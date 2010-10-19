@@ -28,13 +28,15 @@ AddOption('--prefix',
           type='string',
           nargs=1,
           action='store',
-          default=variant_basename,
+          default='',
           metavar='DIR',
           help='installation prefix')
 
 env=Environment(options=options,
                 prefix=GetOption('prefix'))
 
+type=env["TYPE"]
+variant_basename += "-%s"%type
 env.Append(CPPDEFINES=["PARTIO_USE_ZLIB"])
 
 # --prefix is typically an absolute path, but we
@@ -43,24 +45,18 @@ env.Append(CPPDEFINES=["PARTIO_USE_ZLIB"])
 # prefix is the installation prefix, e.g. /usr
 # variant_install_abs is the path to the install root.
 
-prefix = GetOption('prefix')
+prefix = GetOption('prefix') or os.path.join('dist', variant_basename)
 if os.path.isabs(prefix):
-    prefix_base = os.path.basename(prefix)
     variant_install_abs = prefix
 else:
-    prefix_base = prefix
-    variant_install_abs = Dir(".").abspath + "/" + prefix
-
-type=env["TYPE"]
-prefix_base+="-%s"%type
-variant_install_abs+="-%s"%type
+    variant_install_abs = os.path.join(Dir(".").abspath, prefix)
 
 # variant_build_abs is the path to the temporary build directory.
-variant_build = os.path.join('build', prefix_base)
-variant_build_abs = Dir(".").abspath+"/"+variant_build
+variant_build = os.path.join('build', variant_basename)
+variant_build_abs = os.path.join(Dir(".").abspath, variant_build)
 
 if env["mac"]==True:
-    env.Append(CPPDEFINES=["DARWIN"])
+    env.Append(CPPDEFINES=["__DARWIN__"])
     #env.Append(LINKFLAGS=["-m32"])
 
 if env["TYPE"]=="optimize":
