@@ -43,11 +43,13 @@ dir=Dir(".").srcnode().abspath
 files=[x for x in os.listdir(dir) if x.endswith(".cpp") and x not in filter]
 targets=[x.replace(".cpp","") for x in files]
 
+test_targets = []
+
 for i in range(len(files)):
     file=files[i]
     target=targets[i]
     prog=envtests.Program(target,[file])
     envtests.Install("../../tests",prog)
-    envtests.Install(variant_install_abs+"/tests",prog)
+    test_targets.append(envtests.Install(variant_install_abs+"/tests",prog))
 
-    
+envtests.Alias('test', test_targets)
