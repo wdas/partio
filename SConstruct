@@ -1,23 +1,25 @@
 import os
 import platform
 
+def kernel_version():
+    return os.popen("uname -r").read().strip().split('-')[0]
 
 default_cxx="g++"
 
-options=Options("SConstruct.options")
+options=Variables("SConstruct.options")
 
-options.AddOptions(
+uos = platform.system()
+ver = kernel_version()
+arch = platform.machine()
+
+options.AddVariables(
     ('CXX','C++ compiler',default_cxx),
-    ('mac','Is a mac',False),
-    EnumOption("TYPE",
+    ('mac','Is a mac', uos == 'Darwin'),
+    EnumVariable("TYPE",
                "Type of build (e.g. optimize,debug)",
                "optimize",
                allowed_values=("profile","optimize","debug")),
     )
-
-uos = platform.system()
-ver = os.popen("fa.arch -r").read().strip()
-arch = platform.machine()
 
 variant_basename = '%s-%s-%s' % (uos, ver, arch)
 
@@ -82,3 +84,5 @@ env.SConscript(variant_build+"/src/tools/SConscript")
 env.SConscript(variant_build+"/src/tests/SConscript")
 env.SConscript(variant_build+"/src/doc/SConscript")
 env.SConscript(variant_build+"/src/py/SConscript")
+
+

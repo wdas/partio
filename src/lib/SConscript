@@ -49,20 +49,25 @@ env.Append(LINKFLAGS=["-pthread"])
 dir=Dir(".").srcnode().abspath
 
 def cppFiles(basePath):
-    print("test %s"%os.getcwd())
+    #print("test %s"%os.getcwd())
     return [os.path.join(basePath,x) for x in os.listdir(basePath) if x.endswith(".cpp")]
 
 
 files=cppFiles(os.path.join(dir,"core"))+cppFiles(os.path.join(dir,"io"))
 lib=env.Library("partio",files)
 foo=Dir(".").abspath+"../../include"
+
 env.Install(variant_build_abs+"/include","Partio.h")
 env.Install(variant_build_abs+"/include","PartioIterator.h")
 env.Install(variant_build_abs+"/include","PartioAttribute.h")
 env.Install(variant_build_abs+"/lib",lib)
-env.Install(variant_install_abs+"/include","Partio.h")
-env.Install(variant_install_abs+"/include","PartioIterator.h")
-env.Install(variant_install_abs+"/include","PartioAttribute.h")
-env.Install(variant_install_abs+"/lib",lib)
+
+core_targets = [
+    env.Install(variant_install_abs+"/include","Partio.h"),
+    env.Install(variant_install_abs+"/include","PartioIterator.h"),
+    env.Install(variant_install_abs+"/include","PartioAttribute.h"),
+    env.Install(variant_install_abs+"/lib",lib)
+]
 
 
+env.Alias('core', core_targets )

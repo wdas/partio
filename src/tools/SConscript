@@ -61,5 +61,7 @@ else:
 
 prog=envglut.Program("partview",["partview.cpp"])
 envglut.Install("../../bin",prog)
-envglut.Install(variant_install_abs+"/bin",prog)
+
+env.Alias('tools', envglut.Install(variant_install_abs+"/bin",prog))
+
     
