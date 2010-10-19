@@ -63,7 +63,7 @@ lib=envpy.SharedLibrary("partio",["partio.i"],LIBS=["z","partio"])
 #print lib
 dp1=envpy.InstallAs(variant_install_abs+"/%s/_partio.so" % python_mod,lib)
 dp2=envpy.InstallAs(variant_install_abs+"/%s/partio.py" % python_mod,"partio.py")
-Depends(dp1,dp2)
+envpy.Depends(dp1,dp2)
 
 envpy.Alias('python', [dp1,dp2])
 
