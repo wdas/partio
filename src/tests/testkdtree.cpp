@@ -36,54 +36,64 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include <Partio.h>
 #include <iostream>
+#include <cmath>
+
+#define GRIDN 9
 
 Partio::ParticlesDataMutable* makeData()
 {
     Partio::ParticlesDataMutable& foo=*Partio::create();
     Partio::ParticleAttribute positionAttr=foo.addAttribute("position",Partio::VECTOR,3);
-    Partio::ParticleAttribute lifeAttr=foo.addAttribute("life",Partio::FLOAT,2);
     Partio::ParticleAttribute idAttr=foo.addAttribute("id",Partio::INT,1);
-    
-    for(int i=0;i<5;i++){
-        Partio::ParticleIndex index=foo.addParticle();
-        float* pos=foo.dataWrite<float>(positionAttr,index);
-        float* life=foo.dataWrite<float>(lifeAttr,index);
-        int* id=foo.dataWrite<int>(idAttr,index);
-        
-        pos[0]=.1*i;
-        pos[1]=.1*(i+1);
-        pos[2]=.1*(i+2);
-        life[0]=-1.2+i;
-        life[1]=10.;
-        id[0]=index;
-        
-    }
-    return &foo;
-}
 
-void testSaveLoad(Partio::ParticlesData* p,const char* filename)
-{
-    std::cerr<<"Testing with file '"<<filename<<"'"<<std::endl;
-    Partio::write(filename,*p);
-    Partio::ParticlesData* pnew=Partio::read(filename);
-    pnew->release();
+
+    std::cout << "Inserting points ...\n";
+    for (int i = 0; i < GRIDN; i++)
+        for (int j = 0; j < GRIDN; ++j)
+            for (int k = 0; k < GRIDN; ++k) {
+                Partio::ParticleIndex pi = foo.addParticle();
+                float* pos = foo.dataWrite<float>(positionAttr, pi);
+                int* id = foo.dataWrite<int>(idAttr, pi);
+
+                pos[0] = i * 1.0f / (GRIDN - 1);
+                pos[1] = j * 1.0f / (GRIDN - 1);
+                pos[2] = k * 1.0f / (GRIDN - 1);
+                id[0]= i * 100 + j * 10 + k;
+            }
+    std::cout << "Building tree ...\n";
+    foo.sort();
+    std::cout << "Done\n";
+    return &foo;
 }
 
 int main(int argc,char *argv[])
 {
-    {
-        Partio::ParticlesDataMutable* foo=makeData();
-        testSaveLoad(foo,"test.bgeo");
-        testSaveLoad(foo,"test.bgeo.gz");
-        testSaveLoad(foo,"test.geo");
-        testSaveLoad(foo,"test.geo.gz");
-        //testSaveLoad(foo,"test.ptc");
-        //testSaveLoad(foo,"test.ptc.gz");
-        //testSaveLoad(foo,"test.pdb");
-        //testSaveLoad(foo,"test.pdb.gz");
-        foo->release();
-    }
+    Partio::ParticlesDataMutable* foo=makeData();
+    Partio::ParticleAttribute posAttr;
+    assert (foo->attributeInfo("position", posAttr));
 
+    std::vector<uint64_t> indices;
+    std::vector<float>    dists;
+    float point[3] = {0.51, 0.52, 0.53};
+
+    std::cout << "Testing lookup ...\n";
+
+    foo->findNPoints(point, 5, 0.15f, indices, dists);
+    assert (indices.size() == 5);
+
+    const float *pos = foo->data<float>(posAttr, indices[0]);
+    assert (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
+    pos = foo->data<float>(posAttr, indices[1]);
+    assert (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
+    pos = foo->data<float>(posAttr, indices[2]);
+    assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
+    pos = foo->data<float>(posAttr, indices[3]);
+    assert (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
+    pos = foo->data<float>(posAttr, indices[4]);
+    assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+
+    std::cout << "Test passed\n";
+    foo->release();
 
     return 0;
 

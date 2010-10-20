@@ -81,4 +81,3 @@ env.SConscript(variant_build+"/src/tests/SConscript")
 env.SConscript(variant_build+"/src/doc/SConscript")
 env.SConscript(variant_build+"/src/py/SConscript")
 
-
