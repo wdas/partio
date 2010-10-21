@@ -164,6 +164,24 @@ findNPoints(const float center[3],const int nPoints,const float maxRadius,std::v
     return maxDistance;
 }
 
+int ParticlesSimple::
+findNPoints(const float center[3],int nPoints,const float maxRadius, ParticleIndex *points,
+    float *pointDistancesSquared, float *finalRadius2) const
+{
+    if(!kdtree){
+        std::cerr<<"Partio: findNPoints without first calling sort()"<<std::endl;
+        return 0;
+    }
+
+    int count = kdtree->findNPoints (points, pointDistancesSquared, finalRadius2, center, nPoints, maxRadius);
+    // remap all points since findNPoints clears array
+    for(int i=0; i < count; i++){
+        ParticleIndex index = kdtree->id(points[i]);
+        points[i]=index;
+    }
+    return count;
+}
+
 ParticleAttribute ParticlesSimple::
 addAttribute(const char* attribute,ParticleAttributeType type,const int count)
 {

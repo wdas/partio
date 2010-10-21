@@ -139,6 +139,12 @@ public:
     virtual float findNPoints(const float center[3],int nPoints,const float maxRadius,
         std::vector<ParticleIndex>& points,std::vector<float>& pointDistancesSquared) const=0;
 
+    //! POD version of the above call
+    //! NOTE: returns the number of found points and leaves in finalRadius2 the
+    //! square of the final search radius used
+    virtual int findNPoints(const float center[3],int nPoints,const float maxRadius,
+        ParticleIndex *points, float *pointDistancesSquared, float *finalRadius2) const=0;
+
     //! Produce a const iterator
     virtual const_iterator setupConstIterator() const=0;
 

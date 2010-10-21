@@ -162,6 +162,15 @@ findNPoints(const float center[3],const int nPoints,const float maxRadius,std::v
     return 0;
 }
 
+int ParticlesSimpleInterleave::
+findNPoints(const float center[3],int nPoints,const float maxRadius, ParticleIndex *points,
+    float *pointDistancesSquared, float *finalRadius2) const
+{
+    // TODO: I guess they don't support this lookup here
+    return 0;
+}
+
+
 ParticleAttribute ParticlesSimpleInterleave::
 addAttribute(const char* attribute,ParticleAttributeType type,const int count)
 {
