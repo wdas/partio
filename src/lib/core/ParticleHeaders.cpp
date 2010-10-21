@@ -107,6 +107,14 @@ findNPoints(const float center[3],const int nPoints,const float maxRadius,std::v
     return 0;
 }
 
+int ParticleHeaders::
+findNPoints(const float center[3],int nPoints,const float maxRadius, ParticleIndex *points,
+    float *pointDistancesSquared, float *finalRadius2) const
+{
+    assert(false);
+    return 0;
+}
+
 ParticleAttribute ParticleHeaders::
 addAttribute(const char* attribute,ParticleAttributeType type,const int count)
 {

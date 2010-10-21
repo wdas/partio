@@ -58,6 +58,8 @@ protected:
     void findPoints(const float bboxMin[3],const float bboxMax[3],std::vector<ParticleIndex>& points) const;
     float findNPoints(const float center[3],int nPoints,const float maxRadius,
         std::vector<ParticleIndex>& points,std::vector<float>& pointDistancesSquared) const;
+    int findNPoints(const float center[3],int nPoints,const float maxRadius,
+        ParticleIndex *points, float *pointDistancesSquared, float *finalRadius2) const;
 
     ParticleAttribute addAttribute(const char* attribute,ParticleAttributeType type,const int count);
     ParticleIndex addParticle();
