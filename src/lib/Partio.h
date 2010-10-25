@@ -105,9 +105,10 @@ public:
     template<class T> inline void data(const ParticleAttribute& attribute,
         const int indexCount,const ParticleIndex* particleIndices,const bool sorted,T* values)
     {
-    	assert(typeCheck<T>(attribute.type));
+        // NOTE: I'm disabling this assert here so we can call this function with void as T
+    	  //assert(typeCheck<T>(attribute.type));
         // TODO: add type checking
-        dataInternalMultiple(attribute,indexCount,particleIndices,sorted,(void*)values);
+        dataInternalMultiple(attribute,indexCount,particleIndices,sorted,(char*)values);
     }
 
     template<class T> inline const T* data(const ParticleAttribute& attribute,
