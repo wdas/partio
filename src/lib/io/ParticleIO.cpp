@@ -51,7 +51,7 @@ readers()
     if(!initialized){
         data["bgeo"]=readBGEO;
         data["geo"]=readGEO;
-       // data["pdb"]=readPDB;
+        data["pdb"]=readPDB;
         data["pda"]=readPDA;
         data["ptc"]=readPTC;
     }
@@ -66,7 +66,7 @@ writers()
     if(!initialized){
         data["bgeo"]=writeBGEO;
         data["geo"]=writeGEO;
-        //data["pdb"]=writePDB;
+        data["pdb"]=writePDB;
         data["pda"]=writePDA;
         data["ptc"]=writePTC;
     }
