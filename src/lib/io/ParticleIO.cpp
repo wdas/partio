@@ -53,7 +53,7 @@ readers()
         data["geo"]=readGEO;
        // data["pdb"]=readPDB;
         data["pda"]=readPDA;
-       // data["ptc"]=readPTC;
+        data["ptc"]=readPTC;
     }
     return data;
 }
@@ -68,7 +68,7 @@ writers()
         data["geo"]=writeGEO;
         //data["pdb"]=writePDB;
         data["pda"]=writePDA;
-        //data["ptc"]=writePTC;
+        data["ptc"]=writePTC;
     }
     return data;
 }

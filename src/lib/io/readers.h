@@ -16,12 +16,12 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly);
 ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly);
 //ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly);
 ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly);
-//ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly);
+ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly);
 void writeBGEO(const char* filename,const ParticlesData& p,const bool compressed);
 void writeGEO(const char* filename,const ParticlesData& p,const bool compressed);
 //void writePDB(const char* filename,const ParticlesData& p,const bool compressed);
 void writePDA(const char* filename,const ParticlesData& p,const bool compressed);
-//void writePTC(const char* filename,const ParticlesData& p,const bool compressed);
+void writePTC(const char* filename,const ParticlesData& p,const bool compressed);
 }
 
 #endif
