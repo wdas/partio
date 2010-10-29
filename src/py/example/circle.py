@@ -33,14 +33,14 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-import papi
+import partio
 
 # create a particle set and attributes
-p=papi.create()
-position=p.addAttribute("position",papi.VECTOR,3)
-color=p.addAttribute("Cd",papi.FLOAT,3)
-radius=p.addAttribute("radius",papi.FLOAT,1)
-normal=p.addAttribute("normal",papi.VECTOR,3)
+p=partio.create()
+position=p.addAttribute("position",partio.VECTOR,3)
+color=p.addAttribute("Cd",partio.FLOAT,3)
+radius=p.addAttribute("radius",partio.FLOAT,1)
+normal=p.addAttribute("normal",partio.VECTOR,3)
 
 # make a spiral circle thingy
 t=0

@@ -35,6 +35,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include <Partio.h>
 #include <iostream>
+#ifdef PARTIO_WIN32
+#define M_PI (3.14159265359893238)
+#endif
+
 #include <cmath>
 
 using namespace Partio;

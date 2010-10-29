@@ -33,6 +33,8 @@ AddOption('--prefix',
 env=Environment(options=options,
                 prefix=GetOption('prefix'))
 
+env.Append(CPPDEFINES=["PARTIO_USE_ZLIB"])
+
 # --prefix is typically an absolute path, but we
 # should also allow relative paths for convenience.
 

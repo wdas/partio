@@ -32,6 +32,11 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
+
+#ifdef PARTIO_WIN32
+#    define NOMINMAX
+#endif
+
 #include "ParticleSimple.h"
 #include "ParticleCaching.h"
 #include <map>
@@ -218,13 +223,13 @@ addParticles(const int countToAdd)
 ParticlesDataMutable::iterator ParticlesSimple::
 setupIterator()
 {
-    return iterator(this,0,numParticles()-1);
+    return ParticlesDataMutable::iterator(this,0,numParticles()-1);
 }
 
 ParticlesData::const_iterator ParticlesSimple::
 setupConstIterator() const
 {
-    return const_iterator(this,0,numParticles()-1);
+    return ParticlesData::const_iterator(this,0,numParticles()-1);
 }
 
 void ParticlesSimple::

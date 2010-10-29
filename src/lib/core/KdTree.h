@@ -131,7 +131,7 @@ template <int k> class BBox
 // MAKE-heap on a binary (array based) heap
 // loosely based on Henrik Wann Jensen's Photon Mapping book, but made 0-indexed
 // and commented
-float buildHeap(std::vector<uint64_t>& result,std::vector<float>& distance_squared)
+inline float buildHeap(std::vector<uint64_t>& result,std::vector<float>& distance_squared)
 {
     assert(result.size()==distance_squared.size());
     int heap_size=result.size();
@@ -160,7 +160,7 @@ float buildHeap(std::vector<uint64_t>& result,std::vector<float>& distance_squar
 }
 
 // Inserts smaller element into heap (does not check so caller must)
-float insertToHeap(std::vector<uint64_t>& result,std::vector<float>& distance_squared,int new_id,float new_distance_squared)
+inline float insertToHeap(std::vector<uint64_t>& result,std::vector<float>& distance_squared,int new_id,float new_distance_squared)
 {
     assert(result.size()>0 && distance_squared.size()==result.size());
     assert(new_distance_squared<distance_squared[0]);
@@ -343,7 +343,7 @@ float KdTree<k>::findNPoints(std::vector<uint64_t>& result,
 }
 
 template<int k>
-void KdTree<k>::findNPoints(KdTree<k>::NearestQuery& query,int n,int size,int j) const
+void KdTree<k>::findNPoints(typename KdTree<k>::NearestQuery& query,int n,int size,int j) const
 {
     const float* p=&_points[n].p[0];
 

@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <iostream>
 #include <cmath>
 #include <stdlib.h>
-#ifdef DARWIN
+#ifdef __DARWIN__
 #include <GLUT/glut.h>
 #else
 #include <GL/glut.h>

@@ -41,7 +41,7 @@ namespace Partio{
 
 // reader and writer code
 typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool);
-typedef void (*WRITER_FUNCTION)(const char*,const ParticlesData&,const bool);
+typedef bool (*WRITER_FUNCTION)(const char*,const ParticlesData&,const bool);
 
 std::map<std::string,READER_FUNCTION>&
 readers()

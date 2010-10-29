@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <map>
 #include <stdexcept>
 #include <vector>
-#include <zlib.h>
+
 namespace Partio{
 struct ZipFileHeader;
 //#####################################################################

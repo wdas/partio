@@ -33,20 +33,26 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
+#ifdef PARTIO_USE_ZLIB
 extern "C"{
-#include <zlib.h>
+#   include <zlib.h>
 }
+#endif
+
 #include <cassert>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
+#include <string>
 
 #include "ZIP.h"
 
 namespace Partio{
 
+
+    
 template<class T>
 inline void Swap_Endianity(T& x)
 {
@@ -68,6 +74,65 @@ inline void Write_Primitive(std::ostream& stream,const T& x)
 {
     stream.write(&(char&)x,sizeof(T));
 }
+
+
+//#####################################################################
+// class GZipFileHeader
+//#####################################################################
+struct GZipFileHeader
+{
+    unsigned char magic0,magic1; // magic should be 0x8b,0x1f
+    unsigned char cm; // compression method 0x8 is gzip
+    unsigned char flags; // flags
+    unsigned int modtime; // 4 byte modification time
+    unsigned char flags2; // secondary flags
+    unsigned char os; // operating system 0xff for unknown
+    unsigned short crc16; // crc check
+    unsigned int crc32;
+
+    GZipFileHeader()
+        :magic0(0),magic1(0),flags(0),modtime(0),flags2(0),os(0),crc16(0),crc32(0)
+    {}
+
+    bool Read(std::istream& istream)
+    {Read_Primitive(istream,magic0);
+    Read_Primitive(istream,magic1);
+    if(magic0 != 0x1f || magic1 != 0x8b){//std::cerr<<"gzip: did not find gzip magic 0x1f 0x8b"<<std::endl;
+        return false;}
+    Read_Primitive(istream,cm);
+    if(cm!=8){std::cerr<<"gzip: compression method not 0x8"<<std::endl;return false;}
+    Read_Primitive(istream,flags);
+    Read_Primitive(istream,modtime);
+    Read_Primitive(istream,flags2);
+    Read_Primitive(istream,os);
+    unsigned char dummyByte;
+    // read flags if necessary
+    if(flags&2){
+        unsigned short flgExtraLen;
+        Read_Primitive(istream,flgExtraLen);
+        for(int k=0;k<flgExtraLen;k++) Read_Primitive(istream,dummyByte);}
+    // read filename/comment if present
+    int stringsToRead=((flags&8)?1:0) + ((flags&4)?1:0);
+    for(int i=0;i<stringsToRead;i++) 
+        do{Read_Primitive(istream,dummyByte);}while(dummyByte!=0 && istream);
+    if(flags&1) Read_Primitive(istream,crc16);
+    if(!istream) {std::cerr<<"gzip: got to end of file after only reading gzip header"<<std::endl;return false;}
+    return true;}
+
+    void Write(std::ostream& ostream)
+    {magic0=0x1f;magic1=0x8b;cm=8;flags=0;os=0xff;
+    Write_Primitive(ostream,magic0);Write_Primitive(ostream,magic1);
+    Write_Primitive(ostream,cm);
+    Write_Primitive(ostream,flags);
+    Write_Primitive(ostream,modtime);
+    Write_Primitive(ostream,flags2);
+    Write_Primitive(ostream,os);}
+
+//#####################################################################
+};
+
+#ifdef PARTIO_USE_ZLIB
+
 
 //#####################################################################
 // class ZipFileHeader
@@ -156,60 +221,7 @@ struct ZipFileHeader
     for(unsigned int i=0;i<filename.length();i++) Write_Primitive(ostream,filename.c_str()[i]);}
 //#####################################################################
 };
-//#####################################################################
-// class GZipFileHeader
-//#####################################################################
-struct GZipFileHeader
-{
-    unsigned char magic0,magic1; // magic should be 0x8b,0x1f
-    unsigned char cm; // compression method 0x8 is gzip
-    unsigned char flags; // flags
-    unsigned int modtime; // 4 byte modification time
-    unsigned char flags2; // secondary flags
-    unsigned char os; // operating system 0xff for unknown
-    unsigned short crc16; // crc check
-    unsigned int crc32;
 
-    GZipFileHeader()
-        :magic0(0),magic1(0),flags(0),modtime(0),flags2(0),os(0),crc16(0),crc32(0)
-    {}
-
-    bool Read(std::istream& istream)
-    {Read_Primitive(istream,magic0);
-    Read_Primitive(istream,magic1);
-    if(magic0 != 0x1f || magic1 != 0x8b){//std::cerr<<"gzip: did not find gzip magic 0x1f 0x8b"<<std::endl;
-        return false;}
-    Read_Primitive(istream,cm);
-    if(cm!=8){std::cerr<<"gzip: compression method not 0x8"<<std::endl;return false;}
-    Read_Primitive(istream,flags);
-    Read_Primitive(istream,modtime);
-    Read_Primitive(istream,flags2);
-    Read_Primitive(istream,os);
-    unsigned char dummyByte;
-    // read flags if necessary
-    if(flags&2){
-        unsigned short flgExtraLen;
-        Read_Primitive(istream,flgExtraLen);
-        for(int k=0;k<flgExtraLen;k++) Read_Primitive(istream,dummyByte);}
-    // read filename/comment if present
-    int stringsToRead=((flags&8)?1:0) + ((flags&4)?1:0);
-    for(int i=0;i<stringsToRead;i++) 
-        do{Read_Primitive(istream,dummyByte);}while(dummyByte!=0 && istream);
-    if(flags&1) Read_Primitive(istream,crc16);
-    if(!istream) {std::cerr<<"gzip: got to end of file after only reading gzip header"<<std::endl;return false;}
-    return true;}
-
-    void Write(std::ostream& ostream)
-    {magic0=0x1f;magic1=0x8b;cm=8;flags=0;os=0xff;
-    Write_Primitive(ostream,magic0);Write_Primitive(ostream,magic1);
-    Write_Primitive(ostream,cm);
-    Write_Primitive(ostream,flags);
-    Write_Primitive(ostream,modtime);
-    Write_Primitive(ostream,flags2);
-    Write_Primitive(ostream,os);}
-
-//#####################################################################
-};
 //#####################################################################
 // class ZipStreambufDecompress
 //#####################################################################
@@ -572,5 +584,36 @@ Gzip_Out(const std::string& filename,std::ios::openmode mode)
     return new ZIP_FILE_OSTREAM(0,*outfile);
 }
 //#####################################################################
-}
 
+#else
+
+//#####################################################################
+// Function Gzip_In
+//#####################################################################
+std::istream* 
+Gzip_In(const std::string& filename,std::ios::openmode mode)
+{
+    std::ifstream* infile=new std::ifstream(filename.c_str(),mode | std::ios::binary);
+    GZipFileHeader header;
+    bool zipped=header.Read(*infile);
+    
+    infile->seekg(0);
+    if(!zipped) return infile;
+    
+    delete infile;
+    std::cerr<<"Partio: encountered gz file '"<<filename<<"' but partio not compiled with zlib"<<std::endl;
+    return 0;
+}
+//#####################################################################
+// Function Gzip_Out
+//#####################################################################
+std::ostream* 
+Gzip_Out(const std::string& filename,std::ios::openmode mode)
+{
+    std::cerr<<"Partio: gzipped file write requested for '"<<filename<<"' but partio not compiled with zlib"<<std::endl;
+    return 0;    
+}
+//#####################################################################
+
+#endif
+} // namespace Partio

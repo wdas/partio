@@ -45,17 +45,17 @@ Partio::ParticlesDataMutable* makeData()
     Partio::ParticleAttribute idAttr=foo.addAttribute("id",Partio::INT,1);
     
     for(int i=0;i<5;i++){
-        Partio::ParticleIndex i=foo.addParticle();
-        float* pos=foo.dataWrite<float>(positionAttr,i);
-        float* life=foo.dataWrite<float>(lifeAttr,i);
-        int* id=foo.dataWrite<int>(idAttr,i);
+        Partio::ParticleIndex index=foo.addParticle();
+        float* pos=foo.dataWrite<float>(positionAttr,index);
+        float* life=foo.dataWrite<float>(lifeAttr,index);
+        int* id=foo.dataWrite<int>(idAttr,index);
         
         pos[0]=.1*i;
         pos[1]=.1*(i+1);
         pos[2]=.1*(i+2);
         life[0]=-1.2+i;
         life[1]=10.;
-        id[0]=i;
+        id[0]=index;
         
     }
     return &foo;

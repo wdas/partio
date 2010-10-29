@@ -36,6 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifndef _timer_h_
 #define _timer_h_
 
+#ifndef PARTIO_WIN32
+
 #include <sys/time.h>
 #include <iostream>
 
@@ -69,5 +71,46 @@ struct Timer
     }
     
 };
+
+#else
+
+#include <windows.h>
+#include <string>
+
+struct Timer
+{
+    const char* name;
+    bool running;
+
+    __int64 start;
+    __int64 counts_per_sec;
+    
+    Timer(const char* name)
+        :name(name)
+    {
+        QueryPerformanceFrequency((LARGE_INTEGER*)&counts_per_sec);
+        QueryPerformanceCounter((LARGE_INTEGER*)&start);
+        running=true;
+    }
+    
+    double Stop_Time()
+    {
+        __int64 end;
+        QueryPerformanceCounter((LARGE_INTEGER*)&end);
+        double seconds=float(end-start)/float(counts_per_sec);
+        std::cerr<<"Time for '"<<name<<"' was "<<seconds<<" s"<<std::endl;
+        running=false;
+        return seconds;
+    }
+    
+    ~Timer()
+    {
+        if(running) Stop_Time();
+    }
+    
+};
+
+
+#endif
 
 #endif

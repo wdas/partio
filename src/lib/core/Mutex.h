@@ -36,6 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifndef _Mutex_
 #define _Mutex_
 
+#ifndef PARTIO_WIN32
+
 #include <pthread.h>
 
 namespace Partio
@@ -70,6 +72,7 @@ namespace Partio
     };
     
 #else
+
     class PartioMutex
     {
         pthread_spinlock_t CacheLock;
@@ -96,7 +99,38 @@ namespace Partio
         }
     };
     
-#endif
+#endif // USE_PTHREAD_SPINLOCK
 }
 
-#endif
+#else
+#include <windows.h>
+    namespace Partio{
+
+   class PartioMutex
+    {
+        HANDLE CacheLock;
+    
+    public:
+        inline PartioMutex()
+        {
+            CacheLock=CreateMutex(0,FALSE,"partiocache");
+        }
+    
+        inline ~PartioMutex()
+        {
+            CloseHandle(CacheLock);
+        }
+    
+        inline void lock()
+        {
+            WaitForSingleObject(CacheLock,INFINITE);
+        }
+    
+        inline void unlock()
+        {
+            ReleaseMutex(CacheLock);
+        }
+    };
+    }
+#endif // USE_PTHREADS
+#endif // Header guard
