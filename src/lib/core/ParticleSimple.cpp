@@ -195,7 +195,7 @@ addParticle()
     if(allocatedCount==particleCount){
         allocatedCount=std::max(10,std::max(allocatedCount*3/2,particleCount));
         for(unsigned int i=0;i<attributes.size();i++)
-            attributeData[i]=(char*)realloc(attributeData[i],attributeStrides[i]*allocatedCount);
+            attributeData[i]=(char*)realloc(attributeData[i],(size_t)attributeStrides[i]*(size_t)allocatedCount);
     }
     ParticleIndex index=particleCount;
     particleCount++;
@@ -209,7 +209,7 @@ addParticles(const int countToAdd)
         // TODO: this should follow 2/3 rule
         allocatedCount=allocatedCount+countToAdd;
         for(unsigned int i=0;i<attributes.size();i++){
-            attributeData[i]=(char*)realloc(attributeData[i],attributeStrides[i]*allocatedCount);
+            attributeData[i]=(char*)realloc(attributeData[i],(size_t)attributeStrides[i]*(size_t)allocatedCount);
             attributeOffsets[i]=attributeData[i]-(char*)0;
         }
     }

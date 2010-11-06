@@ -180,7 +180,7 @@ addAttribute(const char* attribute,ParticleAttributeType type,const int count)
     // repackage data for new attribute
     int oldStride=stride;
     int newStride=stride+TypeSize(type)*count;
-    char* newData=(char*)malloc(allocatedCount*newStride);
+    char* newData=(char*)malloc((size_t)allocatedCount*(size_t)newStride);
     if(data){
         char* ptrNew=newData;
         char* ptrOld=data;
@@ -203,7 +203,7 @@ addParticle()
 {
     if(allocatedCount==particleCount){
         allocatedCount=std::max(10,std::max(allocatedCount*3/2,particleCount));
-        data=(char*)realloc(data,stride*allocatedCount);
+        data=(char*)realloc(data,(size_t)stride*(size_t)allocatedCount);
     }
     return particleCount++;
 }
@@ -214,7 +214,7 @@ addParticles(const int countToAdd)
     if(particleCount+countToAdd>allocatedCount){
         while(allocatedCount<particleCount+countToAdd)
             allocatedCount=std::max(10,std::max(allocatedCount*3/2,particleCount));
-        data=(char*)realloc(data,stride*allocatedCount);
+        data=(char*)realloc(data,(size_t)stride*(size_t)allocatedCount);
     }
     // int offset=particleCount;
     particleCount+=countToAdd;
