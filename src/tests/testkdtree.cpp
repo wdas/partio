@@ -72,27 +72,52 @@ int main(int argc,char *argv[])
     Partio::ParticleAttribute posAttr;
     assert (foo->attributeInfo("position", posAttr));
 
-    std::vector<uint64_t> indices;
-    std::vector<float>    dists;
-    float point[3] = {0.51, 0.52, 0.53};
 
-    std::cout << "Testing lookup ...\n";
+    std::cout << "Testing lookup with stl types ...\n";
+    {
+        std::vector<uint64_t> indices;
+        std::vector<float>    dists;
+        float point[3] = {0.51, 0.52, 0.53};
 
-    foo->findNPoints(point, 5, 0.15f, indices, dists);
-    assert (indices.size() == 5);
+        foo->findNPoints(point, 5, 0.15f, indices, dists);
+        assert (indices.size() == 5);
+        
+        const float *pos = foo->data<float>(posAttr, indices[0]);
+        assert (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
+        pos = foo->data<float>(posAttr, indices[1]);
+        assert (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
+        pos = foo->data<float>(posAttr, indices[2]);
+        assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
+        pos = foo->data<float>(posAttr, indices[3]);
+        assert (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
+        pos = foo->data<float>(posAttr, indices[4]);
+        assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+        
+        std::cout << "Test passed\n";
+    }
+    std::cout << "Testing lookup with pod types ...\n";
+    {
+        uint64_t indices[10];
+        float dists[10];
+        float point[3] = {0.51, 0.52, 0.53};
 
-    const float *pos = foo->data<float>(posAttr, indices[0]);
-    assert (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
-    pos = foo->data<float>(posAttr, indices[1]);
-    assert (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
-    pos = foo->data<float>(posAttr, indices[2]);
-    assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
-    pos = foo->data<float>(posAttr, indices[3]);
-    assert (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
-    pos = foo->data<float>(posAttr, indices[4]);
-    assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
-
-    std::cout << "Test passed\n";
+        float finalDist;
+        int returned=foo->findNPoints(point, 5, 0.15f, indices, dists,&finalDist);
+        assert (returned == 5);
+        
+        const float *pos = foo->data<float>(posAttr, indices[0]);
+        assert (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
+        pos = foo->data<float>(posAttr, indices[1]);
+        assert (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
+        pos = foo->data<float>(posAttr, indices[2]);
+        assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
+        pos = foo->data<float>(posAttr, indices[3]);
+        assert (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
+        pos = foo->data<float>(posAttr, indices[4]);
+        assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+        
+        std::cout << "Test passed\n";
+    }
     foo->release();
 
     return 0;

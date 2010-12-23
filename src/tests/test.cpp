@@ -77,10 +77,10 @@ int main(int argc,char *argv[])
         testSaveLoad(foo,"test.bgeo.gz");
         testSaveLoad(foo,"test.geo");
         testSaveLoad(foo,"test.geo.gz");
-        //testSaveLoad(foo,"test.ptc");
-        //testSaveLoad(foo,"test.ptc.gz");
-        //testSaveLoad(foo,"test.pdb");
-        //testSaveLoad(foo,"test.pdb.gz");
+        testSaveLoad(foo,"test.ptc");
+        testSaveLoad(foo,"test.ptc.gz");
+        testSaveLoad(foo,"test.pdb");
+        testSaveLoad(foo,"test.pdb.gz");
         foo->release();
     }
 

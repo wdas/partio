@@ -131,57 +131,54 @@ template <int k> class BBox
 // MAKE-heap on a binary (array based) heap
 // loosely based on Henrik Wann Jensen's Photon Mapping book, but made 0-indexed
 // and commented
-inline float buildHeap(uint64_t *result, float *distance_squared, int heap_size)
+inline float buildHeap(uint64_t *result, float *distance_squared,int heap_size)
 {
-    int max_non_leaf_index = heap_size/2 - 1; // 0 to max_non_leaf_index is indices of parents
+    int max_non_leaf_index=heap_size/2-1; // 0 to max_non_leaf_index is indices of parents
 
     // go from bottom of tree scanning right to left in each height of the tree
-    for(int subtreeParent = max_non_leaf_index; subtreeParent >= 0; subtreeParent--) {
-        int current_parent = subtreeParent;
-        while(current_parent <= max_non_leaf_index) {
-            int left_index = 2 * current_parent + 1;
-            int right_index = 2 * current_parent + 2;
+    for(int subtreeParent=max_non_leaf_index;subtreeParent>=0;subtreeParent--){ 
+        int current_parent=subtreeParent;
+        while(current_parent<=max_non_leaf_index){
+            int left_index=2*current_parent+1;int right_index=2*current_parent+2;
             // find largest element
-            int largest_index = current_parent;
-            if(left_index < heap_size && distance_squared[left_index] > distance_squared[largest_index])
-                largest_index = left_index;
-            if(right_index < heap_size && distance_squared[right_index] > distance_squared[largest_index])
-                largest_index = right_index;
+            int largest_index=current_parent;
+            if(left_index<heap_size && distance_squared[left_index]>distance_squared[largest_index])
+                largest_index=left_index;
+            if(right_index<heap_size && distance_squared[right_index]>distance_squared[largest_index])
+                largest_index=right_index;
             // subtree parented at current_parent satisfies heap property because parent has largest
-            if(largest_index == current_parent) break;
+            if(largest_index==current_parent) break;
             // pull large value up and descend to tree to see if new that subtree is invalid
-            std::swap(result[largest_index], result[current_parent]);
-            std::swap(distance_squared[largest_index], distance_squared[current_parent]);
-            current_parent = largest_index;
+            std::swap(result[largest_index],result[current_parent]);
+            std::swap(distance_squared[largest_index],distance_squared[current_parent]);
+            current_parent=largest_index;
         }
     }
     return distance_squared[0]; // return max distance
 }
 
 // Inserts smaller element into heap (does not check so caller must)
-inline float insertToHeap(uint64_t *result, float *distance_squared, int heap_size, int new_id, float new_distance_squared)
+inline float insertToHeap(uint64_t *result,float*distance_squared,int heap_size,int new_id,float new_distance_squared)
 {
-    assert(new_distance_squared < distance_squared[0]);
-    int current_parent = 0;
+    assert(new_distance_squared<distance_squared[0]);
+    int current_parent=0;
     for(;;){
-        int left = 2 * current_parent + 1, right = 2 * current_parent + 2;
-        int index_of_largest = current_parent;
+        int left=2*current_parent+1,right=2*current_parent+2;
+        int index_of_largest=current_parent;
         // find out if the current element is being replaced by descendant or by new element
-        if(left >= heap_size) break;
-        else if(right >= heap_size || distance_squared[left] > distance_squared[right])
-            index_of_largest = left;
-        else
-            index_of_largest=right;
+        if(left>=heap_size) break;
+        else if(right>=heap_size || distance_squared[left]>distance_squared[right]) index_of_largest=left;
+        else index_of_largest=right;
         // new element is largest
-        if(new_distance_squared > distance_squared[index_of_largest]) break;
+        if(new_distance_squared>distance_squared[index_of_largest]) break;
         // pull the biggest element up and recurse to where it came from
-        std::swap(result[index_of_largest], result[current_parent]);
-        std::swap(distance_squared[index_of_largest], distance_squared[current_parent]);
-        current_parent = index_of_largest;
+        std::swap(result[index_of_largest],result[current_parent]);
+        std::swap(distance_squared[index_of_largest],distance_squared[current_parent]);
+        current_parent=index_of_largest;
     }
     // overwrite current node in tree
-    distance_squared[current_parent] = new_distance_squared;
-    result[current_parent] = new_id;
+    distance_squared[current_parent]=new_distance_squared;
+    result[current_parent]=new_id;
     return distance_squared[0]; // return max distance
 }
 
@@ -191,32 +188,19 @@ template <int k> class KdTree
 
     struct NearestQuery
     {
-        NearestQuery(std::vector<uint64_t>& result,std::vector<float>& distanceSquared,const float pquery_in[k],int maxPoints,float maxRadiusSquared)
-            :result(result),distanceSquared(distanceSquared),maxPoints(maxPoints),maxRadiusSquared(maxRadiusSquared)
-        {for(int i=0;i<k;i++) pquery[i]=pquery_in[i];}
-
-        std::vector<uint64_t>& result;
-        std::vector<float>& distanceSquared;
-        float pquery[k];
-        int maxPoints;
-        float maxRadiusSquared;
-    };
-
-    struct NearestQueryC
-    {
-        NearestQueryC(uint64_t *result, float *distanceSquared, const float pquery_in[k],
-                      int maxPoints, float maxRadiusSquared)
-            :result(result), distanceSquared(distanceSquared), maxPoints(maxPoints),
-             foundPoints(0), maxRadiusSquared(maxRadiusSquared)
+        NearestQuery(uint64_t *result,float *distanceSquared,const float pquery_in[k],
+                      int maxPoints,float maxRadiusSquared)
+            :result(result),distanceSquared(distanceSquared),maxPoints(maxPoints),
+             foundPoints(0),maxRadiusSquared(maxRadiusSquared)
 
         {for(int i=0;i<k;i++) pquery[i]=pquery_in[i];}
 
         uint64_t *result;
-        float    *distanceSquared;
-        float    pquery[k];
-        int      maxPoints;
-        int      foundPoints;
-        float    maxRadiusSquared;
+        float *distanceSquared;
+        float pquery[k];
+        int maxPoints;
+        int foundPoints;
+        float maxRadiusSquared;
     };
 
  public:
@@ -231,8 +215,7 @@ template <int k> class KdTree
     void findPoints(std::vector<uint64_t>& points, const BBox<k>& bbox) const;
     float findNPoints(std::vector<uint64_t>& result,std::vector<float>& distanceSquared,
         const float p[k],int nPoints,float maxRadius) const;
-
-    int findNPoints(uint64_t *result, float *distanceSquared, float *finalSearchRadius2,
+    int findNPoints(uint64_t *result,float *distanceSquared, float *finalSearchRadius2,
                     const float p[k], int nPoints, float maxRadius) const;
 
 
@@ -245,7 +228,7 @@ template <int k> class KdTree
     };
     void findPoints(std::vector<uint64_t>& result, const BBox<k>& bbox,
 		    int n, int size, int j) const;
-    void findNPoints(NearestQueryC& query,int n,int size,int j) const;
+    void findNPoints(NearestQuery& query,int n,int size,int j) const;
 
     static inline void ComputeSubtreeSizes(int size, int& left, int& right)
     {
@@ -350,70 +333,68 @@ template <int k>
 float KdTree<k>::findNPoints(std::vector<uint64_t>& result,
     std::vector<float>& distanceSquared,const float p[k],int nPoints,float maxRadius) const
 {
-    result.resize (nPoints);
+    result.resize(nPoints);
     distanceSquared.resize (nPoints);
     float finalRadius2 = maxRadius;
     int size = findNPoints (&result[0], &distanceSquared[0], &finalRadius2, p, nPoints, maxRadius);
     result.resize(size);
     distanceSquared.resize(size);
-    return finalRadius2;
+    return maxRadius;
 }
 
 template <int k>
 int KdTree<k>::findNPoints(uint64_t *result, float *distanceSquared, float *finalSearchRadius2,
                            const float p[k],int nPoints,float maxRadius) const
 {
-    float radius_squared = maxRadius * maxRadius;
+    float radius_squared=maxRadius*maxRadius;
 
     if (!size() || !_sorted || nPoints<1) return radius_squared;
 
-    NearestQueryC query(result, distanceSquared, p, nPoints, radius_squared);
-    findNPoints(query, 0, size(), 0);
-    *finalSearchRadius2 = query.maxRadiusSquared;
+    NearestQuery query(result,distanceSquared,p,nPoints,radius_squared);
+    findNPoints(query,0,size(),0);
+    *finalSearchRadius2=query.maxRadiusSquared;
     return query.foundPoints;
 }
 
 template<int k>
-void KdTree<k>::findNPoints(typename KdTree<k>::NearestQueryC& query,int n,int size,int j) const
+void KdTree<k>::findNPoints(typename KdTree<k>::NearestQuery& query,int n,int size,int j) const
 {
     const float* p=&_points[n].p[0];
 
-    if(size>1) {
-        float axis_distance = query.pquery[j] - p[j];
-        int left,right; ComputeSubtreeSizes(size, left, right);
-        int nextj = (j + 1) % k;
+    if(size>1){
+        float axis_distance=query.pquery[j]-p[j];
+        int left,right;ComputeSubtreeSizes(size,left,right);
+        int nextj=(j+1)%k;
 
         if(axis_distance>0){ // visit right definitely, and left if within distance
-            if(right)
-                findNPoints(query, n + left + 1, right, nextj);
-            if(axis_distance * axis_distance < query.maxRadiusSquared)
-                findNPoints(query, n + 1, left, nextj);
+            if(right) findNPoints(query,n+left+1,right,nextj);
+            if(axis_distance*axis_distance<query.maxRadiusSquared)
+                findNPoints(query,n+1,left,nextj);
         }else{ // visit left definitely, and right if within distance
-            findNPoints(query, n + 1, left, nextj);
-            if(right && axis_distance * axis_distance < query.maxRadiusSquared)
-                findNPoints(query, n + left + 1, right, nextj);
+            findNPoints(query,n+1,left,nextj);
+            if(right && axis_distance*axis_distance<query.maxRadiusSquared)
+                findNPoints(query,n+left+1,right,nextj);
         }
     }
 
     // Compute squared distance for this entry
     float pDistanceSquared=0;
 
-    for(int axis=0; axis < k; axis++) {
-        float tmp = p[axis] - query.pquery[axis];
-        pDistanceSquared += tmp * tmp;
+    for(int axis=0;axis<k;axis++){
+        float tmp=p[axis]-query.pquery[axis];
+        pDistanceSquared+=tmp*tmp;
     }
 
-    if(pDistanceSquared < query.maxRadiusSquared) {
-        if(query.foundPoints < query.maxPoints){
-            // TODO: shouldn't this be the real index?
-            query.result[query.foundPoints] = n;
+    if(pDistanceSquared<query.maxRadiusSquared){
+        if(query.foundPoints<query.maxPoints){
+            // TODO: we could do the remapping here, but we do it at the end before returning teh result
+            query.result[query.foundPoints]=n;
             query.distanceSquared[query.foundPoints] = pDistanceSquared;
-            query.foundPoints ++;
-            if(query.foundPoints == query.maxPoints)
-                query.maxRadiusSquared = buildHeap(query.result, query.distanceSquared, query.foundPoints);
+            query.foundPoints++;
+            if(query.foundPoints==query.maxPoints)
+                query.maxRadiusSquared=buildHeap(query.result,query.distanceSquared,query.foundPoints);
         }else // already have heap, find somebody to throw out
-            query.maxRadiusSquared = insertToHeap(query.result, query.distanceSquared, query.foundPoints,
-                                                  n, pDistanceSquared);
+            query.maxRadiusSquared=insertToHeap(query.result,query.distanceSquared,query.foundPoints,n,pDistanceSquared);
     }
 }
 

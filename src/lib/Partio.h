@@ -102,12 +102,11 @@ public:
 
     //! Fill the user supplied values array with data corresponding to the given
     //! list of particles. Specify whether or not your indices are sorted.
+    //! note if T is void, then type checking is disabled.
     template<class T> inline void data(const ParticleAttribute& attribute,
         const int indexCount,const ParticleIndex* particleIndices,const bool sorted,T* values)
     {
-        // NOTE: I'm disabling this assert here so we can call this function with void as T
-    	  //assert(typeCheck<T>(attribute.type));
-        // TODO: add type checking
+    	assert(typeCheck<T>(attribute.type));
         dataInternalMultiple(attribute,indexCount,particleIndices,sorted,(char*)values);
     }
 
@@ -132,7 +131,7 @@ public:
     virtual void findPoints(const float bboxMin[3],const float bboxMax[3],
         std::vector<ParticleIndex>& points) const=0;
 
-    //! Find the N nearest neighbors that are within maxRadius distance
+    //! Find the N nearest neighbors that are within maxRadius distance using STL types
     //! (measured in standard 2-norm). If less than N are found within the
     //! radius, the search radius is not increased. 
     //! NOTE: points/pointsDistancesSquared are cleared before use.
@@ -140,7 +139,7 @@ public:
     virtual float findNPoints(const float center[3],int nPoints,const float maxRadius,
         std::vector<ParticleIndex>& points,std::vector<float>& pointDistancesSquared) const=0;
 
-    //! POD version of the above call
+    //! Find the N nearest neighbors that are within maxRadius distance using POD types
     //! NOTE: returns the number of found points and leaves in finalRadius2 the
     //! square of the final search radius used
     virtual int findNPoints(const float center[3],int nPoints,const float maxRadius,

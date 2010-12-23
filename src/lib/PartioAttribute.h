@@ -60,12 +60,12 @@ template<class T> struct IS_SAME<T,T>{static const bool value=true;};
 template<class T> bool
 typeCheck(const ParticleAttributeType& type)
 {
-	switch(type){
+    switch(type){
 	case VECTOR: return IS_SAME<typename ETYPE_TO_TYPE<VECTOR>::TYPE,T>::value;
 	case FLOAT: return IS_SAME<typename ETYPE_TO_TYPE<FLOAT>::TYPE,T>::value;
 	case INT: return IS_SAME<typename ETYPE_TO_TYPE<INT>::TYPE,T>::value;
-	default: return false;
-	}
+	default: return IS_SAME<T,void>::value; // allow void types
+    }
 }
 
 int TypeSize(ParticleAttributeType attrType);

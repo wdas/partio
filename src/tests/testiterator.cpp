@@ -35,14 +35,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include <Partio.h>
 #include <iostream>
+#include <typeinfo>
+#include <cstdlib>
 
 #include "Timer.h"
-
-// TODO: remove this
-
-extern "C"{
-int offsets[3]={0,3,4};
-}
 
 int main(int argc,char *argv[])
 {
@@ -131,17 +127,30 @@ int main(int argc,char *argv[])
             handTimes.push_back( timer.Stop_Time());
 
         }
+ 
+        // NOTE: this is using direct access and assuming ParticlesSimple (non-interleaved data)
+        // This is not what you should ever do, and is not guaranteed to work under any stretch of the imagination.
+        // I am only doing it here to see what I'm losing in iteration.
         {
             Timer timer("Access and sum raw");
-            
+            std::string fooType=typeid(foo).name();
+            if(fooType.find("ParticlesSimple")==std::string::npos){
+                std::cerr<<"You are using the wrong particle type for this test it must be ParticlesSimple"<<std::endl;
+                exit(1);
+            }
             Partio::ParticlesData& fooc=foo;
+            int nParts=fooc.numParticles();
             float sum=0;
             const float* X=fooc.data<float>(position,0);
-            int nParts=fooc.numParticles();
+            const float* r=fooc.data<float>(radius,0);
+            const float* l=fooc.data<float>(life,0);
             for(int i=0;i<nParts;i++){
+                //std::cout<<i<<std::endl;
                 //sum+= X[0]+X[3]+X[4];
-                sum+= X[offsets[0]]+X[offsets[1]]+X[offsets[2]];
-                X+=6;
+                sum+= X[0]+r[0]+l[0];
+                X+=3;
+                r++;
+                l+=2;
             }
             std::cerr<<"sum is "<<sum<<std::endl;
            
