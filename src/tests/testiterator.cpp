@@ -127,7 +127,7 @@ int main(int argc,char *argv[])
             handTimes.push_back( timer.Stop_Time());
 
         }
- 
+
         // NOTE: this is using direct access and assuming ParticlesSimple (non-interleaved data)
         // This is not what you should ever do, and is not guaranteed to work under any stretch of the imagination.
         // I am only doing it here to see what I'm losing in iteration.
