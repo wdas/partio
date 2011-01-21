@@ -290,8 +290,8 @@ public:
                 Py_XDECREF(o);
             }
         }
-// TODO: is this correcT?!?!
-//        Py_XINCREF(Py_None);
+
+        Py_XINCREF(Py_None);
         return Py_None;
     }
 
