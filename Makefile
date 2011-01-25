@@ -6,7 +6,10 @@ DESTDIR	=
 install:
 	@echo "Installing $(prefix)"
 	scons --prefix="$(DESTDIR)$(prefix)" #"$(DESTDIR)$(prefix)"
-	echo "bin\nlib64\ninclude\nshare" > ${DESTDIR}${prefix}/.release.partio
+	echo "bin" > ${DESTDIR}${prefix}/.release.partio
+	echo "lib64" >> ${DESTDIR}${prefix}/.release.partio
+	echo "share" >> ${DESTDIR}${prefix}/.release.partio
+	echo "include" >> ${DESTDIR}${prefix}/.release.partio
 
 clean:
 	scons -c --prefix="$(DESTDIR)$(prefix)" #"$(DESTDIR)$(prefix)"
