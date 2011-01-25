@@ -52,6 +52,8 @@ readers()
         data["bgeo"]=readBGEO;
         data["geo"]=readGEO;
         data["pdb"]=readPDB;
+        data["pdb32"]=readPDB32;
+        data["pdb64"]=readPDB64;
         data["pda"]=readPDA;
         data["ptc"]=readPTC;
     }
@@ -67,6 +69,8 @@ writers()
         data["bgeo"]=writeBGEO;
         data["geo"]=writeGEO;
         data["pdb"]=writePDB;
+        data["pdb32"]=writePDB32;
+        data["pdb64"]=writePDB64;
         data["pda"]=writePDA;
         data["ptc"]=writePTC;
     }
