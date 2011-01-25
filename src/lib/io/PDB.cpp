@@ -37,7 +37,9 @@ This code is partially based on the Gifts/readpdb directory of Autodesk Maya
 
 #include "../Partio.h"
 #include "../core/ParticleHeaders.h"
+namespace PDB{
 #include "pdb.h"
+}
 #include "endian.h"
 #include "ZIP.h"
 #include <iostream>
@@ -47,6 +49,24 @@ This code is partially based on the Gifts/readpdb directory of Autodesk Maya
 #include <memory>
 #include <string.h>
 namespace Partio{
+
+template<int bits> struct PDB_POLICY;
+template<> struct PDB_POLICY<32>
+{
+    typedef PDB::PDB_Header32 HEADER;
+    typedef PDB::PDBdata32 DATA;
+    typedef PDB::Channel32 CHANNEL;
+    typedef PDB::Channel_Data32 CHANNEL_DATA;
+    typedef PDB::Channel_io_Header CHANNEL_IO;
+};
+template<> struct PDB_POLICY<64>
+{
+    typedef PDB::PDB_Header HEADER;
+    typedef PDB::PDBdata DATA;
+    typedef PDB::Channel CHANNEL;
+    typedef PDB::Channel_Data CHANNEL_DATA;
+    typedef PDB::Channel_io_Header CHANNEL_IO;
+};
 
 std::string GetString(std::istream& input,bool& error)
 {
@@ -65,8 +85,10 @@ std::string GetString(std::istream& input,bool& error)
     return s;
 }
 
-ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly)
+
+template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,const bool headersOnly)
 {
+
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){
         std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
@@ -79,20 +101,20 @@ ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly)
     else simple=create();
 
     // Read header and add as many particles as found
-    PDB_Header32 header32;
+    typename PDB_POLICY<bits>::HEADER header;
 
-    input->read((char*)&header32,sizeof(PDB_Header32));
-    if(header32.magic != PDB_MAGIC){
+    input->read((char*)&header,sizeof(typename PDB_POLICY<bits>::HEADER));
+    if(header.magic != PDB_MAGIC){
         std::cerr<<"Partio: failed to get PDB magic"<<std::endl;
         return 0;
     }
 
-    simple->addParticles(header32.data_size);
+    simple->addParticles(header.data_size);
     
-    for(unsigned int i=0;i<header32.num_data;i++){
-        Channel_io_Header channelIOHeader;
+    for(unsigned int i=0;i<header.num_data;i++){
+        typename PDB_POLICY<bits>::CHANNEL_IO channelIOHeader;
         input->read((char*)&channelIOHeader,sizeof(channelIOHeader));
-        Channel32 channelHeader;
+        typename PDB_POLICY<bits>::CHANNEL channelHeader;
         input->read((char*)&channelHeader,sizeof(channelHeader));
         bool error;
         std::string name=GetString(*input,error);
@@ -101,7 +123,7 @@ ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly)
             return 0;
         }
 
-        Channel_Data32 channelData;
+        typename PDB_POLICY<bits>::CHANNEL_DATA channelData;
         input->read((char*)&channelData,sizeof(channelData));
 
         
@@ -112,7 +134,7 @@ ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly)
             case PDB_LONG: type=INT;break;
             default: type=NONE;break;
         }
-        int size=header32.data_size*channelData.datasize;
+        int size=header.data_size*channelData.datasize;
 
         // Read data or skip if we haven't found appropriate type handle
         if(type==NONE){
@@ -147,7 +169,8 @@ ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly)
     return simple;
 }
 
-bool writePDB(const char* filename,const ParticlesData& p,const bool compressed)
+template<int bits>
+bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compressed)
 {
     std::auto_ptr<std::ostream> output(
         compressed ? 
@@ -159,8 +182,8 @@ bool writePDB(const char* filename,const ParticlesData& p,const bool compressed)
         return false;
     }
 
-    PDB_Header32 h32;
-    memset(&h32,0,sizeof(PDB_Header32));
+    typename PDB_POLICY<bits>::HEADER h32;
+    memset(&h32,0,sizeof(typename PDB_POLICY<bits>::HEADER));
     h32.magic=PDB_MAGIC;
     h32.swap=1;
     h32.version=1.0;
@@ -169,49 +192,49 @@ bool writePDB(const char* filename,const ParticlesData& p,const bool compressed)
     h32.num_data=p.numAttributes();
     for(int k=0;k<32;k++) h32.padding[k]=0;
     h32.data=0;
-    output->write((char*)&h32,sizeof(PDB_Header32));
+    output->write((char*)&h32,sizeof(typename PDB_POLICY<bits>::HEADER));
     
     for(int attrIndex=0;attrIndex<p.numAttributes();attrIndex++){
         ParticleAttribute attr;
         p.attributeInfo(attrIndex,attr);
 
-        Channel_io_Header cio;
-        Channel32 channel32;
-        Channel_Data32 data_header32;
-        memset(&cio,0,sizeof(Channel_io_Header));
-        memset(&channel32,0,sizeof(Channel32));
-        memset(&data_header32,0,sizeof(Channel_Data32));
+        typename PDB_POLICY<bits>::CHANNEL_IO cio;
+        typename PDB_POLICY<bits>::CHANNEL channel;
+        typename PDB_POLICY<bits>::CHANNEL_DATA data_header;
+        memset(&cio,0,sizeof(typename PDB_POLICY<bits>::CHANNEL_IO));
+        memset(&channel,0,sizeof(typename PDB_POLICY<bits>::CHANNEL));
+        memset(&data_header,0,sizeof(typename PDB_POLICY<bits>::CHANNEL_DATA));
 
-        cio.magic=99;
+        cio.magic=0;
         cio.swap=1;
         cio.encoding=0;
         cio.type=0;
-        output->write((char*)&cio,sizeof(Channel_io_Header));
+        output->write((char*)&cio,sizeof(typename PDB_POLICY<bits>::CHANNEL_IO));
  
         // TODO: assert cproper count!
-        channel32.name=0;
+        channel.name=0;
         switch(attr.type){
-            case INT:channel32.type=PDB_LONG;break;
-            case FLOAT:channel32.type=PDB_REAL;break;
-            case VECTOR:channel32.type=PDB_VECTOR;break;
+            case INT:channel.type=PDB_LONG;break;
+            case FLOAT:channel.type=PDB_REAL;break;
+            case VECTOR:channel.type=PDB_VECTOR;break;
             default: assert(false);
         }
-        channel32.size=0;
-        channel32.active_start=0;
-        channel32.active_end=h32.data_size-1;
-        channel32.hide=0;
-        channel32.disconnect=0;
-        channel32.data=0;
-        channel32.link=0;
-        channel32.next=0;
-        output->write((char*)&channel32,sizeof(channel32));
+        channel.size=0;
+        channel.active_start=0;
+        channel.active_end=h32.data_size-1;
+        channel.hide=0;
+        channel.disconnect=0;
+        channel.data=0;
+        channel.link=0;
+        channel.next=0;
+        output->write((char*)&channel,sizeof(channel));
         output->write(attr.name.c_str(),attr.name.length()*sizeof(char)+1);
-        data_header32.type=channel32.type;
-        data_header32.datasize=attr.count*sizeof(float);
-        data_header32.blocksize=p.numParticles();
-        data_header32.num_blocks=1;
-        data_header32.block=0;
-        output->write((char*)&data_header32,sizeof(data_header32));
+        data_header.type=channel.type;
+        data_header.datasize=attr.count*sizeof(float);
+        data_header.blocksize=p.numParticles();
+        data_header.num_blocks=1;
+        data_header.block=0;
+        output->write((char*)&data_header,sizeof(data_header));
 
         Partio::ParticlesData::const_iterator it=p.begin();
         Partio::ParticleAccessor accessor(attr);
@@ -224,5 +247,45 @@ bool writePDB(const char* filename,const ParticlesData& p,const bool compressed)
     return true;
 }
 
+ParticlesDataMutable* readPDB32(const char* filename,const bool headersOnly)
+{return readPDBHelper<32>(filename,headersOnly);}
+
+ParticlesDataMutable* readPDB64(const char* filename,const bool headersOnly)
+{return readPDBHelper<64>(filename,headersOnly);}
+
+bool writePDB32(const char* filename,const ParticlesData& p,const bool compressed)
+{return writePDBHelper<32>(filename,p,compressed);}
+
+bool writePDB64(const char* filename,const ParticlesData& p,const bool compressed)
+{return writePDBHelper<64>(filename,p,compressed);}
+
+ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly)
+{
+    std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
+    if(!*input){
+        std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
+        return 0;
+    }
+    // Read header and add as many particles as found
+    PDB_POLICY<64>::HEADER header;
+    input->read((char*)&header,sizeof(header));
+    if(header.magic != PDB_MAGIC){
+        std::cerr<<"Partio: failed to get PDB magic"<<std::endl;
+        return 0;
+    }
+    // Now read a channel io ... and see if the the swap is zero or one and encoding is zero. If so then we probably god a good thing
+    // if not, then we assume 64 bit.
+    PDB_POLICY<64>::CHANNEL_IO channelIOHeader;
+    input->read((char*)&channelIOHeader,sizeof(channelIOHeader));
+    //std::cout<<"we got channel io as "<<int(channelIOHeader.type)<<" swap is "<<channelIOHeader.swap<<std::endl;
+    if(channelIOHeader.type > 5  || channelIOHeader.type < 0 || (channelIOHeader.swap != 1 && channelIOHeader.swap != 0)){
+        return readPDBHelper<32>(filename,headersOnly);
+    }else{
+        return readPDBHelper<64>(filename,headersOnly);
+    }
+}
+
+bool writePDB(const char* filename,const ParticlesData& p,const bool compressed)
+{return writePDBHelper<32>(filename,p,compressed);}
 
 }
