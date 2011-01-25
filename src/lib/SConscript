@@ -60,13 +60,13 @@ foo=Dir(".").abspath+"../../include"
 env.Install(variant_build_abs+"/include","Partio.h")
 env.Install(variant_build_abs+"/include","PartioIterator.h")
 env.Install(variant_build_abs+"/include","PartioAttribute.h")
-env.Install(variant_build_abs+"/lib",lib)
+env.Install(variant_build_abs+"/lib64",lib)
 
 core_targets = [
     env.Install(variant_install_abs+"/include","Partio.h"),
     env.Install(variant_install_abs+"/include","PartioIterator.h"),
     env.Install(variant_install_abs+"/include","PartioAttribute.h"),
-    env.Install(variant_install_abs+"/lib",lib)
+    env.Install(variant_install_abs+"/lib64",lib)
 ]
 
 

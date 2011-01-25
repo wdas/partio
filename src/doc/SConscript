@@ -35,7 +35,7 @@ Import('env variant_build_abs variant_install_abs GetInstallPath')
 
 
 
-docTarget=variant_install_abs+'/doc/Partio'
+docTarget=variant_install_abs+'/share/doc/Partio'
 headers=['#src/lib/Partio.h'] 
 # Build doxygen if Doxyfile or headers change 
 index=env.Command('#src/doc/doc/html/index.html',  # only target file known in advance 
