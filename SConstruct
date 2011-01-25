@@ -60,7 +60,7 @@ if env["mac"]==True:
     #env.Append(LINKFLAGS=["-m32"])
 
 if env["TYPE"]=="optimize":
-    env.Append(CXXFLAGS="-fPIC -DNDEBUG -O3 -fno-strict-aliasing -Wall -Werror -Wstrict-aliasing=0  -mfpmath=sse -msse3".split())
+    env.Append(CXXFLAGS="-fPIC -DNDEBUG -O3 -fno-strict-aliasing -Wall -Wstrict-aliasing=0  -mfpmath=sse -msse3".split())
 if env["TYPE"]=="profile":
     env.Append(CXXFLAGS="-fPIC -fno-strict-aliasing -DNDEBUG -g -fno-omit-frame-pointer -O3 -Wall -Werror -Wstrict-aliasing=0  -mfpmath=sse -msse3".split())
 elif env["TYPE"]=="debug":
