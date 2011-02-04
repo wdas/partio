@@ -103,19 +103,22 @@ int main(int argc,char *argv[])
 
         float finalDist;
         int returned=foo->findNPoints(point, 5, 0.15f, indices, dists,&finalDist);
-        assert (returned == 5);
-        
-        const float *pos = foo->data<float>(posAttr, indices[0]);
-        assert (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[1]);
-        assert (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[2]);
-        assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
-        pos = foo->data<float>(posAttr, indices[3]);
-        assert (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[4]);
-        assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
-        
+        if (returned != 5) {
+	    std::cerr<<"Test failed";
+	}else{
+	    
+	    const float *pos = foo->data<float>(posAttr, indices[0]);
+	    assert (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
+	    pos = foo->data<float>(posAttr, indices[1]);
+	    assert (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
+	    pos = foo->data<float>(posAttr, indices[2]);
+	    assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
+	    pos = foo->data<float>(posAttr, indices[3]);
+	    assert (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
+	    pos = foo->data<float>(posAttr, indices[4]);
+	    assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+        }
+
         std::cout << "Test passed\n";
     }
     foo->release();
