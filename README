@@ -7,12 +7,19 @@ reading/writing.  It started out as an abstraction for the commonalities in
 particle models (i.e. accessing many attributes associated with an index or
 entity).
 
+Super impatient scons building guide
+====================================
+$ git clone https://github.com/wdas/partio.git
+$ cd partio
+$ scons -j 4
+(dist/ will now have your build)
+
 Geting Started
 ==============
 
-I use scons for building. I'm open to adding build files for other
-build systems, too. Just type scons and you will get a build
-to a platform specific build directory. 
+I support both scons and cmake build files. I would rather not support
+more. Lately I have been using cmake more, so that may be more up to
+date, but others have contributed fixes from time to time.
 
 Source code overview
 ====================
