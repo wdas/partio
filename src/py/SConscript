@@ -35,12 +35,12 @@ import sys
 
 python_ver = sys.version[:3]
 python_inc = 'include/python%s' % python_ver
-python_mod = 'lib/python%s/site-packages' % python_ver
+python_mod = 'lib64/python%s/site-packages' % python_ver
 
 Import('env variant_build_abs variant_install_abs')
 
 envpy=env.Clone(CPPPATH=[variant_build_abs+"/include"]
-              ,LIBPATH="%s/lib"%variant_build_abs
+              ,LIBPATH="%s/lib64"%variant_build_abs
               ,LIBS=["partio"])
 
 
@@ -50,7 +50,7 @@ pythonDir="/usr"
 envpy.Append(CXXFLAGS=["-Wno-format"])
 envpy.Append(CPPPATH=[pythonDir+"/include/python%s" % python_ver
                       ],
-             LIBPATH=["%s/lib"%variant_build_abs],
+             LIBPATH=["%s/lib64"%variant_build_abs],
              LIBS=["partio"])
 
 envpy.Append(SWIGFLAGS=['-c++','-python','-Wall'])
