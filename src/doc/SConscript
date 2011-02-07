@@ -40,7 +40,7 @@ headers=['#src/lib/Partio.h']
 # Build doxygen if Doxyfile or headers change 
 index=env.Command('#src/doc/doc/html/index.html',  # only target file known in advance 
 ['#src/doc/Doxyfile']+headers, # all src files that might influence the result 
-'doxygen src/doc/Doxyfile') 
+'env CMAKE_CURRENT_SOURCE_DIR=\"src/lib\" doxygen src/doc/Doxyfile') 
 
 env.Install(docTarget,index) # Now we need the list of files that were produced by Doxygen. 
 

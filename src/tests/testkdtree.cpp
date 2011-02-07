@@ -37,8 +37,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <Partio.h>
 #include <iostream>
 #include <cmath>
-
+#include <stdexcept>
 #define GRIDN 9
+
+
+#define TESTASSERT(x)\
+ if(!(x)) throw std::runtime_error(__FILE__ ": Test failed on " #x ); 
+
 
 Partio::ParticlesDataMutable* makeData()
 {
@@ -70,7 +75,7 @@ int main(int argc,char *argv[])
 {
     Partio::ParticlesDataMutable* foo=makeData();
     Partio::ParticleAttribute posAttr;
-    assert (foo->attributeInfo("position", posAttr));
+    TESTASSERT (foo->attributeInfo("position", posAttr));
 
 
     std::cout << "Testing lookup with stl types ...\n";
@@ -80,18 +85,18 @@ int main(int argc,char *argv[])
         float point[3] = {0.51, 0.52, 0.53};
 
         foo->findNPoints(point, 5, 0.15f, indices, dists);
-        assert (indices.size() == 5);
+        TESTASSERT (indices.size() == 5);
         
         const float *pos = foo->data<float>(posAttr, indices[0]);
-        assert (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[1]);
-        assert (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[2]);
-        assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
+        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
         pos = foo->data<float>(posAttr, indices[3]);
-        assert (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[4]);
-        assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
         
         std::cout << "Test passed\n";
     }
@@ -103,19 +108,19 @@ int main(int argc,char *argv[])
 
         float finalDist;
         int returned=foo->findNPoints(point, 5, 0.15f, indices, dists,&finalDist);
-        assert (returned == 5);
+        TESTASSERT(returned == 5);
         
         const float *pos = foo->data<float>(posAttr, indices[0]);
-        assert (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[1]);
-        assert (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[2]);
-        assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
+        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
         pos = foo->data<float>(posAttr, indices[3]);
-        assert (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[4]);
-        assert (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
-        
+        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+
         std::cout << "Test passed\n";
     }
     foo->release();

@@ -291,7 +291,7 @@ public:
             }
         }
 
-        Py_XINCREF(Py_None);
+        Py_INCREF(Py_None);
         return Py_None;
     }
 
