@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 namespace Partio{
 
-class ParticlesData;
-class ParticleAccessor;
+class  ParticlesData;
+struct ParticleAccessor;
 
 //! Data
 /*!
