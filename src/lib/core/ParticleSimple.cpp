@@ -241,12 +241,14 @@ addParticles(const int countToAdd)
 ParticlesDataMutable::iterator ParticlesSimple::
 setupIterator()
 {
+    if(numParticles()==0) return ParticlesDataMutable::iterator();
     return ParticlesDataMutable::iterator(this,0,numParticles()-1);
 }
 
 ParticlesData::const_iterator ParticlesSimple::
 setupConstIterator() const
 {
+    if(numParticles()==0) return ParticlesDataMutable::const_iterator();
     return ParticlesData::const_iterator(this,0,numParticles()-1);
 }
 
