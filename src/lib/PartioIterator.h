@@ -200,7 +200,7 @@ public:
     {
         newAccessor.next=accessors;
         accessors=&newAccessor;
-        particles->setupAccessor(*this,newAccessor);
+        if(particles) particles->setupAccessor(*this,newAccessor);
     }
 
 
