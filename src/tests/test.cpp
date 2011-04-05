@@ -61,6 +61,17 @@ Partio::ParticlesDataMutable* makeData()
     return &foo;
 }
 
+void testEmptySaveLoad(const char* filename)
+{
+    Partio::ParticlesDataMutable* p=Partio::create();
+    p->addAttribute("position",Partio::VECTOR,3);
+    std::cerr<<"Testing empty save with file '"<<filename<<"'"<<std::endl;
+    Partio::write(filename,*p);
+    p->release();
+    Partio::ParticlesDataMutable* pread=Partio::read(filename);
+    pread->release();
+}
+
 void testSaveLoad(Partio::ParticlesData* p,const char* filename)
 {
     std::cerr<<"Testing with file '"<<filename<<"'"<<std::endl;
@@ -81,6 +92,10 @@ int main(int argc,char *argv[])
         testSaveLoad(foo,"test.ptc.gz");
         testSaveLoad(foo,"test.pdb");
         testSaveLoad(foo,"test.pdb.gz");
+        testEmptySaveLoad("testEmpty.geo");
+        testEmptySaveLoad("testEmpty.bgeo");
+        testEmptySaveLoad("testEmpty.pdb");
+        testEmptySaveLoad("testEmpty.ptc");
         foo->release();
     }
 
