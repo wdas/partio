@@ -459,9 +459,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories 
 # with spaces.
 
-INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/../lib/Partio.h \
-                       @CMAKE_CURRENT_SOURCE_DIR@/../lib/PartioAttribute.h \
-                       @CMAKE_CURRENT_SOURCE_DIR@/../lib/PartioIterator.h \
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/../lib \
                        @CMAKE_CURRENT_SOURCE_DIR@
 
 # If the value of the INPUT tag contains directories, you can use the 

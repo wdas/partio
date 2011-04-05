@@ -36,11 +36,18 @@ Import('env variant_build_abs variant_install_abs GetInstallPath')
 
 
 docTarget=variant_install_abs+'/doc/Partio'
-headers=['#src/lib/Partio.h'] 
+headers=['#src/lib/Partio.h']
+foo=env.Command("#src/doc/Doxyfile",
+                ["#src/doc/Doxyfile.in"]+headers,
+                "sed 's/\@CMAKE_CURRENT_SOURCE_DIR\@/src\/doc/g' src/doc/Doxyfile.in > src/doc/Doxyfile; echo OUTPUT_DIRECTORY=src/doc/doc >> src/doc/Doxyfile")
+
+                
+
 # Build doxygen if Doxyfile or headers change 
 index=env.Command('#src/doc/doc/html/index.html',  # only target file known in advance 
-['#src/doc/Doxyfile']+headers, # all src files that might influence the result 
-'env CMAKE_CURRENT_SOURCE_DIR=\"src/lib\" doxygen src/doc/Doxyfile') 
+foo,
+'doxygen src/doc/Doxyfile')
+
 
 env.Install(docTarget,index) # Now we need the list of files that were produced by Doxygen. 
 
