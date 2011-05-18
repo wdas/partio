@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <string>
 #include <cfloat>
 #include <memory>
+#include <sstream>
 
 namespace Partio{
 
@@ -77,6 +78,7 @@ bool ParseSpec(const std::string& spec,std::string& typeName,std::string& name)
 
 ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
 {
+    std::cerr<<"we are here"<<std::endl;
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){
         std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
@@ -92,6 +94,11 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
 
     int version;
     read<LITEND>(*input,version);
+    std::cerr<<"PTC vers "<<version<<std::endl;
+    if(version>2){
+        std::cerr<<"Partio: ptc reader only supports version 2 or less"<<std::endl;
+        return 0;
+    }
 
     double nPoints;
     read<LITEND>(*input,nPoints);
@@ -99,9 +106,18 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
     // TODO: allow access to this in the headers only mode for times when only bbox is necessary
     float xmin,ymin,zmin,xmax,ymax,zmax;
     read<LITEND>(*input,xmin,ymin,zmin,xmax,ymax,zmax);
+    std::cerr<<" bound min "<<xmin<<" "<<ymin<<" "<<zmin
+             <<" bound max "<<xmax<<" "<<ymax<<" "<<zmin<<std::endl;
 
     float dummy;
+    // Who knows what this is?
     if (version>=1) for (int d=0;d<4;d++) read<LITEND>(*input,dummy);
+    // This seems to be 4 bytes of something and 32 0xDEADBEEF guys
+    if (version>=2){
+        float maxRadius;
+        read<LITEND>(*input,maxRadius);
+        for (int d=0;d<32;d++) read<LITEND>(*input,dummy);
+    }
 
     // world-to-eye
     for(int i=0;i<16;i++) read<LITEND>(*input,dummy);
@@ -148,8 +164,18 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
             simple->release();
             return 0;
         }
+        
+        // make unqiue name
+        int unique=1;
+        std::string effectiveName=name;
+        ParticleAttribute info;
+        while(simple->attributeInfo(effectiveName.c_str(),info)){
+            std::ostringstream ss;
+            ss<<name<<unique++;
+            effectiveName=ss.str();
+        }
 
-        attrHandles.push_back(simple->addAttribute(name.c_str(),dataType,dataSize));
+        attrHandles.push_back(simple->addAttribute(effectiveName.c_str(),dataType,dataSize));
         parsedSize+=dataSize;
     }
     if(dataSize!=parsedSize){
