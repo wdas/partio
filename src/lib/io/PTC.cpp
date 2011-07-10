@@ -150,8 +150,11 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
 
         int dataSize=0;
         ParticleAttributeType dataType;
-        if(typeName=="color" || typeName=="vector" || typeName=="point" || typeName=="color"){
+        if(typeName=="normal" || typeName=="vector" || typeName=="point"){
             dataType=VECTOR;
+            dataSize=3;
+        }else if(typeName=="color"){
+            dataType=FLOAT;
             dataSize=3;
         }else if(typeName=="matrix"){
             dataType=FLOAT;
