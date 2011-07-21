@@ -78,7 +78,6 @@ bool ParseSpec(const std::string& spec,std::string& typeName,std::string& name)
 
 ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
 {
-    std::cerr<<"we are here"<<std::endl;
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){
         std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
@@ -94,7 +93,6 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
 
     int version;
     read<LITEND>(*input,version);
-    std::cerr<<"PTC vers "<<version<<std::endl;
     if(version>2){
         std::cerr<<"Partio: ptc reader only supports version 2 or less"<<std::endl;
         return 0;
@@ -106,8 +104,6 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
     // TODO: allow access to this in the headers only mode for times when only bbox is necessary
     float xmin,ymin,zmin,xmax,ymax,zmax;
     read<LITEND>(*input,xmin,ymin,zmin,xmax,ymax,zmax);
-    std::cerr<<" bound min "<<xmin<<" "<<ymin<<" "<<zmin
-             <<" bound max "<<xmax<<" "<<ymax<<" "<<zmin<<std::endl;
 
     float dummy;
     // Who knows what this is?
