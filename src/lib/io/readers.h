@@ -12,13 +12,14 @@
 #define _READERS_h_
 
 namespace Partio{
-ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly);
-ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly);
-ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly);
-ParticlesDataMutable* readPDB32(const char* filename,const bool headersOnly);
-ParticlesDataMutable* readPDB64(const char* filename,const bool headersOnly);
-ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly);
-ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly);
+ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,char** partAttrs,int percentage);
+ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly,char** partAttrs,int percentage);
+ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly,char** partAttrs,int percentage);
+ParticlesDataMutable* readPDB32(const char* filename,const bool headersOnly,char** partAttrs,int percentage);
+ParticlesDataMutable* readPDB64(const char* filename,const bool headersOnly,char** partAttrs,int percentage);
+ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char** partAttrs,int percentage);
+ParticlesDataMutable* readMC(const char* filename,const bool headersOnly,char** partAttrs,int percentage);
+ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly,char** partAttrs,int percentage);
 bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed);
 bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed);
 bool writePDB(const char* filename,const ParticlesData& p,const bool compressed);
@@ -26,6 +27,7 @@ bool writePDB32(const char* filename,const ParticlesData& p,const bool compresse
 bool writePDB64(const char* filename,const ParticlesData& p,const bool compressed);
 bool writePDA(const char* filename,const ParticlesData& p,const bool compressed);
 bool writePTC(const char* filename,const ParticlesData& p,const bool compressed);
+bool writeRIB(const char* filename,const ParticlesData& p,const bool compressed);
 }
 
 #endif

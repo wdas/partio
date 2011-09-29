@@ -22,7 +22,7 @@ namespace Partio{
 
 // TODO: convert this to use iterators like the rest of the readers/writers
 
-ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char** attributes, int percentage)
 {
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){

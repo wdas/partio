@@ -223,6 +223,10 @@ ParticlesDataMutable* create();
 //! freed with p->release()
 ParticlesDataMutable* read(const char* filename);
 
+//! Provides read/write access to a particle set stored in a file with only particular attribute
+////! freed with p->release()
+ParticlesDataMutable* readPart(const char* filename, char** attributes, int percentage);
+
 //! Provides read access to a particle headers (number of particles
 //! and attribute information, much cheapeer
 ParticlesInfo* readHeaders(const char* filename);

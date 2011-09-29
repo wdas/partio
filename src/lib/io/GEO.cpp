@@ -93,7 +93,7 @@ std::string scanString(std::istream& input)
     return std::string(buf);
 }
 
-ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly,char** attributes, int percentage)
 {
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in));
     if(!*input){

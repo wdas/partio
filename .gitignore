@@ -6,3 +6,7 @@
 /build
 *~
 *.o
+/partio.kdevelop
+/partio.kdevelop.filelist
+/partio.kdevelop.pcs
+/partio.kdevses
