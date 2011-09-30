@@ -51,6 +51,8 @@ using namespace Partio;
 ParticlesData* particles=0;
 Camera camera;
 ParticleAttribute positionAttr;
+ParticleAttribute colorAttr;
+ParticleAttribute alphaAttr;
 static const double fov=60;
 
 static void render()
@@ -105,10 +107,14 @@ static void render()
     glColor3f(0,0,1);glVertex3f(0,0,0);glVertex3f(0,0,1);
     glEnd();
     
-    glColor3f(1,1,1);
+    //glColor3f(1,1,1);
+    glPointSize(1.5);
     glBegin(GL_POINTS);
     for(int i=0;i<particles->numParticles();i++){
         const float* pos=particles->data<float>(positionAttr,i);
+        const float* color=particles->data<float>(colorAttr,i);
+        const float* alpha=particles->data<float>(alphaAttr,i);
+        glColor4f(color[0],color[1],color[2],alpha[0]);
         glVertex3f(pos[0],pos[1],pos[2]);
     }
     glEnd();
@@ -151,7 +157,7 @@ int main(int argc,char *argv[])
     if(particles){
         glutInitWindowSize(1024,768);
         glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
-        glutCreateWindow("papi view");
+        glutCreateWindow("partview");
         glutDisplayFunc(render);
         glutMotionFunc(motionFunc);
         glutMouseFunc(mouseFunc);

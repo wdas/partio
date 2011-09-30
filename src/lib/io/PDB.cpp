@@ -247,10 +247,10 @@ bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compr
     return true;
 }
 
-ParticlesDataMutable* readPDB32(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readPDB32(const char* filename,const bool headersOnly, char** attributes, int percentage)
 {return readPDBHelper<32>(filename,headersOnly);}
 
-ParticlesDataMutable* readPDB64(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readPDB64(const char* filename,const bool headersOnly, char** attributes, int percentage)
 {return readPDBHelper<64>(filename,headersOnly);}
 
 bool writePDB32(const char* filename,const ParticlesData& p,const bool compressed)
@@ -259,7 +259,7 @@ bool writePDB32(const char* filename,const ParticlesData& p,const bool compresse
 bool writePDB64(const char* filename,const ParticlesData& p,const bool compressed)
 {return writePDBHelper<64>(filename,p,compressed);}
 
-ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly, char** attributes, int percentage)
 {
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){

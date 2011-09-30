@@ -42,8 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 namespace Partio{
 
-class  ParticlesData;
-struct ParticleAccessor;
+class ParticlesData;
+class ParticleAccessor;
 
 //! Data
 /*!
@@ -200,7 +200,7 @@ public:
     {
         newAccessor.next=accessors;
         accessors=&newAccessor;
-        if(particles) particles->setupAccessor(*this,newAccessor);
+        particles->setupAccessor(*this,newAccessor);
     }
 
 

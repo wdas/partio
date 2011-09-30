@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 namespace Partio{
 
 // reader and writer code
-typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool);
+typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool,char**,int);
 typedef bool (*WRITER_FUNCTION)(const char*,const ParticlesData&,const bool);
 
 std::map<std::string,READER_FUNCTION>&
@@ -55,7 +55,10 @@ readers()
         data["pdb32"]=readPDB32;
         data["pdb64"]=readPDB64;
         data["pda"]=readPDA;
+        data["mc"]=readMC;
         data["ptc"]=readPTC;
+		data["pdc"]=readPDC;
+		data["prt"]=readPRT;
     }
     return data;
 }
@@ -73,6 +76,9 @@ writers()
         data["pdb64"]=writePDB64;
         data["pda"]=writePDA;
         data["ptc"]=writePTC;
+        data["rib"]=writeRIB;
+		data["pdc"]=writePDC;
+		data["prt"]=writePRT;
     }
     return data;
 }
@@ -115,7 +121,22 @@ read(const char* c_filename)
         std::cerr<<"Partio: No reader defined for extension "<<extension<<std::endl;
         return 0;
     }
-    return (*i->second)(c_filename,false);
+    return (*i->second)(c_filename,false,NULL,100);
+}
+
+ParticlesDataMutable*
+readPart(const char* c_filename, char** attributes, int percentage)
+{
+    std::string filename(c_filename);
+    std::string extension;
+    bool endsWithGz;
+    if(!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
+    std::map<std::string,READER_FUNCTION>::iterator i=readers().find(extension);
+    if(i==readers().end()){
+        std::cerr<<"Partio: No reader defined for extension "<<extension<<std::endl;
+        return 0;
+    }
+    return (*i->second)(c_filename,false,attributes,percentage);
 }
 
 ParticlesInfo*
@@ -130,7 +151,7 @@ readHeaders(const char* c_filename)
         std::cerr<<"Partio: No reader defined for extension "<<extension<<std::endl;
         return 0;
     }
-    return (*i->second)(c_filename,true);
+    return (*i->second)(c_filename,true,false,0);
 }
 
 void 
