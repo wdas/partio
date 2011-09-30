@@ -334,12 +334,18 @@ bool writePTC(const char* filename,const ParticlesData& p,const bool compressed)
         const float* n=static_n;
         if(foundNormal)
             n=p.data<float>(normalHandle,pointIndex);
+        // normalize and encode normals as two unsigned short integers z and
+        // phi, representing the z coordinate and angle in the xy plane.  The
+        // special value z == phi == 65535 encodes a zero normal.
 	int phi, z;
 	if (n[0] == 0 && n[1] == 0 && n[2] == 0) phi = z = 65535;
 	else {
             float mag_squared=n[0]*n[0]+n[1]*n[1]+n[2]*n[2];
 	    phi = int((atan2(n[0], n[1]) * (1/(2*M_PI)) + 0.5) * 65535 + 0.5);
 	    z = std::min(int((n[2]/sqrt(mag_squared)+1)/2 * 65535 + 0.5), 65535);
+            // phi is redundent when z == 65535; avoid the special value.
+            if (phi == 65535 && z == 65535)
+                phi = 0;
 	}
         write<LITEND>(*output,(unsigned short)phi,(unsigned short)z);
         // write radius
