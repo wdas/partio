@@ -9,9 +9,12 @@
 #include <cassert>
 #include <memory>
 
-namespace Partio{
+namespace Partio
+{
 //#define PartioBIG_ENDIAN
+
 using namespace std;
+
 // TODO: convert this to use iterators like the rest of the readers/writers
 
 std::string GetString(std::istream& input, unsigned int size){

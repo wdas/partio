@@ -295,80 +295,85 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char*
 
 bool writePRT(const char* filename,const ParticlesData& p,const bool /*compressed*/)
 {
-    std::auto_ptr<std::ostream> output(
+	/// Krakatoa pukes on 0 particle files for some reason so don't export at all.... 
+    int numParts = p.numParticles();
+    if (numParts)
+    {
+        std::auto_ptr<std::ostream> output(
         new std::ofstream(filename,std::ios::out|std::ios::binary));
-    
-    if (!*output) {
-        std::cerr<<"Partio Unable to open file "<<filename<<std::endl;
-        return false;
-    }
-    
-    FileHeadder header;
-    memcpy(header.magic, magic, sizeof(magic));
-    memcpy(header.signature, signature, sizeof(signature));
-    header.headersize = 0x38;
-    header.version = 1;
-    header.numParticles = p.numParticles();
-    int reserve = 4;
-    output->write((char*)&header,sizeof(FileHeadder));
-    write<LITEND>(*output, reserve);
-    write<LITEND>(*output, (int)p.numAttributes());
-	reserve = 0x2c;
-    write<LITEND>(*output, reserve);
-    
-    std::vector<ParticleAttribute> attrs;
-    int offset = 0;
-    for (int i=0;i<p.numAttributes();i++) {
-        ParticleAttribute attr;
-        p.attributeInfo(i,attr);
-        Channel ch;
-        memset(&ch, 0, sizeof(Channel));
-		memcpy((char*)ch.name, attr.name.c_str(), attr.name.size());
-        ch.offset = offset;
-        switch (attr.type) {
-        case FLOAT: ch.type=4; ch.arity=attr.count; offset += sizeof(float)*attr.count; break;
-        case INT: ch.type=1; ch.arity=attr.count; offset += sizeof(int)*attr.count; break;
-        case VECTOR: ch.type=4; ch.arity=attr.count; offset += sizeof(float)*attr.count; break;
-        case NONE:;break;
+        
+        if (!*output) {
+            std::cerr<<"Partio Unable to open file "<<filename<<std::endl;
+            return false;
         }
-        if (ch.arity) {
-#ifdef AUTO_CASES
-            if (ch.name[0] >= 'a' && ch.name[0] <= 'z') {
-                ch.name[0] -= 0x20;
+        
+        FileHeadder header;
+        memcpy(header.magic, magic, sizeof(magic));
+        memcpy(header.signature, signature, sizeof(signature));
+        header.headersize = 0x38;
+        header.version = 1;
+        header.numParticles = p.numParticles();
+        int reserve = 4;
+        output->write((char*)&header,sizeof(FileHeadder));
+        write<LITEND>(*output, reserve);
+        write<LITEND>(*output, (int)p.numAttributes());
+            reserve = 0x2c;
+        write<LITEND>(*output, reserve);
+        
+        std::vector<ParticleAttribute> attrs;
+        int offset = 0;
+        for (int i=0;i<p.numAttributes();i++) {
+            ParticleAttribute attr;
+            p.attributeInfo(i,attr);
+            Channel ch;
+            memset(&ch, 0, sizeof(Channel));
+                    memcpy((char*)ch.name, attr.name.c_str(), attr.name.size());
+            ch.offset = offset;
+            switch (attr.type) {
+            case FLOAT: ch.type=4; ch.arity=attr.count; offset += sizeof(float)*attr.count; break;
+            case INT: ch.type=1; ch.arity=attr.count; offset += sizeof(int)*attr.count; break;
+            case VECTOR: ch.type=4; ch.arity=attr.count; offset += sizeof(float)*attr.count; break;
+            case NONE:;break;
             }
-#endif
-            output->write((char*)&ch,sizeof(Channel));
-            attrs.push_back(attr);
-        }
-    }
-    
-    z_stream z;
-    z.zalloc = Z_NULL;z.zfree = Z_NULL;z.opaque = Z_NULL;
-    if (deflateInit( &z, Z_DEFAULT_COMPRESSION ) != Z_OK) {
-        std::cerr<<"Zlib deflateInit error"<<std::endl;
-        return false;
-    }
-    
-    char out_buf[OUT_BUFSIZE+10];
-    for (int particleIndex=0;particleIndex<p.numParticles();particleIndex++) {
-        for (unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++) {
-            if (attrs[attrIndex].type==Partio::INT) {
-                const int* data=p.data<int>(attrs[attrIndex],particleIndex);
-                if (!write_buffer(*output, z, (char*)out_buf, (void*)data, sizeof(int)*attrs[attrIndex].count, false))
-                    return false;
-            } else if (attrs[attrIndex].type==Partio::FLOAT || attrs[attrIndex].type==Partio::VECTOR) {
-                const float* data=p.data<float>(attrs[attrIndex],particleIndex);
-                if (!write_buffer(*output, z, (char*)out_buf, (void*)data, sizeof(int)*attrs[attrIndex].count, false))
-                    return false;
+            if (ch.arity) {
+    #ifdef AUTO_CASES
+                if (ch.name[0] >= 'a' && ch.name[0] <= 'z') {
+                    ch.name[0] -= 0x20;
+                }
+    #endif
+                output->write((char*)&ch,sizeof(Channel));
+                attrs.push_back(attr);
             }
         }
-    }
-    write_buffer(*output, z, (char*)out_buf, 0, 0, true);
-    if (deflateEnd( &z ) != Z_OK) {
-        std::cerr<<"Zlib deflateEnd error"<<std::endl;
-        return false;
-    }
-    // success
+        
+        z_stream z;
+        z.zalloc = Z_NULL;z.zfree = Z_NULL;z.opaque = Z_NULL;
+        if (deflateInit( &z, Z_DEFAULT_COMPRESSION ) != Z_OK) {
+            std::cerr<<"Zlib deflateInit error"<<std::endl;
+            return false;
+        }
+        
+        char out_buf[OUT_BUFSIZE+10];
+        for (int particleIndex=0;particleIndex<p.numParticles();particleIndex++) {
+            for (unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++) {
+                if (attrs[attrIndex].type==Partio::INT) {
+                    const int* data=p.data<int>(attrs[attrIndex],particleIndex);
+                    if (!write_buffer(*output, z, (char*)out_buf, (void*)data, sizeof(int)*attrs[attrIndex].count, false))
+                        return false;
+                } else if (attrs[attrIndex].type==Partio::FLOAT || attrs[attrIndex].type==Partio::VECTOR) {
+                    const float* data=p.data<float>(attrs[attrIndex],particleIndex);
+                    if (!write_buffer(*output, z, (char*)out_buf, (void*)data, sizeof(int)*attrs[attrIndex].count, false))
+                        return false;
+                }
+            }
+        }
+        write_buffer(*output, z, (char*)out_buf, 0, 0, true);
+        if (deflateEnd( &z ) != Z_OK) {
+            std::cerr<<"Zlib deflateEnd error"<<std::endl;
+            return false;
+        } 
+        // success
+    }// end if numParticles > 0
     return true;
 }
 

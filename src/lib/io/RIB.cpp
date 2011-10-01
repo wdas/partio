@@ -33,39 +33,42 @@
 
 namespace Partio
 {
+
+using namespace std;
+
   bool writeRIB(const char* filename, const ParticlesData& p, const bool compressed)
   {
-    std::auto_ptr<std::ostream> output(
-      compressed ? Gzip_Out(filename, std::ios::out | std::ios::binary)
-                 : new std::ofstream(filename, std::ios::out | std::ios::binary));
+    auto_ptr<ostream> output(
+      compressed ? Gzip_Out(filename, ios::out | ios::binary)
+                 : new ofstream(filename, ios::out | ios::binary));
 
     ParticleAttribute dummy;
     bool foundP     = p.attributeInfo("position",  dummy) || p.attributeInfo("P",     dummy);
     bool foundP2    = p.attributeInfo("position2", dummy) || p.attributeInfo("P2",    dummy);
-    bool foundWidth = p.attributeInfo("radius",    dummy) || p.attributeInfo("width", dummy);
+    bool foundWidth = p.attributeInfo("radius",    dummy) || p.attributeInfo("width", dummy) || p.attributeInfo("radiusPP", dummy);
 
     if(!foundP)
     {
-      std::cerr << "Partio: failed to find attr 'position' or 'P' for RIB output" << std::endl;
+      cerr << "Partio: failed to find attr 'position' or 'P' for RIB output" << endl;
       return false;
     }
 
     if(!foundWidth)
-      std::cerr << "Partio: failed to find attr 'width' or 'radius' for RIB output, using constantwidth = 1" << std::endl;
+      cerr << "Partio: failed to find attr 'width' or 'radius' for RIB output, using constantwidth = 1" << endl;
 
-    *output << "version 3.04" << std::endl;
+    *output << "version 3.04" << endl;
 
     if(foundP2)
-      *output << "GeometricApproximation \"motionfactor\" 1.0" << std::endl;
+      *output << "GeometricApproximation \"motionfactor\" 1.0" << endl;
 
-    *output << "AttributeBegin" << std::endl;
-    *output << "  ResourceBegin" << std::endl;
-    *output << "    Attribute \"identifier\" \"name\" [\"|partioParticle1|partioParticleShape1\"]" << std::endl;
+    *output << "AttributeBegin" << endl;
+    *output << "  ResourceBegin" << endl;
+    *output << "    Attribute \"identifier\" \"name\" [\"|partioParticle1|partioParticleShape1\"]" << endl;
 
     int numPasses = foundP2 ? 2 : 1;
 
     if(foundP2)
-      *output << "    MotionBegin [0.0 1.0]" << std::endl;
+      *output << "    MotionBegin [0.0 1.0]" << endl;
 
     for(int passIndex = 0; passIndex < numPasses; ++passIndex)
     {
@@ -79,7 +82,7 @@ namespace Partio
         if((passIndex == 0 && (attr.name == "P2" || attr.name == "position2")) ||
            (passIndex == 1 && (attr.name == "P"  || attr.name == "position"))) continue;
 
-        std::string attrname = (attr.name == "position" || attr.name == "position2" || attr.name == "P" || attr.name == "P2")
+        string attrname = (attr.name == "position" || attr.name == "position2" || attr.name == "P" || attr.name == "P2")
                                  ? "P"
                                  : (attr.name == "radius" ? "width" : attr.name);
       
@@ -117,14 +120,14 @@ namespace Partio
       if(!foundWidth)
         *output << "\"constantwidth\" [1.0]";
 
-      *output << std::endl;
+      *output << endl;
     }
 
     if(foundP2)
-      *output << "    MotionEnd" << std::endl;
+      *output << "    MotionEnd" << endl;
 
-    *output << "  ResourceEnd" << std::endl;
-    *output << "AttributeEnd" << std::endl;
+    *output << "  ResourceEnd" << endl;
+    *output << "AttributeEnd" << endl;
   
     return true;
   }

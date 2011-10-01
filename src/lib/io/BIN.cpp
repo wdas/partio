@@ -86,19 +86,22 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly, char
     return simple;
 }
 
-bool writeBIN(const char* filename,const ParticlesData& p,const bool compressed){
-    return true;
-    /*
-    auto_ptr<ostream> output(
-        compressed ?
-        Gzip_Out(filename,ios::out|ios::binary)
-        :new std::ofstream(filename,ios::out|ios::binary));
-
-    if(!*output){
-        cerr << "Partio Unable to open file " << filename << endl;
+bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compressed*/)
+{
+    return true; 
+/*
+    std::auto_ptr<std::ostream> output(
+    new std::ofstream(filename,std::ios::out|std::ios::binary));
+    
+    if (!*output) {
+        std::cerr<<"Partio Unable to open file "<<filename<<std::endl;
         return false;
     }
- 
+
+
+    FileHeadder header;
+    memcpy(header.magic, BIN_MAGIC, sizeof(BIN_MAGIC));
+    
     // write .pdc header
     write<LITEND>(*output, PDC_MAGIC);
     write<BIGEND>(*output, (int)1); // version
@@ -131,7 +134,8 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool compressed)
             }
         }
     }
-    return true;*/
+    return true;
+*/
 }
 
 }// end of namespace Partio

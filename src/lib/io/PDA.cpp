@@ -18,15 +18,18 @@
 #include <cassert>
 #include <memory>
 
-namespace Partio{
+namespace Partio
+{
+
+using namespace std;
 
 // TODO: convert this to use iterators like the rest of the readers/writers
 
 ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char** attributes, int percentage)
 {
-    std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
+    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
-        std::cerr<<"Partio: Can't open particle data file: "<<filename<<std::endl;
+        cerr<<"Partio: Can't open particle data file: "<<filename<<endl;
         return 0;
     }
 
@@ -35,15 +38,15 @@ ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char**
     else simple=create();
 
     // read NPoints and NPointAttrib
-    std::string word;
+    string word;
     
     if(input->good()){
         *input>>word;
         if(word!="ATTRIBUTES"){simple->release();return 0;}
     }
 
-    std::vector<std::string> attrNames;
-    std::vector<ParticleAttribute> attrs;
+    vector<string> attrNames;
+    vector<ParticleAttribute> attrs;
 
     while(input->good()){
         *input>>word;
@@ -116,23 +119,23 @@ ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char**
 
 bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
 {
-    std::auto_ptr<std::ostream> output(
+    auto_ptr<ostream> output(
         compressed ? 
-        Gzip_Out(filename,std::ios::out|std::ios::binary)
-        :new std::ofstream(filename,std::ios::out|std::ios::binary));
+        Gzip_Out(filename,ios::out|ios::binary)
+        :new ofstream(filename,ios::out|ios::binary));
 
-    *output<<"ATTRIBUTES"<<std::endl;
+    *output<<"ATTRIBUTES"<<endl;
 
-    std::vector<ParticleAttribute> attrs;
+    vector<ParticleAttribute> attrs;
     for (int aIndex=0;aIndex<p.numAttributes();aIndex++){
         attrs.push_back(ParticleAttribute());
         p.attributeInfo(aIndex,attrs[aIndex]);
         *output<<" "<<attrs[aIndex].name;
     }
-    *output<<std::endl;
+    *output<<endl;
 
     // TODO: assert right count
-    *output<<"TYPES"<<std::endl;
+    *output<<"TYPES"<<endl;
     for (int aIndex=0;aIndex<p.numAttributes();aIndex++){
         switch(attrs[aIndex].type){
             case FLOAT: *output<<" R";break;
@@ -141,10 +144,10 @@ bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
             case NONE: assert(false); break; // TODO: more graceful
         }
     }
-    *output<<std::endl;
+    *output<<endl;
 
-    *output<<"NUMBER_OF_PARTICLES: "<<p.numParticles()<<std::endl;
-    *output<<"BEGIN DATA"<<std::endl;
+    *output<<"NUMBER_OF_PARTICLES: "<<p.numParticles()<<endl;
+    *output<<"BEGIN DATA"<<endl;
 
     for(int particleIndex=0;particleIndex<p.numParticles();particleIndex++){
         for(unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++){
@@ -158,7 +161,7 @@ bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
                     *output<<data[count]<<" ";
             }
         }
-        *output<<std::endl;
+        *output<<endl;
     }
     return true;
 

@@ -48,7 +48,10 @@ namespace PDB{
 #include <cassert>
 #include <memory>
 #include <string.h>
-namespace Partio{
+namespace Partio
+{
+
+using namespace std;
 
 template<int bits> struct PDB_POLICY;
 template<> struct PDB_POLICY<32>
@@ -68,13 +71,13 @@ template<> struct PDB_POLICY<64>
     typedef PDB::Channel_io_Header CHANNEL_IO;
 };
 
-std::string GetString(std::istream& input,bool& error)
+string GetString(istream& input,bool& error)
 {
-    //std::cerr<<"enter"<<std::endl;
+    //cerr<<"enter"<<endl;
     const char terminator='\0';
     // TODO: make this check for FEOF condition! and also more efficient
     char c=' ';
-    std::string s="";
+    string s="";
     error=true;
     while (input)
     {
@@ -89,9 +92,9 @@ std::string GetString(std::istream& input,bool& error)
 template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,const bool headersOnly)
 {
 
-    std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
+    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
-        std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
+        cerr<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
     }
 
@@ -105,7 +108,7 @@ template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,cons
 
     input->read((char*)&header,sizeof(typename PDB_POLICY<bits>::HEADER));
     if(header.magic != PDB_MAGIC){
-        std::cerr<<"Partio: failed to get PDB magic"<<std::endl;
+        cerr<<"Partio: failed to get PDB magic"<<endl;
         return 0;
     }
 
@@ -117,7 +120,7 @@ template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,cons
         typename PDB_POLICY<bits>::CHANNEL channelHeader;
         input->read((char*)&channelHeader,sizeof(channelHeader));
         bool error;
-        std::string name=GetString(*input,error);
+        string name=GetString(*input,error);
         if(error){
             simple->release();
             return 0;
@@ -141,10 +144,10 @@ template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,cons
             char buf[1024];
             int toSkip=size;
             while(toSkip>0){
-                input->read(buf,std::min(toSkip,1024));
+                input->read(buf,min(toSkip,1024));
                 toSkip-=1024;
             }
-            std::cerr<<"Partio: Attribute '"<<name<<"' cannot map type"<<std::endl;
+            cerr<<"Partio: Attribute '"<<name<<"' cannot map type"<<endl;
         }else{
             int count=channelData.datasize/TypeSize(type);
             ParticleAttribute attrHandle=simple->addAttribute(name.c_str(),type,count);
@@ -152,7 +155,7 @@ template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,cons
                 char buf[1024];
                 int toSkip=size;
                 while(toSkip>0){
-                    input->read(buf,std::min(toSkip,1024));
+                    input->read(buf,min(toSkip,1024));
                     toSkip-=1024;
                 }
             }else{
@@ -172,13 +175,13 @@ template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,cons
 template<int bits>
 bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compressed)
 {
-    std::auto_ptr<std::ostream> output(
+    auto_ptr<ostream> output(
         compressed ? 
-        Gzip_Out(filename,std::ios::out|std::ios::binary)
-        :new std::ofstream(filename,std::ios::out|std::ios::binary));
+        Gzip_Out(filename,ios::out|ios::binary)
+        :new ofstream(filename,ios::out|ios::binary));
 
     if(!*output){
-        std::cerr<<"Partio Unable to open file "<<filename<<std::endl;
+        cerr<<"Partio Unable to open file "<<filename<<endl;
         return false;
     }
 
@@ -261,23 +264,23 @@ bool writePDB64(const char* filename,const ParticlesData& p,const bool compresse
 
 ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly, char** attributes, int percentage)
 {
-    std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
+    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
-        std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
+        cerr<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
     }
     // Read header and add as many particles as found
     PDB_POLICY<64>::HEADER header;
     input->read((char*)&header,sizeof(header));
     if(header.magic != PDB_MAGIC){
-        std::cerr<<"Partio: failed to get PDB magic"<<std::endl;
+        cerr<<"Partio: failed to get PDB magic"<<endl;
         return 0;
     }
     // Now read a channel io ... and see if the the swap is zero or one and encoding is zero. If so then we probably god a good thing
     // if not, then we assume 64 bit.
     PDB_POLICY<64>::CHANNEL_IO channelIOHeader;
     input->read((char*)&channelIOHeader,sizeof(channelIOHeader));
-    //std::cout<<"we got channel io as "<<int(channelIOHeader.type)<<" swap is "<<channelIOHeader.swap<<std::endl;
+    //cout<<"we got channel io as "<<int(channelIOHeader.type)<<" swap is "<<channelIOHeader.swap<<endl;
     if(channelIOHeader.type > 5  || channelIOHeader.type < 0 || (channelIOHeader.swap != 1 && channelIOHeader.swap != 0)){
         return readPDBHelper<32>(filename,headersOnly);
     }else{
