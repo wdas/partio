@@ -40,11 +40,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 int main(int argc,char *argv[])
 {
 
-    Partio::ParticlesDataMutable* particles=Partio::create();
+    Partio::ParticlesDataMutable* particles=Partio::createInterleave();
+
+	particles->addParticles(10);
+
     Partio::ParticleAttribute position=particles->addAttribute("position",Partio::VECTOR,3);
     Partio::ParticleAttribute id=particles->addAttribute("id",Partio::INT,1);
 
-    particles->addParticles(10);
+    
     
     Partio::ParticlesDataMutable::iterator it=particles->begin();
     Partio::ParticleAccessor positionAccess(position);

@@ -114,7 +114,14 @@ static void render()
         const float* pos=particles->data<float>(positionAttr,i);
         const float* color=particles->data<float>(colorAttr,i);
         const float* alpha=particles->data<float>(alphaAttr,i);
-        glColor4f(color[0],color[1],color[2],alpha[0]);
+        if( color[0] + color[1] + color[2] < .01)
+        {
+            glColor3f(1,1,1);
+        }
+        else
+        {
+            glColor4f(color[0],color[1],color[2],alpha[0]);
+        }
         glVertex3f(pos[0],pos[1],pos[2]);
     }
     glEnd();

@@ -174,6 +174,7 @@ findNPoints(const float center[3],int nPoints,const float maxRadius, ParticleInd
 ParticleAttribute ParticlesSimpleInterleave::
 addAttribute(const char* attribute,ParticleAttributeType type,const int count)
 {
+	//std::cerr<< "AddAttribute interleave" << std::endl;
     if(nameToAttribute.find(attribute) != nameToAttribute.end()){
         std::cerr<<"Partio: addAttribute failed because attr '"<<attribute<<"'"<<" already exists"<<std::endl;
         return ParticleAttribute();

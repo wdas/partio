@@ -219,6 +219,8 @@ private:
 //! Provides an empty particle instance, freed with p->release()
 ParticlesDataMutable* create();
 
+ParticlesDataMutable* createInterleave();
+
 //! Provides read/write access to a particle set stored in a file
 //! freed with p->release()
 ParticlesDataMutable* read(const char* filename);
@@ -231,7 +233,7 @@ ParticlesDataMutable* readPart(const char* filename, char** attributes, int perc
 //! and attribute information, much cheapeer
 ParticlesInfo* readHeaders(const char* filename);
 
-//! Provides access to a particle set stored in a file
+//! Provides write access to a particle set stored in a file
 //! if filename ends with .gz or forceCompressed is true, the file is compressed.
 void write(const char* filename,const ParticlesData&,const bool forceCompressed=false);
 
