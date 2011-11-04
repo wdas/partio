@@ -93,6 +93,25 @@ sort()
     assert(false);
 }
 
+
+int ParticleHeaders::
+registerIndexedStr(const ParticleAttribute& attribute,const char* str)
+{
+    assert(false);
+}
+
+int ParticleHeaders::
+lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const
+{
+    assert(false);
+}
+
+const std::vector<std::string>& ParticleHeaders::
+indexedStrs(const ParticleAttribute& attr) const
+{
+    assert(false);
+}
+
 void ParticleHeaders::
 findPoints(const float bboxMin[3],const float bboxMax[3],std::vector<ParticleIndex>& points) const
 {

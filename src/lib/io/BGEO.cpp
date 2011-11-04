@@ -127,7 +127,10 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly)
             attrOffsets.push_back(particleSize);
             particleSize+=size;
         }else if(houdiniType==4){
-            std::cerr<<"Partio: attr '"<<name<<"' of type index (string) found, treating as integer"<<std::endl;
+            ParticleAttribute attribute=simple->addAttribute(name,INDEXEDSTR,size);
+            attrHandles.push_back(attribute);
+            accessors.push_back(ParticleAccessor(attrHandles.back()));
+            attrOffsets.push_back(particleSize);
             int numIndices=0;
             read<BIGEND>(*input,numIndices);
             for(int ii=0;ii<numIndices;ii++){
@@ -136,12 +139,12 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly)
                 char* indexName=new char[indexNameLength+1];;
                 input->read(indexName,indexNameLength);
                 indexName[indexNameLength]=0;
-                std::cerr<<"Partio:    index "<<ii<<" is "<<indexName<<std::endl;
+                int id=simple->registerIndexedStr(attribute,indexName);
+                if(id != ii){
+                    std::cerr<<"Partio: error on read, expected registeerIndexStr to return index "<<ii<<" but got "<<id<<" for string "<<indexName<<std::endl;
+                }
                 delete [] indexName;
             }
-            attrHandles.push_back(simple->addAttribute(name,INT,size));
-            accessors.push_back(ParticleAccessor(attrHandles.back()));
-            attrOffsets.push_back(particleSize);
             particleSize+=size;
         }else if(houdiniType==2){
             std::cerr<<"Partio: found attr of type 'string', aborting"<<std::endl;
@@ -227,18 +230,29 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
             foundPosition=true;
         }else{
             writeHoudiniStr(*output,attr.name);
-            int houdiniType=0;
-            switch(attr.type){
-                case FLOAT: houdiniType=0;break;
-                case INT: houdiniType=1;break;
-                case VECTOR: houdiniType=5;break;
-                case NONE: assert(false);houdiniType=0;break;
-            }
-            unsigned short size=attr.count;
-            write<BIGEND>(*output,size,houdiniType);
-            for(int i=0;i<attr.count;i++){
-                int defaultValue=0;
-                write<BIGEND>(*output,defaultValue);
+            if(attr.type==INDEXEDSTR){
+                int houdiniType=4;
+                unsigned short size=attr.count;
+                const std::vector<std::string>& indexTable=p.indexedStrs(attr);
+                int numIndexes=indexTable.size();
+                write<BIGEND>(*output,size,houdiniType,numIndexes);
+                for(int i=0;i<numIndexes;i++)
+                    writeHoudiniStr(*output,indexTable[i]);
+            }else{
+                int houdiniType=0;
+                switch(attr.type){
+                    case FLOAT: houdiniType=0;break;
+                    case INT: houdiniType=1;break;
+                    case VECTOR: houdiniType=5;break;
+                    case INDEXEDSTR:
+                    case NONE: assert(false);houdiniType=0;break;
+                }
+                unsigned short size=attr.count;
+                write<BIGEND>(*output,size,houdiniType);
+                for(int i=0;i<attr.count;i++){
+                    int defaultValue=0;
+                    write<BIGEND>(*output,defaultValue);
+                }
             }
             attrOffsets.push_back(particleSize);
             particleSize+=attr.count;

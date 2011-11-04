@@ -161,6 +161,7 @@ bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
         switch(attrs[aIndex].type){
             case FLOAT: *output<<" R";break;
             case VECTOR: *output<<" V";break;
+            case INDEXEDSTR: 
             case INT: *output<<" I";break;
             case NONE: assert(false); break; // TODO: more graceful
         }
@@ -172,7 +173,7 @@ bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
 
     for(int particleIndex=0;particleIndex<p.numParticles();particleIndex++){
         for(unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++){
-            if(attrs[attrIndex].type==Partio::INT){
+            if(attrs[attrIndex].type==Partio::INT || attrs[attrIndex].type==Partio::INDEXEDSTR){
                 const int* data=p.data<int>(attrs[attrIndex],particleIndex);
                 for(int count=0;count<attrs[attrIndex].count;count++)
                     *output<<data[count]<<" ";

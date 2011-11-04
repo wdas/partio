@@ -47,12 +47,12 @@ int main(int argc,char *argv[])
     if(p){
         std::cout<<std::setiosflags(std::ios::left)<<"Number of particles:  "<<p->numParticles()<<std::endl;
         int numAttr=p->numAttributes();
-        std::cout<<std::setw(10)<<"Type"<<std::setw(10)<<"Count"<<std::setw(30)<<"Name"<<std::endl;
-        std::cout<<std::setw(10)<<"----"<<std::setw(10)<<"-----"<<std::setw(30)<<"----"<<std::endl;
+        std::cout<<std::setw(12)<<"Type"<<std::setw(10)<<"Count"<<std::setw(30)<<"Name"<<std::endl;
+        std::cout<<std::setw(12)<<"----"<<std::setw(10)<<"-----"<<std::setw(30)<<"----"<<std::endl;
         for(int i=0;i<numAttr;i++){
             Partio::ParticleAttribute attr;
             p->attributeInfo(i,attr);
-            std::cout<<std::setw(10)<<Partio::TypeName(attr.type)
+            std::cout<<std::setw(12)<<Partio::TypeName(attr.type)
                      <<std::setw(10)<<attr.count
                      <<std::setw(30)<<attr.name<<std::endl;;
         }
@@ -77,7 +77,10 @@ int main(int argc,char *argv[])
                         p->attributeInfo(i,attr);
                         std::cout<<std::setw(10)<<Partio::TypeName(attr.type)<<" "<<std::setw(10)<<attr.name;
                         for(int ii=0;ii<attr.count;ii++){
-                            if(attr.type==Partio::INT) std::cout<<" "<<p->data<int>(attr,particleIndex)[ii];
+                            if(attr.type==Partio::INDEXEDSTR){
+                                int val=p->data<int>(attr,particleIndex)[ii];
+                                std::cout<<" "<<val<<" '"<<p->indexedStrs(attr)[val]<<"'";
+                            }else if(attr.type==Partio::INT) std::cout<<" "<<p->data<int>(attr,particleIndex)[ii];
                             else std::cout<<" "<<p->data<float>(attr,particleIndex)[ii];
                         }
                         std::cout<<std::endl;

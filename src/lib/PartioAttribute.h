@@ -44,14 +44,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 namespace Partio{
 
 // Particle Types
-enum ParticleAttributeType {NONE=0,VECTOR=1,FLOAT=2,INT=3};
+enum ParticleAttributeType {NONE=0,VECTOR=1,FLOAT=2,INT=3,INDEXEDSTR=4};
 
 template<ParticleAttributeType ENUMTYPE> struct ETYPE_TO_TYPE
-
 {struct UNUSABLE;typedef UNUSABLE TYPE;};
 template<> struct ETYPE_TO_TYPE<VECTOR>{typedef float TYPE;};
 template<> struct ETYPE_TO_TYPE<FLOAT>{typedef float TYPE;};
 template<> struct ETYPE_TO_TYPE<INT>{typedef int TYPE;};
+template<> struct ETYPE_TO_TYPE<INDEXEDSTR>{typedef int TYPE;};
 
 template<class T1,class T2> struct
 IS_SAME{static const bool value=false;};
@@ -66,11 +66,24 @@ typeCheck(const ParticleAttributeType& type)
         case VECTOR: return IS_SAME<typename ETYPE_TO_TYPE<VECTOR>::TYPE,T>::value;
         case FLOAT: return IS_SAME<typename ETYPE_TO_TYPE<FLOAT>::TYPE,T>::value;
         case INT: return IS_SAME<typename ETYPE_TO_TYPE<INT>::TYPE,T>::value;
+        case INDEXEDSTR: return IS_SAME<typename ETYPE_TO_TYPE<INDEXEDSTR>::TYPE,T>::value;
         default: return false; // unknown type
     }
 }
 
-int TypeSize(ParticleAttributeType attrType);
+inline 
+int TypeSize(ParticleAttributeType attrType)
+{
+    switch(attrType){
+        case NONE: return 0;
+        case VECTOR: return sizeof(float);
+        case FLOAT: return sizeof(float);
+        case INT: return sizeof(int);
+        case INDEXEDSTR: return sizeof(int);
+        default: return 0;
+    }
+}
+
 std::string TypeName(ParticleAttributeType attrType);
 
 // Particle Attribute Specifier

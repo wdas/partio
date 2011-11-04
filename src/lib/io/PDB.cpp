@@ -214,6 +214,7 @@ bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compr
         // TODO: assert cproper count!
         channel.name=0;
         switch(attr.type){
+            case INDEXEDSTR:channel.type=PDB_LONG;break;
             case INT:channel.type=PDB_LONG;break;
             case FLOAT:channel.type=PDB_REAL;break;
             case VECTOR:channel.type=PDB_VECTOR;break;
