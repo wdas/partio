@@ -64,9 +64,8 @@ int main(int argc,char *argv[])
         if(alive == -1 || dead == -1 || zombie == -1){ std::cerr<<"don't have tokens I expect!"<<std::endl;}
 
         for(int i=0;i<p->numParticles();i++){
-            const int* tok=p->data<int>(fileAttr,i);
+            //const int* tok=p->data<int>(fileAttr,i);
             const int* state=p->data<int>(stateAttr,i);
-            int num=tok[0];
 
             // Note this is not what you would like to do ideally because it uses strings a lot!
             //std::cerr<<"Particle index "<<i<<" str "<<tok[0]<<" "<<p->indexedStrs(fileAttr)[num]<<

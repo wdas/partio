@@ -40,7 +40,7 @@ This code is partially based on the Gifts/readpdb directory of Autodesk Maya
 namespace PDB{
 #include "pdb.h"
 }
-#include "endian.h"
+#include "PartioEndian.h"
 #include "ZIP.h"
 #include <iostream>
 #include <fstream>

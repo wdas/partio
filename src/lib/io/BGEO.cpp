@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
 #include "../Partio.h"
-#include "endian.h"
+#include "PartioEndian.h"
 #include "../core/ParticleHeaders.h"
 #include "ZIP.h"
 

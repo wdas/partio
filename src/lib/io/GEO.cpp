@@ -274,7 +274,7 @@ bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
                 typestring="index";
                 const std::vector<std::string>& indexes=p.indexedStrs(attrib);
                 *output<<attrib.name<<" "<<attrib.count<<" "<<typestring<<" "<<indexes.size();
-                for(int k=0;k<indexes.size();k++){
+                for(size_t k=0;k<indexes.size();k++){
                     *output<<" ";
                     writeString(*output,indexes[k].c_str());
                 }
