@@ -78,7 +78,6 @@ bool ParseSpec(const std::string& spec,std::string& typeName,std::string& name)
 
 ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
 {
-    std::cerr<<"we are here"<<std::endl;
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){
         std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
@@ -94,7 +93,6 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
 
     int version;
     read<LITEND>(*input,version);
-    std::cerr<<"PTC vers "<<version<<std::endl;
     if(version>2){
         std::cerr<<"Partio: ptc reader only supports version 2 or less"<<std::endl;
         return 0;
@@ -106,8 +104,6 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
     // TODO: allow access to this in the headers only mode for times when only bbox is necessary
     float xmin,ymin,zmin,xmax,ymax,zmax;
     read<LITEND>(*input,xmin,ymin,zmin,xmax,ymax,zmax);
-    std::cerr<<" bound min "<<xmin<<" "<<ymin<<" "<<zmin
-             <<" bound max "<<xmax<<" "<<ymax<<" "<<zmin<<std::endl;
 
     float dummy;
     // Who knows what this is?
@@ -150,8 +146,11 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
 
         int dataSize=0;
         ParticleAttributeType dataType;
-        if(typeName=="color" || typeName=="vector" || typeName=="point" || typeName=="color"){
+        if(typeName=="normal" || typeName=="vector" || typeName=="point"){
             dataType=VECTOR;
+            dataSize=3;
+        }else if(typeName=="color"){
+            dataType=FLOAT;
             dataSize=3;
         }else if(typeName=="matrix"){
             dataType=FLOAT;
@@ -335,12 +334,18 @@ bool writePTC(const char* filename,const ParticlesData& p,const bool compressed)
         const float* n=static_n;
         if(foundNormal)
             n=p.data<float>(normalHandle,pointIndex);
+        // normalize and encode normals as two unsigned short integers z and
+        // phi, representing the z coordinate and angle in the xy plane.  The
+        // special value z == phi == 65535 encodes a zero normal.
 	int phi, z;
 	if (n[0] == 0 && n[1] == 0 && n[2] == 0) phi = z = 65535;
 	else {
             float mag_squared=n[0]*n[0]+n[1]*n[1]+n[2]*n[2];
 	    phi = int((atan2(n[0], n[1]) * (1/(2*M_PI)) + 0.5) * 65535 + 0.5);
 	    z = std::min(int((n[2]/sqrt(mag_squared)+1)/2 * 65535 + 0.5), 65535);
+            // phi is redundent when z == 65535; avoid the special value.
+            if (phi == 65535 && z == 65535)
+                phi = 0;
 	}
         write<LITEND>(*output,(unsigned short)phi,(unsigned short)z);
         // write radius

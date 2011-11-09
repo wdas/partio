@@ -117,6 +117,11 @@ public:
         return static_cast<T*>(dataInternal(attribute,particleIndex));
     }
 
+    /// All indexed strings for an attribute
+    virtual const std::vector<std::string>& indexedStrs(const ParticleAttribute& attr) const=0;
+
+    /// Looks up the index for a given string for a given attribute, returns -1 if not found
+    virtual int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const=0;
 
     //! Fill the user supplied values array with data corresponding to the given
     //! list of particles. Specify whether or not your indices are sorted. Attributes
@@ -171,7 +176,7 @@ private:
 class ParticlesDataMutable:public ParticlesData
 {
 protected:
-    virtual ~ParticlesDataMutable() {}
+    virtual ~ParticlesDataMutable();
 
 public:
 
@@ -185,6 +190,9 @@ public:
         // TODO: add type checking
         return static_cast<T*>(dataInternal(attribute,particleIndex));
     }
+
+    /// Returns a token for the given string. This allows efficient storage of string data
+    virtual int registerIndexedStr(const ParticleAttribute& attribute,const char* str)=0;
 
     //! Preprocess the data for finding nearest neighbors by sorting into a
     //! KD-Tree. Note: all particle pointers are invalid after this call.

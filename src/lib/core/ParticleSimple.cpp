@@ -68,7 +68,6 @@ release() const
     freeCached(const_cast<ParticlesSimple*>(this));
 }
 
-
 int ParticlesSimple::
 numParticles() const
 {
@@ -203,6 +202,7 @@ addAttribute(const char* attribute,ParticleAttributeType type,const int count)
     char* dataPointer=(char*)malloc(allocatedCount*stride);
     attributeData.push_back(dataPointer);
     attributeOffsets.push_back(dataPointer-(char*)0);
+    attributeIndexedStrs.push_back(IndexedStrTable());
 
     return attr;
 }
@@ -305,11 +305,39 @@ dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
     assert(attribute.attributeIndex>=0 && attribute.attributeIndex<(int)attributes.size());
     
     if(attribute.type==FLOAT || attribute.type==VECTOR) dataInternalMultiple(attribute,indexCount,particleIndices,sorted,(char*)values);
-    else if(attribute.type==INT){
+    else if(attribute.type==INT || attribute.type==INDEXEDSTR){
         char* attrrawbase=attributeData[attribute.attributeIndex];
         int* attrbase=(int*)attrrawbase;
         int count=attribute.count;
         for(int i=0;i<indexCount;i++) for(int k=0;k<count;k++) values[i*count+k]=(int)attrbase[particleIndices[i]*count+k];
     }
+}
+
+int ParticlesSimple::
+registerIndexedStr(const ParticleAttribute& attribute,const char* str)
+{
+    IndexedStrTable& table=attributeIndexedStrs[attribute.attributeIndex];
+    std::map<std::string,int>::const_iterator it=table.stringToIndex.find(str);
+    if(it!=table.stringToIndex.end()) return it->second;
+    int newIndex=table.strings.size();
+    table.strings.push_back(str);
+    table.stringToIndex[str]=newIndex;
+    return newIndex;
+}
+
+int ParticlesSimple::
+lookupIndexedStr(Partio::ParticleAttribute const &attribute, char const *str) const
+{
+    const IndexedStrTable& table=attributeIndexedStrs[attribute.attributeIndex];
+    std::map<std::string,int>::const_iterator it=table.stringToIndex.find(str);
+    if(it!=table.stringToIndex.end()) return it->second;
+    return -1;
+}
+
+const std::vector<std::string>& ParticlesSimple::
+indexedStrs(const ParticleAttribute& attr) const
+{
+    const IndexedStrTable& table=attributeIndexedStrs[attr.attributeIndex];
+    return table.strings;
 }
 
