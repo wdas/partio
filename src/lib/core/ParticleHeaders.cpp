@@ -98,18 +98,22 @@ int ParticleHeaders::
 registerIndexedStr(const ParticleAttribute& attribute,const char* str)
 {
     assert(false);
+    return -1;
 }
 
 int ParticleHeaders::
 lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const
 {
     assert(false);
+    return -1;
 }
 
 const std::vector<std::string>& ParticleHeaders::
 indexedStrs(const ParticleAttribute& attr) const
 {
+    static std::vector<std::string> dummy; 
     assert(false);
+    return dummy;
 }
 
 void ParticleHeaders::
