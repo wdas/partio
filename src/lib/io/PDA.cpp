@@ -1,13 +1,37 @@
 /*
- * <b>CONFIDENTIAL INFORMATION: This software is the confidential and
- * proprietary information of Walt Disney Animation Studios ("Disney").
- * This software is owned by Disney and may not be used, disclosed,
- * reproduced or distributed for any purpose without prior written
- * authorization and license from Disney. Reproduction of any section of
- * this software must include this legend and all copyright notices.
- * (c) Disney. All rights reserved.</b>
- *
- */
+PARTIO SOFTWARE
+Copyright 2011 Disney Enterprises, Inc. All rights reserved
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+* The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
+Studios" or the names of its contributors may NOT be used to
+endorse or promote products derived from this software without
+specific prior written permission from Walt Disney Pictures.
+
+Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+*/
 #include "../Partio.h"
 #include "../core/ParticleHeaders.h"
 #include "ZIP.h"
@@ -18,15 +42,18 @@
 #include <cassert>
 #include <memory>
 
-namespace Partio{
+namespace Partio
+{
+
+using namespace std;
 
 // TODO: convert this to use iterators like the rest of the readers/writers
 
 ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char** attributes, int percentage)
 {
-    std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
+    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
-        std::cerr<<"Partio: Can't open particle data file: "<<filename<<std::endl;
+        cerr<<"Partio: Can't open particle data file: "<<filename<<endl;
         return 0;
     }
 
@@ -35,15 +62,15 @@ ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char**
     else simple=create();
 
     // read NPoints and NPointAttrib
-    std::string word;
+    string word;
     
     if(input->good()){
         *input>>word;
         if(word!="ATTRIBUTES"){simple->release();return 0;}
     }
 
-    std::vector<std::string> attrNames;
-    std::vector<ParticleAttribute> attrs;
+    vector<string> attrNames;
+    vector<ParticleAttribute> attrs;
 
     while(input->good()){
         *input>>word;
@@ -116,39 +143,40 @@ ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char**
 
 bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
 {
-    std::auto_ptr<std::ostream> output(
+    auto_ptr<ostream> output(
         compressed ? 
-        Gzip_Out(filename,std::ios::out|std::ios::binary)
-        :new std::ofstream(filename,std::ios::out|std::ios::binary));
+        Gzip_Out(filename,ios::out|ios::binary)
+        :new ofstream(filename,ios::out|ios::binary));
 
-    *output<<"ATTRIBUTES"<<std::endl;
+    *output<<"ATTRIBUTES"<<endl;
 
-    std::vector<ParticleAttribute> attrs;
+    vector<ParticleAttribute> attrs;
     for (int aIndex=0;aIndex<p.numAttributes();aIndex++){
         attrs.push_back(ParticleAttribute());
         p.attributeInfo(aIndex,attrs[aIndex]);
         *output<<" "<<attrs[aIndex].name;
     }
-    *output<<std::endl;
+    *output<<endl;
 
     // TODO: assert right count
-    *output<<"TYPES"<<std::endl;
+    *output<<"TYPES"<<endl;
     for (int aIndex=0;aIndex<p.numAttributes();aIndex++){
         switch(attrs[aIndex].type){
             case FLOAT: *output<<" R";break;
             case VECTOR: *output<<" V";break;
+            case INDEXEDSTR: 
             case INT: *output<<" I";break;
             case NONE: assert(false); break; // TODO: more graceful
         }
     }
-    *output<<std::endl;
+    *output<<endl;
 
-    *output<<"NUMBER_OF_PARTICLES: "<<p.numParticles()<<std::endl;
-    *output<<"BEGIN DATA"<<std::endl;
+    *output<<"NUMBER_OF_PARTICLES: "<<p.numParticles()<<endl;
+    *output<<"BEGIN DATA"<<endl;
 
     for(int particleIndex=0;particleIndex<p.numParticles();particleIndex++){
         for(unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++){
-            if(attrs[attrIndex].type==Partio::INT){
+            if(attrs[attrIndex].type==Partio::INT || attrs[attrIndex].type==Partio::INDEXEDSTR){
                 const int* data=p.data<int>(attrs[attrIndex],particleIndex);
                 for(int count=0;count<attrs[attrIndex].count;count++)
                     *output<<data[count]<<" ";
@@ -158,7 +186,7 @@ bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
                     *output<<data[count]<<" ";
             }
         }
-        *output<<std::endl;
+        *output<<endl;
     }
     return true;
 

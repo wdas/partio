@@ -65,6 +65,9 @@ public:
 
     virtual void dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
         const ParticleIndex* particleIndices,const bool sorted,float* values) const;
+    int registerIndexedStr(const ParticleAttribute& attribute,const char* str);
+    int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const;
+    const std::vector<std::string>& indexedStrs(const ParticleAttribute& attr) const;
 
     void sort();
     void findPoints(const float bboxMin[3],const float bboxMax[3],std::vector<ParticleIndex>& points) const;
@@ -94,6 +97,11 @@ private:
     int allocatedCount;
     char* data;
     int stride;
+	struct IndexedStrTable{
+        std::map<std::string,int> stringToIndex; // TODO: this should be a hash table unordered_map
+        std::vector<std::string> strings;
+    };
+	std::vector<IndexedStrTable> attributeIndexedStrs;
     std::vector<size_t> attributeOffsets; // Inside is data of appropriate type
     std::vector<ParticleAttribute> attributes;
     std::map<std::string,int> nameToAttribute;

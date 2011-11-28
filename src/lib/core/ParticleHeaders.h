@@ -51,10 +51,15 @@ protected:
     bool attributeInfo(const char* attributeName,ParticleAttribute& attribute) const;
     bool attributeInfo(const int attributeInfo,ParticleAttribute& attribute) const;
 
+    int registerIndexedStr(const ParticleAttribute& attribute,const char* str);
+    int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const;
+    const std::vector<std::string>& indexedStrs(const ParticleAttribute& attr) const;
+
     virtual void dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
         const ParticleIndex* particleIndices,const bool sorted,float* values) const;
 
     void sort();
+
     void findPoints(const float bboxMin[3],const float bboxMax[3],std::vector<ParticleIndex>& points) const;
     float findNPoints(const float center[3],int nPoints,const float maxRadius,
         std::vector<ParticleIndex>& points,std::vector<float>& pointDistancesSquared) const;

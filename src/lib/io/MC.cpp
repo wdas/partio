@@ -1,6 +1,45 @@
+/*
+PARTIO SOFTWARE
+Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
+
+Format Contributed by github user: Jinkuen
+Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+* The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
+Studios" or the names of its contributors may NOT be used to
+endorse or promote products derived from this software without
+specific prior written permission from Walt Disney Pictures.
+
+Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+*/
+
 #include "../Partio.h"
 #include "../core/ParticleHeaders.h"
-#include "endian.h" // read/write big-endian file
+#include "PartioEndian.h" // read/write big-endian file
 #include "ZIP.h" // for zip file
 
 #include <iostream>
@@ -9,9 +48,12 @@
 #include <cassert>
 #include <memory>
 
-namespace Partio{
+namespace Partio
+{
 //#define PartioBIG_ENDIAN
+
 using namespace std;
+
 // TODO: convert this to use iterators like the rest of the readers/writers
 
 std::string GetString(std::istream& input, unsigned int size){
@@ -106,7 +148,7 @@ ParticlesDataMutable* readMC(const char* filename, const bool headersOnly, char*
     read<BIGEND>(*input, headerSize);
 
     int dummy; // tmp1, tmp2, num1, tmp3, tmp4, num2, num3, tmp5, num4, num5, blockTag
-    for(int i = 0; i < 10; i++){ 
+    for(int i = 0; i < 10; i++){
         read<BIGEND>(*input, dummy);
         //std::cout << dummy << std::endl;
     }
@@ -122,7 +164,7 @@ ParticlesDataMutable* readMC(const char* filename, const bool headersOnly, char*
     if(headersOnly){
         simple = new ParticleHeaders;
     }
-    else{ 
+    else{
         simple=create();
     }
 
@@ -159,7 +201,7 @@ ParticlesDataMutable* readMC(const char* filename, const bool headersOnly, char*
         }
     }
     simple->addParticles(numParticles);
-    
+
     // If all we care about is headers, then return.--
     if(headersOnly){
         return simple;
@@ -207,7 +249,7 @@ ParticlesDataMutable* readMC(const char* filename, const bool headersOnly, char*
                     //data[i] = endianSwap<float>(data[i]);
                 }
             }
-            
+
 
         }
         /*
@@ -220,7 +262,7 @@ ParticlesDataMutable* readMC(const char* filename, const bool headersOnly, char*
 
     }
     return simple;
-    
+
 }
 /*
 bool dgMc::open(string filePath){

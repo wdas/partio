@@ -136,7 +136,7 @@ inline float buildHeap(uint64_t *result, float *distance_squared,int heap_size)
     int max_non_leaf_index=heap_size/2-1; // 0 to max_non_leaf_index is indices of parents
 
     // go from bottom of tree scanning right to left in each height of the tree
-    for(int subtreeParent=max_non_leaf_index;subtreeParent>=0;subtreeParent--){ 
+    for(int subtreeParent=max_non_leaf_index;subtreeParent>=0;subtreeParent--){
         int current_parent=subtreeParent;
         while(current_parent<=max_non_leaf_index){
             int left_index=2*current_parent+1;int right_index=2*current_parent+2;
@@ -259,7 +259,7 @@ template <int k> class KdTree
     bool _sorted;
 };
 
-template <int k> 
+template <int k>
 KdTree<k>::KdTree()
     : _sorted(0)
 {}
@@ -307,19 +307,19 @@ void KdTree<k>::sort()
     std::swap(_points, newpoints);
 }
 
-template <int k> 
+template <int k>
 void KdTree<k>::sortSubtree(int n, int size, int j)
 {
     int left, right; ComputeSubtreeSizes(size, left, right);
 
     // partition range [n, n+size) along axis j into two subranges:
     //   [n, n+leftSize+1) and [n+leftSize+1, n+size)
-    std::nth_element(&_ids[n], &_ids[n+left], &_ids[n+size], 
+    std::nth_element(&_ids[n], &_ids[n+left], &_ids[n+size],
 		     ComparePointsById(&_points[0].p[j]));
     // move median value (nth element) to front as root node of subtree
     std::swap(_ids[n], _ids[n+left]);
 
-    // sort left and right subtrees using next discriminant 
+    // sort left and right subtrees using next discriminant
     if (left <= 1) return;
     if (k > 1) j = (j+1)%k;
     sortSubtree(n+1, left, j);
@@ -348,7 +348,7 @@ int KdTree<k>::findNPoints(uint64_t *result, float *distanceSquared, float *fina
 {
     float radius_squared=maxRadius*maxRadius;
 
-    if (!size() || !_sorted || nPoints<1) return radius_squared;
+    if (!size() || !_sorted || nPoints<1) return (int)radius_squared;
 
     NearestQuery query(result,distanceSquared,p,nPoints,radius_squared);
     findNPoints(query,0,size(),0);

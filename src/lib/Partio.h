@@ -67,7 +67,7 @@ protected:
     virtual ~ParticlesInfo() {}
 public:
     friend void freeCached(ParticlesData* particles);
-    
+
     //! Frees the memory if this particle set was created with create() or release()
     //! Reduces reference count if it was obtained with readCached()
     //! and if the ref count hits zero, frees the memory
@@ -117,6 +117,11 @@ public:
         return static_cast<T*>(dataInternal(attribute,particleIndex));
     }
 
+    /// All indexed strings for an attribute
+    virtual const std::vector<std::string>& indexedStrs(const ParticleAttribute& attr) const=0;
+
+    /// Looks up the index for a given string for a given attribute, returns -1 if not found
+    virtual int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const=0;
 
     //! Fill the user supplied values array with data corresponding to the given
     //! list of particles. Specify whether or not your indices are sorted. Attributes
@@ -133,7 +138,7 @@ public:
 
     //! Find the N nearest neighbors that are within maxRadius distance using STL types
     //! (measured in standard 2-norm). If less than N are found within the
-    //! radius, the search radius is not increased. 
+    //! radius, the search radius is not increased.
     //! NOTE: points/pointsDistancesSquared are cleared before use.
     //! Must call sort() before using this function
     virtual float findNPoints(const float center[3],int nPoints,const float maxRadius,
@@ -186,6 +191,9 @@ public:
         return static_cast<T*>(dataInternal(attribute,particleIndex));
     }
 
+    /// Returns a token for the given string. This allows efficient storage of string data
+    virtual int registerIndexedStr(const ParticleAttribute& attribute,const char* str)=0;
+
     //! Preprocess the data for finding nearest neighbors by sorting into a
     //! KD-Tree. Note: all particle pointers are invalid after this call.
     virtual void sort()=0;
@@ -219,6 +227,8 @@ private:
 //! Provides an empty particle instance, freed with p->release()
 ParticlesDataMutable* create();
 
+ParticlesDataMutable* createInterleave();
+
 //! Provides read/write access to a particle set stored in a file
 //! freed with p->release()
 ParticlesDataMutable* read(const char* filename);
@@ -237,8 +247,8 @@ void write(const char* filename,const ParticlesData&,const bool forceCompressed=
 
 
 //! Cached (only one copy) read only way to read a particle file
-/*! 
-  Loads a file read-only if not already in memory, otherwise returns 
+/*!
+  Loads a file read-only if not already in memory, otherwise returns
   already loaded item. Pointer is owned by Partio and must be releasedwith
   p->release(); (will not be deleted if others are also holding).
   If you want to do finding neighbors give true to sort
