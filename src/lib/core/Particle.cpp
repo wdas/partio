@@ -42,6 +42,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <cassert>
 namespace Partio{
 
+//ParticlesDataMutable::~ParticlesDataMutable()
+//{}
+
 std::string
 TypeName(ParticleAttributeType attrType)
 {
@@ -50,18 +53,7 @@ TypeName(ParticleAttributeType attrType)
         case VECTOR: return "VECTOR";
         case FLOAT: return "FLOAT";
         case INT: return "INT";
-        default: return 0;
-    }
-}
-
-int
-TypeSize(ParticleAttributeType attrType)
-{
-    switch(attrType){
-        case NONE: return 0;
-        case VECTOR: return sizeof(float);
-        case FLOAT: return sizeof(float);
-        case INT: return sizeof(int);
+        case INDEXEDSTR: return "INDEXEDSTR";
         default: return 0;
     }
 }
@@ -81,7 +73,7 @@ createInterleave()
 
 
 
-template<ParticleAttributeType ETYPE> void 
+template<ParticleAttributeType ETYPE> void
 printAttr(const ParticlesData* p,const ParticleAttribute& attr,const int particleIndex)
 {
     typedef typename ETYPE_TO_TYPE<ETYPE>::TYPE TYPE;
@@ -102,10 +94,10 @@ print(const ParticlesData* particles)
         attrs.push_back(attr);
         std::cout<<"attribute "<<attr.name<<" "<<int(attr.type)<<" "<<attr.count<<std::endl;
     }
-    
+
     int numToPrint=std::min(10,particles->numParticles());
     std::cout<<"num to print "<<numToPrint<<std::endl;
-    
+
     ParticlesData::const_iterator it=particles->begin(),end=particles->end();
     std::vector<ParticleAccessor> accessors;
     for(size_t k=0;k<attrs.size();k++) accessors.push_back(ParticleAccessor(attrs[k]));
@@ -121,6 +113,9 @@ print(const ParticlesData* particles)
                 for(int c=0;c<attrs[k].count;c++) std::cout<<accessors[k].raw<float>(it)[c];
                 break;
             case INT:
+                for(int c=0;c<attrs[k].count;c++) std::cout<<accessors[k].raw<int>(it)[c];
+                break;
+            case INDEXEDSTR:
                 for(int c=0;c<attrs[k].count;c++) std::cout<<accessors[k].raw<int>(it)[c];
                 break;
             }

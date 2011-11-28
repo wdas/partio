@@ -54,7 +54,7 @@ using namespace std;
     }
 
     if(!foundWidth)
-      cerr << "Partio: failed to find attr 'width' or 'radius' for RIB output, using constantwidth = 1" << endl;
+      cerr << "Partio: failed to find attr 'width','radius', or 'radiusPP' for RIB output, using constantwidth = 1" << endl;
 
     *output << "version 3.04" << endl;
 
@@ -85,9 +85,9 @@ using namespace std;
         string attrname = (attr.name == "position" || attr.name == "position2" || attr.name == "P" || attr.name == "P2")
                                  ? "P"
                                  : (attr.name == "radius" ? "width" : attr.name);
-      
+
         *output << "\"" << attrname << "\" [ ";
-      
+
         switch(attr.type)
         {
           case Partio::FLOAT:
@@ -99,7 +99,7 @@ using namespace std;
                 *output << data[count] << " ";
             }
             break;
-      
+
           case Partio::INT:
             for(int particleIndex = 0; particleIndex < p.numParticles(); ++particleIndex)
             {
@@ -108,15 +108,15 @@ using namespace std;
                 *output << data[count] << " ";
             }
             break;
-      
+
           case Partio::NONE:
           default:
             break;
         }
-      
+
         *output << "] ";
       }
-      
+
       if(!foundWidth)
         *output << "\"constantwidth\" [1.0]";
 
@@ -128,7 +128,7 @@ using namespace std;
 
     *output << "  ResourceEnd" << endl;
     *output << "AttributeEnd" << endl;
-  
+
     return true;
   }
 }

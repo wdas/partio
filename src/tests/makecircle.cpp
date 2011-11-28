@@ -62,8 +62,17 @@ int main(int argc,char *argv[])
         norm[1]=0;
         
     }
-    write("circle.bgeo",*p);
-    write("circle.geo",*p);
+    write("circle.00001.bgeo",*p);
+    write("circle.00001.geo",*p);
+    write("circle.00001.bin",*p);
+    write("circle.00001.pdc",*p);
+    write("circle.00001.pdb",*p);
+    write("circle.00001.pda",*p);
+    write("circle.00001.ptc",*p);
+    write("circle.00001.rib",*p);
+    write("circle.00001.mc",*p);
+
+   
     p->release();
     return 0;
 }

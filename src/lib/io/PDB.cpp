@@ -40,7 +40,7 @@ This code is partially based on the Gifts/readpdb directory of Autodesk Maya
 namespace PDB{
 #include "pdb.h"
 }
-#include "endian.h"
+#include "PartioEndian.h"
 #include "ZIP.h"
 #include <iostream>
 #include <fstream>
@@ -217,6 +217,7 @@ bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compr
         // TODO: assert cproper count!
         channel.name=0;
         switch(attr.type){
+            case INDEXEDSTR:channel.type=PDB_LONG;break;
             case INT:channel.type=PDB_LONG;break;
             case FLOAT:channel.type=PDB_REAL;break;
             case VECTOR:channel.type=PDB_VECTOR;break;

@@ -61,7 +61,7 @@ struct fixedFloatArray
 %}
 
 // Particle Types
-enum ParticleAttributeType {NONE=0,VECTOR=1,FLOAT=2,INT=3};
+enum ParticleAttributeType {NONE=0,VECTOR=1,FLOAT=2,INT=3,INDEXEDSTR=4};
 
 
 %feature("docstring","A handle for operating on attribbutes of a particle set");
@@ -147,9 +147,12 @@ public:
 %feature("docstring","A reader for a set of particles.");
 class ParticlesData:public ParticlesInfo
 {
+  public:
+    %feature("autodoc");
+    %feature("docstring","Looks up a given indexed string given the index, returns -1 if not found");
+    int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const=0;
 
 };
-
 
 %unrefobject ParticlesDataMutable "$this->release();"
 %feature("autodoc");
@@ -157,6 +160,12 @@ class ParticlesData:public ParticlesInfo
 class ParticlesDataMutable:public ParticlesData
 {
 public:
+
+    %feature("autodoc");
+    %feature("docstring","Registers a string in the particular attribute");
+    virtual int registerIndexedStr(const ParticleAttribute& attribute,const char* str)=0;
+
+
     %feature("autodoc");
     %feature("docstring","Prepares data for N nearest neighbor searches using the\n"
        "attribute in the file with name 'position'");
@@ -180,7 +189,6 @@ public:
 
 
 %extend ParticlesData {
-
     %feature("autodoc");
     %feature("docstring","Searches for the N nearest points to the center location\n"
         "or as many as can be found within maxRadius distance.");
@@ -240,6 +248,17 @@ public:
             for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple,k,PyFloat_FromDouble(p[k]));
         }
         return tuple;
+    }
+
+
+    %feature("autodoc");
+    %feature("docstring","Gets a list of all indexed strings for the given attribute handle");
+    PyObject* indexedStrs(const ParticleAttribute& attr) const
+    {
+        const std::vector<std::string>& indexes=self->indexedStrs(attr);
+        PyObject* list=PyList_New(indexes.size());
+        for(int k=0;k<indexes.size();k++) PyList_SetItem(list,k,PyString_FromString(indexes[k].c_str()));
+        return list;
     }
 }
 

@@ -60,7 +60,18 @@ void readGeoAttr(istream& f,const ParticleAttribute& attr,ParticleAccessor& acce
     }
 }
 
-string scanString(istream& input)
+void writeString(std::ostream& output,const char* s){
+    const char* p=s;
+    output<<"\"";
+    while(*p != 0){
+        if(*p=='\\' || *p=='"') output<<'\\';
+        output<<*p;
+        p++;
+    }
+    output<<"\"";
+}
+
+std::string scanString(std::istream& input)
 {
     // TODO: this code does not check for buf overrun
     // TODO: this code doesn't properly check for FEOF condition
@@ -137,13 +148,18 @@ ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly,char**
             cerr<<"Partio: attr '"<<attrName<<"' of type index (string) found, treating as integer"<<endl;
             int nIndices=0;
             *input>>nIndices;
+            ParticleAttribute attribute=simple->addAttribute(attrName.c_str(),INDEXEDSTR,1);
+            attrs.push_back(attribute);
             for(int j=0;j<nIndices;j++){
                 string indexName;
                 //*input>>indexName;
                 indexName=scanString(*input);
-                cerr<<"Partio:    index "<<j<<" is "<<indexName<<endl;
+                //std::cerr<<"Partio:    index "<<j<<" is "<<indexName<<std::endl;
+                int id=simple->registerIndexedStr(attribute,indexName.c_str());
+                if(id != j){
+                    std::cerr<<"Partio: error on read, expected registeerIndexStr to return index "<<j<<" but got "<<id<<" for string "<<indexName<<std::endl;
+                }
             }
-            attrs.push_back(simple->addAttribute(attrName.c_str(),INT,1));
             accessors.push_back(ParticleAccessor(attrs.back()));
             attrInfoRead++;
             
@@ -196,6 +212,7 @@ ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly,char**
                 case FLOAT: readGeoAttr<FLOAT>(*input,attrs[i],accessors[i],iterator);break;
                 case VECTOR: readGeoAttr<VECTOR>(*input,attrs[i],accessors[i],iterator);break;
                 case INT: readGeoAttr<INT>(*input,attrs[i],accessors[i],iterator);break;
+                case INDEXEDSTR: readGeoAttr<INDEXEDSTR>(*input,attrs[i],accessors[i],iterator);break;
             }
         }
         // skip closing parenthes
@@ -245,15 +262,26 @@ bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
         }else{
             handles.push_back(attrib);
             accessors.push_back(ParticleAccessor(handles.back()));
-            string typestring;
-            switch(attrib.type){
-                case NONE: assert(false);typestring="int";break;
-                case VECTOR: typestring="vector";break;
-                case FLOAT: typestring="float";break;
-                case INT: typestring="int";break;
+            std::string typestring;
+            if(attrib.type!=INDEXEDSTR){
+                switch(attrib.type){
+                    case NONE: assert(false);typestring="int";break;
+                    case VECTOR: typestring="vector";break;
+                    case FLOAT: typestring="float";break;
+                    case INT: typestring="int";break;
+                    default: break;
+                }
+                *output<<attrib.name<<" "<<attrib.count<<" "<<typestring;
+                for(int k=0;k<attrib.count;k++) *output<<" "<<0;
+            }else{
+                typestring="index";
+                const std::vector<std::string>& indexes=p.indexedStrs(attrib);
+                *output<<attrib.name<<" "<<attrib.count<<" "<<typestring<<" "<<indexes.size();
+                for(size_t k=0;k<indexes.size();k++){
+                    *output<<" ";
+                    writeString(*output,indexes[k].c_str());
+                }
             }
-            *output<<attrib.name<<" "<<attrib.count<<" "<<typestring;
-            for(int k=0;k<attrib.count;k++) *output<<" "<<0;
         }
         *output<<endl;
     }
@@ -279,6 +307,7 @@ bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
                 case FLOAT: writeType<ETYPE_TO_TYPE<FLOAT>::TYPE>(*output,p,handle,accessor,iterator);break;
                 case INT: writeType<ETYPE_TO_TYPE<INT>::TYPE>(*output,p,handle,accessor,iterator);break;
                 case VECTOR: writeType<ETYPE_TO_TYPE<VECTOR>::TYPE>(*output,p,handle,accessor,iterator);break;
+                case INDEXEDSTR: writeType<ETYPE_TO_TYPE<INDEXEDSTR>::TYPE>(*output,p,handle,accessor,iterator);break;
             }
         }        
         if(handles.size()) *output<<")";

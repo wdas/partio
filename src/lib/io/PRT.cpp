@@ -1,5 +1,44 @@
+/*
+PARTIO SOFTWARE
+Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
+
+Format Contributed by github user: K240
+Some Code for this format  was helped along  by referring to an implementation by  Bo Schwartzstein and ThinkBox Software   THANKS!
+Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+* The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
+Studios" or the names of its contributors may NOT be used to
+endorse or promote products derived from this software without
+specific prior written permission from Walt Disney Pictures.
+
+Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+*/
 #include "../Partio.h"
-#include "endian.h"
+#include "PartioEndian.h"
 #include "../core/ParticleHeaders.h"
 #include <string.h>
 
@@ -56,7 +95,7 @@ static f_ui half2float[65536] = {
 static bool read_buffer(std::istream& is, z_stream& z, char* in_buf, void* p, size_t size) {
     z.next_out=(Bytef*)p;
     z.avail_out=(uInt)size;
-    
+
     while (z.avail_out) {
         if ( z.avail_in == 0 ) {
             if (!is.eof()) {
@@ -105,15 +144,15 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char*
         std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
         return 0;
     }
-    
+
     // Use simple particle since we don't have optimized storage.
     ParticlesDataMutable* simple=0;
     if (headersOnly) simple=new ParticleHeaders;
     else simple=create();
-    
+
     FileHeadder header;
     input->read((char*)&header,sizeof(FileHeadder));
-    
+
     if (memcmp(header.magic, magic, sizeof(magic))) {
         std::cerr<<"Partio: failed to get PRT magic"<<std::endl;
         return 0;
@@ -124,12 +163,12 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char*
     read<LITEND>(*input,reserve);		// reserved
     read<LITEND>(*input,channels);		// number of channel
     read<LITEND>(*input,channelsize);	// size of channel
-    
+
     simple->addParticles((const int)header.numParticles);
-    
+
     std::vector<Channel> chans;
     std::vector<ParticleAttribute> attrs;
-    
+
     for (int i=0; i<channels; i++) {
         Channel ch;
         input->read((char*)&ch, sizeof(Channel));
@@ -170,7 +209,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char*
             attrs.push_back(attrHandle);
         }
     }
-    
+
     if (headersOnly) return simple;
 
     z_stream z;
@@ -179,11 +218,11 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char*
         std::cerr<<"Zlib inflateInit error"<<std::endl;
         return false;
     }
-    
+
     char in_buf[OUT_BUFSIZE];
     z.next_in = 0;
     z.avail_in = 0;
-    
+
     for (unsigned int particleIndex=0;particleIndex<(unsigned int )simple->numParticles();particleIndex++) {
         for (unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++) {
             if (attrs[attrIndex].type==Partio::INT) {
@@ -194,54 +233,54 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char*
                     case 0:	// int16
                         {
                             short val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(short)); 
+                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(short));
                             ival = (int)val;
                         }
                         break;
                     case 1:	// int32
                         {
-                            read_buffer(*input, z, (char*)in_buf, &ival, sizeof(int)); 
+                            read_buffer(*input, z, (char*)in_buf, &ival, sizeof(int));
                         }
                         break;
                     case 2:	// int64
                         {
                             long long val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(long long)); 
+                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(long long));
                             ival = (int)val;
                         }
                         break;
                     case 6:	// uint16
                         {
                             unsigned short val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned short)); 
+                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned short));
                             ival = (int)val;
                         }
                         break;
                     case 7:	// uint32
                         {
                             unsigned int val;
-                            read_buffer(*input, z, (char*)in_buf,  &val, sizeof(unsigned int)); 
+                            read_buffer(*input, z, (char*)in_buf,  &val, sizeof(unsigned int));
                             ival = (int)val;
                         }
                         break;
                     case 8:	// uint64
                         {
                             unsigned long long val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned long long)); 
+                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned long long));
                             ival = (int)val;
                         }
                         break;
                     case 9:	// int8
                         {
                             char val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(char)); 
+                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(char));
                             ival = (int)val;
                         }
                         break;
                     case 10:// uint8
                         {
                             unsigned char val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned char)); 
+                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned char));
                             ival = (int)val;
                         }
                         break;
@@ -257,24 +296,24 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char*
                         {
 #ifdef USE_ILMHALF
                             half val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(half)); 
+                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(half));
                             fval = (float)(val);
 #else
                             unsigned short val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(val)); 
+                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(val));
                             fval = half2float[val].f;
-#endif	
+#endif
                         }
                         break;
                     case 4:	// float32
                         {
-                            read_buffer(*input, z, (char*)in_buf, &fval, sizeof(float)); 
+                            read_buffer(*input, z, (char*)in_buf, &fval, sizeof(float));
                         }
                         break;
                     case 5:	// float64
                         {
                             double val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(double)); 
+                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(double));
                             fval = (float)val;
                         }
                         break;
@@ -288,25 +327,25 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char*
         std::cerr<<"Zlib inflateEnd error"<<std::endl;
         return false;
     }
-    
+
     // success
     return simple;
 }
 
 bool writePRT(const char* filename,const ParticlesData& p,const bool /*compressed*/)
 {
-	/// Krakatoa pukes on 0 particle files for some reason so don't export at all.... 
+	/// Krakatoa pukes on 0 particle files for some reason so don't export at all....
     int numParts = p.numParticles();
     if (numParts)
     {
         std::auto_ptr<std::ostream> output(
         new std::ofstream(filename,std::ios::out|std::ios::binary));
-        
+
         if (!*output) {
             std::cerr<<"Partio Unable to open file "<<filename<<std::endl;
             return false;
         }
-        
+
         FileHeadder header;
         memcpy(header.magic, magic, sizeof(magic));
         memcpy(header.signature, signature, sizeof(signature));
@@ -319,7 +358,7 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
         write<LITEND>(*output, (int)p.numAttributes());
             reserve = 0x2c;
         write<LITEND>(*output, reserve);
-        
+
         std::vector<ParticleAttribute> attrs;
         int offset = 0;
         for (int i=0;i<p.numAttributes();i++) {
@@ -333,6 +372,7 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
             case FLOAT: ch.type=4; ch.arity=attr.count; offset += sizeof(float)*attr.count; break;
             case INT: ch.type=1; ch.arity=attr.count; offset += sizeof(int)*attr.count; break;
             case VECTOR: ch.type=4; ch.arity=attr.count; offset += sizeof(float)*attr.count; break;
+			case INDEXEDSTR:; break;
             case NONE:;break;
             }
             if (ch.arity) {
@@ -345,14 +385,14 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
                 attrs.push_back(attr);
             }
         }
-        
+
         z_stream z;
         z.zalloc = Z_NULL;z.zfree = Z_NULL;z.opaque = Z_NULL;
         if (deflateInit( &z, Z_DEFAULT_COMPRESSION ) != Z_OK) {
             std::cerr<<"Zlib deflateInit error"<<std::endl;
             return false;
         }
-        
+
         char out_buf[OUT_BUFSIZE+10];
         for (int particleIndex=0;particleIndex<p.numParticles();particleIndex++) {
             for (unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++) {
@@ -371,7 +411,7 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
         if (deflateEnd( &z ) != Z_OK) {
             std::cerr<<"Zlib deflateEnd error"<<std::endl;
             return false;
-        } 
+        }
         // success
     }// end if numParticles > 0
     return true;

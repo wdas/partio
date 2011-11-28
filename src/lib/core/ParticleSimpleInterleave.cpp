@@ -112,7 +112,7 @@ sort()
         std::cerr<<"Partio: sort, position attribute is not a vector of size 3"<<std::endl;
         return;
     }
-    
+
     const float* data=this->data<float>(attr,0); // contiguous assumption used here
     KdTree<3>* kdtree_temp=new KdTree<3>();
     kdtree_temp->setPoints(data,numParticles());
@@ -186,7 +186,7 @@ addAttribute(const char* attribute,ParticleAttributeType type,const int count)
     attr.count=count;
     attributes.push_back(attr);
     nameToAttribute[attribute]=attributes.size()-1;
-    
+
     // repackage data for new attribute
     int oldStride=stride;
     int newStride=stride+TypeSize(type)*count;
@@ -204,6 +204,7 @@ addAttribute(const char* attribute,ParticleAttributeType type,const int count)
     data=newData;
     stride=newStride;
     attributeOffsets.push_back(oldStride);
+	attributeIndexedStrs.push_back(IndexedStrTable());
 
     return attr;
 }
@@ -286,7 +287,7 @@ dataInternalMultiple(const ParticleAttribute& attribute,const int indexCount,
 {
 #if 0
     assert(attribute.attributeIndex>=0 && attribute.attributeIndex<(int)attributes.size());
-    
+
     char* base=attributeData[attribute.attributeIndex];
     int bytes=attributeStrides[attribute.attributeIndex];
     for(int i=0;i<indexCount;i++)
@@ -300,7 +301,7 @@ dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
 {
 #if 0
     assert(attribute.attributeIndex>=0 && attribute.attributeIndex<(int)attributes.size());
-    
+
     if(attribute.type==FLOAT || attribute.type==VECTOR) dataInternalMultiple(attribute,indexCount,particleIndices,sorted,(char*)values);
     else if(attribute.type==INT){
         char* attrrawbase=attributeData[attribute.attributeIndex];
@@ -309,5 +310,34 @@ dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
         for(int i=0;i<indexCount;i++) for(int k=0;k<count;k++) values[i*count+k]=(int)attrbase[particleIndices[i]*count+k];
     }
 #endif
+}
+
+
+int ParticlesSimpleInterleave::
+registerIndexedStr(const ParticleAttribute& attribute,const char* str)
+{
+    IndexedStrTable& table=attributeIndexedStrs[attribute.attributeIndex];
+    std::map<std::string,int>::const_iterator it=table.stringToIndex.find(str);
+    if(it!=table.stringToIndex.end()) return it->second;
+    int newIndex=table.strings.size();
+    table.strings.push_back(str);
+    table.stringToIndex[str]=newIndex;
+    return newIndex;
+}
+
+int ParticlesSimpleInterleave::
+lookupIndexedStr(Partio::ParticleAttribute const &attribute, char const *str) const
+{
+    const IndexedStrTable& table=attributeIndexedStrs[attribute.attributeIndex];
+    std::map<std::string,int>::const_iterator it=table.stringToIndex.find(str);
+    if(it!=table.stringToIndex.end()) return it->second;
+    return -1;
+}
+
+const std::vector<std::string>& ParticlesSimpleInterleave::
+indexedStrs(const ParticleAttribute& attr) const
+{
+    const IndexedStrTable& table=attributeIndexedStrs[attr.attributeIndex];
+    return table.strings;
 }
 
