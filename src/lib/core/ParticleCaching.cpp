@@ -44,7 +44,7 @@ namespace
 {
     static PartioMutex mutex;
 }
-    
+
 // cached read write
 std::map<ParticlesData*,int> cachedParticlesCount;
 std::map<std::string,ParticlesData*> cachedParticles;
@@ -73,29 +73,38 @@ ParticlesData* readCached(const char* filename,const bool sort)
 
 void freeCached(ParticlesData* particles)
 {
-    if(!particles) return;
+	if(!particles) return;
 
-    mutex.lock();
+	mutex.lock();
 
     std::map<ParticlesData*,int>::iterator i=cachedParticlesCount.find(particles);
-    if(i==cachedParticlesCount.end()){ // Not found in cache, just free
+    if(i==cachedParticlesCount.end())
+	{ // Not found in cache, just free
         delete (ParticlesInfo*)particles;
-    }else{ // found in cache
+
+    }
+    else
+	{
+
+		// found in cache
         i->second--; // decrement ref count
-        if(i->second==0){ // ref count is now zero, remove from structure
-            delete (ParticlesInfo*)particles;
+        if(i->second==0)
+		{ 	// ref count is now zero, remove from structure
+			delete (ParticlesInfo*)particles;
             cachedParticlesCount.erase(i);
-            for(std::map<std::string,ParticlesData*>::iterator i2=cachedParticles.begin();
-                i2!=cachedParticles.end();++i2){
-                if(i2->second==particles){
-                    cachedParticles.erase(i2);
+            for(std::map<std::string,ParticlesData*>::iterator i2=cachedParticles.begin(); i2!=cachedParticles.end(); ++i2)
+			{
+				if(i2->second==particles)
+				{
+					cachedParticles.erase(i2);
                     goto exit_and_release;
                 }
-            }        
+            }
             assert(false);
         }
     }
   exit_and_release:
+
     mutex.unlock();
 }
 
