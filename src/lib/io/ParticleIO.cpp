@@ -51,7 +51,8 @@ readers()
 {
     static map<string,READER_FUNCTION> data;
     static bool initialized=false;
-    if(!initialized){
+    if(!initialized)
+	{
         data["bgeo"]=readBGEO;
         data["geo"]=readGEO;
         data["pdb"]=readPDB;
@@ -60,9 +61,10 @@ readers()
         data["pda"]=readPDA;
         data["mc"]=readMC;
         data["ptc"]=readPTC;
-	data["pdc"]=readPDC;
-	data["prt"]=readPRT;
-	data["bin"]=readBIN;
+		data["pdc"]=readPDC;
+		data["prt"]=readPRT;
+		data["bin"]=readBIN;
+		data["pts"]=readPTS;
     }
     return data;
 }
@@ -159,7 +161,7 @@ readHeaders(const char* c_filename)
     return (*i->second)(c_filename,true,false,0);
 }
 
-void 
+void
 write(const char* c_filename,const ParticlesData& particles,const bool forceCompressed)
 {
     string filename(c_filename);

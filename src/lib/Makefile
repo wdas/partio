@@ -367,6 +367,21 @@ io/PTC.s:
 .PHONY : io/PTC.s
 
 # target to build an object file
+io/PTS.o:
+	cd /Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio && $(MAKE) -f src/lib/CMakeFiles/partio.dir/build.make src/lib/CMakeFiles/partio.dir/io/PTS.o
+.PHONY : io/PTS.o
+
+# target to preprocess a source file
+io/PTS.i:
+	cd /Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio && $(MAKE) -f src/lib/CMakeFiles/partio.dir/build.make src/lib/CMakeFiles/partio.dir/io/PTS.i
+.PHONY : io/PTS.i
+
+# target to generate assembly for a file
+io/PTS.s:
+	cd /Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio && $(MAKE) -f src/lib/CMakeFiles/partio.dir/build.make src/lib/CMakeFiles/partio.dir/io/PTS.s
+.PHONY : io/PTS.s
+
+# target to build an object file
 io/ParticleIO.o:
 	cd /Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio && $(MAKE) -f src/lib/CMakeFiles/partio.dir/build.make src/lib/CMakeFiles/partio.dir/io/ParticleIO.o
 .PHONY : io/ParticleIO.o
@@ -466,6 +481,9 @@ help:
 	@echo "... io/PTC.o"
 	@echo "... io/PTC.i"
 	@echo "... io/PTC.s"
+	@echo "... io/PTS.o"
+	@echo "... io/PTS.i"
+	@echo "... io/PTS.s"
 	@echo "... io/ParticleIO.o"
 	@echo "... io/ParticleIO.i"
 	@echo "... io/ParticleIO.s"

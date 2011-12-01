@@ -3,7 +3,7 @@ PARTIO SOFTWARE
 Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
 
 Format Contributed by github user: Jinkuen
-Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
+Modifications from github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are

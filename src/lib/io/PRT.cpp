@@ -4,7 +4,7 @@ Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserv
 
 Format Contributed by github user: K240
 Some Code for this format  was helped along  by referring to an implementation by  Bo Schwartzstein and ThinkBox Software   THANKS!
-Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
+Modifications from: github user redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
