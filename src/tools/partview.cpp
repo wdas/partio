@@ -39,26 +39,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 
 
-void FPS(void)
-{
-  static GLint Frames = 0;         // frames averaged over 1000mS
-
-  static GLuint Clock;             // [milliSeconds]
-  static GLuint PreviousClock = 0; // [milliSeconds]
-  static GLuint NextClock = 0;     // [milliSeconds]
-
-  ++Frames;
-  Clock = glutGet(GLUT_ELAPSED_TIME); //has limited resolution, so average over 1000mS
-
-  if ( Clock < NextClock ) return;
-
-  gFramesPerSecond = Frames/1; // store the averaged number of frames per second
-
-  PreviousClock = Clock;
-  NextClock = Clock+1000; // 1000mS=1S in the future
-  Frames=0;
-
-}
 
 void restorePerspectiveProjection() {
 
@@ -115,6 +95,8 @@ static void render()
 	{
 		//cout << "not inited" << endl;
         inited=true;
+		colorMissing = false;
+		colorMissing = false;
 
 
 		glEnable(GL_DEPTH_TEST);
@@ -155,6 +137,7 @@ static void render()
 				!particles->attributeInfo("pointColor", colorAttr))
 			{
 				//std::cerr<<"Failed to find color attribute "<<std::endl;
+				colorMissing = true;
 			}
 			if (!particles->attributeInfo("opacity", colorAttr) &
 				!particles->attributeInfo("opacityPP", colorAttr) &
@@ -165,6 +148,7 @@ static void render()
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 			{
+				alphaMissing = true;
 				//std::cerr<<"Failed to find opacity/alpha attribute "<<std::endl;
 				glDisable(GL_BLEND);
 			}
@@ -172,6 +156,8 @@ static void render()
 		sourceChanged=false;
     }
 
+	glEnableClientState( GL_VERTEX_ARRAY );
+	glEnableClientState( GL_COLOR_ARRAY );
     glClearColor(0,0,0,0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_PROJECTION);
@@ -219,40 +205,77 @@ static void render()
 	glColor3f(1.0f,0.0f,0.0f);
 	renderBitmapString(455,20,0,GLUT_BITMAP_HELVETICA_18,frameNumString);
 
-	char FPS[50];
-	sprintf(FPS,"FPS %d\n",gFramesPerSecond);
-	renderBitmapString(750,20,0,GLUT_BITMAP_HELVETICA_18,FPS);
-
 	glPopMatrix();
 	restorePerspectiveProjection();
 
     glPointSize(pointSize);
-    glBegin(GL_POINTS);
-    for(int i=0;i<particles->numParticles();i++){
-        const float* pos=particles->data<float>(positionAttr,i);
-        const float* color=particles->data<float>(colorAttr,i);
-        const float* alpha=particles->data<float>(alphaAttr,i);
 
-		float colorR = 0.75;
-		float colorG = 0.75;
-		float colorB = 0.75;
-		float alphaVal  = 1.0;
-		if (useColor)
+
+	// now setup the position/color/alpha output pointers
+
+	const float * pos=particles->data<float>(positionAttr,0);
+	glVertexPointer( 3, GL_FLOAT, 0, pos );
+
+	float colorR = 0.75;
+	float colorG = 0.75;
+	float colorB = 0.75;
+	float alphaVal  = 1.0;
+
+	if (useColor && !colorMissing)
+	{
+		const float * rgb =particles->data<float>(colorAttr,0);
+		if (useAlpha && !alphaMissing)
 		{
-				colorR = color[0];
-				colorG = color[1];
-				colorB = color[2];
+			const float* alpha=particles->data<float>(alphaAttr,0);
+			float * rgba = (float *) malloc(particles->numParticles()*sizeof(float)*4);
+			for(int i=0;i<particles->numParticles();i++)
+			{
+				rgba[i*3] = rgb[i*3];
+				rgba[(i*3)+1] = rgb[(i*3)+1];
+				rgba[(i*3)+2] = rgb[(i*3)+2];
+				rgba[(i*3)+3] = alpha[i];
+			}
+			glColorPointer(  4, GL_FLOAT, 0, rgba );
 		}
-
-		if (useAlpha)
+		else
 		{
-			alphaVal = alpha[0];
+			glColorPointer(  3, GL_FLOAT, 0, rgb );
 		}
+	}
+	else
+	{
+		float * rgba;
+		const float* alpha;
 
-		glColor4f(colorR+brightness,colorG+brightness,colorB+brightness,alphaVal);
-		glVertex3f(pos[0],pos[1],pos[2]);
+		if(useAlpha && !alphaMissing)
+		{
+			rgba = (float *) malloc(particles->numParticles()*sizeof(float)*4);
+			const float* alpha=particles->data<float>(alphaAttr,0);
+			for(int i=0;i<particles->numParticles();i++)
+			{
+				rgba[i*4] = colorR+brightness;
+				rgba[(i*4)+1] = colorG+brightness;
+				rgba[(i*4)+2] = colorB+brightness;
+				rgba[(i*4)+3] = alpha[i];
+			}
+			glColorPointer(  4, GL_FLOAT, 0, rgba );
+		}
+		else
+		{
+			rgba = (float *) malloc(particles->numParticles()*sizeof(float)*3);
+			for(int i=0;i<particles->numParticles()*3;i++)
+			{
+				rgba[i] = colorR+brightness;
+			}
+			glColorPointer(  3, GL_FLOAT, 0, rgba );
+		}
+	}
 
-    }
+	glDrawArrays( GL_POINTS, 0, particles->numParticles() );
+
+	glDisableClientState( GL_VERTEX_ARRAY );
+	glDisableClientState( GL_COLOR_ARRAY );
+
     glEnd();
 
     glutSwapBuffers();
@@ -352,19 +375,18 @@ static void mouseFunc(int button,int state,int x,int y)
         if(button==GLUT_MIDDLE_BUTTON) camera.startPan(x,y);
         if(button==GLUT_RIGHT_BUTTON) camera.startZoom(x,y);
 		int mod = glutGetModifiers();
-		if(mod == GLUT_ACTIVE_ALT)
+
+		if(button== 3)
 		{
-			if(button== 3)
-			{
-				camera.startZoom(x,y);
-				camera.update(x,y-5);
-			}
-			else if (button == 4)
-			{
-				camera.startZoom(x,y);
-				camera.update(x,y+5);
-			}
+			camera.startZoom(x,y);
+			camera.update(x,y-5);
 		}
+		else if (button == 4)
+		{
+			camera.startZoom(x,y);
+			camera.update(x,y+5);
+		}
+
     }
     else if(state==GLUT_UP)
 	{
@@ -387,78 +409,83 @@ static void motionFunc(int x,int y)
 }
 
 
-void idle()
+void idle(int value)
 {
-	if (keyStates[27])  // escape pressed,  just exit
+	if (anyKeyPressed)
 	{
-		exit(0);
+		if (keyStates[27])  // escape pressed,  just exit
+		{
+			exit(0);
+		}
+
+		static GLuint Clock=glutGet(GLUT_ELAPSED_TIME);
+		static GLfloat deltaT;
+		Clock = glutGet(GLUT_ELAPSED_TIME);
+		deltaT=Clock-PreviousClock;
+
+		if (deltaT > 200)  // initial key press delay
+		{
+
+			if (keyStates['='])
+			{
+				pointSize += 0.5;
+			}
+			else if (keyStates['-'])
+			{
+				if (pointSize > .5)
+				{
+					pointSize -= 0.5;
+				}
+			}
+
+			if (keyStates['z'])
+			{
+				if( fov > 10)
+				{
+					fov -= 5;
+				}
+			}
+			else if (keyStates['Z'])
+			{
+				if(fov < 180)
+				{
+					fov += 5;
+				}
+			}
+
+			if (brightnessDownPressed)
+			{
+				if (brightness >= -1)
+				brightness -= .02;
+			}
+			if (brightnessUpPressed)
+			{
+				if (brightness <= 1)
+				brightness += .02;
+			}
+
+			if(frameForwardPressed)
+			{
+				reloadParticleFile(1);
+			}
+			else if (frameBackwardPressed)
+			{
+				reloadParticleFile(-1);
+			}
+			else
+			{
+				glutPostRedisplay();
+			}
+
+		}
+		glutTimerFunc(10,idle,0);
 	}
-
-	static GLuint Clock=glutGet(GLUT_ELAPSED_TIME);
-	static GLfloat deltaT;
-	FPS(); //only call once per frame loop
-	Clock = glutGet(GLUT_ELAPSED_TIME);
-	deltaT=Clock-PreviousClock;
-
-	if (deltaT > 200)  // initial key press delay
-	{
-
-		if (keyStates['='])
-		{
-			pointSize += 0.5;
-		}
-		else if (keyStates['-'])
-		{
-			if (pointSize > .5)
-			{
-				pointSize -= 0.5;
-			}
-		}
-
-		if (keyStates['z'])
-		{
-			if( fov > 10)
-			{
-				fov -= 5;
-			}
-		}
-		else if (keyStates['Z'])
-		{
-			if(fov < 180)
-			{
-				fov += 5;
-			}
-		}
-
-		if (brightnessDownPressed)
-		{
-			if (brightness >= -1)
-			brightness -= .02;
-		}
-		if (brightnessUpPressed)
-		{
-			if (brightness <= 1)
-			brightness += .02;
-		}
-
-		if(frameForwardPressed)
-		{
-			reloadParticleFile(1);
-		}
-		else if (frameBackwardPressed)
-		{
-			reloadParticleFile(-1);
-		}
-		else
-		{
-			glutPostRedisplay();
-		}
-
-	}
+	glutPostRedisplay();
 }
 
 static void processNormalKeys(unsigned char key, int x, int y)
 {
+	anyKeyPressed = true;
 	keyStates[key] = true;
 
 	if (keyStates['='])
@@ -498,7 +525,7 @@ static void processNormalKeys(unsigned char key, int x, int y)
 			fov += 5;
 		}
 	}
-
+	glutTimerFunc(200,idle,0);
 	glutPostRedisplay();
 	PreviousClock=glutGet(GLUT_ELAPSED_TIME);
 }
@@ -506,11 +533,13 @@ static void processNormalKeys(unsigned char key, int x, int y)
 static void processNormalUpKeys(unsigned char key, int x, int y)
 {
 	keyStates[key] =false;
+	anyKeyPressed = false;
 }
 
 
 static void  processSpecialKeys(int key, int x, int y)
 {
+	anyKeyPressed = true;
 
 	if (key == GLUT_KEY_UP)
 	{
@@ -539,12 +568,14 @@ static void  processSpecialKeys(int key, int x, int y)
 		frameBackwardPressed = true;
 		PreviousClock=glutGet(GLUT_ELAPSED_TIME);
 	}
+	glutTimerFunc(200,idle,0);
 	glutPostRedisplay();
 
 }
 
 void processSpecialUpKeys(int key, int x, int y)
 {
+	anyKeyPressed = false;
 	if( key == GLUT_KEY_UP )
 	{
 		brightnessUpPressed = false;
@@ -594,7 +625,7 @@ int main(int argc,char *argv[])
         glutInitWindowSize(1024,768);
         glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
         glutCreateWindow("PartView");
-		glutIdleFunc(idle);
+		glutTimerFunc(200,idle,0);
 		glutDisplayFunc(render);
         glutMotionFunc(motionFunc);
         glutMouseFunc(mouseFunc);

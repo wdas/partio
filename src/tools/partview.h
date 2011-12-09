@@ -76,6 +76,9 @@ GLint gFramesPerSecond;
 bool* keyStates;
 bool frameMissing;
 string loadError;
+bool anyKeyPressed;
+bool  colorMissing;
+bool  alphaMissing;
 
 
 void restorePerspectiveProjection();
