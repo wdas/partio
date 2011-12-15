@@ -86,6 +86,8 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly, char
     BIN_HEADER header;
     input->read((char*)&header, sizeof(header));
 
+	/*
+	// DEBUG HEADER INFO
     cout << "header.verify_code = " << hex << header.verificationCode << endl;
     cout << "header.fluid_name = " << dec << header.fluidName << endl;
     cout << "header.version = " << header.version << endl;
@@ -108,7 +110,7 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly, char
     << header.emitterRotation[1] << "\t" << header.emitterRotation[2] << endl;
     cout << "header.emitter_scale = " << header.emitterScale[0] << "\t"
     << header.emitterScale[1] << "\t" << header.emitterScale[2] << endl;
-
+	*/
 
     if(BIN_MAGIC != header.verificationCode){
         cerr << "Partio: Magic number '" << hex<<  header.verificationCode << "' of '" << filename << "' doesn't match BIN magic '" << BIN_MAGIC << "'" << endl;

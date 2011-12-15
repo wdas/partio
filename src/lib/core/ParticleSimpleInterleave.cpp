@@ -80,6 +80,16 @@ numAttributes() const
     return attributes.size();
 }
 
+void ParticlesSimpleInterleave::attributeNames() const
+{
+	std::map<std::string,int>::const_iterator it;
+	for (it = nameToAttribute.begin(); it != nameToAttribute.end(); it++)
+	{
+		std::cout << it->first << std::endl;
+	}
+}
+
+
 bool ParticlesSimpleInterleave::
 attributeInfo(const int attributeIndex,ParticleAttribute& attribute) const
 {

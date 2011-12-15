@@ -33,6 +33,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
+
 #include <iostream>
 #include <cmath>
 #include <string>
@@ -49,8 +50,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include <Partio.h>
 #include "Camera.h"
+
 using namespace Partio;
 using namespace std;
+
 
 // global vars
 ParticlesData* particles;
@@ -58,28 +61,30 @@ Camera camera;
 ParticleAttribute positionAttr;
 ParticleAttribute colorAttr;
 ParticleAttribute alphaAttr;
+
+int numPoints;
+int frameNumberOGL;
+GLuint PreviousClock;
 double fov;
 double pointSize;
 double brightness;
+
 bool useColor;
 bool useAlpha;
-int numPoints;
-string  particleFile;
 bool sourceChanged;
-int frameNumberOGL;
 bool frameForwardPressed;
 bool frameBackwardPressed;
 bool brightnessUpPressed;
 bool brightnessDownPressed;
-GLuint PreviousClock;
-GLint gFramesPerSecond;
 bool* keyStates;
 bool frameMissing;
-string loadError;
 bool anyKeyPressed;
-bool  colorMissing;
-bool  alphaMissing;
+bool colorMissing;
+bool alphaMissing;
 
+string loadError;
+string particleFile;
+string lastParticleFile;
 
 void restorePerspectiveProjection();
 void setOrthographicProjection();
@@ -92,8 +97,7 @@ static void processNormalKeys(unsigned char key, int x, int y);
 static void processNormalUpKeys(unsigned char key, int x, int y);
 static void processSpecialKeys(int key, int x, int y);
 static void processSpecialUpKeys(int key, int x, int y);
-void idle();
-void FPS(void);
+void timer();
 
 int main(int argc,char *argv[]);
 

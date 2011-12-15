@@ -79,6 +79,9 @@ public:
     //! Number of per-particle attributes.
     virtual int numParticles() const=0;
 
+	//! return a full comma separated list of  attribute names
+	virtual void attributeNames() const=0;
+
     //! Lookup an attribute by name and store a handle to the attribute.
     virtual bool attributeInfo(const char* attributeName,ParticleAttribute& attribute) const=0;
 

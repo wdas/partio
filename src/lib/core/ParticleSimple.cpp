@@ -99,6 +99,17 @@ attributeInfo(const char* attributeName,ParticleAttribute& attribute) const
     return false;
 }
 
+
+void ParticlesSimple::attributeNames() const
+{
+	std::map<std::string,int>::const_iterator it;
+	for (it =nameToAttribute.begin(); it != nameToAttribute.end(); it++)
+	{
+		std::cout << it->first << std::endl;
+	}
+}
+
+
 void ParticlesSimple::
 sort()
 {
@@ -111,7 +122,7 @@ sort()
         std::cerr<<"Partio: sort, position attribute is not a vector of size 3"<<std::endl;
         return;
     }
-    
+
     const ParticleIndex baseParticleIndex=0;
     const float* data=this->data<float>(attr,baseParticleIndex); // contiguous assumption used here
     KdTree<3>* kdtree_temp=new KdTree<3>();
@@ -291,7 +302,7 @@ dataInternalMultiple(const ParticleAttribute& attribute,const int indexCount,
     const ParticleIndex* particleIndices,const bool sorted,char* values) const
 {
     assert(attribute.attributeIndex>=0 && attribute.attributeIndex<(int)attributes.size());
-    
+
     char* base=attributeData[attribute.attributeIndex];
     int bytes=attributeStrides[attribute.attributeIndex];
     for(int i=0;i<indexCount;i++)
@@ -303,7 +314,7 @@ dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
     const ParticleIndex* particleIndices,const bool sorted,float* values) const
 {
     assert(attribute.attributeIndex>=0 && attribute.attributeIndex<(int)attributes.size());
-    
+
     if(attribute.type==FLOAT || attribute.type==VECTOR) dataInternalMultiple(attribute,indexCount,particleIndices,sorted,(char*)values);
     else if(attribute.type==INT || attribute.type==INDEXEDSTR){
         char* attrrawbase=attributeData[attribute.attributeIndex];
