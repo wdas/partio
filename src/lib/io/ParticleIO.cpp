@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
 #include <iostream>
+#include <sstream>
 #include "../Partio.h"
 #include "readers.h"
 
@@ -174,6 +175,27 @@ write(const char* c_filename,const ParticlesData& particles,const bool forceComp
         return;
     }
     (*i->second)(c_filename,particles,forceCompressed || endsWithGz);
+}
+
+
+/// TODO:possibly make this a class function that will allow users to override it to hook in their own loading feedback mechanism
+
+void
+reportLoadProgress(float progress)
+{
+	static stringstream bars;
+	static int x = 0;
+	string slash[4];
+	slash[0] = "\\";
+	slash[1] = "-";
+	slash[2] = "/";
+	slash[3] = "|";
+
+	cout << "\033[1;31m\rPartio Loading: " << " " << slash[x] << " "<< (int)progress << " points\033[0m";
+	fflush(stdout);
+	x++;
+	if (x == 4)
+	{ x = 0; }
 }
 
 } // namespace Partio

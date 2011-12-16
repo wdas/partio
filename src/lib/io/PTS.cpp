@@ -176,6 +176,10 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly,char**
 
     for (unsigned int particleIndex=0;input->good();)
     {
+		if (particleIndex%1000 == 0)
+		{
+			reportLoadProgress ((float)particleIndex);
+		}
         string token = "";
         char line[1024];
         input->getline(line, 1024);

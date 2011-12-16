@@ -248,6 +248,8 @@ ParticlesInfo* readHeaders(const char* filename);
 //! if filename ends with .gz or forceCompressed is true, the file is compressed.
 void write(const char* filename,const ParticlesData&,const bool forceCompressed=false);
 
+//! Provides  feedback on load progress
+void reportLoadProgress(float progress);
 
 //! Cached (only one copy) read only way to read a particle file
 /*!
