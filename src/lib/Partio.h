@@ -248,6 +248,7 @@ ParticlesInfo* readHeaders(const char* filename);
 //! if filename ends with .gz or forceCompressed is true, the file is compressed.
 void write(const char* filename,const ParticlesData&,const bool forceCompressed=false);
 
+/// TODO:  this could be implemented as a logger function that takes a custom  input function from the  program using partio
 //! Provides  feedback on load progress
 void reportLoadProgress(float progress);
 

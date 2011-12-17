@@ -208,6 +208,19 @@ partview/fast:
 .PHONY : partview/fast
 
 #=============================================================================
+# Target rules for targets named _partio
+
+# Build rule for target.
+_partio: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 _partio
+.PHONY : _partio
+
+# fast build rule for target.
+_partio/fast:
+	$(MAKE) -f src/py/CMakeFiles/_partio.dir/build.make src/py/CMakeFiles/_partio.dir/build
+.PHONY : _partio/fast
+
+#=============================================================================
 # Target rules for targets named makecircle
 
 # Build rule for target.
@@ -341,6 +354,7 @@ help:
 	@echo "... partconv"
 	@echo "... partinfo"
 	@echo "... partview"
+	@echo "... _partio"
 	@echo "... makecircle"
 	@echo "... makeline"
 	@echo "... test"

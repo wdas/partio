@@ -142,18 +142,51 @@ depend:
 	cd /Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
+# Convenience name for target.
+src/py/CMakeFiles/_partio.dir/rule:
+	cd /Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio && $(MAKE) -f CMakeFiles/Makefile2 src/py/CMakeFiles/_partio.dir/rule
+.PHONY : src/py/CMakeFiles/_partio.dir/rule
+
+# Convenience name for target.
+_partio: src/py/CMakeFiles/_partio.dir/rule
+.PHONY : _partio
+
+# fast build rule for target.
+_partio/fast:
+	cd /Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio && $(MAKE) -f src/py/CMakeFiles/_partio.dir/build.make src/py/CMakeFiles/_partio.dir/build
+.PHONY : _partio/fast
+
+# target to build an object file
+partioPYTHON_wrap.o:
+	cd /Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio && $(MAKE) -f src/py/CMakeFiles/_partio.dir/build.make src/py/CMakeFiles/_partio.dir/partioPYTHON_wrap.o
+.PHONY : partioPYTHON_wrap.o
+
+# target to preprocess a source file
+partioPYTHON_wrap.i:
+	cd /Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio && $(MAKE) -f src/py/CMakeFiles/_partio.dir/build.make src/py/CMakeFiles/_partio.dir/partioPYTHON_wrap.i
+.PHONY : partioPYTHON_wrap.i
+
+# target to generate assembly for a file
+partioPYTHON_wrap.s:
+	cd /Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio && $(MAKE) -f src/py/CMakeFiles/_partio.dir/build.make src/py/CMakeFiles/_partio.dir/partioPYTHON_wrap.s
+.PHONY : partioPYTHON_wrap.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
 	@echo "... all (the default if no target is provided)"
 	@echo "... clean"
 	@echo "... depend"
+	@echo "... _partio"
 	@echo "... edit_cache"
 	@echo "... install"
 	@echo "... install/local"
 	@echo "... install/strip"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
+	@echo "... partioPYTHON_wrap.o"
+	@echo "... partioPYTHON_wrap.i"
+	@echo "... partioPYTHON_wrap.s"
 .PHONY : help
 
 

@@ -178,8 +178,6 @@ write(const char* c_filename,const ParticlesData& particles,const bool forceComp
 }
 
 
-/// TODO:possibly make this a class function that will allow users to override it to hook in their own loading feedback mechanism
-
 void
 reportLoadProgress(float progress)
 {
