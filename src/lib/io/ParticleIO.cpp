@@ -56,7 +56,11 @@ readers()
         data["pdb32"]=readPDB32;
         data["pdb64"]=readPDB64;
         data["pda"]=readPDA;
+        data["mc"]=readMC;
         data["ptc"]=readPTC;
+        data["pdc"]=readPDC;
+        data["prt"]=readPRT;
+        data["bin"]=readBIN;
     }
     return data;
 }
@@ -74,6 +78,10 @@ writers()
         data["pdb64"]=writePDB64;
         data["pda"]=writePDA;
         data["ptc"]=writePTC;
+        data["rib"]=writeRIB;
+        data["pdc"]=writePDC;
+        data["prt"]=writePRT;
+        data["bin"]=writeBIN;
     }
     return data;
 }
