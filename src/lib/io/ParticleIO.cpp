@@ -61,6 +61,7 @@ readers()
         data["pdc"]=readPDC;
         data["prt"]=readPRT;
         data["bin"]=readBIN;
+        data["pts"]=readPTS;
     }
     return data;
 }
@@ -142,7 +143,7 @@ readHeaders(const char* c_filename)
     return (*i->second)(c_filename,true);
 }
 
-void 
+void
 write(const char* c_filename,const ParticlesData& particles,const bool forceCompressed)
 {
     string filename(c_filename);

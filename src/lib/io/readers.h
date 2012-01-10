@@ -45,8 +45,9 @@ ParticlesDataMutable* readPDA(	const char* filename,const bool headersOnly);
 ParticlesDataMutable* readMC(	const char* filename,const bool headersOnly);
 ParticlesDataMutable* readPTC(	const char* filename,const bool headersOnly);
 ParticlesDataMutable* readPDC(	const char* filename,const bool headersOnly);
-ParticlesDataMutable* readPRT(	const char* fileName,const bool headersOnly);
-ParticlesDataMutable* readBIN(	const char* fileName,const bool headersOnly);
+ParticlesDataMutable* readPRT(	const char* filename,const bool headersOnly);
+ParticlesDataMutable* readBIN(	const char* filename,const bool headersOnly);
+ParticlesDataMutable* readPTS(  const char* filename,const bool headersOnly);
 
 bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed);
 bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed);
@@ -57,8 +58,8 @@ bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
 bool writePTC(const char* filename,const ParticlesData& p,const bool compressed);
 bool writeRIB(const char* filename,const ParticlesData& p,const bool compressed);
 bool writePDC(const char* filename,const ParticlesData& p,const bool compressed);
-bool writePRT(const char* fileName,const ParticlesData& p,const bool compressed);
-bool writeBIN(const char* fileName,const ParticlesData& p,const bool compressed);
+bool writePRT(const char* filename,const ParticlesData& p,const bool compressed);
+bool writeBIN(const char* filename,const ParticlesData& p,const bool compressed);
 }
 
 #endif
