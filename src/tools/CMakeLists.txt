@@ -47,6 +47,8 @@ target_link_libraries(partinfo ${PARTIO_LIBRARIES})
 ADD_EXECUTABLE(partconv partconv.cpp)
 target_link_libraries(partconv ${PARTIO_LIBRARIES})
 
+ADD_EXECUTABLE(partattr partattr.cpp)
+target_link_libraries(partattr ${PARTIO_LIBRARIES})
 
-install(TARGETS  partconv partinfo DESTINATION bin)
+install(TARGETS partattr partconv partinfo DESTINATION bin)
 
