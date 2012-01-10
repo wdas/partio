@@ -44,12 +44,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <memory>
 
 
-namespace Partio{
+namespace Partio
+{
+
+using namespace std;
 
 template<ParticleAttributeType ETYPE>
-void readGeoAttr(std::istream& f,const ParticleAttribute& attr,ParticleAccessor& accessor,ParticlesDataMutable::iterator& iterator)
+void readGeoAttr(istream& f,const ParticleAttribute& attr,ParticleAccessor& accessor,ParticlesDataMutable::iterator& iterator)
 {
-    //std::cout<<"reading "<<TypeName(attr.type)<<std::endl;
+    //cout<<"reading "<<TypeName(attr.type)<<endl;
     typedef typename ETYPE_TO_TYPE<ETYPE>::TYPE TYPE;
     TYPE* data=accessor.raw<TYPE>(iterator);
     for(int k=0;k<attr.count;k++){
@@ -68,7 +71,7 @@ void writeString(std::ostream& output,const char* s){
     output<<"\"";
 }
 
-std::string scanString(std::istream& input)
+string scanString(istream& input)
 {
     // TODO: this code does not check for buf overrun
     // TODO: this code doesn't properly check for FEOF condition
@@ -101,14 +104,14 @@ std::string scanString(std::istream& input)
         }
     }
     *ptr++=0;
-    return std::string(buf);
+    return string(buf);
 }
 
 ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly)
 {
-    std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in));
+    auto_ptr<istream> input(Gzip_In(filename,ios::in));
     if(!*input){
-        std::cerr<<"Partio: Can't open particle data file: "<<filename<<std::endl;
+        cerr<<"Partio: Can't open particle data file: "<<filename<<endl;
         return 0;
     }
     int NPoints=0, NPointAttrib=0;
@@ -118,7 +121,7 @@ ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly)
     else simple=create();
 
     // read NPoints and NPointAttrib
-    std::string word;
+    string word;
     while(input->good()){
         *input>>word;
         if(word=="NPoints") *input>>NPoints;
@@ -135,26 +138,26 @@ ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly)
     ParticleAttribute positionAttr=simple->addAttribute("position",VECTOR,3);
     ParticleAccessor positionAccessor(positionAttr);
 
-    std::vector<ParticleAttribute> attrs;
-    std::vector<ParticleAccessor> accessors;
+    vector<ParticleAttribute> attrs;
+    vector<ParticleAccessor> accessors;
     while (input->good() && attrInfoRead < NPointAttrib) {
-        std::string attrName, attrType;
+        string attrName, attrType;
         int nvals = 0;
         *input >> attrName >> nvals >> attrType;
         if(attrType=="index"){
-            std::cerr<<"Partio: attr '"<<attrName<<"' of type index (string) found, treating as integer"<<std::endl;
+            cerr<<"Partio: attr '"<<attrName<<"' of type index (string) found, treating as integer"<<endl;
             int nIndices=0;
             *input>>nIndices;
             ParticleAttribute attribute=simple->addAttribute(attrName.c_str(),INDEXEDSTR,1);
             attrs.push_back(attribute);
             for(int j=0;j<nIndices;j++){
-                std::string indexName;
+                string indexName;
                 //*input>>indexName;
                 indexName=scanString(*input);
                 //std::cerr<<"Partio:    index "<<j<<" is "<<indexName<<std::endl;
                 int id=simple->registerIndexedStr(attribute,indexName.c_str());
                 if(id != j){
-                    std::cerr<<"Partio: error on read, expected registeerIndexStr to return index "<<j<<" but got "<<id<<" for string "<<indexName<<std::endl;
+                    cerr<<"Partio: error on read, expected registeerIndexStr to return index "<<j<<" but got "<<id<<" for string "<<indexName<<endl;
                 }
             }
             accessors.push_back(ParticleAccessor(attrs.back()));
@@ -171,7 +174,7 @@ ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly)
             else if(attrType=="vector") type=VECTOR;
             else if(attrType=="int") type=INT;
             else{
-                std::cerr<<"Partio: unknown attribute "<<attrType<<" type... aborting"<<std::endl;
+                cerr<<"Partio: unknown attribute "<<attrType<<" type... aborting"<<endl;
                 type=NONE;
             }
             attrs.push_back(simple->addAttribute(attrName.c_str(),type,nvals));
@@ -195,7 +198,7 @@ ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly)
         float* posInternal=positionAccessor.raw<float>(iterator); 
         for(int i=0;i<3;i++) *input>>posInternal[i];
         *input>>fval;
-        //std::cout<<"saw "<<posInternal[0]<<" "<<posInternal[1]<<" "<<posInternal[2]<<std::endl;
+        //cout<<"saw "<<posInternal[0]<<" "<<posInternal[1]<<" "<<posInternal[2]<<endl;
         
         // skip open paren
         char paren = 0;
@@ -221,7 +224,7 @@ ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly)
 
 
 template<class T>
-void writeType(std::ostream& output,const ParticlesData& p,const ParticleAttribute& attrib,
+void writeType(ostream& output,const ParticlesData& p,const ParticleAttribute& attrib,
     const ParticleAccessor& accessor,const ParticlesData::const_iterator& iterator)
 {
     const T* data=accessor.raw<T>(iterator);
@@ -233,22 +236,22 @@ void writeType(std::ostream& output,const ParticlesData& p,const ParticleAttribu
 
 bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
 {
-    std::auto_ptr<std::ostream> output(
+    auto_ptr<ostream> output(
         compressed ? 
-        Gzip_Out(filename,std::ios::out)
-        :new std::ofstream(filename,std::ios::out));
+        Gzip_Out(filename,ios::out)
+        :new ofstream(filename,ios::out));
 
-    *output<<"PGEOMETRY V5"<<std::endl;
-    *output<<"NPoints "<<p.numParticles()<<" NPrims "<<1<<std::endl;
-    *output<<"NPointGroups "<<0<<" NPrimGroups "<<0<<std::endl;
-    *output<<"NPointAttrib "<<p.numAttributes()-1<<" NVertexAttrib "<<0<<" NPrimAttrib 1 NAttrib 0"<<std::endl;
+    *output<<"PGEOMETRY V5"<<endl;
+    *output<<"NPoints "<<p.numParticles()<<" NPrims "<<1<<endl;
+    *output<<"NPointGroups "<<0<<" NPrimGroups "<<0<<endl;
+    *output<<"NPointAttrib "<<p.numAttributes()-1<<" NVertexAttrib "<<0<<" NPrimAttrib 1 NAttrib 0"<<endl;
 
-    if(p.numAttributes()-1>0) *output<<"PointAttrib"<<std::endl;
+    if(p.numAttributes()-1>0) *output<<"PointAttrib"<<endl;
     ParticleAttribute positionHandle;
     ParticleAccessor positionAccessor(positionHandle);
     bool foundPosition=false;
-    std::vector<ParticleAttribute> handles;
-    std::vector<ParticleAccessor> accessors;
+    vector<ParticleAttribute> handles;
+    vector<ParticleAccessor> accessors;
     for(int i=0;i<p.numAttributes();i++){
         ParticleAttribute attrib;
         p.attributeInfo(i,attrib);
@@ -259,7 +262,7 @@ bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
         }else{
             handles.push_back(attrib);
             accessors.push_back(ParticleAccessor(handles.back()));
-            std::string typestring;
+            string typestring;
             if(attrib.type!=INDEXEDSTR){
                 switch(attrib.type){
                     case NONE: assert(false);typestring="int";break;
@@ -272,7 +275,7 @@ bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
                 for(int k=0;k<attrib.count;k++) *output<<" "<<0;
             }else{
                 typestring="index";
-                const std::vector<std::string>& indexes=p.indexedStrs(attrib);
+                const vector<string>& indexes=p.indexedStrs(attrib);
                 *output<<attrib.name<<" "<<attrib.count<<" "<<typestring<<" "<<indexes.size();
                 for(size_t k=0;k<indexes.size();k++){
                     *output<<" ";
@@ -280,10 +283,10 @@ bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
                 }
             }
         }
-        *output<<std::endl;
+        *output<<endl;
     }
     if(!foundPosition){
-        std::cerr<<"Partio: didn't find attr 'position' while trying to write GEO"<<std::endl;
+        cerr<<"Partio: didn't find attr 'position' while trying to write GEO"<<endl;
         return false;
     }
 
@@ -308,16 +311,16 @@ bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
             }
         }        
         if(handles.size()) *output<<")";
-        *output<<std::endl;
+        *output<<endl;
     }
 
-    *output<<"PrimitiveAttrib"<<std::endl;
-    *output<<"generator 1 index 1 papi"<<std::endl;
+    *output<<"PrimitiveAttrib"<<endl;
+    *output<<"generator 1 index 1 papi"<<endl;
     *output<<"Part "<<p.numParticles();
     for(int i=0;i<p.numParticles();i++)
         *output<<" "<<i;
-    *output<<" [0]\nbeginExtra"<<std::endl;
-    *output<<"endExtra"<<std::endl;
+    *output<<" [0]\nbeginExtra"<<endl;
+    *output<<"endExtra"<<endl;
 
     // success
     return true;

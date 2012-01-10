@@ -67,7 +67,7 @@ protected:
     virtual ~ParticlesInfo() {}
 public:
     friend void freeCached(ParticlesData* particles);
-    
+
     //! Frees the memory if this particle set was created with create() or release()
     //! Reduces reference count if it was obtained with readCached()
     //! and if the ref count hits zero, frees the memory
@@ -138,7 +138,7 @@ public:
 
     //! Find the N nearest neighbors that are within maxRadius distance using STL types
     //! (measured in standard 2-norm). If less than N are found within the
-    //! radius, the search radius is not increased. 
+    //! radius, the search radius is not increased.
     //! NOTE: points/pointsDistancesSquared are cleared before use.
     //! Must call sort() before using this function
     virtual float findNPoints(const float center[3],int nPoints,const float maxRadius,
@@ -241,8 +241,8 @@ void write(const char* filename,const ParticlesData&,const bool forceCompressed=
 
 
 //! Cached (only one copy) read only way to read a particle file
-/*! 
-  Loads a file read-only if not already in memory, otherwise returns 
+/*!
+  Loads a file read-only if not already in memory, otherwise returns
   already loaded item. Pointer is owned by Partio and must be releasedwith
   p->release(); (will not be deleted if others are also holding).
   If you want to do finding neighbors give true to sort
