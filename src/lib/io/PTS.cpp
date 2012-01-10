@@ -45,6 +45,7 @@ Some code for this format  was helped along  by referring to an implementation b
 #include <string>
 #include <cassert>
 #include <memory>
+#include <cstring>
 
 namespace Partio
 {
@@ -56,14 +57,14 @@ using namespace std;
 ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
-    if(!*input)
-	{
+    if (!*input)
+    {
         cerr<<"Partio: Can't open particle data file: "<<filename<<endl;
         return 0;
     }
 
     ParticlesDataMutable* simple=0;
-    if(headersOnly) simple=new ParticleHeaders;
+    if (headersOnly) simple=new ParticleHeaders;
     else simple=create();
 
     // read NPoints and NPointAttrib
@@ -72,89 +73,179 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
     vector<string> attrNames;
     vector<ParticleAttribute> attrs;
 
-	/// FORMAT  is  7 elements  space delimited { posX posY posZ  magic?  red green blue }
-	// since there's no header data to parse we're just going to hard code this
+	/// we're going to fake the ID attribute since there's no such thing in PTS Files
+	attrNames.push_back((string)"id");
+	attrs.push_back(simple->addAttribute(attrNames[0].c_str(),Partio::INT,1));
 
-    attrNames.push_back((string)"position");
-	attrNames.push_back((string)"magic");
-	attrNames.push_back((string)"pointColor");
+    /// FORMAT  is  up to 8 elements  space delimited { posX posY posZ  remission quality  red green blue }
+    // since there's no header data to parse we're just going to hard code this
 
-    attrs.push_back(simple->addAttribute(attrNames[0].c_str(),Partio::VECTOR,3));
-    attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::INT,1));
-	attrs.push_back(simple->addAttribute(attrNames[2].c_str(),Partio::VECTOR,3));
+    /* Start from the beginning */
+	input->seekg(0,ios::beg);
 
+    /* Determine amount of values per line */
+    char line[1024];
+    /* Jump over first line. */
+	input->getline(line,1024);
+    input->getline(line,1024);
+    int valcount = 0;
+    char * pch = strtok( line, "\t " );
+    while ( pch )
+    {
+        if ( *pch != 0 && *pch != '\n' )
+		{
+            valcount++;
+        }
+        pch = strtok( NULL, "\t " );
+    }
+
+
+    switch ( valcount )
+	{
+		case 3:  // position only
+		{
+			attrNames.push_back((string)"position");
+			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::VECTOR,3));
+		}
+		break;
+		case 4:  // position and  remission
+		{
+			attrNames.push_back((string)"position");
+			attrNames.push_back((string)"remission");
+			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::VECTOR,3));
+			attrs.push_back(simple->addAttribute(attrNames[2].c_str(),Partio::FLOAT,1));
+		}
+		break;
+		case 6: //  position and RGB
+		{
+			attrNames.push_back((string)"position");
+			attrNames.push_back((string)"pointColor");
+			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::VECTOR,3));
+			attrs.push_back(simple->addAttribute(attrNames[2].c_str(),Partio::VECTOR,3));
+		}
+		break;
+		case 7: // position remission and  RGB
+		{
+			attrNames.push_back((string)"position");
+			attrNames.push_back((string)"remission");
+			attrNames.push_back((string)"pointColor");
+			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::VECTOR,3));
+			attrs.push_back(simple->addAttribute(attrNames[2].c_str(),Partio::FLOAT,1));
+			attrs.push_back(simple->addAttribute(attrNames[3].c_str(),Partio::VECTOR,3));
+		}
+		break;
+		case 8: // everything
+		{
+			attrNames.push_back((string)"position");
+			attrNames.push_back((string)"remission");
+			attrNames.push_back((string)"quality");
+			attrNames.push_back((string)"pointColor");
+			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::VECTOR,3));
+			attrs.push_back(simple->addAttribute(attrNames[2].c_str(),Partio::FLOAT,1));
+			attrs.push_back(simple->addAttribute(attrNames[3].c_str(),Partio::INT,1));
+			attrs.push_back(simple->addAttribute(attrNames[4].c_str(),Partio::VECTOR,3));
+		}
+		break;
+		default:
+		{
+			return 0;
+		}
+		break;
+
+    }
+
+    input->seekg(0,ios::beg);
 
     unsigned int num=0;
     simple->addParticles(num);
-    if(headersOnly) return simple; // escape before we try to touch data
+    if (headersOnly) return simple; // escape before we try to touch data
 
-    if(input->good())
-	{ // garbage count at top of  file
-        *input>>word;
+    if (input->good())
+    { // garbage count at top of  file
+		char junk[1024];
+        input->getline(junk,1024);
     }
 
-	unsigned int index = 0;
     // Read actual particle data
-    if(!input->good()){simple->release();return 0;}
+    if (!input->good()) {
+        simple->release();
+        return 0;
+    }
 
-	// we have to read line by line, because data is not  clean and consistent so we skip any lines that dont' conform
+    // we have to read line by line, because data is not  clean and consistent so we skip any lines that dont' conform
 
-    for(unsigned int particleIndex=0;input->good();)
-	{
-		string token = "";
-		char line[100];
-		input->getline(line, 100);
+    for (unsigned int particleIndex=0;input->good();)
+    {
+        string token = "";
+        char line[1024];
+        input->getline(line, 1024);
 
-		stringstream ss(line);
+        stringstream ss(line);
 
-		float lineData[7];
-		int i = 0;
+        float lineData[8];
+        int i = 0;
 
-		while (ss >> token)
-		{
-			stringstream foo(token);
-			float x;
-			foo >> x;
+        while (ss >> token)
+        {
+            stringstream foo(token);
+            float x;
+            foo >> x;
 			lineData[i] = x;
-			i++;
-		}
+            i++;
+        }
 
-		if (i == 7)
-		{
-			simple->addParticle();
-			for(unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++)
-			{
-				if(attrs[attrIndex].type==Partio::INT)
-				{
+        if (i == valcount)
+        {
+            simple->addParticle();
+            for (unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++)
+            {
+                if (attrs[attrIndex].type==Partio::INT )
+                {
 					int* data=simple->dataWrite<int>(attrs[attrIndex],particleIndex);
+					if (attrs[attrIndex].name == "id")
+					{
 						data[0]=particleIndex;
-				}
-				else if(attrs[attrIndex].type==Partio::FLOAT || attrs[attrIndex].type==Partio::VECTOR)
-				{
-					float* data=simple->dataWrite<float>(attrs[attrIndex],particleIndex);
+					}
+					else
+					{
+						data[0] = (int)lineData[4];
+					}
 
-					if(attrs[attrIndex].name == "pointColor")
+
+                }
+                else if (attrs[attrIndex].type==Partio::FLOAT || attrs[attrIndex].type==Partio::VECTOR)
+                {
+                    float* data=simple->dataWrite<float>(attrs[attrIndex],particleIndex);
+
+					if (attrs[attrIndex].name == "pointColor")
 					{
 						// 8 bit color  conversion
 						data[0]=lineData[4]/255;
 						data[1]=lineData[5]/255;
 						data[2]=lineData[6]/255;
 					}
-					else
+					else if (attrs[attrIndex].name == "position")
 					{
 						// position, we flip y/z
 						data[0]=lineData[0];
 						data[1]=lineData[2];
 						data[2]=lineData[1];
 					}
-				}
-			}
-			particleIndex++;
-		}
+					else if (attrs[attrIndex].name == "remission")
+					{
+						data[0] = lineData[3];
+					}
+
+                }
+            }
+            particleIndex++;
+        }
     }
     return simple;
 }
 
+/// THIS DOESENT WORK YET>>
+/*
 bool writePTS(const char* filename,const ParticlesData& p,const bool compressed)
 {
     auto_ptr<ostream> output(
@@ -205,5 +296,7 @@ bool writePTS(const char* filename,const ParticlesData& p,const bool compressed)
     return true;
 
 }
+*/
 
 }
+
