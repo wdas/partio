@@ -45,8 +45,6 @@ difficult/error prone to detect what type the PDB file is.
 
 */
 
-#include <stdio.h>
-#include <stdlib.h>
 
 #define PDB_VECTOR          1
 #define PDB_REAL            2

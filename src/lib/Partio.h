@@ -176,7 +176,7 @@ private:
 class ParticlesDataMutable:public ParticlesData
 {
 protected:
-    virtual ~ParticlesDataMutable();
+    virtual ~ParticlesDataMutable(){}
 
 public:
 
