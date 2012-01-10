@@ -58,10 +58,14 @@ TypeName(ParticleAttributeType attrType)
 ParticlesDataMutable*
 create()
 {
-//    return new ParticlesSimpleInterleave;
    return new ParticlesSimple;
 }
 
+ParticlesDataMutable*
+createInterleave()
+{
+    return new ParticlesSimpleInterleave;
+}
 
 
 

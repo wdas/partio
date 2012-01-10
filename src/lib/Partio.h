@@ -227,6 +227,8 @@ private:
 //! Provides an empty particle instance, freed with p->release()
 ParticlesDataMutable* create();
 
+ParticlesDataMutable* createInterleave();
+
 //! Provides read/write access to a particle set stored in a file
 //! freed with p->release()
 ParticlesDataMutable* read(const char* filename);
