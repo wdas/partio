@@ -182,7 +182,7 @@ ParticlesDataMutable* readMC(const char* filename, const bool headersOnly){
             input->seekg((int)input->tellg() + attrHeader.blocksize);
             continue;
         }
-#if 0 // TODO: put this back if we ever add back attributes
+#if 0 // TODO: if we ever put back attributes re-enable this
         if(attributes && (IsStringInCharArray(attrHeader.name, attributes)==false)){
             input->seekg((int)input->tellg() + attrHeader.blocksize);
             continue;
