@@ -23,4 +23,5 @@
 /include/
 /lib/
 /py/
-/MakeFile
+*Makefile*
+*Doxyfile
