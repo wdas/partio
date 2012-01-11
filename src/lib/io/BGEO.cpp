@@ -55,7 +55,7 @@ void writeHoudiniStr(ostream& ostream,const string& s)
 }
 
 
-ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly, char** attributes, int percentage)
+ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
@@ -99,14 +99,14 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly, char
 
 
     // Read attribute definitions
-    int particleSize=4; // Size in # of 32 bit primitives 
+    int particleSize=4; // Size in # of 32 bit primitives
     vector<int> attrOffsets; // offsets in # of 32 bit offsets
     vector<ParticleAttribute> attrHandles;
     vector<ParticleAccessor> accessors;
     attrOffsets.push_back(0); // pull values from byte offset
     attrHandles.push_back(simple->addAttribute("position",VECTOR,3)); // we always have one
     accessors.push_back(ParticleAccessor(attrHandles[0]));
-    
+
     for(int i=0;i<nPointAttrib;i++){
         unsigned short nameLength;
         read<BIGEND>(*input,nameLength);
@@ -196,7 +196,7 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly, char
 bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed)
 {
     auto_ptr<ostream> output(
-        compressed ? 
+        compressed ?
         Gzip_Out(filename,ios::out|ios::binary)
         :new ofstream(filename,ios::out|ios::binary));
 
@@ -283,7 +283,7 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
                 buffer[attrOffsets[attrIndex]+k]=data[k];
                 BIGEND::swap(buffer[attrOffsets[attrIndex]+k]);
             }
-        }        
+        }
         // set homogeneous coordinate
         float *w=(float*)&buffer[3];
         *w=1.;

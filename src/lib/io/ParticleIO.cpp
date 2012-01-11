@@ -38,13 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "../Partio.h"
 #include "readers.h"
 
-namespace Partio
-{
-
+namespace Partio{
 using namespace std;
 
 // reader and writer code
-typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool,char**,int);
+typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool);
 typedef bool (*WRITER_FUNCTION)(const char*,const ParticlesData&,const bool);
 
 map<string,READER_FUNCTION>&
@@ -52,8 +50,7 @@ readers()
 {
     static map<string,READER_FUNCTION> data;
     static bool initialized=false;
-    if(!initialized)
-	{
+    if(!initialized){
         data["bgeo"]=readBGEO;
         data["geo"]=readGEO;
         data["pdb"]=readPDB;
@@ -62,10 +59,10 @@ readers()
         data["pda"]=readPDA;
         data["mc"]=readMC;
         data["ptc"]=readPTC;
-		data["pdc"]=readPDC;
-		data["prt"]=readPRT;
-		data["bin"]=readBIN;
-		data["pts"]=readPTS;
+        data["pdc"]=readPDC;
+        data["prt"]=readPRT;
+        data["bin"]=readBIN;
+        data["pts"]=readPTS;
     }
     return data;
 }
@@ -84,9 +81,9 @@ writers()
         data["pda"]=writePDA;
         data["ptc"]=writePTC;
         data["rib"]=writeRIB;
-	data["pdc"]=writePDC;
-	data["prt"]=writePRT;
-	data["bin"]=writeBIN;
+        data["pdc"]=writePDC;
+        data["prt"]=writePRT;
+        data["bin"]=writeBIN;
     }
     return data;
 }
@@ -129,22 +126,7 @@ read(const char* c_filename)
         cerr<<"Partio: No reader defined for extension "<<extension<<endl;
         return 0;
     }
-    return (*i->second)(c_filename,false,NULL,100);
-}
-
-ParticlesDataMutable*
-readPart(const char* c_filename, char** attributes, int percentage)
-{
-    string filename(c_filename);
-    string extension;
-    bool endsWithGz;
-    if(!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
-    map<string,READER_FUNCTION>::iterator i=readers().find(extension);
-    if(i==readers().end()){
-        cerr<<"Partio: No reader defined for extension "<<extension<<endl;
-        return 0;
-    }
-    return (*i->second)(c_filename,false,attributes,percentage);
+    return (*i->second)(c_filename,false);
 }
 
 ParticlesInfo*
@@ -159,7 +141,7 @@ readHeaders(const char* c_filename)
         cerr<<"Partio: No reader defined for extension "<<extension<<endl;
         return 0;
     }
-    return (*i->second)(c_filename,true,false,0);
+    return (*i->second)(c_filename,true);
 }
 
 void
@@ -175,25 +157,6 @@ write(const char* c_filename,const ParticlesData& particles,const bool forceComp
         return;
     }
     (*i->second)(c_filename,particles,forceCompressed || endsWithGz);
-}
-
-
-void
-reportLoadProgress(float progress)
-{
-	static stringstream bars;
-	static int x = 0;
-	string slash[4];
-	slash[0] = "\\";
-	slash[1] = "-";
-	slash[2] = "/";
-	slash[3] = "|";
-
-	cout << "\033[1;31m\rPartio Loading: " << " " << slash[x] << " "<< (int)progress << " points\033[0m";
-	fflush(stdout);
-	x++;
-	if (x == 4)
-	{ x = 0; }
 }
 
 } // namespace Partio

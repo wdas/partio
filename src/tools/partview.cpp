@@ -33,6 +33,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
+#include <cstdio>
 
 #include "partview.h"
 
@@ -420,7 +421,6 @@ void  reloadParticleFile(int direction)
 		if (result >=0)
 		{
 			particles=read(particleFile.c_str());
-			//particles->attributeNames();
 			if (!glutGetWindow()) {
 				return;
 			}

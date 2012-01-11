@@ -49,7 +49,7 @@ using namespace std;
 
 // TODO: convert this to use iterators like the rest of the readers/writers
 
-ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char** attributes, int percentage)
+ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
@@ -63,7 +63,7 @@ ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char**
 
     // read NPoints and NPointAttrib
     string word;
-    
+
     if(input->good()){
         *input>>word;
         if(word!="ATTRIBUTES"){simple->release();return 0;}
@@ -105,7 +105,7 @@ ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char**
         simple->release();
         return 0;
     }
-    
+
     // look for beginning of header
     if(input->good()){
         *input>>word;
@@ -137,14 +137,14 @@ ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,char**
             }
         }
     }
-    
+
     return simple;
 }
 
 bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
 {
     auto_ptr<ostream> output(
-        compressed ? 
+        compressed ?
         Gzip_Out(filename,ios::out|ios::binary)
         :new ofstream(filename,ios::out|ios::binary));
 
@@ -164,7 +164,7 @@ bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
         switch(attrs[aIndex].type){
             case FLOAT: *output<<" R";break;
             case VECTOR: *output<<" V";break;
-            case INDEXEDSTR: 
+            case INDEXEDSTR:
             case INT: *output<<" I";break;
             case NONE: assert(false); break; // TODO: more graceful
         }

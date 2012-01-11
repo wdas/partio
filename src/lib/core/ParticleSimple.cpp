@@ -100,16 +100,6 @@ attributeInfo(const char* attributeName,ParticleAttribute& attribute) const
 }
 
 
-void ParticlesSimple::attributeNames() const
-{
-	std::map<std::string,int>::const_iterator it;
-	for (it =nameToAttribute.begin(); it != nameToAttribute.end(); it++)
-	{
-		std::cout << it->first << std::endl;
-	}
-}
-
-
 void ParticlesSimple::
 sort()
 {

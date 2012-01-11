@@ -58,8 +58,7 @@ public:
 
     int numAttributes() const;
     int numParticles() const;
-	void attributeNames() const;
-    bool attributeInfo(const char* attributeName,ParticleAttribute& attribute) const;
+	bool attributeInfo(const char* attributeName,ParticleAttribute& attribute) const;
     bool attributeInfo(const int attributeInfo,ParticleAttribute& attribute) const;
     void dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
         const ParticleIndex* particleIndices,const bool sorted,float* values) const;

@@ -81,7 +81,7 @@ bool ParseSpec(const string& spec,string& typeName,string& name)
     return true;
 }
 
-ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly,char** attributes, int percentage)
+ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
@@ -168,7 +168,7 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly,char**
             simple->release();
             return 0;
         }
-
+        
         // make unqiue name
         int unique=1;
         string effectiveName=name;
@@ -189,7 +189,7 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly,char**
         return 0;
     }
 
-    // If all we care about is headers, then return.
+    // If all we care about is headers, then return.  
     if(headersOnly){
         return simple;
     }
@@ -218,7 +218,7 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly,char**
 	     norm[1] = rxy * cos(fphi);
 	} else {
 	     norm[0] = norm[1] = norm[2] = 0.0f;
-	}
+	}        
 
         float* radius=simple->dataWrite<float>(radiusHandle,pointIndex);
         read<LITEND>(*input,radius[0]);
@@ -240,7 +240,7 @@ bool writePTC(const char* filename,const ParticlesData& p,const bool compressed)
     //ofstream output(filename,ios::out|ios::binary);
 
     auto_ptr<ostream> output(
-        compressed ?
+        compressed ? 
         Gzip_Out(filename,ios::out|ios::binary)
         :new ofstream(filename,ios::out|ios::binary));
 
@@ -281,7 +281,7 @@ bool writePTC(const char* filename,const ParticlesData& p,const bool compressed)
     write<LITEND>(*output,boxmin[0],boxmin[1],boxmin[2]);
     write<LITEND>(*output,boxmax[0],boxmax[1],boxmax[2]);
 
-    // world-to-eye &
+    // world-to-eye & 
     for(int i=0;i<4;i++) for(int j=0;j<4;j++){
             if(i==j) write<LITEND>(*output,(float)1);
             else write<LITEND>(*output,(float)0);
@@ -291,7 +291,7 @@ bool writePTC(const char* filename,const ParticlesData& p,const bool compressed)
     for(int i=0;i<4;i++) for(int j=0;j<4;j++){
             write<LITEND>(*output,foo[i][j]);
     }
-
+    
 
     // imgwidth imgheight, imgdepth
     write<LITEND>(*output,(float)640,(float)480,(float)300);
@@ -366,7 +366,7 @@ bool writePTC(const char* filename,const ParticlesData& p,const bool compressed)
                 write<LITEND>(*output,data[k]);
             }
         }
-
+        
     }
     return true;
 }

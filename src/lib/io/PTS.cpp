@@ -2,9 +2,6 @@
 PARTIO SOFTWARE
 Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
 
-Format Contributed by github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
-Some code for this format  was helped along  by referring to an implementation by
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -34,6 +31,9 @@ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+Format Contributed by github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
+Some code for this format  was helped along  by referring to an implementation by
 */
 #include "../Partio.h"
 #include "../core/ParticleHeaders.h"
@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <string>
 #include <cassert>
 #include <memory>
+#include <cstring>
 
 namespace Partio
 {
@@ -53,7 +54,7 @@ using namespace std;
 
 // TODO: convert this to use iterators like the rest of the readers/writers
 
-ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly,char** attributes, int percentage)
+ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if (!*input)
@@ -165,7 +166,6 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly,char**
         input->getline(junk,1024);
     }
 
-    //uint index = 0;
     // Read actual particle data
     if (!input->good()) {
         simple->release();
@@ -176,10 +176,6 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly,char**
 
     for (unsigned int particleIndex=0;input->good();)
     {
-		if (particleIndex%1000 == 0)
-		{
-			reportLoadProgress ((float)particleIndex);
-		}
         string token = "";
         char line[1024];
         input->getline(line, 1024);

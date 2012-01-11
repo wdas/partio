@@ -113,7 +113,7 @@ template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,cons
     }
 
     simple->addParticles(header.data_size);
-    
+
     for(unsigned int i=0;i<header.num_data;i++){
         typename PDB_POLICY<bits>::CHANNEL_IO channelIOHeader;
         input->read((char*)&channelIOHeader,sizeof(channelIOHeader));
@@ -129,7 +129,7 @@ template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,cons
         typename PDB_POLICY<bits>::CHANNEL_DATA channelData;
         input->read((char*)&channelData,sizeof(channelData));
 
-        
+
         ParticleAttributeType type;
         switch(channelHeader.type){
             case PDB_VECTOR: type=VECTOR;break;
@@ -176,7 +176,7 @@ template<int bits>
 bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compressed)
 {
     auto_ptr<ostream> output(
-        compressed ? 
+        compressed ?
         Gzip_Out(filename,ios::out|ios::binary)
         :new ofstream(filename,ios::out|ios::binary));
 
@@ -196,7 +196,7 @@ bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compr
     for(int k=0;k<32;k++) h32.padding[k]=0;
     h32.data=0;
     output->write((char*)&h32,sizeof(typename PDB_POLICY<bits>::HEADER));
-    
+
     for(int attrIndex=0;attrIndex<p.numAttributes();attrIndex++){
         ParticleAttribute attr;
         p.attributeInfo(attrIndex,attr);
@@ -213,7 +213,7 @@ bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compr
         cio.encoding=0;
         cio.type=0;
         output->write((char*)&cio,sizeof(typename PDB_POLICY<bits>::CHANNEL_IO));
- 
+
         // TODO: assert cproper count!
         channel.name=0;
         switch(attr.type){
@@ -251,10 +251,10 @@ bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compr
     return true;
 }
 
-ParticlesDataMutable* readPDB32(const char* filename,const bool headersOnly, char** attributes, int percentage)
+ParticlesDataMutable* readPDB32(const char* filename,const bool headersOnly)
 {return readPDBHelper<32>(filename,headersOnly);}
 
-ParticlesDataMutable* readPDB64(const char* filename,const bool headersOnly, char** attributes, int percentage)
+ParticlesDataMutable* readPDB64(const char* filename,const bool headersOnly)
 {return readPDBHelper<64>(filename,headersOnly);}
 
 bool writePDB32(const char* filename,const ParticlesData& p,const bool compressed)
@@ -263,7 +263,7 @@ bool writePDB32(const char* filename,const ParticlesData& p,const bool compresse
 bool writePDB64(const char* filename,const ParticlesData& p,const bool compressed)
 {return writePDBHelper<64>(filename,p,compressed);}
 
-ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly, char** attributes, int percentage)
+ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){

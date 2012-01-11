@@ -6,10 +6,7 @@
 /build
 *~
 *.o
-/partio.kdevelop
-/partio.kdevelop.filelist
-/partio.kdevelop.pcs
-/partio.kdevses
+/*.kdev*
 *.cmake
 *.txt
 *.make
@@ -23,7 +20,7 @@
 *.log
 /bin
 /CMakeFiles
-
 /include/
 /lib/
 /py/
+/MakeFile
