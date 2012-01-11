@@ -24,3 +24,6 @@
 /bin
 /CMakeFiles
 
+/include/
+/lib/
+/py/
