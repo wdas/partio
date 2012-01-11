@@ -33,7 +33,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 Format Contributed by github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
-Some code for this format  was helped along  by referring to an implementation by
+Some code for this format  was helped along  by referring to an implementation by github user ikiesow (libPTS)
 */
 #include "../Partio.h"
 #include "../core/ParticleHeaders.h"
