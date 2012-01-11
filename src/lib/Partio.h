@@ -44,6 +44,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <string>
 #include <vector>
 #include <map>
+#include <cstdio>
+#include <cstring>
 #include <stdint.h>
 #include "PartioAttribute.h"
 #include "PartioIterator.h"
