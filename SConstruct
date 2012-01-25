@@ -5,6 +5,7 @@ def kernel_version():
     return os.popen("uname -r").read().strip().split('-')[0]
 
 default_cxx="g++"
+default_cxxflags=""
 
 options=Variables("SConstruct.options")
 
@@ -14,6 +15,7 @@ arch = platform.machine()
 
 options.AddVariables(
     ('CXX','C++ compiler',default_cxx),
+    ('CXXFLAGS','C++ compiler flags',default_cxxflags),
     ('mac','Is a mac', uos == 'Darwin'),
     EnumVariable("TYPE",
                "Type of build (e.g. optimize,debug)",
@@ -60,9 +62,9 @@ if env["mac"]==True:
     #env.Append(LINKFLAGS=["-m32"])
 
 if env["TYPE"]=="optimize":
-    env.Append(CXXFLAGS="-fPIC -DNDEBUG -O3 -fno-strict-aliasing -Wall -Wstrict-aliasing=0  -mfpmath=sse -msse3".split())
+    env.Append(CXXFLAGS=" -fPIC -DNDEBUG -O3 -fno-strict-aliasing -Wall -Wstrict-aliasing=0 -mfpmath=sse -msse3".split())
 if env["TYPE"]=="profile":
-    env.Append(CXXFLAGS="-fPIC -fno-strict-aliasing -DNDEBUG -g -fno-omit-frame-pointer -O3 -Wall -Werror -Wstrict-aliasing=0  -mfpmath=sse -msse3".split())
+    env.Append(CXXFLAGS=" -fPIC -fno-strict-aliasing -DNDEBUG -g -fno-omit-frame-pointer -O3 -Wall -Werror -Wstrict-aliasing=0  -mfpmath=sse -msse3".split())
 elif env["TYPE"]=="debug":
     env.Append(CXXFLAGS=" -fPIC -g -Wall -Werror -Wstrict-aliasing=0")
 
