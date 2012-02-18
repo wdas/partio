@@ -32,29 +32,15 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
-#include <Partio.h>
-#include <cassert>
-#include <iostream>
-#include "partiotesting.h"
-#include "testcache.h"
 
-void Partio::test_Cache()
+#include "teststr.h"
+
+// Standalone execution of teststr, here for legacy purposes
+
+int main(int argc,char *argv[])
 {
-    std::cout << "------- Executing test_Cache() -------" << std::endl;
-
-    Partio::ParticlesDataMutable* p=Partio::create();
-    Partio::ParticleAttribute attr=p->addAttribute("position",Partio::VECTOR,3);
-    p->addParticle();
-    float* pos=p->dataWrite<float>(attr,0);
-    pos[0]=1;pos[1]=2;pos[2]=3;
-    Partio::write("/tmp/test.bgeo",*p);
-    p->release();
-
-    Partio::ParticlesInfo* p1=Partio::readCached("/tmp/test.bgeo",false);
-    Partio::ParticlesInfo* p2=Partio::readCached("/tmp/test.bgeo",false);
-    TESTEXPECT(p1==p2);
-    p1->release();p2->release();
-    Partio::ParticlesInfo* p3=Partio::readCached("/tmp/test.bgeo",false);
-    p3->release();
-
+	Partio::test_str();
+	return 0;
 }
+
+

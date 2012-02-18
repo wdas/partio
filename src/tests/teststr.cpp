@@ -1,4 +1,37 @@
+/*
+PARTIO SOFTWARE
+Copyright 2010 Disney Enterprises, Inc. All rights reserved
 
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+* The names "Disney", "Walt Disney Pictures", "Walt Disney Animation
+Studios" or the names of its contributors may NOT be used to
+endorse or promote products derived from this software without
+specific prior written permission from Walt Disney Pictures.
+
+Disclaimer: THIS SOFTWARE IS PROVIDED BY WALT DISNEY PICTURES AND
+CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+IN NO EVENT SHALL WALT DISNEY PICTURES, THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+*/
 
 #include <Partio.h>
 #include <iostream>
@@ -6,22 +39,24 @@
 #include <stdexcept>
 #include <cstdlib>
 
+#include "teststr.h"
+
 using namespace Partio;
 
-void failure(const std::string& x)
+void Partio::failure(const std::string& x)
 {
     std::cerr<<"teststr failed "<<x<<std::endl;
     exit(1);
 }
 
-int main(int argc,char *argv[])
+void Partio::test_str()
 {
-    {
+ {
         ParticlesDataMutable* p=create();
         ParticleAttribute posAttr=p->addAttribute("position",VECTOR,3);
         ParticleAttribute fileAttr=p->addAttribute("filename",INDEXEDSTR,1);
         ParticleAttribute stateAttr=p->addAttribute("state",INDEXEDSTR,1);
-        
+
         int test1Token=p->registerIndexedStr(fileAttr,"test1");
         int test2Token=p->registerIndexedStr(fileAttr,"test2 with space");
 
@@ -54,7 +89,7 @@ int main(int argc,char *argv[])
         if(!p->attributeInfo("position",posAttr)) failure("couldn't get position");
         if(!p->attributeInfo("filename",fileAttr)) failure("couldn't get filnename");
         if(!p->attributeInfo("state",stateAttr)) failure("couldn't get state");
-        
+
 
         // lookup the string codes in a way that is efficient to check later
         int alive=p->lookupIndexedStr(stateAttr,"alive");
@@ -77,7 +112,5 @@ int main(int argc,char *argv[])
 
         p->release();
     }
-    return 0;
 }
-
 

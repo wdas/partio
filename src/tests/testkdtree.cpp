@@ -38,14 +38,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <iostream>
 #include <cmath>
 #include <stdexcept>
-#define GRIDN 9
+#include "partiotesting.h"
+#include "testkdtree.h"
 
+using namespace Partio;
 
-#define TESTASSERT(x)\
- if(!(x)) throw std::runtime_error(__FILE__ ": Test failed on " #x ); 
-
-
-Partio::ParticlesDataMutable* makeData()
+ParticlesDataMutable* Partio::makeKDTreeData()
 {
     Partio::ParticlesDataMutable& foo=*Partio::create();
     Partio::ParticleAttribute positionAttr=foo.addAttribute("position",Partio::VECTOR,3);
@@ -71,13 +69,12 @@ Partio::ParticlesDataMutable* makeData()
     return &foo;
 }
 
-int main(int argc,char *argv[])
+void Partio::test_KDTree()
 {
-    Partio::ParticlesDataMutable* foo=makeData();
+	std::cout << "------- Executing test_KDTree() -------" << std::endl;
+    Partio::ParticlesDataMutable* foo=makeKDTreeData();
     Partio::ParticleAttribute posAttr;
-    TESTASSERT (foo->attributeInfo("position", posAttr));
-
-
+    TESTEXPECT (foo->attributeInfo("position", posAttr));
     std::cout << "Testing lookup with stl types ...\n";
     {
         std::vector<uint64_t> indices;
@@ -85,20 +82,21 @@ int main(int argc,char *argv[])
         float point[3] = {0.51, 0.52, 0.53};
 
         foo->findNPoints(point, 5, 0.15f, indices, dists);
-        TESTASSERT (indices.size() == 5);
-        
+        TESTEXPECT (indices.size() == 5);
+
         const float *pos = foo->data<float>(posAttr, indices[0]);
-        TESTASSERT (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTEXPECT (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[1]);
-        TESTASSERT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTEXPECT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[2]);
-        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
+        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
         pos = foo->data<float>(posAttr, indices[3]);
-        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
+        std::clog << "Pos: " << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
+        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[4]);
-        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
-        
-        std::cout << "Test passed\n";
+        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+
+        std::cout << "Test finished\n";
     }
     std::cout << "Testing lookup with pod types ...\n";
     {
@@ -108,23 +106,21 @@ int main(int argc,char *argv[])
 
         float finalDist;
         int returned=foo->findNPoints(point, 5, 0.15f, indices, dists,&finalDist);
-        TESTASSERT(returned == 5);
-        
-        const float *pos = foo->data<float>(posAttr, indices[0]);
-        TESTASSERT (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[1]);
-        TESTASSERT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[2]);
-        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
-        pos = foo->data<float>(posAttr, indices[3]);
-        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[4]);
-        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTEXPECT(returned == 5);
 
-        std::cout << "Test passed\n";
+        const float *pos = foo->data<float>(posAttr, indices[0]);
+        TESTEXPECT (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
+        pos = foo->data<float>(posAttr, indices[1]);
+        TESTEXPECT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
+        pos = foo->data<float>(posAttr, indices[2]);
+        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
+        pos = foo->data<float>(posAttr, indices[3]);
+        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
+        pos = foo->data<float>(posAttr, indices[4]);
+        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+
+        std::cout << "Test finished\n";
     }
     foo->release();
-
-    return 0;
 
 }
