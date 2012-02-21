@@ -108,7 +108,7 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::VECTOR,3));
 		}
 		break;
-		case 4:  // position and  remission
+		case 4:  // position and  refl/emission
 		{
 			attrNames.push_back((string)"position");
 			attrNames.push_back((string)"remission");
@@ -124,7 +124,7 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 			attrs.push_back(simple->addAttribute(attrNames[2].c_str(),Partio::VECTOR,3));
 		}
 		break;
-		case 7: // position remission and  RGB
+		case 7: // position refl/emission and  RGB
 		{
 			attrNames.push_back((string)"position");
 			attrNames.push_back((string)"remission");
