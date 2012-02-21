@@ -114,7 +114,10 @@ static void render()
             if (particles->numParticles() > 0)
             {
 
-                if (!particles->attributeInfo("position",positionAttr))
+                if (!particles->attributeInfo("position",positionAttr) &&
+					!particles->attributeInfo("Position",positionAttr) &&
+					!particles->attributeInfo("pos",positionAttr) &&
+					!particles->attributeInfo("Pos",positionAttr) )
                 {
                     std::cerr<<"Failed to find position attribute "<<std::endl;
                 }

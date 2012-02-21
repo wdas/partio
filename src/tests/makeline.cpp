@@ -47,8 +47,9 @@ int main(int argc,char *argv[])
     Partio::ParticleAttribute position=particles->addAttribute("position",Partio::VECTOR,3);
     Partio::ParticleAttribute id=particles->addAttribute("id",Partio::INT,1);
 
-    
-    
+
+	// before adding  additional  attrs. you must ->begin() the iterator
+
     Partio::ParticlesDataMutable::iterator it=particles->begin();
     Partio::ParticleAccessor positionAccess(position);
     it.addAccessor(positionAccess);
@@ -65,9 +66,9 @@ int main(int argc,char *argv[])
         x+=1.;
         idCounter++;
     }
-    
+
     Partio::write("test.bgeo",*particles);
     Partio::write("test.geo",*particles);
-    
+
 
 }
