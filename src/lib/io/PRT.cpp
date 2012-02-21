@@ -217,7 +217,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
     z.zalloc = Z_NULL;z.zfree = Z_NULL;z.opaque = Z_NULL;
     if (inflateInit( &z ) != Z_OK) {
         std::cerr<<"Zlib inflateInit error"<<std::endl;
-        return false;
+        return 0;
     }
 
     char in_buf[OUT_BUFSIZE];
@@ -326,7 +326,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
 	}
     if (inflateEnd( &z ) != Z_OK) {
         std::cerr<<"Zlib inflateEnd error"<<std::endl;
-        return false;
+        return 0;
     }
 
     // success
