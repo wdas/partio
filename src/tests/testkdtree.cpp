@@ -49,7 +49,6 @@ ParticlesDataMutable* Partio::makeKDTreeData()
     Partio::ParticleAttribute positionAttr=foo.addAttribute("position",Partio::VECTOR,3);
     Partio::ParticleAttribute idAttr=foo.addAttribute("id",Partio::INT,1);
 
-
     std::cout << "Inserting points ...\n";
     for (int i = 0; i < GRIDN; i++)
         for (int j = 0; j < GRIDN; ++j)
@@ -73,7 +72,11 @@ void Partio::test_KDTree()
 {
 	std::cout << "------- Executing test_KDTree() -------" << std::endl;
     Partio::ParticlesDataMutable* foo=makeKDTreeData();
+
     Partio::ParticleAttribute posAttr;
+
+    // check that position attribute exists
+
     TESTEXPECT (foo->attributeInfo("position", posAttr));
     std::cout << "Testing lookup with stl types ...\n";
     {
@@ -91,7 +94,7 @@ void Partio::test_KDTree()
         pos = foo->data<float>(posAttr, indices[2]);
         TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
         pos = foo->data<float>(posAttr, indices[3]);
-        std::clog << "Pos: " << pos[0] << " " << pos[1] << " " << pos[2] << std::endl;
+        // the following tests fail ( points are retrieved in the opposite order )
         TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[4]);
         TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
@@ -114,6 +117,7 @@ void Partio::test_KDTree()
         TESTEXPECT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[2]);
         TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
+        // the following tests fail ( points are retrieved in the opposite order )
         pos = foo->data<float>(posAttr, indices[3]);
         TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[4]);
