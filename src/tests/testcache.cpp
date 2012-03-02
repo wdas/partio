@@ -32,6 +32,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
+
 #include <Partio.h>
 #include <cassert>
 #include <iostream>
@@ -53,7 +54,8 @@ void Partio::test_Cache()
     Partio::ParticlesInfo* p1=Partio::readCached("/tmp/test.bgeo",false);
     Partio::ParticlesInfo* p2=Partio::readCached("/tmp/test.bgeo",false);
     TESTEXPECT(p1==p2);
-    p1->release();p2->release();
+    p1->release();
+    p2->release();
     Partio::ParticlesInfo* p3=Partio::readCached("/tmp/test.bgeo",false);
     p3->release();
 
