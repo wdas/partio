@@ -208,7 +208,7 @@ static void render()
     else
     {
 
-        for (uint a=0; a<=loadError.size();a++)
+        for (unsigned int a=0; a<=loadError.size();a++)
         {
             frameNumString[a] = loadError[a];
         }
