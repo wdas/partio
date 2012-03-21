@@ -1,0 +1,717 @@
+// Copyright (c) 2012 redpawfx
+// The enclosed code is free domain, carries no warranty, and no support.
+//
+// MODIFY THIS AT YOUR OWN RISK
+//
+// Creation  $Date$
+// $Revision$
+// $Author$
+//
+//  Procedure Name: partioExportGui
+//
+//
+//  Description:  A gui for the partioExport command   that gives much more user friendly control over exporting particles
+//
+//  Input Arguments: none GUI based
+//
+//
+//  Return Value:  none
+//
+//***********__________     partioExportGui     _____________***********
+
+
+global proc partioExportGui  ()
+
+{
+
+global int $partioExportGuiTabSelected;
+
+if ($partioExportGuiTabSelected == 0) {$partioExportGuiTabSelected = 1;}
+
+
+if (`window  -exists  partioExportGui`)
+        deleteUI partioExportGui ;
+
+window  -s true -title "partioExportGui" -w 520 -h 600
+        -iconName "partioExportGui" partioExportGui;
+
+////////////////////////////////////////////
+///// Main layout is a TabLayout
+
+////////////////////////////////////////////////////////
+/////// CREATE CACHE  TAB
+
+int $start =  `playbackOptions -query -minTime`;
+int $end =  `playbackOptions -query -maxTime`;
+string $form = `formLayout -w 520 -h 600`;
+//string $tabLayout =`tabLayout  mainTabLayout`;  // when we add the manage cache stuff back in we can re-enable this
+string $mainLayout = `formLayout -w 530 Create_Cache `;
+
+
+
+string $aboutLogoButton = `iconTextButton -style "iconOnly"    -image1 "partioExportGuiLogo.png"`;
+string $refreshButton = `iconTextButton -style "iconOnly"  -image1 "partioExportRefresh.png"`;
+
+string $closeButton 	= `button  -w 75 -ebg true -bgc .25 0 0 -l "Close" -c "deleteUI partioExportGui"`;
+string $dynExportButton    = `button -w 200 -ebg true -bgc 0 .25  0 -l "partioExport" `;
+string $partioExportFormatOptionMenu = `optionMenuGrp -l "PartioFormat" partioExportFormat`;
+	menuItem -label "BGEO";
+	menuItem -label "GEO";
+	menuItem -label "PDA";
+	menuItem -label "PDB";
+	menuItem -label "PDC";
+	menuItem -label "BIN";
+	menuItem -label "PRT";
+	menuItem -label "PTC";
+	menuItem -label "RIB";
+//	menuItem -label "ASS";
+
+optionMenuGrp -e -sl 5 $partioExportFormatOptionMenu;
+
+string $exportPerFrameCheckbox = `checkBoxGrp -numberOfCheckBoxes 1  -label1 "Per/Frame"  -v1  0`;
+
+string $startFrame = `intFieldGrp -l "StartFrame" -cw 1 90 -cw 2 80 -nf 1  -v $start  0 0 0 `;
+string $endFrame   = `intFieldGrp -l "EndFrame" -cw 1 90 -cw 2 80 -nf 1 -v $end 0 0 0 `;
+
+
+
+/////////////////////////////
+// cache directory
+
+    string $cacheDir = `textFieldButtonGrp -l "Cache Directory" -text "" -buttonLabel "....." -cw 1 140  -cw 2 300`;
+
+
+string $scroll  = `scrollLayout -w 520 -h 350 -hst 0 -vst 10 -cr 1 particleScrollList `;
+
+buildParticleScrollList;
+
+button -e -c ("dynExportSelectedparticles "+$startFrame+" "+$endFrame+" "+$partioExportFormatOptionMenu+" "+$cacheDir+" "+$exportPerFrameCheckbox) $dynExportButton;
+
+textFieldButtonGrp -e -bc ("updatePath "+$cacheDir) $cacheDir;
+
+iconTextButton -e -c "buildParticleScrollList" $refreshButton;
+
+formLayout  -edit
+
+	-attachForm $aboutLogoButton "top" 5
+	-attachForm $aboutLogoButton "left" 5
+	-attachControl  $scroll "top" 5 $cacheDir
+	-attachForm $scroll "left" 5
+	-attachForm $closeButton "bottom" 5
+	-attachForm $closeButton "right" 5
+	-attachForm $dynExportButton "left" 5
+	-attachForm $dynExportButton "bottom" 5
+	-attachControl$partioExportFormatOptionMenu "left" -40 $dynExportButton
+	-attachForm$partioExportFormatOptionMenu "bottom" 5
+	-attachControl $startFrame  "left" 10 $aboutLogoButton
+	-attachControl $endFrame "left"10 $aboutLogoButton
+	-attachControl $exportPerFrameCheckbox "top" 5 $endFrame
+	-attachControl $exportPerFrameCheckbox  "left" 75 $aboutLogoButton
+	-attachControl $refreshButton "left" 10 $endFrame
+	-attachForm $refreshButton "top" 28
+	-attachForm $startFrame "top" 30
+	-attachControl $endFrame "top" 5 $startFrame
+	-attachControl $cacheDir "top" 5 $aboutLogoButton
+	-attachForm $cacheDir "left"10
+
+$mainLayout;
+
+/*
+/////////////////////////////////////////////////////////////////////
+/////// MANAGE CACHE TAB
+
+setParent $tabLayout;
+string  $manageCacheFormLayout = `formLayout Manage_Cache`;
+
+string $manageCacheLogoButton = `picture  -image "/home/redpaw/icons/manageCache.xpm"`;
+string $manageCloseButton 	= `button  -l "Close" -c "deleteUI partioExportGui"`;
+
+/////////////////////////////
+// cache directory
+
+    string $manageSubdir  = "";
+
+    if (`attributeExists "cacheDirectory" $masterDynGlobals`);
+    {
+        $manageSubdir = `getAttr "dynGlobals1.cacheDirectory"`;
+    }
+
+    string $manageCacheDir = `textFieldButtonGrp -l "Cache Directory" -text $manageSubdir -cw 1 110  -cw 2 300 -bl "Update"`;
+
+string $manageScrollLayout  = `scrollLayout -w 500 -h 350 -hst 0 -vst 20 -cr 1 manageParticlesScrollLayout`;
+
+updateCacheDir  $mayaCacheDir $manageCacheDir $masterDynGlobals 1;
+
+
+formLayout   -e
+
+    -attachForm $manageCacheLogoButton "top" 5
+	-attachForm $manageCacheLogoButton "left" 5
+    -attachControl  $manageCacheDir "top" 10 $manageCacheLogoButton
+    -attachControl  $manageScrollLayout "top" 10  $manageCacheDir
+    -attachForm     $manageScrollLayout "left" 10
+    -attachForm $manageCloseButton  "bottom" 5
+    -attachForm $manageCloseButton  "right" 5
+
+$manageCacheFormLayout;
+
+
+tabLayout  -e -sti $partioExportGuiTabSelected $tabLayout;
+tabLayout -e -sc ("int $x = `tabLayout -q -sti mainTabLayout`; $partioExportGuiTabSelected= $x;") $tabLayout;
+
+textFieldButtonGrp -e -bc ("updateCacheDir  "+$mayaCacheDir+" "+$manageCacheDir+" "+$masterDynGlobals +" "+ 1) $manageCacheDir;
+textFieldButtonGrp -e -cc ("updateCacheDir  "+$mayaCacheDir+" "+$manageCacheDir+" "+$masterDynGlobals +" "+ 1) $manageCacheDir;
+textFieldGrp -e -cc ("updateCacheDir  "+$mayaCacheDir+" "+$manageCacheDir+" "+$masterDynGlobals +" "+ 0) $mayaCacheDir;
+*/
+
+
+showWindow partioExportGui;
+
+window -edit  -w 501 -h 401 partioExportGui;
+window -edit  -w 520 -h 600 partioExportGui;
+
+
+}
+
+global proc buildParticleScrollList()
+{
+
+	if (`columnLayout -q -exists "particleColumnLayout"`)
+        deleteUI particleColumnLayout;
+
+setParent particleScrollList;
+string $columnMain = `columnLayout particleColumnLayout`;
+
+string $particles[] = `ls -type particle`;
+
+int $color  = 0;
+
+for ($particle in $particles)
+	{
+		string $parent = `columnLayout -p $columnMain` ;
+ 		buildParticleEntry $particle $parent $color;
+
+		if ($color == 0)
+		{
+			$color = 1;
+		}
+		else
+		{
+			$color = 0;
+		}
+	}
+}
+
+
+global proc buildParticleEntry (string $particle, string $parent, int $color )
+{
+
+	float $uiColor;
+	if ($color == 0) { $uiColor = .2 ; }
+	else  { $uiColor  = .35; }
+
+	int  $open = 0;
+	if (`frameLayout -exists ($particle+"frameLayout")`)
+	{
+		$open = `frameLayout -q -cl ($particle+"frameLayout")`;
+		deleteUI ($particle+"frameLayout");
+	}
+
+	$framelayoutName = ($particle+"frameLayout");
+	$columnLayoutName = ($particle+"columnLayout");
+	$particleExportCheckbox = ($particle+"exportCheckBox");
+	$particleRampCheckbox = ($particle+"rampCheckbox");
+	$particleSupressedCheckbox = ($particle+"supressedCheckbox");
+
+
+
+	if (!`rowLayout -exists ($particle+"checkboxRowLayout")`)
+	{
+		rowLayout -ebg true -bgc $uiColor $uiColor $uiColor -nc 3 -cw3 335 75 75  ($particle+"checkboxRowLayout");
+		checkBox  -l  ("Check to Export Attributes for "+$particle)  $particleExportCheckbox;
+		checkBox  -l  "ramp Attrs" -cc ("buildParticleEntry "+ $particle + " " + $parent + " " + $color) $particleRampCheckbox;
+		checkBox  -l "supressed" -cc ("buildParticleEntry "+ $particle + " " + $parent+ " " + $color) $particleSupressedCheckbox;
+		setParent $parent;
+	}
+	frameLayout -p $parent  -ebg true -bgc $uiColor $uiColor $uiColor -label $particle -collapsable true  -collapse $open -w 492 -borderStyle "etchedIn"
+		  -labelAlign "center" $framelayoutName;
+
+	rowColumnLayout -ebg true -bgc $uiColor $uiColor $uiColor -nc 4 -cw 1 120 -cw 2 120 -cw 3 120 -cw 4 120   $columnLayoutName;
+
+///checkboxes for each attr ////
+
+	int $ramp = `checkBox -q -v $particleRampCheckbox`;
+	int $supress = `checkBox -q -v $particleSupressedCheckbox`;
+
+	string $attrs[] = `partioExportGuiListParticleAttrs  $particle "allPP" $ramp $supress `;   // uses a modified  version of listParticleAttrs with a separate list for dynExport
+
+	for ($attr in $attrs)
+		{
+		if ($attr == "particleId") {}
+		else {
+
+			$checkBoxName = ($particle+$attr+"checkBox");
+
+			checkBox -l $attr -v 0 $checkBoxName;
+		     }
+		}
+
+	setParent ..;
+	setParent ..;
+}
+
+
+global proc dynExportSelectedparticles  (string $startFrame, string $endFrame, string $partioExportOptionMenu, string $cacheDirText, string $cacheDirCtrl, string $exportPerFrameCheckbox)
+{
+
+int $start = `intFieldGrp -q -v1 $startFrame`;
+int $end  = `intFieldGrp  -q -v1 $endFrame`;
+int $pdabc = `optionMenuGrp -q -sl $partioExportOptionMenu`;
+string $partioExportFormat = `optionMenuGrp -q -v  $partioExportOptionMenu`;
+string $cacheDir = `textFieldButtonGrp -q -text  $cacheDirCtrl`;
+
+
+int $perframe = `checkBoxGrp -q -v1 $exportPerFrameCheckbox`;
+
+string $pdabcString = `tolower $partioExportFormat `;
+
+string $particles[] = `ls -type particle`;
+
+int $numFrames  = $end-$start;
+int $loopStartFrame = $start;
+int $loopEndFrame = $start;
+
+if ($perframe)
+    {
+
+    $loopEndFrame = $end;
+
+    }
+
+for ($x = $loopStartFrame; $x <= $loopEndFrame; $x++)
+{
+
+currentTime $x;
+
+int $currentFrame = `currentTime -q`;
+
+    if ($perframe)
+        {
+
+            $start = $currentFrame;
+            $end = $currentFrame;
+
+        }
+
+    for ($particle in $particles)
+
+	{
+
+	$particleExportCheckbox = ($particle+"exportCheckBox");
+
+	int $selected  = `checkBox -q -v  $particleExportCheckbox`;
+
+	if ($selected  >= 1)
+		{
+
+		string $cmd;
+		string $filePath;
+
+// gather format here..
+		$cmd = ("partioExport -mnf "+$start+" -mxf "+$end+ " -flip -atr position -atr id ");
+		$filePath = (" \""+$cacheDir+"\" ");
+
+		string $attrs[] = `partioExportGuiListParticleAttrs $particle allPP 0 1`;
+
+		for ($attr in $attrs)
+		{
+			if ($attr == "particleId")
+			{}
+			else
+			{
+
+				$attrCheckbox =  ($particle+$attr+"checkBox");
+
+				$val = `checkBox -q -v  $attrCheckbox`;
+				if ( $val >= 1)
+				{
+					$cmd += (" -atr "+$attr);
+				}
+			}
+		}
+			$cmd += (" -p "+$filePath +" "+$particle);
+			print $cmd;
+			eval $cmd;
+
+		}
+	else { continue;}
+
+	}
+
+
+}// end frame loop
+
+
+}
+
+
+
+
+/////////////////////////////////////////////
+//// update  path
+
+global proc  updatePath (string $cacheDirControl)
+{
+
+string $result[] = `fileDialog2 -fileMode 3  -dialogStyle 1`;
+
+textFieldButtonGrp -e -text $result[0]  $cacheDirControl;
+
+}
+
+
+/////////////////////////////////////////////
+//// update cacheDir
+
+global proc  updateCacheDir (string $cacheDirControl, string $manageCacheDirControl, string $dynGlobalsNode, int $switch)
+
+{
+string $mayaCacheDir;
+
+if ($switch)
+{
+    $mayaCacheDir = `textFieldButtonGrp -q -text $manageCacheDirControl`;
+    textFieldGrp -e -text $mayaCacheDir $cacheDirControl;
+}
+
+else
+{
+    $mayaCacheDir = `textFieldGrp -q -text $cacheDirControl`;
+    textFieldButtonGrp -e -text $mayaCacheDir $manageCacheDirControl;
+}
+
+
+setAttr -type "string" ($dynGlobalsNode+".cacheDirectory") $mayaCacheDir;
+
+string $workspace = `workspace -q -rd`;
+string $rebuildParticleDir = ($workspace+"/particles/"+$mayaCacheDir);
+
+buildCacheDirList  $rebuildParticleDir;
+
+}
+
+
+//////////////////////////////////////////////
+//// parse particle name
+
+global proc  string[]  parseCacheDir (string $cacheListing)
+
+{
+
+
+string $parts[];
+
+/// parsing the following
+//  MainMast_sail_softParticleShape.250-125000x250.pdc
+
+// returns an array  of values...  0= particleShape, 1= first frame, 2= second frame
+
+string $x[];
+
+tokenize $cacheListing "." $x;
+
+//int $size = `size $x[1]`;
+//$x[1] =  `substring  $x[1] 2  $size`;
+//$x[1] =  `substring  $x[1] 1  ($size-2)`;
+
+string $negative = "";
+if (`substring $x[1] 1 1` == "-")
+{
+	$negative = "-";
+}
+
+string $frames[];
+
+tokenize $x[1] "-x" $frames;
+
+$parts[0] = $x[0];
+$parts[1] = $negative +$frames[0];
+$parts[2] = $frames[1];
+$parts[3] = `substituteAllString $frames[2] "@" ""`;
+
+return $parts;
+
+}
+
+
+
+/////////////////////////////////////////////////
+//// padZeros
+
+global proc string padzeros(int $num, int $l)
+{
+	string $padString = string($num);
+	while (size($padString)<$l)
+		$padString="0"+$padString;
+	return $padString;
+};
+
+////////////////////////////////////////////
+// our own versions of  these stolen from  autodesk listParticleAttrs.mel
+
+proc int isInitialStateAttr( string $attr )
+{
+	int $s = size( $attr );
+	if( $s > 0 )
+	{
+		string $last = substring( $attr, $s, $s );
+		if( $last == "0" )
+			return 1;
+	}
+
+	return 0;
+}
+
+proc int isCachedAttr( string $attr )
+{
+	int $s = size( $attr );
+
+	if( $s > 5 )
+	{
+		string $last5 = substring( $attr, $s - 4, $s );
+		if( $last5 == "Cache" )
+			return 1;
+	}
+
+	if( $s > 6 )
+	{
+		string $first6 = substring( $attr, 1, 6 );
+		if( $first6 == "cached" )
+			return 1;
+	}
+
+	return 0;
+}
+
+proc int isArrayAttr( string $node, string $attr )
+{
+	string $typeStr = `getAttr -type ($node+"."+$attr)`;
+	int $s = size( $typeStr );
+
+	if( $s > 5 )
+	{
+		string $last5 = substring( $typeStr, $s - 4, $s );
+		if( $last5 == "Array" )
+			return 1;
+	}
+
+	return 0;
+}
+
+proc int isSuppressedAttr( string $attr )
+{
+	string $suppressedAttrs[];
+	$suppressedAttrs =
+	{
+   	 "emitterDataPosition",
+   	 "emitterDataVelocity",
+   	 "fieldDataMass",
+   	 "fieldDataPosition",
+   	 "fieldDataVelocity",
+   	 "inputGeometryPoints",
+   	 "lastCachedPosition",
+   	 "lastPosition",
+   	 "lastVelocity",
+   	 "lastWorldPosition",
+   	 "lastWorldVelocity",
+   	 "worldVelocityInObjectSpace"
+	};
+
+	$suppressedAttrs = sort( $suppressedAttrs );
+
+	if( size($attr) == 0 )
+		return 0;
+
+	int $i;
+	for( $i = 0; $i < size($suppressedAttrs); $i ++ )
+	{
+		int $cmp = strcmp( $suppressedAttrs[$i], $attr );
+		if( $cmp == 0 )
+			return 1;
+		if( $cmp > 0 )
+			return 0;
+	}
+
+	return 0;
+}
+
+proc int isValidAttr( string $node, string $attr, int $newOnly )
+{
+	if( size( $attr ) ==0 )
+		return 0;
+
+	if( $newOnly == 0 )
+	{
+		if( `attributeQuery -exists -node $node $attr` == 0 )
+			return 0;
+	}
+
+	if( isInitialStateAttr( $attr ) )
+		return 0;
+
+	if( isCachedAttr( $attr ) )
+		return 0;
+
+	if( $newOnly == 0 )
+	{
+		if( `attributeQuery -multi -node $node $attr` == 1 )
+			return 0;
+
+		if( isSuppressedAttr( $attr ) )
+			return 0;
+	}
+
+	return 1;
+}
+
+global proc string[] partioExportGuiListParticleAttrs( string $particle, string $typeStr, int $showRamp, int $supressed)
+//
+// type:
+//  typeStr: vectorArray, doubleArray, all, allPP, nonPP
+//
+{
+
+	print $typeStr;
+
+
+	string $attrs[];
+	clear( $attrs );
+
+	string $customArrayAttrs[];
+	string $customVectorAttrs[];
+	string $customDoubleAttrs[];
+	string $customNonPPAttrs[];
+
+	int $exists = `objExists $particle`;
+	if( $exists)
+	{
+		$customArrayAttrs = `listAttr -a -ud $particle`;
+
+		for ($customAttr in $customArrayAttrs)
+		{
+			if ( `isValidAttr  $particle $customAttr  1`)
+			{
+				string $typeStr = `getAttr -type ($particle+"."+$customAttr)`;
+
+				if ($typeStr == "vectorArray")
+				{
+					$customVectorAttrs[size($customVectorAttrs)] = $customAttr;
+				}
+				else if ($typeStr == "doubleArray")
+				{
+					$customDoubleAttrs[size($customDoubleAttrs)] = $customAttr;
+				}
+			}
+		}
+		$customNonPPAttrs = `listAttr -ud -s $particle`;
+	}
+
+	string $usefullSuppressedAttrs[] =
+	{
+		"lastCachedPosition",
+		"lastPosition",
+		"lastVelocity",
+		"lastWorldPosition",
+		"lastWorldVelocity"
+	};
+
+	string $defaultRampAttrs[] =
+	{
+		"rampAcceleration",
+		"rampPosition",
+		"rampVelocity"
+	};
+
+	string $defaultVectorAttrs[] =
+	{
+		"position",
+	    "velocity",
+		"worldPosition",
+		"worldVelocity",
+		"acceleration",
+		"force"
+		};
+
+	string $defaultDoubleAttrs[] =
+	{
+		"age",
+		"birthTime",
+		"mass",
+		"particleId"
+	};
+
+	switch ($typeStr) {
+		case "vectorArray":
+		{
+			$attrs = $defaultVectorAttrs;
+			if ($showRamp)
+			{
+				$attrs = stringArrayCatenate($attrs, $defaultRampAttrs);
+			}
+			if ($supressed)
+			{
+				$attrs = stringArrayCatenate($attrs, $usefullSuppressedAttrs);
+			}
+			$attrs =  stringArrayCatenate($attrs, $customVectorAttrs);
+			break;
+		}
+		case "doubleArray":
+		{
+			$attrs = $defaultDoubleAttrs;
+			$attrs = stringArrayCatenate($attrs, $customDoubleAttrs);
+			break;
+		}
+		case "allPP":
+		{
+
+			$attrs = stringArrayCatenate($defaultVectorAttrs, $customVectorAttrs);
+			$attrs = stringArrayCatenate($attrs, $defaultDoubleAttrs);
+			$attrs = stringArrayCatenate($attrs, $customDoubleAttrs);
+			if ($showRamp)
+			{
+				$attrs = stringArrayCatenate($attrs, $defaultRampAttrs);
+			}
+			if ($supressed)
+			{
+				$attrs = stringArrayCatenate($attrs, $usefullSuppressedAttrs);
+			}
+
+			break;
+		}
+		case "all":
+		{
+			$attrs = stringArrayCatenate($defaultVectorAttrs, $customVectorAttrs);
+			$attrs = stringArrayCatenate($attrs, $defaultDoubleAttrs);
+			$attrs = stringArrayCatenate($attrs, $customDoubleAttrs);
+			if ($showRamp)
+			{
+				$attrs = stringArrayCatenate($attrs, $defaultRampAttrs);
+			}
+			if ($supressed)
+			{
+				$attrs = stringArrayCatenate($attrs, $usefullSuppressedAttrs);
+			}
+			$attrs = stringArrayCatenate($attrs,$customNonPPAttrs);
+			break;
+
+		}
+		case "nonPP":
+		{
+			$attrs = $customNonPPAttrs;
+			break;
+		}
+	}
+
+	return $attrs;
+}
+
