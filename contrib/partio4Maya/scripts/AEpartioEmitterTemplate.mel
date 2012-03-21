@@ -37,6 +37,7 @@ global proc AEpartioEmitterTemplate( string $nodeName )
 	editorTemplate -addControl "cacheOffset";
 	editorTemplate -addControl "cachePadding";
 	editorTemplate -addControl "cacheFormat";
+	editorTemplate -addControl "iconSize";
 
 
 	editorTemplate -endLayout;
@@ -211,10 +212,10 @@ global proc string pioEmStripNodeName (string $nodeName) {
 global proc pioEmCustomAttrsManage (string $nodeName)
 {
     $nodeName = pioEmStripNodeName ($nodeName);
-    if (`columnLayout -q -exists "foobar"`)
-    { deleteUI "foobar"; }
+    if (`columnLayout -q -exists "partioToParticleMapping"`)
+    { deleteUI "partioToParticleMapping"; }
 
-    columnLayout  foobar;
+    columnLayout  partioToParticleMapping;
 
     string $multiList[] = `listAttr -multi ($nodeName+".partioCacheAttributes")`;
     for ($multi in $multiList)
@@ -230,12 +231,14 @@ global proc pioEmCustomAttrsManage (string $nodeName)
        	 -text  $attr
        	-editable false -cw2 75 100 ;
 		text -w 75 -fn "boldLabelFont" -l "---map to--->";
-		string $mayaPPMapping = `textFieldGrp -w 175 -cw2 75 100 -label "ppAttr" -text "" -editable true`;
+		string $mayaPPMapping = `textFieldGrp -w 175 -cw2 75 100   -label "ppAttr" -text "" -editable true`;
 		connectControl -index 2  $mayaPPMapping  ($nodeName+".mayaPPAttributes["+$index+"]");
 		setParent ..;
     }
 
 }
+
+
 global proc  pioEmLogoHeader(string $nodeName)
 {
 	if (!`symbolButton -q -exists  pioEmHeaderIcon`)
@@ -260,6 +263,29 @@ global proc  pioEmSwapAboutText()
 	else
 	{
 		text -e -l $text1 pioEmAboutText;
+	}
+
+}
+
+global proc pioEmAddPPAttr(string $ppAttrName, string $attrType, string $partName)
+
+{
+	if ($ppAttrName != "")
+	{
+		if (`nodeType $partName` != "particle" && `nodeType $partName` != "nParticle")
+		{
+			string $shape[] = `listRelatives -s $partName`;
+			$part = $shape[0];
+		}
+		if (`nodeType $partName` == "particle" ||  `nodeType $partName` == "nParticle")
+		{
+			if (!`attributeExists $ppAttrName $partName`)
+			{
+				addAttr -ln ($ppAttrName+"0") -dt $attrType $partName;
+				addAttr -ln ($ppAttrName) -dt $attrType $partName;
+				setAttr -e -keyable true ($partName+"."+$ppAttrName);
+			}
+		}
 	}
 
 }

@@ -28,14 +28,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
 #include <maya/MIOStream.h>
-#include <math.h>
-#include <stdlib.h>
 
 #include <maya/MGlobal.h>
 #include <maya/MVectorArray.h>
 #include <maya/MDoubleArray.h>
 #include <maya/MIntArray.h>
 #include <maya/MMatrix.h>
+#include <maya/MDistance.h>
 #include <maya/MFnDependencyNode.h>
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnTypedAttribute.h>
@@ -71,6 +70,7 @@ MObject partioEmitter::aCacheFormat;
 MObject partioEmitter::aCachePadding;
 MObject partioEmitter::aCacheStatic;
 MObject partioEmitter::aUseEmitterTransform;
+MObject partioEmitter::aSize;
 MObject partioEmitter::aJitterPos;
 MObject partioEmitter::aJitterFreq;
 MObject partioEmitter::aPartioAttributes;
@@ -135,6 +135,7 @@ void partioEmitter::reInit(void *data)
 }
 
 
+/// Creates the tracking ID attribute on the  particle object
 void partioEmitter::connectionMadeCallbk(MPlug &srcPlug, MPlug &destPlug, bool made, void *clientData)
 {
 	MStatus status;
@@ -153,7 +154,6 @@ void partioEmitter::connectionMadeCallbk(MPlug &srcPlug, MPlug &destPlug, bool m
 }
 
 
-
 MStatus partioEmitter::initialize()
 //
 //	Descriptions:
@@ -169,14 +169,14 @@ MStatus partioEmitter::initialize()
     aCacheDir = tAttr.create ( "cacheDir", "cachD", MFnStringData::kString );
     tAttr.setReadable ( true );
     tAttr.setWritable ( true );
-    tAttr.setKeyable ( true );
+    tAttr.setKeyable ( false );
     tAttr.setConnectable ( true );
     tAttr.setStorable ( true );
 
     aCachePrefix = tAttr.create ( "cachePrefix", "cachP", MFnStringData::kString );
     tAttr.setReadable ( true );
     tAttr.setWritable ( true );
-    tAttr.setKeyable ( true );
+    tAttr.setKeyable ( false );
     tAttr.setConnectable ( true );
     tAttr.setStorable ( true );
 
@@ -201,9 +201,13 @@ MStatus partioEmitter::initialize()
 
     eAttr.setDefault(4); // PDC
     eAttr.setChannelBox(true);
+	eAttr.setKeyable(false);
 
     aUseEmitterTransform = nAttr.create("useEmitterTransform", "uet", MFnNumericData::kBoolean, false, &status);
     nAttr.setKeyable(true);
+
+	aSize = uAttr.create( "iconSize", "isz", MFnUnitAttribute::kDistance );
+	uAttr.setDefault( 0.25 );
 
     aJitterPos = nAttr.create("jitterPos", "jpos", MFnNumericData::kFloat,0.0, &status );
     nAttr.setDefault(0);
@@ -232,6 +236,7 @@ MStatus partioEmitter::initialize()
 	status = addAttribute ( aCacheStatic );
     status = addAttribute ( aCacheFormat );
     status = addAttribute ( aUseEmitterTransform );
+	status = addAttribute ( aSize );
     status = addAttribute ( aJitterPos );
     status = addAttribute ( aJitterFreq );
     status = addAttribute ( aPartioAttributes );
@@ -352,7 +357,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     if ( ( cT <= sT ))
     {
         // We do not emit particles before the start time,
-        // and do not emit particles when moving backwards in time.
+        // we do support emitting / killing of particles if we scroll backward in time.
         //
 
         // This code is necessary primarily the first time to
@@ -434,6 +439,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 				}
                 else
                 {
+					// we attempt to use the array index as our only last resort
 					MGlobal::displayWarning("Loaded Partio cache has a non-standard or non-existant id attribute, this may render things unstable");
                     id = i;
                 }
@@ -509,6 +515,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 					yPlug.setValue(MString(""));
 
 					delete [] temp;
+					MGlobal::executeCommand("refreshAE;");
 				}
 			} // end cache changed
 
@@ -530,16 +537,24 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 				if (yPlug.asString() != "")
 				{
 					MString ppAttrName = yPlug.asString();
-					MString shortName =  ppAttrName.substring(0,ppAttrName.length()-1);
+
 
 					if (attr.type == VECTOR)
 					{
 						if (!part.isPerParticleVectorAttribute(ppAttrName))
 						{
-							/// NO WORKY YET
-							//createPPAttr( part, ppAttrName,  shortName, 2);
+							cout <<  "partioEmitter->adding ppAttr " << ppAttrName << endl;
 
-							/// but this does.
+							// moving this to an outside mel proc
+							MString command;
+							command += "pioEmAddPPAttr ";
+							command += ppAttrName;
+							command += " vectorArray ";
+							command += partName;
+							command += ";";
+							MGlobal::executeCommandOnIdle(command);
+
+							/*
 							cout <<  "partioEmitter->adding ppAttr " << ppAttrName << endl;
 							MString command;
 							command += "if (!`attributeExists ";
@@ -561,7 +576,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 							command += ppAttrName;
 							command +=";}";
 							MGlobal::executeCommandOnIdle(command);
-
+							*/
 						}
 						if (part.isPerParticleVectorAttribute(ppAttrName))
 						{
@@ -579,11 +594,17 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 					{
 						if (!part.isPerParticleDoubleAttribute(ppAttrName))
 						{
-							/// NO WORKY YET
-							//createPPAttr( part, ppAttrName,  shortName, 1);
-
-							/// but this does.
 							cout <<  "partioEmiter->adding ppAttr " << ppAttrName << endl;
+							// moving this to an outside mel proc
+							MString command;
+							command += "pioEmAddPPAttr ";
+							command += ppAttrName;
+							command += " doubleArray ";
+							command += partName;
+							command += ";";
+							MGlobal::executeCommandOnIdle(command);
+
+							/*
 							MString command;
 							command += "if (!`attributeExists ";
 							command += ppAttrName;
@@ -604,6 +625,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 							command += ppAttrName;
 							command +=";";
 							MGlobal::executeCommandOnIdle(command);
+							*/
 						}
 						if (part.isPerParticleDoubleAttribute(ppAttrName))
 						{
@@ -611,7 +633,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 							part.getPerParticleAttribute(ppAttrName, dAttribute, &status);
 							if ( !status )
 							{
-								cout << "partioEmitter->could not get  double PP array " << endl;
+								cout << "partioEmitter->could not get double PP array " << endl;
 							}
 							doubleAttrArrays[ppAttrName.asChar()] = dAttribute;
 						}
@@ -654,7 +676,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 					const float* pos=particles->data<float>(posAttribute,it->second);
 					const float* vel=particles->data<float>(velAttribute,it->second);
 
-					MVector jitter = jitterPoint(it->second, jitterFreq, seed, jitterPos);
+					MVector jitter = partio4Maya::jitterPoint(it->second, jitterFreq, seed, jitterPos);
 
 					positions[x] = MVector(pos[0],pos[1],pos[2])+(jitter);
 					if (useEmitterTxfm) {
@@ -726,7 +748,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 				const int* id=particles->data<int>(IdAttribute,it->second);
 				MVector temp(pos[0], pos[1], pos[2]);
 
-				MVector jitter = jitterPoint(it->second, jitterFreq, seed, jitterPos);
+				MVector jitter = partio4Maya::jitterPoint(it->second, jitterFreq, seed, jitterPos);
 				if (useEmitterTxfm) {
 					temp += emitterOffset;
 				}
@@ -798,23 +820,6 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     return ( MS::kSuccess );
 }
 
-MVector partioEmitter::jitterPoint(int id, float freq, float offset, float jitterMag)
-///* generate a constant noise offset for this  ID
-//  and return as a vector to add to the particle position
-//
-{
-    MVector jitter(0,0,0);
-    if (jitterMag > 0)
-    {
-        jitter.x = ((noiseAtValue((id+.124+offset)*freq))-.5)*2;
-        jitter.y = ((noiseAtValue((id+1042321+offset)*freq))-.5)*2;
-        jitter.z = ((noiseAtValue((id-2350212+offset)*freq))-.5)*2;
-
-        jitter*= jitterMag;
-    }
-
-    return  jitter;
-}
 
 
 MStatus partioEmitter::getWorldPosition ( MPoint &point )
@@ -880,8 +885,13 @@ void partioEmitter::draw ( M3dView& view, const MDagPath& path, M3dView::Display
 
     view.beginGL();
 
-    float multiplier = 1;
-	partio4Maya::drawPartioLogo(multiplier);
+	MObject thisNode = thisMObject();
+	MPlug sizePlug( thisNode, aSize );
+	MDistance sizeVal;
+	sizePlug.getValue( sizeVal );
+
+	float multiplier = (float) sizeVal.asCentimeters();
+    partio4Maya::drawPartioLogo(multiplier);
 
     view.endGL ();
 }
@@ -956,120 +966,4 @@ MStatus partioEmitter::createPPAttr( MFnParticleSystem  &part, MString attrName,
 			return MStatus::kSuccess;
 }
 
-
-////////////////////////////////////////////////////
-/// NOISE FOR JITTER!
-
-
-
-const int kTableMask = TABLE_SIZE - 1;
-
-float partioEmitter::noiseAtValue( float x )
-//
-//  Description:
-//      Get the Noise value at the given point in 1-space and time
-//
-//  Arguments:
-//      x - the point at which to calculate the lxgNoise
-//
-//  Return Value:
-//      the Noise value at the point
-//
-{
-    int ix;
-    float fx;
-
-    if ( !isInitialized ) {
-        initTable( 23479015 );
-        isInitialized = 1;
-    }
-
-    ix = (int)floorf( x );
-    fx = x - (float)ix;
-
-    return spline( fx, value( ix - 1 ), value( ix ), value( ix + 1 ), value( ix + 2 ) );
-}
-
-
-
-void  partioEmitter::initTable( long seed )
-//
-//  Description:
-//      Initialize the table of random values with the given seed.
-//
-//  Arguments:
-//      seed - the new seed value
-//
-{
-    srand48( seed );
-
-    for ( int i = 0; i < TABLE_SIZE; i++ ) {
-        valueTable1[i] = (float)drand48();
-        valueTable2[i] = (float)drand48();
-        valueTable3[i] = (float)drand48();
-    }
-    isInitialized = 1;
-}
-
-
-float partioEmitter::spline( float x, float knot0, float knot1, float knot2, float knot3 )
-//
-//  Description:
-//      This is a simple version of a Catmull-Rom spline interpolation.
-//
-//  Assumptions:
-//
-//      0 < x < 1
-//
-//
-{
-    float c0, c1, c2, c3;
-
-    // Evaluate span of cubic at x using Horner's rule
-    //
-    c3 = (-0.5F * knot0 ) + ( 1.5F * knot1 ) + (-1.5F * knot2 ) + ( 0.5F * knot3 );
-    c2 = ( 1.0F * knot0 ) + (-2.5F * knot1 ) + ( 2.0F * knot2 ) + (-0.5F * knot3 );
-    c1 = (-0.5F * knot0 ) + ( 0.0F * knot1 ) + ( 0.5F * knot2 ) + ( 0.0F * knot3 );
-    c0 = ( 0.0F * knot0 ) + ( 1.0F * knot1 ) + ( 0.0F * knot2 ) + ( 0.0F * knot3 );
-
-    return ( ( c3 * x + c2 ) * x + c1 ) * x + c0;;
-}
-
-int partioEmitter::isInitialized = 0;
-
-int partioEmitter::permtable[256] = {
-    254,    91,     242,    186,    90,     204,    85,     133,    233,
-    50,     187,    49,     182,    224,    144,    166,    7,      51,
-    20,     179,    36,     203,    114,    156,    195,    40,     24,
-    60,     162,    84,     126,    102,    63,     194,    220,    161,
-    72,     94,     193,    229,    140,    57,     3,      189,    106,
-    54,     164,    198,    199,    44,     245,    235,    100,    87,
-    25,     41,     62,     111,    13,     70,     27,     82,     69,
-    53,     66,     247,    124,    67,     163,    125,    155,    228,
-    122,    19,     113,    143,    121,    9,      1,      241,    171,
-    200,    83,     244,    185,    170,    141,    115,    190,    154,
-    48,     32,     178,    127,    167,    56,     134,    15,     160,
-    238,    64,     6,      11,     196,    232,    26,     89,     0,
-    219,    112,    68,     30,     215,    227,    75,     132,    71,
-    239,    251,    92,     14,     104,    231,    29,     180,    150,
-    226,    191,    47,     73,     37,     183,    88,     105,    42,
-    22,     2,      38,     5,      119,    74,     249,    184,    52,
-    8,      55,     118,    255,    206,    173,    165,    78,     31,
-    123,    98,     212,    80,     139,    61,     138,    77,     177,
-    45,     137,    145,    28,     168,    128,    95,     223,    35,
-    205,    76,     211,    175,    81,     33,     207,    21,     131,
-    58,     152,    16,     240,    18,     96,     210,    109,    214,
-    216,    202,    148,    34,     146,    117,    176,    93,     246,
-    172,    97,     159,    197,    218,    65,     147,    253,    221,
-    217,    79,     101,    142,    23,     149,    99,     39,     12,
-    135,    110,    234,    108,    153,    129,    4,      169,    174,
-    116,    243,    130,    107,    222,    10,     43,     188,    46,
-    213,    252,    86,     157,    192,    236,    158,    120,    17,
-    103,    248,    225,    230,    250,    208,    181,    151,    237,
-    201,    59,     136,    209
-};
-
-float partioEmitter::valueTable1[256];
-float partioEmitter::valueTable2[256];
-float partioEmitter::valueTable3[256];
 

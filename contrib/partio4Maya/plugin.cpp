@@ -34,8 +34,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 MStatus initializePlugin ( MObject obj )
 {
+
+	// source  mel scripts this way if they're missing from the script path it will alert the user...
+	MGlobal::executeCommand("source AEpartioEmitterTemplate.mel");
+	MGlobal::executeCommand("source AEpartioVisualizerTemplate.mel");
+	MGlobal::executeCommand("source partioExportGUI.mel");
+
 	MStatus status;
-	MFnPlugin plugin ( obj, "openSource", "0.1", "Any" );
+	MFnPlugin plugin ( obj, "Luma Pictures,RedpawFX,WDAS", "1.0", "Any" );
 
 	status = plugin.registerNode ( "partioVisualizer", partioVisualizer::id,
 	                               &partioVisualizer::creator, &partioVisualizer::initialize,

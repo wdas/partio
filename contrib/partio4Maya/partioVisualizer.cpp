@@ -191,7 +191,6 @@ void partioVisualizer::reInit(void *data)
 MStatus partioVisualizer::initialize()
 {
 
-	MFnUnitAttribute unitFn;
 	MFnEnumAttribute eAttr;
 	MFnUnitAttribute uAttr;
 	MFnNumericAttribute nAttr;
@@ -201,8 +200,8 @@ MStatus partioVisualizer::initialize()
 	time = nAttr.create( "time", "tm", MFnNumericData::kLong ,0);
 	uAttr.setKeyable( true );
 
-	aSize = unitFn.create( "iconSize", "isz", MFnUnitAttribute::kDistance );
-	unitFn.setDefault( 1.0 );
+	aSize = uAttr.create( "iconSize", "isz", MFnUnitAttribute::kDistance );
+	uAttr.setDefault( 0.25 );
 
 	aDrawSkip = nAttr.create( "drawSkip", "dsk", MFnNumericData::kLong ,0);
 	nAttr.setKeyable( true );
@@ -251,8 +250,8 @@ MStatus partioVisualizer::initialize()
 
 	aDrawStyle = eAttr.create( "drawStyle", "drwStyl");
     eAttr.addField("points",	0);
-    eAttr.addField("velocity",	1);
-    eAttr.addField("spheres",	2);
+    //eAttr.addField("velocity",	1);
+    //eAttr.addField("spheres",	2);
 	eAttr.addField("boundingBox", 3);
 	eAttr.setDefault(0);
 	eAttr.setChannelBox(true);
@@ -426,19 +425,20 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 			cout << "LOADED " << particles->numParticles() << " particles" << endl;
 
-			cout << " reallocating" << endl;
+			//cout << " reallocating" << endl;
 			float * floatToRGB = (float *) realloc(rgb, particles->numParticles()*sizeof(float)*3);
 			if (floatToRGB != NULL)
 			{
 				rgb =  floatToRGB;
 			}
-			else{ cout << "unable to allocate" << endl;}
+			else{ cout << "unable to allocate new memory for particles" << endl;}
 
 			float * newRGBA = (float *) realloc(rgba,particles->numParticles()*sizeof(float)*4);
 			if (newRGBA != NULL)
 			{
 				rgba =  newRGBA;
 			}
+			else{ cout << "unable to allocate new memory for particles" << endl;}
 
 			bbox.clear();
 
@@ -623,7 +623,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			MGlobal::executeCommand(command);
 			zPlug.setNumElements(0);
 
-			cout << "partioVisualizer->refreshing AE controls" << endl;
+			//cout << "partioVisualizer->refreshing AE controls" << endl;
 
 			attributeList.clear();
 
@@ -686,10 +686,13 @@ void partioVisualizer::draw( M3dView & view, const MDagPath & /*path*/,
 	}
 
 
-	drawBoundingBox();
-	if (drawStyle < 3)
+	if (drawStyle < 3 && style != M3dView::kBoundingBox)
 	{
 		drawPartio(drawStyle);
+	}
+	else
+	{
+		drawBoundingBox();
 	}
 
 	//glCallList(dList); ??? not sure we need this ?

@@ -25,7 +25,7 @@ set (PLUGIN_NAME "partio4Maya")
 set (PLUGIN_SUFFIX ".so")
 
 # update the base dir to where your copy of maya resides
-SET(MAYA_BASE_DIR "/usr/autodesk/maya2012.17-x64/")
+SET(MAYA_BASE_DIR "/usr/autodesk/maya2012-x64/")
 SET(MAYA_INC_DIR ${MAYA_BASE_DIR}/include)
 SET(MAYA_LIB_DIR ${MAYA_BASE_DIR}/lib)
 

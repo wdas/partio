@@ -46,10 +46,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include "Partio.h"
 
-#define TABLE_SIZE 256
-
-extern const int kTableMask;
-#define MODPERM(x) permtable[(x)&kTableMask]
 
 #define McheckErr(stat, msg)\
 	if ( MS::kSuccess != stat )\
@@ -71,6 +67,7 @@ class partioEmitter: public MPxEmitterNode
 		static MObject 	aCacheDir;
 		static MObject 	aCachePrefix;
 		static MObject 	aUseEmitterTransform;
+		static MObject  aSize;
 		static MObject 	aCacheActive;
 		static MObject 	aCacheOffset;
 		static MObject 	aCacheFormat;
@@ -85,20 +82,9 @@ class partioEmitter: public MPxEmitterNode
 		static void 	reInit(void *data);
 		void 			initCallback();
 		static void 	connectionMadeCallbk(MPlug &srcPlug, MPlug &destPlug, bool made, void *clientData);
-		static float  	noiseAtValue( float x);
-		static void   	initTable( long seed );
 
 	private:
 
-		static int    	permtable   [256];
-		static float  	valueTable1 [256];
-		static float  	valueTable2 [256];
-		static float  	valueTable3 [256];
-		static int    	isInitialized;
-
-		static float  	spline( float x, float knot0, float knot1, float knot2, float knot3 );
-
-		static float  	value( int x, float table[] = valueTable1 );
 		long 		seedValue( int  plugIndex, MDataBlock& block );
 
 		MStatus	getWorldPosition ( MPoint &p );
@@ -126,7 +112,6 @@ class partioEmitter: public MPxEmitterNode
 		bool cacheChanged;
 
 		virtual void 	draw ( M3dView  & view, const  MDagPath  & path,  M3dView::DisplayStyle  style, M3dView:: DisplayStatus );
-		MVector  jitterPoint(int id, float freq, float offset, float jitterMag);
 		static MStatus createPPAttr( MFnParticleSystem  &part, MString attrName, MString shortName, int type);
 };
 
@@ -134,9 +119,7 @@ class partioEmitter: public MPxEmitterNode
 // inlines
 //
 
-inline float partioEmitter::value( int x, float table[] ) {
-	return table[MODPERM( x )];
-}
+
 
 inline long partioEmitter::seedValue( int plugIndex, MDataBlock& block )
 {

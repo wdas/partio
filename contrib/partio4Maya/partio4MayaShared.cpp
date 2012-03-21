@@ -28,12 +28,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
 #include <map>
+#include <math.h>
+#include <stdlib.h>
 #include "partio4MayaShared.h"
 #include "iconArrays.h"
 #include "Partio.h"
 
 using namespace Partio;
 using namespace std;
+
+//////////////////////////////////
+MVector partio4Maya::jitterPoint(int id, float freq, float offset, float jitterMag)
+///* generate a constant noise offset for this  ID
+//  and return as a vector to add to the particle position
+//
+{
+    MVector jitter(0,0,0);
+    if (jitterMag > 0)
+    {
+        jitter.x = ((noiseAtValue((id+.124+offset)*freq))-.5)*2;
+        jitter.y = ((noiseAtValue((id+1042321+offset)*freq))-.5)*2;
+        jitter.z = ((noiseAtValue((id-2350212+offset)*freq))-.5)*2;
+
+        jitter*= jitterMag;
+    }
+
+    return  jitter;
+}
 
 //////////////////////////////////////////////////
 bool partio4Maya::partioCacheExists(const char* fileName)
@@ -288,4 +309,118 @@ void partio4Maya::drawPartioLogo(float multiplier)
     glEnd();
 
 }
+
+////////////////////////////////////////////////////
+/// NOISE FOR JITTER!
+
+const int kTableMask = TABLE_SIZE - 1;
+
+float partio4Maya::noiseAtValue( float x )
+//
+//  Description:
+//      Get the Noise value at the given point in 1-space and time
+//
+//  Arguments:
+//      x - the point at which to calculate the lxgNoise
+//
+//  Return Value:
+//      the Noise value at the point
+//
+{
+    int ix;
+    float fx;
+
+    if ( !isInitialized ) {
+        initTable( 23479015 );
+        isInitialized = 1;
+    }
+
+    ix = (int)floorf( x );
+    fx = x - (float)ix;
+
+    return spline( fx, value( ix - 1 ), value( ix ), value( ix + 1 ), value( ix + 2 ) );
+}
+
+
+void  partio4Maya::initTable( long seed )
+//
+//  Description:
+//      Initialize the table of random values with the given seed.
+//
+//  Arguments:
+//      seed - the new seed value
+//
+{
+    srand48( seed );
+
+    for ( int i = 0; i < TABLE_SIZE; i++ ) {
+        valueTable1[i] = (float)drand48();
+        valueTable2[i] = (float)drand48();
+        valueTable3[i] = (float)drand48();
+    }
+    isInitialized = 1;
+}
+
+
+float partio4Maya::spline( float x, float knot0, float knot1, float knot2, float knot3 )
+//
+//  Description:
+//      This is a simple version of a Catmull-Rom spline interpolation.
+//
+//  Assumptions:
+//
+//      0 < x < 1
+//
+//
+{
+    float c0, c1, c2, c3;
+
+    // Evaluate span of cubic at x using Horner's rule
+    //
+    c3 = (-0.5F * knot0 ) + ( 1.5F * knot1 ) + (-1.5F * knot2 ) + ( 0.5F * knot3 );
+    c2 = ( 1.0F * knot0 ) + (-2.5F * knot1 ) + ( 2.0F * knot2 ) + (-0.5F * knot3 );
+    c1 = (-0.5F * knot0 ) + ( 0.0F * knot1 ) + ( 0.5F * knot2 ) + ( 0.0F * knot3 );
+    c0 = ( 0.0F * knot0 ) + ( 1.0F * knot1 ) + ( 0.0F * knot2 ) + ( 0.0F * knot3 );
+
+    return ( ( c3 * x + c2 ) * x + c1 ) * x + c0;;
+}
+
+int partio4Maya::isInitialized = 0;
+
+int partio4Maya::permtable[256] = {
+    254,    91,     242,    186,    90,     204,    85,     133,    233,
+    50,     187,    49,     182,    224,    144,    166,    7,      51,
+    20,     179,    36,     203,    114,    156,    195,    40,     24,
+    60,     162,    84,     126,    102,    63,     194,    220,    161,
+    72,     94,     193,    229,    140,    57,     3,      189,    106,
+    54,     164,    198,    199,    44,     245,    235,    100,    87,
+    25,     41,     62,     111,    13,     70,     27,     82,     69,
+    53,     66,     247,    124,    67,     163,    125,    155,    228,
+    122,    19,     113,    143,    121,    9,      1,      241,    171,
+    200,    83,     244,    185,    170,    141,    115,    190,    154,
+    48,     32,     178,    127,    167,    56,     134,    15,     160,
+    238,    64,     6,      11,     196,    232,    26,     89,     0,
+    219,    112,    68,     30,     215,    227,    75,     132,    71,
+    239,    251,    92,     14,     104,    231,    29,     180,    150,
+    226,    191,    47,     73,     37,     183,    88,     105,    42,
+    22,     2,      38,     5,      119,    74,     249,    184,    52,
+    8,      55,     118,    255,    206,    173,    165,    78,     31,
+    123,    98,     212,    80,     139,    61,     138,    77,     177,
+    45,     137,    145,    28,     168,    128,    95,     223,    35,
+    205,    76,     211,    175,    81,     33,     207,    21,     131,
+    58,     152,    16,     240,    18,     96,     210,    109,    214,
+    216,    202,    148,    34,     146,    117,    176,    93,     246,
+    172,    97,     159,    197,    218,    65,     147,    253,    221,
+    217,    79,     101,    142,    23,     149,    99,     39,     12,
+    135,    110,    234,    108,    153,    129,    4,      169,    174,
+    116,    243,    130,    107,    222,    10,     43,     188,    46,
+    213,    252,    86,     157,    192,    236,    158,    120,    17,
+    103,    248,    225,    230,    250,    208,    181,    151,    237,
+    201,    59,     136,    209
+};
+
+float partio4Maya::valueTable1[256];
+float partio4Maya::valueTable2[256];
+float partio4Maya::valueTable3[256];
+
 
