@@ -54,10 +54,14 @@ SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
 ## Setup platform specific helper defines build variants
 IF(WIN32)
   ADD_DEFINITIONS (-DPARTIO_WIN32)
+  # these are the defaults included with partio 
+  set( ZLIB_INCLUDE_DIR "L:/partio/zlib-win_x64/include")
+  set( ZLIB_LIBRARY "L:/partio/zlib-win_x64/lib/zlib.lib")
 ELSE(WIN32)
   ADD_DEFINITIONS (-Wextra -Wno-unused-parameter)
   SET( CMAKE_CXX_FLAGS "-fPIC")
 ENDIF(WIN32)
+
 
 ## Choose build options
 # Disney specific method of choosing variant
