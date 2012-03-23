@@ -52,6 +52,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <sys/stat.h>
 
 #include "Partio.h"
+#include "partio4MayaShared.h"
 
 class PartioExport : public MPxCommand
 {

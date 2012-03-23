@@ -108,7 +108,7 @@ MString partio4Maya::getBaseName(MString pattern, MString file) {
 MString partio4Maya::updateFileName (MString cacheFile, MString cacheDir, bool cacheStatic, int cacheOffset, int cachePadding,
 						short cacheFormat,int integerTime, MString &formatExt)
 {
-
+	//cout << cacheFile << endl;
 	formatExt = setExt(cacheFormat);
 
 	int cacheFrame =  integerTime + cacheOffset;
@@ -351,7 +351,16 @@ void  partio4Maya::initTable( long seed )
 //      seed - the new seed value
 //
 {
-    srand48( seed );
+
+#ifndef drand48
+#define drand48() (rand()*(1.0/RAND_MAX))
+#endif
+
+#ifdef WIN32
+	srand( seed );
+#else 
+	srand48( seed );
+#endif
 
     for ( int i = 0; i < TABLE_SIZE; i++ ) {
         valueTable1[i] = (float)drand48();

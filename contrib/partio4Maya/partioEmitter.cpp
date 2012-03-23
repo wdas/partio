@@ -410,7 +410,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     //if ( cacheFile != "" && partioCacheExists(cacheFile.asChar()) && cacheFile != mLastFileLoaded)
     if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()))
     {
-        cout << "partioEmitter->Loading: " << newCacheFile << endl;
+		MGlobal::displayInfo(MString("partioEmitter->Loading: " + newCacheFile));
         ParticlesData* particles=0;
         ParticleAttribute IdAttribute;
         ParticleAttribute posAttribute;
@@ -469,7 +469,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 
 			if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache
 			{
-				cout << "partioEmitter->refreshing AE controls" << endl;
+				MGlobal::displayInfo("partioEmitter->refreshing AE controls");
 
 				MString command = "";
 				MString zPlugName = zPlug.name();
@@ -539,11 +539,11 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 					MString ppAttrName = yPlug.asString();
 
 
-					if (attr.type == VECTOR)
+					if (attr.type == ParticleAttributeType::VECTOR)
 					{
 						if (!part.isPerParticleVectorAttribute(ppAttrName))
 						{
-							cout <<  "partioEmitter->adding ppAttr " << ppAttrName << endl;
+							MGlobal::displayInfo(MString("partioEmitter->adding ppAttr " + ppAttrName) );
 
 							// moving this to an outside mel proc
 							MString command;
@@ -584,18 +584,17 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 							part.getPerParticleAttribute(ppAttrName, vAttribute, &status);
 							if ( !status )
 							{
-								cout << "partioEmitter->could not get vector PP array " << endl;
+								MGlobal::displayError("partioEmitter->could not get vector PP array ");
 							}
 							vectorAttrArrays[ppAttrName.asChar()] = vAttribute;
 						}
 
 					}
-					else if (attr.type == FLOAT)
+					else if (attr.type == ParticleAttributeType::FLOAT)
 					{
 						if (!part.isPerParticleDoubleAttribute(ppAttrName))
 						{
-							cout <<  "partioEmiter->adding ppAttr " << ppAttrName << endl;
-							// moving this to an outside mel proc
+							MGlobal::displayInfo(MString("partioEmiter->adding ppAttr " + ppAttrName));
 							MString command;
 							command += "pioEmAddPPAttr ";
 							command += ppAttrName;
@@ -633,14 +632,14 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 							part.getPerParticleAttribute(ppAttrName, dAttribute, &status);
 							if ( !status )
 							{
-								cout << "partioEmitter->could not get double PP array " << endl;
+								MGlobal::displayError("partioEmitter->could not get double PP array ");
 							}
 							doubleAttrArrays[ppAttrName.asChar()] = dAttribute;
 						}
 					}
 					else
 					{
-						cout << "partioEmitter->skipping attr: "  << (attr.name) << endl;
+						MGlobal::displayError(MString("partioEmitter->skipping attr: " + MString(attr.name.c_str())));
 					}
 				}
 			}
@@ -782,7 +781,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 			part.setPerParticleAttribute("lifespanPP", lifespans);
 
 
-			cout << "partioEmitter->Emitting  " << inPosArray.length() << " new particles" << endl;
+			MGlobal::displayInfo (MString ("partioEmitter->Emitting  ") + inPosArray.length() + MString( " new particles"));
 			part.emit(inPosArray, inVelArray);
 
 			part.setPerParticleAttribute("partioID", partioIDs);
@@ -809,7 +808,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     else
     {
         MGlobal::displayError("Error loading the Cache file it does not exist on disk, check path/prefix. ");
-        cout << "partioEmitter->No File at: " << newCacheFile << endl;
+        //cout << "partioEmitter->No File at: " << newCacheFile << endl;
     }
 
     // Update the data block with new dOutput and set plug clean.

@@ -30,6 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partioVisualizer.h"
 #include "partioEmitter.h"
 #include "partioExport.h"
+#include "partio4MayaShared.h"
 #include <maya/MFnPlugin.h>
 
 MStatus initializePlugin ( MObject obj )

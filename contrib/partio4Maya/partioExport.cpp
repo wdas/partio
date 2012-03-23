@@ -120,7 +120,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 	}
 
 
-	if( Args.length() < (uint)3)
+	if( Args.length() < 3)
 	{
 		MGlobal::displayError("PartioExport need the EXPORT PATH and a PARTICLESHAPE's NAME, and at least one ATTRIBUTE's NAME you want to export." );
 		printUsage();
@@ -202,7 +202,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 	}
 
 	/// parse attribute  flags
-	uint numUses = argData.numberOfFlagUses( kAttributeFlagL );
+	unsigned int numUses = argData.numberOfFlagUses( kAttributeFlagL );
 
 	/// loop thru the rest of the attributes given
 	MStringArray  attrNames;
@@ -211,7 +211,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
 	bool worldVeloCheck = false;
 
-	for( uint i = 0; i < numUses; i++ )
+	for( unsigned int i = 0; i < numUses; i++ )
 	{
 		MArgList argList;
 		status = argData.getFlagArgumentList( kAttributeFlagL, i, argList );
@@ -275,7 +275,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 		outputPath += Format;
 
 		MFnParticleSystem PS(objNode);
-		uint particleCount = PS.count();
+		unsigned int particleCount = PS.count();
 
 		Partio::ParticlesDataMutable* p = Partio::createInterleave();
 		p->addParticles((const int)particleCount);
@@ -284,7 +284,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 		if (particleCount > 0)
 		{
 
-			for (uint i = 0; i< attrNames.length(); i++)
+			for (unsigned int i = 0; i< attrNames.length(); i++)
 			{
 				// you must reset the iterator before adding new attributes or accessors
 				it=p->begin();
@@ -438,7 +438,11 @@ MStatus PartioExport::doIt(const MArgList& Args)
 			struct stat st;
 			if (stat(Path.asChar(),&st) < 0)
 			{
+#ifdef WIN32
+				CreateDirectory( Path.asChar(),NULL);
+#else
 				mkdir (Path.asChar(),0755);
+#endif
 			}
 
 			Partio::write(outputPath.asChar(), *p );

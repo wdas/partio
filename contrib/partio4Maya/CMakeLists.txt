@@ -23,9 +23,15 @@ SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
 
 set (PLUGIN_NAME "partio4Maya")
 set (PLUGIN_SUFFIX ".so")
+set (CMAKE_PROJECT_NAME "partio4Maya")
 
 # update the base dir to where your copy of maya resides
-SET(MAYA_BASE_DIR "/usr/autodesk/maya2012-x64/")
+SET(MAYA_VERSION "2012-x64")
+if(WIN32)
+	SET(MAYA_BASE_DIR "C:/Program Files/Autodesk/Maya${MAYA_VERSION}")
+else(WIN32)
+	SET(MAYA_BASE_DIR "/usr/autodesk/maya${MAYA_VERSION}")
+ENDIF()
 SET(MAYA_INC_DIR ${MAYA_BASE_DIR}/include)
 SET(MAYA_LIB_DIR ${MAYA_BASE_DIR}/lib)
 
@@ -41,9 +47,11 @@ link_directories  ( ${STD_LIB} ${MAYA_LIB_DIR} ${PARTIO_LIB})
 
 add_definitions(-D_BOOL)
 add_definitions(-DREQUIRE_IOSTREAM)
-add_definitions(-fPIC)
-add_definitions(-O3)
-add_definitions(-pthread)
+if (!WIN32)
+	add_definitions(-fPIC)
+	add_definitions(-O3)
+	add_definitions(-pthread)
+endif()
 
 
 FILE(GLOB partio4MayaCPP "*.cpp")
@@ -56,10 +64,9 @@ SET(OPENGL_gl_LIBRARY "GL")
 SET(OPENGL_glu_LIBRARY "GLU")
 
 
-
 IF (WIN32)
 	   SET(MAYA_LIBS OpenMaya Foundation OpenMayaAnim OpenMayaFX OpenMayaUI OpenMayaRender)
-	   SET(PARTIO_LIB  libpartio.a)
+	   SET(PARTIO_LIB  partio)
 	ELSE()
 		SET(MAYA_LIBS OpenMaya Foundation OpenMayaAnim OpenMayaFX OpenMayaUI OpenMayaRender)
 		SET(PARTIO_LIB  libpartio.a)

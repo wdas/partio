@@ -521,7 +521,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 				if (opacityFromIndex >=0)
 				{
 					particles->attributeInfo(opacityFromIndex,opacityAttr);
-					if (opacityAttr.type == FLOAT)
+					if (opacityAttr.type == ParticleAttributeType::FLOAT)
 					{
 						for (int i=0;i<particles->numParticles();i++)
 						{
@@ -831,7 +831,7 @@ void partioVisualizer::drawPartio(int drawStyle)
 				//cout << "depth test" <<  glGetError() << endl;
 				glEnable(GL_BLEND);
 				//cout << "blend" <<  glGetError() << endl;
-				glBlendEquation(GL_FUNC_ADD);
+//				glBlendEquation(GL_FUNC_ADD);
 				//cout << "blend eq" <<  glGetError() << endl;
 				//glDisable(GL_POINT_SMOOTH);
 				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);

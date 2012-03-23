@@ -27,16 +27,39 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
+#ifndef PARTIO4MAYASHARED
+#define PARTIO4MAYASHARED
+#pragma once
+
+
+#ifdef WIN32
+#define _WINSOCKAPI_
+#include <windows.h>
+#endif
+
 #include <sys/stat.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <map>
 #include <maya/MString.h>
 #include <maya/MDataBlock.h>
 #include <maya/MVector.h>
 
+
+
+#ifdef OSMac_MachO_ 
+#include <OpenGL/glu.h>
+#include <OpenGL/gl.h>
+#endif
+#ifdef  WIN32  
+#include <GL/glu.h>
+#include <GL/gl.h>
+#else
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/gl.h>
 #include <GL/glext.h>
 #include <GL/glx.h>
+#endif
 
 #define LEAD_COLOR				18	// green
 #define ACTIVE_COLOR			15	// white
@@ -80,3 +103,5 @@ public:
 inline float partio4Maya::value( int x, float table[] ) {
 	return table[MODPERM( x )];
 }
+
+#endif
