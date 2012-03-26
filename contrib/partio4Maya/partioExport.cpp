@@ -367,7 +367,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 					{
 
 						Partio::Data<float,1>& floatAttr=floatAccess.data<Partio::Data<float,1> >(it);
-						floatAttr[0] = DA[a];
+						floatAttr[0] = float(DA[a]);
 						a++;
 
 					}

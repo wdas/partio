@@ -46,9 +46,9 @@ MVector partio4Maya::jitterPoint(int id, float freq, float offset, float jitterM
     MVector jitter(0,0,0);
     if (jitterMag > 0)
     {
-        jitter.x = ((noiseAtValue((id+.124+offset)*freq))-.5)*2;
-        jitter.y = ((noiseAtValue((id+1042321+offset)*freq))-.5)*2;
-        jitter.z = ((noiseAtValue((id-2350212+offset)*freq))-.5)*2;
+        jitter.x = ((noiseAtValue(float((id+.124+offset))*freq))-.5)*2;
+        jitter.y = ((noiseAtValue(float((id+1042321+offset))*freq))-.5)*2;
+        jitter.z = ((noiseAtValue(float((id-2350212+offset))*freq))-.5)*2;
 
         jitter*= jitterMag;
     }

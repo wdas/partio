@@ -473,13 +473,25 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			block.setClean(aForceReload);
 
 		}
-
-
+		
 		if (particles)
 		{
 			// something changed..
 			if  (cacheChanged || mLastColorFromIndex != colorFromIndex || mLastColor != defaultColor)
 			{
+				int numAttrs = particles->numAttributes();
+				if (colorFromIndex+1 > numAttrs || opacityFromIndex+1 > numAttrs)
+				{
+					// reset the attrs
+					block.outputValue(aColorFrom).setInt(-1);
+					block.setClean(aColorFrom);
+					block.outputValue(aAlphaFrom).setInt(-1);
+					block.setClean(aAlphaFrom);
+
+					colorFromIndex  = block.inputValue( aColorFrom ).asInt();
+					opacityFromIndex= block.inputValue( aAlphaFrom ).asInt();
+				}
+
 				if(colorFromIndex >=0)
 				{
 					particles->attributeInfo(colorFromIndex,colorAttr);
@@ -540,7 +552,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 							float temp = attrVal[0];
 							if (invertAlpha)
 							{
-								temp = 1.0-temp;
+								temp = float(1.0-temp);
 
 							}
 							rgba[(i*4)+3] = temp;
@@ -556,7 +568,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 								float temp = attrVal[3];
 								if (invertAlpha)
 								{
-									temp = 1.0-temp;
+									temp = float(1.0-temp);
 								}
 								rgba[(i*4)+3] = temp;
 							}
@@ -566,10 +578,10 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 							for (int i=0;i<particles->numParticles();i++)
 							{
 								const float * attrVal = particles->data<float>(opacityAttr,i);
-								float lum = ((attrVal[0]*0.2126)+(attrVal[1]*0.7152)+(attrVal[2]*.0722));
+								float lum = float((attrVal[0]*0.2126)+(attrVal[1]*0.7152)+(attrVal[2]*.0722));
 								if (invertAlpha)
 								{
-									lum = 1.0-lum;
+									lum = float(1.0-lum);
  								}
 								rgba[(i*4)+3] =  lum;
 							}
@@ -619,7 +631,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		{
 			MString command = "";
 			MString zPlugName = zPlug.name();
-			for (int x = 0; x<zPlug.numElements(); x++)
+			for (unsigned int x = 0; x<zPlug.numElements(); x++)
 			{
 				command += "removeMultiInstance -b true ";
 				command += zPlugName;
@@ -659,9 +671,6 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 		}
 	}
-
-	/// DEBUG cout << attributeList << endl;
-
 	return MS::kSuccess;
 }
 
@@ -743,12 +752,12 @@ void  partioVisualizer::drawBoundingBox()
 {
 	MPoint  bboxMin = bbox.min();
 	MPoint  bboxMax = bbox.max();
-	xMin = bboxMin.x;
-	yMin = bboxMin.y;
-	zMin = bboxMin.z;
-	xMax = bboxMax.x;
-	yMax = bboxMax.y;
-	zMax = bboxMax.z;
+	xMin = float(bboxMin.x);
+	yMin = float(bboxMin.y);
+	zMin = float(bboxMin.z);
+	xMax = float(bboxMax.x);
+	yMax = float(bboxMax.y);
+	zMax = float(bboxMax.z);
 
 	/// draw the bounding box
 	glBegin (GL_LINES);

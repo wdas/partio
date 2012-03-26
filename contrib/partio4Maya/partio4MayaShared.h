@@ -46,14 +46,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MVector.h>
 
 
-
 #ifdef OSMac_MachO_
-#include <OpenGL/glu.h>
 #include <OpenGL/gl.h>
-#endif
-#ifdef  WIN32
-#include <GL/glu.h>
-#include <GL/gl.h>
+#include <OpenGL/glu.h>
+#elif  WIN32
+#include <gl/GLU.h>
+#include <gl/GL.h>
 #include <GL/glext.h>
 #else
 #define GL_GLEXT_PROTOTYPES 1

@@ -378,7 +378,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 	// parse and get the new file name
 	MString newCacheFile = partio4Maya::updateFileName(cachePrefix, cacheDir,cacheStatic,cacheOffset,cachePadding,cacheFormat,integerTime, formatExt);
 
-    float deltaTime  = cT.value() - integerTime;
+    float deltaTime  = float(cT.value() - integerTime);
 
     // motion  blur rounding  frame logic
     if ((deltaTime < 1 || deltaTime > -1)&& deltaTime !=0)  // motion blur step?
@@ -474,7 +474,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 				MString command = "";
 				MString zPlugName = zPlug.name();
 				MString yPlugName = yPlug.name();
-				for (int x = 0; x<zPlug.numElements(); x++)
+				for (unsigned int x = 0; x<zPlug.numElements(); x++)
 				{
 					command += "removeMultiInstance -b true ";
 					command += zPlugName;
@@ -666,7 +666,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 			std::map <std::string, MVectorArray >::iterator vecIt;
 			std::map <std::string, MDoubleArray >::iterator doubleIt;
 
-			for (int x = 0; x<part.count(); x++)
+			for (unsigned int x = 0; x<part.count(); x++)
 			{
 				//cout << "partioEmitterDebug->moving existing particles" << endl;
 				it = particleIDMap.find((int)partioIDs[x]);
@@ -675,7 +675,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 					const float* pos=particles->data<float>(posAttribute,it->second);
 					const float* vel=particles->data<float>(velAttribute,it->second);
 
-					MVector jitter = partio4Maya::jitterPoint(it->second, jitterFreq, seed, jitterPos);
+					MVector jitter = partio4Maya::jitterPoint(it->second, jitterFreq, float(seed), jitterPos);
 
 					positions[x] = MVector(pos[0],pos[1],pos[2])+(jitter);
 					if (useEmitterTxfm) {
@@ -713,7 +713,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 			}
 
 			// TODO: handle a "release" attribute list to allow expressions to force partio emitter to forget or skip over certain particles
-			for (int y = 0; y< deletePoints.length(); y++)
+			for (unsigned int y = 0; y< deletePoints.length(); y++)
 			{
 				//cout << "partioEmitterDebug->deleting particles" << endl;
 				positions.remove(deletePoints[y]-y);
@@ -747,7 +747,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 				const int* id=particles->data<int>(IdAttribute,it->second);
 				MVector temp(pos[0], pos[1], pos[2]);
 
-				MVector jitter = partio4Maya::jitterPoint(it->second, jitterFreq, seed, jitterPos);
+				MVector jitter = partio4Maya::jitterPoint(it->second, jitterFreq, float(seed), jitterPos);
 				if (useEmitterTxfm) {
 					temp += emitterOffset;
 				}
