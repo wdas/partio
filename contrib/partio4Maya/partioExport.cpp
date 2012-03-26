@@ -48,7 +48,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <string>
 #include <fstream>
 #include <sstream>
+
+#ifdef WIN32
 #include <zlib.h>
+#include <shlobj.h>
+#endif
 
 #define  kAttributeFlagS	"-atr"
 #define  kAttributeFlagL	"-attribute"
@@ -273,6 +277,8 @@ MStatus PartioExport::doIt(const MArgList& Args)
 		outputPath += ".";
 		outputPath += Format;
 
+		MGlobal::displayInfo("PartioExport-> exporting: "+ outputPath);
+
 		MFnParticleSystem PS(objNode);
 		unsigned int particleCount = PS.count();
 
@@ -438,7 +444,9 @@ MStatus PartioExport::doIt(const MArgList& Args)
 			if (stat(Path.asChar(),&st) < 0)
 			{
 #ifdef WIN32
-				CreateDirectory( Path.asChar(),NULL);
+				HWND hwnd = NULL;
+				const SECURITY_ATTRIBUTES *psa = NULL;
+				SHCreateDirectoryEx(hwnd, Path.asChar(), psa);
 #else
 				mkdir (Path.asChar(),0755);
 #endif

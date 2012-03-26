@@ -242,7 +242,6 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
     string $partioExportFormat = `optionMenuGrp -q -v  $partioExportOptionMenu`;
     string $cacheDir = `textFieldButtonGrp -q -text  $cacheDirCtrl`;
 
-
     int $perframe = `checkBoxGrp -q -v1 $exportPerFrameCheckbox`;
 
     string $partioFormatString = `tolower $partioExportFormat `;
@@ -281,8 +280,11 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
                 string $cmd;
                 string $filePath;
 
+		// fix windows paths with escape characters
+		
+			
                 $cmd = ("partioExport -mnf "+$start+" -mxf "+$end+ " -f "+$partioExportFormat+" -atr position -atr id ");
-                $filePath = (" \""+$cacheDir+"\" ");
+                $filePath = `encodeString($cacheDir)`;
 
                 string $attrs[] = `partioExportGuiListParticleAttrs $particle allPP 0 1`;
 
@@ -303,9 +305,8 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 						}
                     }
                 }
-                $cmd += (" -p "+$filePath +" "+$particle);
-                //print $cmd;
-                eval $cmd;
+                $cmd += (" -p \""+$filePath +"\" "+$particle);
+                evalEcho $cmd;
             }
             else
 			{
@@ -321,6 +322,7 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 global proc  updatePath (string $cacheDirControl)
 {
     string $result[] = `fileDialog2 -fileMode 3  -dialogStyle 1`;
+print $result[0];
     textFieldButtonGrp -e -text $result[0]  $cacheDirControl;
 	optionVar -sv "partioExportGUICachePath" $result[0];
 }
