@@ -25,3 +25,14 @@
 /py/
 *Makefile*
 *Doxyfile
+*.tlog
+*.lastbuildstate
+*.stamp
+*.depend
+*.list
+*.rule
+*manifest*
+*.unsuccessfulbuild
+*.obj
+*.cache
+

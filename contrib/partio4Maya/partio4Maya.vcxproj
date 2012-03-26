@@ -131,7 +131,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <AdditionalOptions> /Zm1000 %(AdditionalOptions)</AdditionalOptions>
-      <AdditionalIncludeDirectories>L:/partio/contrib/partio4Maya/.;L:/partio/contrib/partio4Maya/..;C:/Program Files/Autodesk/Maya2012-x64/include;L:\partio\src\lib;L:\partio\zlib-win_x64\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>L:/partio/contrib/partio4Maya/.;L:/partio/contrib/partio4Maya/..;C:/Program Files/Autodesk/Maya2012-x64/include;L:\partio\src\lib;L:\partio\zlib-win_x64\include;C:\Program Files\Autodesk\Maya2012-x64\devkit\plug-ins;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <CompileAs>Default</CompileAs>
       <ExceptionHandling>Sync</ExceptionHandling>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>

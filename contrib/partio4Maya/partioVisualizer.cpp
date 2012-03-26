@@ -349,7 +349,7 @@ MStatus partioVisualizer::initialize()
 
 MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 {
-
+	
 	bool cacheActive = block.inputValue(aCacheActive).asBool();
 	int colorFromIndex  = block.inputValue( aColorFrom ).asInt();
 	int opacityFromIndex= block.inputValue( aAlphaFrom ).asInt();
@@ -402,13 +402,14 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			mLastPrefix = cachePrefix;
 			block.outputValue(aForceReload).setBool(false);
 		}
+	 
 //////////////////////////////////////////////
 /// or it can change from a time input change
-
+		
 		if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()) && (newCacheFile != mLastFileLoaded || forceReload) )
 		{
 			cacheChanged = true;
-			cout << "partioVisualizer->Loading: " << newCacheFile << endl;
+			MGlobal::displayWarning(MString("partioVisualizer->Loading: " + newCacheFile));
 			particles=0; // resets the particles
 
 			particles=read(newCacheFile.asChar());
@@ -423,8 +424,9 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			ParticleAttribute posAttribute;
 			ParticleAttribute velAttribute;
 
-			cout << "LOADED " << particles->numParticles() << " particles" << endl;
-
+			char buf[5];
+			MGlobal::displayWarning(MString ("LOADED ") + itoa(particles->numParticles(),buf,10) + MString (" particles"));
+	
 			//cout << " reallocating" << endl;
 			float * floatToRGB = (float *) realloc(rgb, particles->numParticles()*sizeof(float)*3);
 			if (floatToRGB != NULL)
@@ -584,9 +586,9 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			}
 		}
 	}
-	/*
 
-///??? DRAW SKIP
+	/*
+	///??? DRAW SKIP
 	MDataHandle drawSkipHnd = block.inputValue(aDrawSkip);
 	float drawSkipVal = drawSkipHnd.asDouble();
 	*/

@@ -54,6 +54,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifdef  WIN32  
 #include <GL/glu.h>
 #include <GL/gl.h>
+#include <GL/glext.h>
 #else
 #define GL_GLEXT_PROTOTYPES 1
 #include <GL/gl.h>
