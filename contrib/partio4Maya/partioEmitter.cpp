@@ -194,7 +194,7 @@ MStatus partioEmitter::initialize()
     aCacheFormat = eAttr.create( "cacheFormat", "cachFmt");
 	std::map<short,MString> formatExtMap;
 	partio4Maya::buildSupportedExtensionList(formatExtMap,false);
-	for (short i = 0; i< formatExtMap.size(); i++)
+	for (unsigned short i = 0; i< formatExtMap.size(); i++)
 	{
 		eAttr.addField(formatExtMap[i].toUpperCase(),	i);
 	}
@@ -462,7 +462,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 			it = particleIDMap.begin();
 			it = particleIDMap.end();
 
-			int numAttr=particles->numAttributes();
+			unsigned int numAttr=particles->numAttributes();
 
 			MPlug zPlug (thisMObject(), aPartioAttributes);
 			MPlug yPlug (thisMObject(), aMayaPPAttributes);
@@ -495,7 +495,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 				yPlug.setNumElements(0);
 
 
-				for (int i=0;i<numAttr;i++)
+				for (unsigned int i=0;i<numAttr;i++)
 				{
 					ParticleAttribute attr;
 					particles->attributeInfo(i,attr);
@@ -524,7 +524,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 			// we use this mapping to allow for direct writing of attrs to PP variables
 			std::map<std::string, std::string > userPPMapping;
 
-			for (int i=0;i<numAttr;i++)
+			for (unsigned int i=0;i<numAttr;i++)
 			{
 				ParticleAttribute attr;
 				particles->attributeInfo(i,attr);

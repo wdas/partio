@@ -240,7 +240,7 @@ MStatus partioVisualizer::initialize()
     aCacheFormat = eAttr.create( "cacheFormat", "cachFmt");
 	std::map<short,MString> formatExtMap;
 	partio4Maya::buildSupportedExtensionList(formatExtMap,false);
-	for (short i = 0; i< formatExtMap.size(); i++)
+	for (unsigned short i = 0; i< formatExtMap.size(); i++)
 	{
 		eAttr.addField(formatExtMap[i].toUpperCase(),	i);
 	}
@@ -473,7 +473,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			block.setClean(aForceReload);
 
 		}
-		
+
 		if (particles)
 		{
 			// something changed..
@@ -615,7 +615,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 	if (particles) // update the AE Controls for attrs in the cache
 	{
-		int numAttr=particles->numAttributes();
+		unsigned int numAttr=particles->numAttributes();
 		MPlug zPlug (thisMObject(), aPartioAttributes);
 
 		if ((colorFromIndex+1) > zPlug.numElements())
@@ -649,7 +649,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 			attributeList.clear();
 
-			for (int i=0;i<numAttr;i++)
+			for (unsigned int i=0;i<numAttr;i++)
 			{
 				ParticleAttribute attr;
 				particles->attributeInfo(i,attr);
