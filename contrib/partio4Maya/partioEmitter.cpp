@@ -539,7 +539,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 					MString ppAttrName = yPlug.asString();
 
 
-					if (attr.type == ParticleAttributeType::VECTOR)
+					if (attr.count == 3)
 					{
 						if (!part.isPerParticleVectorAttribute(ppAttrName))
 						{
@@ -584,17 +584,17 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 							part.getPerParticleAttribute(ppAttrName, vAttribute, &status);
 							if ( !status )
 							{
-								MGlobal::displayError("partioEmitter->could not get vector PP array ");
+								MGlobal::displayError("PartioEmitter->could not get vector PP array ");
 							}
 							vectorAttrArrays[ppAttrName.asChar()] = vAttribute;
 						}
 
 					}
-					else if (attr.type == ParticleAttributeType::FLOAT)
+					else if (attr.count == 1)
 					{
 						if (!part.isPerParticleDoubleAttribute(ppAttrName))
 						{
-							MGlobal::displayInfo(MString("partioEmiter->adding ppAttr " + ppAttrName));
+							MGlobal::displayInfo(MString("PartioEmiter->adding ppAttr " + ppAttrName));
 							MString command;
 							command += "pioEmAddPPAttr ";
 							command += ppAttrName;
@@ -632,14 +632,14 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 							part.getPerParticleAttribute(ppAttrName, dAttribute, &status);
 							if ( !status )
 							{
-								MGlobal::displayError("partioEmitter->could not get double PP array ");
+								MGlobal::displayError("PartioEmitter->could not get double PP array ");
 							}
 							doubleAttrArrays[ppAttrName.asChar()] = dAttribute;
 						}
 					}
 					else
 					{
-						MGlobal::displayError(MString("partioEmitter->skipping attr: " + MString(attr.name.c_str())));
+						MGlobal::displayError(MString("PartioEmitter->skipping attr: " + MString(attr.name.c_str())));
 					}
 				}
 			}
@@ -781,7 +781,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 			part.setPerParticleAttribute("lifespanPP", lifespans);
 
 
-			MGlobal::displayInfo (MString ("partioEmitter->Emitting  ") + inPosArray.length() + MString( " new particles"));
+			MGlobal::displayInfo (MString ("PartioEmitter->Emitting  ") + inPosArray.length() + MString( " new particles"));
 			part.emit(inPosArray, inVelArray);
 
 			part.setPerParticleAttribute("partioID", partioIDs);
@@ -807,7 +807,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     }
     else
     {
-        MGlobal::displayError("Error loading the Cache file it does not exist on disk, check path/prefix. ");
+        MGlobal::displayError("PartioEmitter->Error loading the Cache file, it does not exist on disk, check path/prefix.");
         //cout << "partioEmitter->No File at: " << newCacheFile << endl;
     }
 

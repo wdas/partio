@@ -47,11 +47,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 
 
-#ifdef OSMac_MachO_ 
+#ifdef OSMac_MachO_
 #include <OpenGL/glu.h>
 #include <OpenGL/gl.h>
 #endif
-#ifdef  WIN32  
+#ifdef  WIN32
 #include <GL/glu.h>
 #include <GL/gl.h>
 #include <GL/glext.h>

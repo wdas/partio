@@ -349,7 +349,7 @@ MStatus partioVisualizer::initialize()
 
 MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 {
-	
+
 	bool cacheActive = block.inputValue(aCacheActive).asBool();
 	int colorFromIndex  = block.inputValue( aColorFrom ).asInt();
 	int opacityFromIndex= block.inputValue( aAlphaFrom ).asInt();
@@ -402,14 +402,14 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			mLastPrefix = cachePrefix;
 			block.outputValue(aForceReload).setBool(false);
 		}
-	 
+
 //////////////////////////////////////////////
 /// or it can change from a time input change
-		
+
 		if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()) && (newCacheFile != mLastFileLoaded || forceReload) )
 		{
 			cacheChanged = true;
-			MGlobal::displayWarning(MString("partioVisualizer->Loading: " + newCacheFile));
+			MGlobal::displayWarning(MString("PartioVisualizer->Loading: " + newCacheFile));
 			particles=0; // resets the particles
 
 			particles=read(newCacheFile.asChar());
@@ -417,36 +417,45 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			mLastFileLoaded = newCacheFile;
 			if (particles->numParticles() == 0)
 			{
-				return MS::kSuccess;
+				return (MS::kSuccess);
 			}
 
 			ParticleAttribute IdAttribute;
 			ParticleAttribute posAttribute;
 			ParticleAttribute velAttribute;
 
-			char buf[5];
-			MGlobal::displayWarning(MString ("LOADED ") + itoa(particles->numParticles(),buf,10) + MString (" particles"));
-	
+			char partCount[50];
+			sprintf (partCount, "%d", particles->numParticles());
+			MGlobal::displayInfo(MString ("PartioVisualizer-> LOADED: ") + partCount + MString (" particles"));
+
 			//cout << " reallocating" << endl;
 			float * floatToRGB = (float *) realloc(rgb, particles->numParticles()*sizeof(float)*3);
 			if (floatToRGB != NULL)
 			{
 				rgb =  floatToRGB;
 			}
-			else{ cout << "unable to allocate new memory for particles" << endl;}
+			else
+			{
+				MGlobal::displayError("PartioVisualizer->unable to allocate new memory for particles");
+				return (MS::kFailure);
+			}
 
 			float * newRGBA = (float *) realloc(rgba,particles->numParticles()*sizeof(float)*4);
 			if (newRGBA != NULL)
 			{
 				rgba =  newRGBA;
 			}
-			else{ cout << "unable to allocate new memory for particles" << endl;}
+			else
+			{
+				MGlobal::displayError("PartioVisualizer->unable to allocate new memory for particles");
+				return (MS::kFailure);
+			}
 
 			bbox.clear();
 
 			if (!particles->attributeInfo("position",positionAttr) && !particles->attributeInfo("Position",positionAttr))
 			{
-				std::cerr<<"Failed to find position attribute "<<std::endl;
+				MGlobal::displayError("PartioVisualizer->Failed to find position attribute ");
 				return ( MS::kFailure );
 			}
 			else
@@ -523,7 +532,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 				if (opacityFromIndex >=0)
 				{
 					particles->attributeInfo(opacityFromIndex,opacityAttr);
-					if (opacityAttr.type == ParticleAttributeType::FLOAT)
+					if (opacityAttr.count == 1)  // single float value for opacity
 					{
 						for (int i=0;i<particles->numParticles();i++)
 						{
@@ -539,7 +548,6 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 					}
 					else
 					{
-						cout << opacityAttr.count << endl;
 						if (opacityAttr.count == 4)   // we have an  RGBA 4 float attribute ?
 						{
 							for (int i=0;i<particles->numParticles();i++)

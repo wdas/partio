@@ -108,7 +108,6 @@ void* PartioExport::creator()
 
 MStatus PartioExport::doIt(const MArgList& Args)
 {
-	cout << "DO IT!" << endl;
 
 	MStatus status;
 	MArgParser argData(createSyntax(), Args, &status);
@@ -122,7 +121,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
 	if( Args.length() < 3)
 	{
-		MGlobal::displayError("PartioExport need the EXPORT PATH and a PARTICLESHAPE's NAME, and at least one ATTRIBUTE's NAME you want to export." );
+		MGlobal::displayError("PartioExport-> need the EXPORT PATH and a PARTICLESHAPE's NAME, and at least one ATTRIBUTE's NAME you want to export." );
 		printUsage();
 		return MStatus::kFailure;
 	}
@@ -151,7 +150,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 		Format != "geo" &&
 		Format != "ptc" )
 	{
-		MGlobal::displayError("PartioExport: format is one of: pda,pdb,pdc,prt,bin,bgeo,geo,ptc,mc,rib,ass");
+		MGlobal::displayError("PartioExport-> format is one of: pda,pdb,pdc,prt,bin,bgeo,geo,ptc,mc,rib,ass");
 		return MStatus::kFailure;
 	}
 
@@ -197,7 +196,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
 	if( objNode.apiType() != MFn::kParticle && objNode.apiType() != MFn::kNParticle )
 	{
-		MGlobal::displayError("PartioExport can't find your PARTICLESHAPE.");
+		MGlobal::displayError("PartioExport-> can't find your PARTICLESHAPE.");
 		return MStatus::kFailure;
 	}
 
@@ -289,13 +288,13 @@ MStatus PartioExport::doIt(const MArgList& Args)
 				// you must reset the iterator before adding new attributes or accessors
 				it=p->begin();
 				MString  attrName =  attrNames[i];
-				cout << attrName ;
+				//cout << attrName ;
 
 				///  INT Attribute found
 				if (PS.isPerParticleIntAttribute(attrName) || attrName == "id" || attrName == "particleId")
 				{
 
-					cout << "-> INT " << endl;
+					//cout << "-> INT " << endl;
 					MIntArray IA;
 
 					if ( attrName == "id" || attrName == "particleId" )
@@ -313,7 +312,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 					}
 
 					Partio::ParticleAttribute  intAttribute = p->addAttribute(attrName.asChar(), Partio::INT, 1);
-					cout <<  "partio add Int attribute" << endl;
+					//cout <<  "partio add Int attribute" << endl;
 
 					Partio::ParticleAccessor intAccess(intAttribute);
 					it.addAccessor(intAccess);
@@ -331,7 +330,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 				/// DOUBLE Attribute found
 				else if  (PS.isPerParticleDoubleAttribute(attrName))
 				{
-					cout << "-> FLOAT " << endl;
+					//cout << "-> FLOAT " << endl;
 					MDoubleArray DA;
 
 					if( attrName == "radius" || attrName  == "radiusPP")
@@ -373,7 +372,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 				else if (PS.isPerParticleVectorAttribute(attrName))
 				{
 
-					cout << "-> VECTOR " << endl;
+					//cout << "-> VECTOR " << endl;
 					MVectorArray VA;
 
 					if( attrName == "position" )
@@ -446,13 +445,13 @@ MStatus PartioExport::doIt(const MArgList& Args)
 			}
 
 			Partio::write(outputPath.asChar(), *p );
-			cout << "partioCount" << endl;
-			cout << "end FRAME: " << outFrame << endl;
-			cout << "num particles" << p->numParticles() << endl;
-			cout << "num Attributes" << p->numAttributes() << endl;
+			//cout << "partioCount" << endl;
+			//cout << "end FRAME: " << outFrame << endl;
+			//cout << "num particles" << p->numParticles() << endl;
+			//cout << "num Attributes" << p->numAttributes() << endl;
 
 			p->release();
-			cout << "released  memory" << endl;
+			//cout << "released  memory" << endl;
 		} /// if particle count > 0
 
 	} /// loop frames
