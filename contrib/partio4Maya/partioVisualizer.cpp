@@ -82,6 +82,7 @@ MObject partioVisualizer::time;
 MObject partioVisualizer::aDrawSkip;
 MObject partioVisualizer::aUpdateCache;
 MObject partioVisualizer::aSize;         // The size of the logo
+MObject partioVisualizer::aFlipYZ;
 MObject partioVisualizer::aCacheDir;
 MObject partioVisualizer::aCachePrefix;
 MObject partioVisualizer::aUseTransform;
@@ -124,6 +125,7 @@ partioVisualizer::partioVisualizer()
 	multiplier(1.0)
 {
 	particles = NULL;
+	flipPos = (float *) malloc(sizeof(float));
 	rgb = (float *) malloc (sizeof(float));
 	rgba = (float *) malloc(sizeof(float));
 
@@ -135,6 +137,7 @@ partioVisualizer::~partioVisualizer()
 	{
 		particles->release();
 	}
+	free(flipPos);
 	free(rgb);
 	free(rgba);
 	MSceneMessage::removeCallback( partioVisualizerOpenCallback);
@@ -202,6 +205,10 @@ MStatus partioVisualizer::initialize()
 
 	aSize = uAttr.create( "iconSize", "isz", MFnUnitAttribute::kDistance );
 	uAttr.setDefault( 0.25 );
+
+	aFlipYZ = nAttr.create( "flipYZ", "fyz", MFnNumericData::kBoolean);
+	nAttr.setDefault ( false );
+	nAttr.setKeyable ( true );
 
 	aDrawSkip = nAttr.create( "drawSkip", "dsk", MFnNumericData::kLong ,0);
 	nAttr.setKeyable( true );
@@ -302,6 +309,7 @@ MStatus partioVisualizer::initialize()
 
 	addAttribute( aUpdateCache );
 	addAttribute ( aSize );
+	addAttribute ( aFlipYZ );
 	addAttribute ( aDrawSkip );
 	addAttribute ( aCacheDir );
     addAttribute ( aCachePrefix );
@@ -324,6 +332,7 @@ MStatus partioVisualizer::initialize()
 
     attributeAffects ( aCacheDir, aUpdateCache );
 	attributeAffects ( aSize, aUpdateCache );
+	attributeAffects ( aFlipYZ, aUpdateCache );
     attributeAffects ( aCachePrefix, aUpdateCache );
     attributeAffects ( aCacheOffset, aUpdateCache );
 	attributeAffects ( aCacheStatic, aUpdateCache );
@@ -387,6 +396,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		bool  invertAlpha = block.inputValue( aInvertAlpha ).asBool();
 		bool forceReload = block.inputValue( aForceReload ).asBool();
 		int integerTime= block.inputValue(time).asInt();
+		bool flipYZ = block.inputValue( aFlipYZ ).asBool();
 
 		MString formatExt;
 		MString newCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,cacheFormat,integerTime, formatExt);
@@ -394,9 +404,11 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		cacheChanged = false;
 //////////////////////////////////////////////
 /// Cache can change manually by changing one of the parts of the cache input...
-		if (mLastExt != formatExt || mLastPath != cacheDir || mLastPrefix != cachePrefix || forceReload)
+		if (mLastExt != formatExt || mLastPath != cacheDir || mLastPrefix != cachePrefix ||  mLastFlipStatus  != flipYZ || forceReload )
 		{
 			cacheChanged = true;
+			mFlipped = false;
+			mLastFlipStatus = flipYZ;
 			mLastExt = formatExt;
 			mLastPath = cacheDir;
 			mLastPrefix = cachePrefix;
@@ -409,6 +421,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()) && (newCacheFile != mLastFileLoaded || forceReload) )
 		{
 			cacheChanged = true;
+			mFlipped = false;
 			MGlobal::displayWarning(MString("PartioVisualizer->Loading: " + newCacheFile));
 			particles=0; // resets the particles
 
@@ -428,7 +441,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			sprintf (partCount, "%d", particles->numParticles());
 			MGlobal::displayInfo(MString ("PartioVisualizer-> LOADED: ") + partCount + MString (" particles"));
 
-			//cout << " reallocating" << endl;
+
 			float * floatToRGB = (float *) realloc(rgb, particles->numParticles()*sizeof(float)*3);
 			if (floatToRGB != NULL)
 			{
@@ -476,6 +489,28 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 		if (particles)
 		{
+			/// TODO:  this does not work when scrubbing yet.. really need to put the  resort of channels into the  partio side as a filter
+			/// this is only a temporary hack until we start adding  filter functions to partio
+
+			// only flip the axis stuff if we need to
+			if ( cacheChanged && flipYZ  && !mFlipped )
+			{
+				float * floatToPos = (float *) realloc(flipPos, particles->numParticles()*sizeof(float)*3);
+				if (floatToPos != NULL)
+				{
+					flipPos =  floatToPos;
+				}
+
+				for (int i=0;i<particles->numParticles();i++)
+				{
+					const float * attrVal = particles->data<float>(positionAttr,i);
+					flipPos[(i*3)] 		= attrVal[0];
+					flipPos[((i*3)+1)] 	= -attrVal[2];
+					flipPos[((i*3)+2)] 	= attrVal[1];
+				}
+				mFlipped = true;
+			}
+
 			// something changed..
 			if  (cacheChanged || mLastColorFromIndex != colorFromIndex || mLastColor != defaultColor)
 			{
@@ -704,7 +739,6 @@ void partioVisualizer::draw( M3dView & view, const MDagPath & /*path*/,
 		glEndList();
 	}
 
-
 	if (drawStyle < 3 && style != M3dView::kBoundingBox)
 	{
 		drawPartio(drawStyle);
@@ -815,6 +849,10 @@ void partioVisualizer::drawPartio(int drawStyle)
 	int drawSkipVal;
 	drawSkipPlug.getValue( drawSkipVal );
 
+	MPlug flipYZPlug( thisNode, aFlipYZ );
+	bool flipYZVal;
+	flipYZPlug.getValue( flipYZVal );
+
 	int stride =  3*sizeof(float)*(drawSkipVal);
 
 
@@ -838,6 +876,7 @@ void partioVisualizer::drawPartio(int drawStyle)
 	if (particles)
 	{
 
+		struct Point { float p[3]; };
 		//glPushAttrib( GL_ALL_ATTRIB_BITS);
 
 		if (alphaFromVal >=0 || defaultAlphaVal < 1) //testing settings
@@ -876,7 +915,15 @@ void partioVisualizer::drawPartio(int drawStyle)
 				// now setup the position/color/alpha output pointers
 
 				const float * partioPositions = particles->data<float>(positionAttr,0);
-				glVertexPointer( 3, GL_FLOAT, stride, partioPositions );
+
+				if(flipYZVal)
+				{
+					glVertexPointer( 3, GL_FLOAT, stride, flipPos );
+				}
+				else
+				{
+					glVertexPointer( 3, GL_FLOAT, stride, partioPositions );
+				}
 
 				if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
 				{
@@ -911,8 +958,15 @@ void partioVisualizer::drawPartio(int drawStyle)
 				{
 					glColor3f(rgb[i*3],rgb[(i*3)+1],rgb[(i*3)+2]);
 				}
-				const float * partioPositions = particles->data<float>(positionAttr,i);
-				glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
+				if (flipYZVal)
+				{
+					glVertex3f(flipPos[0], flipPos[1], flipPos[2]);
+				}
+				else
+				{
+					const float * partioPositions = particles->data<float>(positionAttr,i);
+					glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
+				}
 			}
 
 			glEnd( );

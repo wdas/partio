@@ -32,6 +32,7 @@ global proc AEpartioEmitterTemplate( string $nodeName )
 	editorTemplate -callCustom pioEmLogoHeader pioEmLogoHeader $nodeName;
 	editorTemplate -beginLayout "Global" -collapse 0;
 	editorTemplate -addControl "cacheActive";
+	// editorTemplate -addControl "flipYZ";  // not ready for prime time yet
 	editorTemplate -callCustom pioEmAEoutpathNew pioEmAEoutpathReplace cacheDir;
 	editorTemplate -addControl "cachePrefix";
 	editorTemplate -addControl "cacheOffset";

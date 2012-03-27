@@ -71,6 +71,7 @@ MObject partioEmitter::aCachePadding;
 MObject partioEmitter::aCacheStatic;
 MObject partioEmitter::aUseEmitterTransform;
 MObject partioEmitter::aSize;
+MObject partioEmitter::aFlipYZ;
 MObject partioEmitter::aJitterPos;
 MObject partioEmitter::aJitterFreq;
 MObject partioEmitter::aPartioAttributes;
@@ -209,6 +210,10 @@ MStatus partioEmitter::initialize()
 	aSize = uAttr.create( "iconSize", "isz", MFnUnitAttribute::kDistance );
 	uAttr.setDefault( 0.25 );
 
+	aFlipYZ = nAttr.create( "flipYZ", "fyz", MFnNumericData::kBoolean);
+	nAttr.setDefault ( false );
+	nAttr.setKeyable ( true );
+
     aJitterPos = nAttr.create("jitterPos", "jpos", MFnNumericData::kFloat,0.0, &status );
     nAttr.setDefault(0);
     nAttr.setMin(0);
@@ -237,6 +242,7 @@ MStatus partioEmitter::initialize()
     status = addAttribute ( aCacheFormat );
     status = addAttribute ( aUseEmitterTransform );
 	status = addAttribute ( aSize );
+	status = addAttribute ( aFlipYZ );
     status = addAttribute ( aJitterPos );
     status = addAttribute ( aJitterFreq );
     status = addAttribute ( aPartioAttributes );

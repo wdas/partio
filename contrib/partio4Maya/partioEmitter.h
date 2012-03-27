@@ -68,6 +68,7 @@ class partioEmitter: public MPxEmitterNode
 		static MObject 	aCachePrefix;
 		static MObject 	aUseEmitterTransform;
 		static MObject  aSize;
+		static MObject  aFlipYZ;
 		static MObject 	aCacheActive;
 		static MObject 	aCacheOffset;
 		static MObject 	aCacheFormat;

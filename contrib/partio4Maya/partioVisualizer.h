@@ -118,7 +118,9 @@ private:
 	MFloatVector mLastColor;
 	float mLastAlpha;
 	bool mLastInvertAlpha;
+	bool mLastFlipStatus;
 	bool cacheChanged;
+	bool mFlipped;
 	float multiplier;
 	bool  frameChanged;
 
@@ -128,6 +130,7 @@ private:
 	Partio::ParticleAttribute opacityAttr;
 	float* rgb;
 	float* rgba;
+	float* flipPos;
 
 	MBoundingBox bbox;
 	MStringArray attributeList;

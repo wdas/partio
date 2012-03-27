@@ -33,6 +33,7 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 	editorTemplate -beginLayout "Global" -collapse 0;
 	editorTemplate -addControl "cacheActive";
 	editorTemplate -addControl "staticCache";
+	editorTemplate -addControl "flipYZ";
 	editorTemplate -callCustom pioVizAEoutpathNew pioVizAEoutpathReplace cacheDir;
 	editorTemplate -addControl "cachePrefix";
 	editorTemplate -addControl "cacheOffset";
@@ -49,6 +50,7 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 		editorTemplate -beginLayout "General Parameters" -collapse 0;
 			editorTemplate -addControl "pointSize";
 			editorTemplate -addControl "drawStyle";
+			editorTemplate -addControl "drawSkip";
 			editorTemplate -addControl "defaultPointColor";
 			editorTemplate -addControl "defaultAlpha";
 			editorTemplate -addControl "invertAlpha";
