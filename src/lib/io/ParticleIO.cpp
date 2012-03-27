@@ -63,6 +63,7 @@ readers()
         data["prt"]=readPRT;
         data["bin"]=readBIN;
         data["pts"]=readPTS;
+		data["xyz"]=readXYZ;
     }
     return data;
 }

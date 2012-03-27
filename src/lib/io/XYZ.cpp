@@ -54,7 +54,7 @@ using namespace std;
 
 // TODO: convert this to use iterators like the rest of the readers/writers
 
-ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readXYZ(const char* filename,const bool headersOnly)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if (!*input)
@@ -85,9 +85,8 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 
     /* Determine amount of values per line */
     char line[1024];
-    /* Jump over first line. */
+
 	input->getline(line,1024);
-    input->getline(line,1024);
     int valcount = 0;
     char * pch = strtok( line, "\t " );
     while ( pch )
@@ -99,7 +98,6 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
         pch = strtok( NULL, "\t " );
     }
 
-
     switch ( valcount )
 	{
 		case 3:  // position only
@@ -108,14 +106,15 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::VECTOR,3));
 		}
 		break;
-		case 4:  // position and  refl/emission
+		case 4:  // position, intensity only
 		{
 			attrNames.push_back((string)"position");
-			attrNames.push_back((string)"remission");
+			attrNames.push_back((string)"intensity");
 			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::VECTOR,3));
-			attrs.push_back(simple->addAttribute(attrNames[2].c_str(),Partio::FLOAT,1));
+			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::FLOAT,1));
 		}
 		break;
+
 		case 6: //  position and RGB
 		{
 			attrNames.push_back((string)"position");
@@ -127,23 +126,11 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 		case 7: // position refl/emission and  RGB
 		{
 			attrNames.push_back((string)"position");
-			attrNames.push_back((string)"remission");
+			attrNames.push_back((string)"intensity");
 			attrNames.push_back((string)"pointColor");
 			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::VECTOR,3));
 			attrs.push_back(simple->addAttribute(attrNames[2].c_str(),Partio::FLOAT,1));
 			attrs.push_back(simple->addAttribute(attrNames[3].c_str(),Partio::VECTOR,3));
-		}
-		break;
-		case 8: // everything
-		{
-			attrNames.push_back((string)"position");
-			attrNames.push_back((string)"remission");
-			attrNames.push_back((string)"quality");
-			attrNames.push_back((string)"pointColor");
-			attrs.push_back(simple->addAttribute(attrNames[1].c_str(),Partio::VECTOR,3));
-			attrs.push_back(simple->addAttribute(attrNames[2].c_str(),Partio::FLOAT,1));
-			attrs.push_back(simple->addAttribute(attrNames[3].c_str(),Partio::INT,1));
-			attrs.push_back(simple->addAttribute(attrNames[4].c_str(),Partio::VECTOR,3));
 		}
 		break;
 		default:
@@ -151,7 +138,6 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 			return 0;
 		}
 		break;
-
     }
 
     input->seekg(0,ios::beg);
@@ -159,12 +145,6 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
     unsigned int num=0;
     simple->addParticles(num);
     if (headersOnly) return simple; // escape before we try to touch data
-
-    if (input->good())
-    { // garbage count at top of  file
-		char junk[1024];
-        input->getline(junk,1024);
-    }
 
     // Read actual particle data
     if (!input->good()) {
@@ -206,12 +186,6 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 					{
 						data[0]=particleIndex;
 					}
-					else
-					{
-						data[0] = (int)lineData[4];
-					}
-
-
                 }
                 else if (attrs[attrIndex].type==Partio::FLOAT || attrs[attrIndex].type==Partio::VECTOR)
                 {
@@ -231,11 +205,10 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 						data[1]=lineData[2];
 						data[2]=-lineData[1];
 					}
-					else if (attrs[attrIndex].name == "remission")
+					else if (attrs[attrIndex].name == "intensity")
 					{
 						data[0] = lineData[3];
 					}
-
                 }
             }
             particleIndex++;
@@ -299,4 +272,3 @@ bool writePTS(const char* filename,const ParticlesData& p,const bool compressed)
 */
 
 }
-

@@ -71,7 +71,7 @@ typeCheck(const ParticleAttributeType& type)
     }
 }
 
-inline 
+inline
 int TypeSize(ParticleAttributeType attrType)
 {
     switch(attrType){
