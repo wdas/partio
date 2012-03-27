@@ -140,7 +140,7 @@ global proc int pioEmAEassignCacheFileCB( string $fileAttribute,
 	{
 		$pad = 0;
 	}
-	else if ($ext == "pts")
+	else if ($ext == "pts" || $ext == "xyz")
 	{
 		setAttr ($nodeName + ".staticCache") 1;
 		$pad = 0;

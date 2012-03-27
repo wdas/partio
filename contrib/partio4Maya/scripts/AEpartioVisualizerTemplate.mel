@@ -132,11 +132,14 @@ global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
 		case "pts":
 			$extIndex = 9;
 			break;
-		case "rib":
+		case "xyz":
 			$extIndex = 10;
 			break;
-		case "ass":
+		case "rib":
 			$extIndex = 11;
+			break;
+		case "ass":
+			$extIndex = 12;
 			break;
 		default:
 			$extIndex = 4;
@@ -154,7 +157,7 @@ global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
 	{
 		$pad = 0;
 	}
-	else if ($ext == "pts")
+	else if ($ext == "pts" || $ext == "xyz")
 	{
 		setAttr ($nodeName + ".staticCache") 1;
 		$pad = 0;
