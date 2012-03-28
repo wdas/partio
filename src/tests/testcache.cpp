@@ -39,7 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partiotesting.h"
 #include "testcache.h"
 
-void Partio::test_Cache()
+namespace PartioTests {
+
+void test_Cache()
 {
     std::cout << "------- Executing test_Cache() -------" << std::endl;
 
@@ -60,3 +62,5 @@ void Partio::test_Cache()
     p3->release();
 
 }
+
+} // namespace PartioTesting

@@ -9,7 +9,7 @@
 #define TESTEXPECT(x)\
  if(!(x)) std::cerr << __FILE__ << ": Test failed in " << #x << " on line " << __LINE__ << std::endl;
 
-namespace Partio {
+namespace PartioTests {
     const size_t GRIDN = 9;
 }
 

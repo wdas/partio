@@ -4,7 +4,7 @@
 
 #include <string>
 
-namespace Partio {
+namespace PartioTests {
 	void test_str();
 	void failure(const std::string& x);
 }

@@ -40,22 +40,26 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <cstdlib>
 
 #include "teststr.h"
+#include "partiotesting.h"
 
-using namespace Partio;
+namespace PartioTests {
 
-void Partio::failure(const std::string& x)
+void failure(const std::string& x)
 {
     std::cerr<<"teststr failed "<<x<<std::endl;
     exit(1);
 }
 
-void Partio::test_str()
+void test_str()
 {
- {
-        ParticlesDataMutable* p=create();
-        ParticleAttribute posAttr=p->addAttribute("position",VECTOR,3);
-        ParticleAttribute fileAttr=p->addAttribute("filename",INDEXEDSTR,1);
-        ParticleAttribute stateAttr=p->addAttribute("state",INDEXEDSTR,1);
+    using Partio::ParticlesDataMutable;
+    using Partio::ParticleAttribute;
+
+    {
+        ParticlesDataMutable* p=Partio::create();
+        ParticleAttribute posAttr=p->addAttribute("position",Partio::VECTOR,3);
+        ParticleAttribute fileAttr=p->addAttribute("filename",Partio::INDEXEDSTR,1);
+        ParticleAttribute stateAttr=p->addAttribute("state",Partio::INDEXEDSTR,1);
 
         int test1Token=p->registerIndexedStr(fileAttr,"test1");
         int test2Token=p->registerIndexedStr(fileAttr,"test2 with space");
@@ -114,3 +118,4 @@ void Partio::test_str()
     }
 }
 
+} // end namespace PartioTesting

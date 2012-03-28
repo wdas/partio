@@ -33,7 +33,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-
 #include <Partio.h>
 #include <iostream>
 #include <cmath>
@@ -41,9 +40,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partiotesting.h"
 #include "testkdtree.h"
 
-using namespace Partio;
-
-ParticlesDataMutable* Partio::makeKDTreeData()
+// using namespace Partio;
+namespace PartioTests {
+Partio::ParticlesDataMutable* makeKDTreeData()
 {
     Partio::ParticlesDataMutable& foo=*Partio::create();
     Partio::ParticleAttribute positionAttr=foo.addAttribute("position",Partio::VECTOR,3);
@@ -68,7 +67,7 @@ ParticlesDataMutable* Partio::makeKDTreeData()
     return &foo;
 }
 
-void Partio::test_KDTree()
+void test_KDTree()
 {
 	std::cout << "------- Executing test_KDTree() -------" << std::endl;
     Partio::ParticlesDataMutable* foo=makeKDTreeData();
@@ -126,5 +125,7 @@ void Partio::test_KDTree()
         std::cout << "Test finished\n";
     }
     foo->release();
+
+}
 
 }

@@ -1,7 +1,7 @@
 #ifndef TESTITERATOR_H
 #define TESTITERATOR_H
 
-namespace Partio {
+namespace PartioTests {
 	void test_iterator();
 }
 

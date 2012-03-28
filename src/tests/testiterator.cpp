@@ -40,10 +40,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "testiterator.h"
 #include "Timer.h"
 
-void Partio::test_iterator()
+namespace PartioTests {
+
+void test_iterator()
 {
     Timer* timer=new Timer("make array");
-
     Partio::ParticlesDataMutable& foo=*Partio::create();
     const int nParticles=10000000;
     foo.addParticles(nParticles);
@@ -176,3 +177,4 @@ void Partio::test_iterator()
 
 }
 
+}

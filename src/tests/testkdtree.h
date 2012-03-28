@@ -37,9 +37,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include <Partio.h>
 
-namespace Partio {
+namespace PartioTests {
 
-	ParticlesDataMutable* makeKDTreeData();
+	Partio::ParticlesDataMutable* makeKDTreeData();
 
 	//! Currently this does not actually test the KD tree independently, but rather
     //! through a ParticlesDataMutable instance

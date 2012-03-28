@@ -39,9 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include "testsaveload.h"
 
-using namespace Partio;
+// using namespace Partio;
+namespace PartioTests {
 
-Partio::ParticlesDataMutable* Partio::makeSaveLoadTestData()
+Partio::ParticlesDataMutable* makeSaveLoadTestData()
 {
     Partio::ParticlesDataMutable& foo=*Partio::create();
     Partio::ParticleAttribute positionAttr=foo.addAttribute("position",Partio::VECTOR,3);
@@ -65,7 +66,7 @@ Partio::ParticlesDataMutable* Partio::makeSaveLoadTestData()
     return &foo;
 }
 
-void Partio::testEmptySaveLoadFile(const char* filename)
+void testEmptySaveLoadFile(const char* filename)
 {
     Partio::ParticlesDataMutable* p=Partio::create();
     p->addAttribute("position",Partio::VECTOR,3);
@@ -76,7 +77,7 @@ void Partio::testEmptySaveLoadFile(const char* filename)
     pread->release();
 }
 
-void Partio::testSaveLoadFile(Partio::ParticlesData* p,const char* filename)
+void testSaveLoadFile(Partio::ParticlesData* p,const char* filename)
 {
     std::cerr<<"Testing with file '"<<filename<<"'"<<std::endl;
     Partio::write(filename,*p);
@@ -84,7 +85,7 @@ void Partio::testSaveLoadFile(Partio::ParticlesData* p,const char* filename)
     pnew->release();
 }
 
-void Partio::test_SaveLoad()
+void test_SaveLoad()
 {
  {
         Partio::ParticlesDataMutable* foo=makeSaveLoadTestData();
@@ -103,4 +104,5 @@ void Partio::test_SaveLoad()
         foo->release();
     }
 
+}
 }

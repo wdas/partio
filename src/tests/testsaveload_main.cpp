@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 int main(int argc,char *argv[])
 {
-   	Partio::test_SaveLoad();
+   	PartioTests::test_SaveLoad();
 	return 0;
 
 }

@@ -38,10 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include <Partio.h>
 
-namespace Partio {
-	ParticlesDataMutable* makeSaveLoadTestData();
+namespace PartioTests {
+	Partio::ParticlesDataMutable* makeSaveLoadTestData();
 	void testEmptySaveLoadFile(const char* filename);
-	void testSaveLoadFile(ParticlesData* p,const char* filename);
+	void testSaveLoadFile(Partio::ParticlesData* p,const char* filename);
 	void testEmptySaveLoadFile(const char* filename);
 	void test_SaveLoad();
 }

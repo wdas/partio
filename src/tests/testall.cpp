@@ -45,11 +45,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 int main(int argc, char* argv[])
 {
-	Partio::test_str();
-	Partio::test_KDTree();
-	Partio::test_SaveLoad();
-	Partio::test_Cache();
-	Partio::test_iterator();
+	PartioTests::test_str();
+	PartioTests::test_KDTree();
+	PartioTests::test_SaveLoad();
+	PartioTests::test_Cache();
+	PartioTests::test_iterator();
 
 	return 0;
 }
