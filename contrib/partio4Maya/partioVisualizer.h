@@ -84,6 +84,8 @@ public:
 	static MObject  aCacheStatic;
 	static MObject 	aCacheFormat;
 	static MObject 	aCachePadding;
+	static MObject  aCachePreDelim;
+	static MObject  aCachePostDelim;
 	static MObject 	aJitterPos;
 	static MObject 	aJitterFreq;
 	static MObject 	aPartioAttributes;

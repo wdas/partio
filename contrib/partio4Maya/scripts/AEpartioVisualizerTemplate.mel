@@ -82,21 +82,12 @@ global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
 
 	string $baseFileName = basename($fileName,"");
 
-	tokenize $baseFileName "." $fileNameComp;
+	string $fileParts[] = `partioGetBaseFileName($baseFileName)`;
+	string $fileBaseName = $fileParts[0];
+	int $pad = $fileParts[4];
+	string $ext = $fileParts[3];
 
-	string $fileBaseName = $fileNameComp[0];
-
-	string $padding = $fileNameComp[size($fileNameComp)-2];
-	string $ext = $fileNameComp[size($fileNameComp)-1];
-
-	stringArrayRemoveAtIndex(size($fileNameComp)-1,$fileNameComp);
-	stringArrayRemoveAtIndex(size($fileNameComp)-1,$fileNameComp);
-
-	string $fileBaseName = stringArrayToString($fileNameComp, ".");
-
-	setAttr ($nodeName + ".cachePrefix") -type "string" $baseFileName;
-
-	int $pad = size($padding);
+	setAttr ($nodeName + ".cachePrefix") -type "string" $fileBaseName;
 
 	int $extIndex = 0;
 
@@ -165,6 +156,8 @@ global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
 
 	setAttr ($nodeName + ".cachePadding") $pad;
 	setAttr ($nodeName + ".cacheFormat") $extIndex;
+	setAttr ($nodeName + ".cachePreDelim") -type "string" $fileParts[1];
+	setAttr ($nodeName + ".cachePostDelim") -type "string" $fileParts[2];
 
 	$fileName = substituteAllString($fileName, basename($fileName, ""), "");
   	setAttr $fileAttribute -type "string" $fileName;

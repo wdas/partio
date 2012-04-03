@@ -91,6 +91,8 @@ MObject partioVisualizer::aCacheOffset;
 MObject partioVisualizer::aCacheStatic;
 MObject partioVisualizer::aCacheFormat;
 MObject partioVisualizer::aCachePadding;
+MObject partioVisualizer::aCachePreDelim;
+MObject partioVisualizer::aCachePostDelim;
 MObject partioVisualizer::aJitterPos;
 MObject partioVisualizer::aJitterFreq;
 MObject partioVisualizer::aPartioAttributes;
@@ -244,6 +246,9 @@ MStatus partioVisualizer::initialize()
 
     aCachePadding = nAttr.create("cachePadding", "cachPad" , MFnNumericData::kInt, 4, &stat );
 
+	aCachePreDelim = tAttr.create ( "cachePreDelim", "cachPredlm", MFnStringData::kString );
+	aCachePostDelim = tAttr.create ( "cachePostDelim", "cachPstdlm", MFnStringData::kString );
+
     aCacheFormat = eAttr.create( "cacheFormat", "cachFmt");
 	std::map<short,MString> formatExtMap;
 	partio4Maya::buildSupportedExtensionList(formatExtMap,false);
@@ -317,6 +322,8 @@ MStatus partioVisualizer::initialize()
 	addAttribute ( aCacheStatic );
     addAttribute ( aCacheActive );
     addAttribute ( aCachePadding );
+	addAttribute ( aCachePreDelim );
+	addAttribute ( aCachePostDelim );
     addAttribute ( aCacheFormat );
     addAttribute ( aPartioAttributes );
 	addAttribute ( aColorFrom );
@@ -337,6 +344,8 @@ MStatus partioVisualizer::initialize()
     attributeAffects ( aCacheOffset, aUpdateCache );
 	attributeAffects ( aCacheStatic, aUpdateCache );
     attributeAffects ( aCachePadding, aUpdateCache );
+	attributeAffects ( aCachePreDelim, aUpdateCache );
+	attributeAffects ( aCachePostDelim, aUpdateCache );
     attributeAffects ( aCacheFormat, aUpdateCache );
 	attributeAffects ( aColorFrom, aUpdateCache );
 	attributeAffects ( aAlphaFrom, aUpdateCache );
@@ -390,6 +399,8 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		bool cacheStatic	= block.inputValue( aCacheStatic ).asBool();
 		int cacheOffset 	= block.inputValue( aCacheOffset ).asInt();
 		int cachePadding	= block.inputValue( aCachePadding ).asInt();
+		MString preDelim 	= block.inputValue( aCachePreDelim ).asString();
+		MString postDelim   = block.inputValue( aCachePostDelim).asString();
 		short cacheFormat	= block.inputValue( aCacheFormat ).asShort();
 		MFloatVector  defaultColor = block.inputValue( aDefaultPointColor ).asFloatVector();
 		float  defaultAlpha = block.inputValue( aDefaultAlpha ).asFloat();
@@ -399,7 +410,8 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		bool flipYZ = block.inputValue( aFlipYZ ).asBool();
 
 		MString formatExt;
-		MString newCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,cacheFormat,integerTime, formatExt);
+		MString newCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
+														   preDelim, postDelim, cacheFormat,integerTime, formatExt);
 
 		cacheChanged = false;
 //////////////////////////////////////////////

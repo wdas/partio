@@ -61,9 +61,9 @@ global proc AEpartioEmitterTemplate( string $nodeName )
 	editorTemplate -endScrollLayout;
 }
 
-global proc int pioEmAEassignCacheFileCB( string $fileAttribute,
-									 string $fileName,
-									 string $fileType )
+global proc int pioEmAEassignCacheFileCB( 	string $fileAttribute,
+											string $fileName,
+											string $fileType )
 {
 	string $components[];
   	tokenize $fileAttribute "." $components;
@@ -73,21 +73,12 @@ global proc int pioEmAEassignCacheFileCB( string $fileAttribute,
 
 	string $baseFileName = basename($fileName,"");
 
-	tokenize $baseFileName "." $fileNameComp;
-
-	string $fileBaseName = $fileNameComp[0];
-
-	string $padding = $fileNameComp[size($fileNameComp)-2];
-	string $ext = $fileNameComp[size($fileNameComp)-1];
-
-	stringArrayRemoveAtIndex(size($fileNameComp)-1,$fileNameComp);
-	stringArrayRemoveAtIndex(size($fileNameComp)-1,$fileNameComp);
-
-	string $fileBaseName = stringArrayToString($fileNameComp, ".");
+	string $fileParts[] = `partioGetBaseFileName($baseFileName)`;
+	string $fileBaseName = $fileParts[0];
+	int $pad = $fileParts[4];
+	string $ext = $fileParts[3];
 
 	setAttr ($nodeName + ".cachePrefix") -type "string" $fileBaseName;
-
-	int $pad = size($padding);
 
 	int $extIndex = 0;
 
@@ -148,6 +139,8 @@ global proc int pioEmAEassignCacheFileCB( string $fileAttribute,
 
 	setAttr ($nodeName + ".cachePadding") $pad;
 	setAttr ($nodeName + ".cacheFormat") $extIndex;
+	setAttr ($nodeName + ".cachePreDelim") -type "string" $fileParts[1];
+	setAttr ($nodeName + ".cachePostDelim") -type "string" $fileParts[2];
 
 	$fileName = substituteAllString($fileName, basename($fileName, ""), "");
   	setAttr $fileAttribute -type "string" $fileName;

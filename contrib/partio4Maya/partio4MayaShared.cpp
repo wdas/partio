@@ -78,41 +78,15 @@ bool partio4Maya::partioCacheExists(const char* fileName)
 
 }
 
-//////////////////////////////////////////////////////////////////////
-MString partio4Maya::getBaseName(MString pattern, MString file) {
-
-	MString basename;
-
-	// we're assuming there can be  periods in the file name and  that the file has at least one period
-	//  fileName.ext  or fileName.#.ext
-
-	int idx = file.rindexW(pattern);
-
-	if (idx != -1)
-	{
-		basename = file.substring(0, idx-1);
-		idx = basename.rindexW(pattern);
-		if (idx != -1)
-		{
-			basename = basename.substring(0, idx-1);
-		}
-		return basename;
-	}
-	else
-	{
-		return file;
-	}
-
-}
 
 MString partio4Maya::updateFileName (MString cacheFile, MString cacheDir, bool cacheStatic, int cacheOffset, int cachePadding,
-						short cacheFormat,int integerTime, MString &formatExt)
+						MString preDelim, MString postDelim, short cacheFormat,int integerTime, MString &formatExt)
 {
 	formatExt = setExt(cacheFormat);
 
 	int cacheFrame =  integerTime + cacheOffset;
 
-	MString formatString =  "%s%s.%0";
+	MString formatString =  "%s%s%s%0";
 	// special case for PDCs and maya nCache files because of the funky naming convention  TODO: support substepped/retiming  caches
 	if (formatExt == "pdc")
 	{
@@ -135,23 +109,27 @@ MString partio4Maya::updateFileName (MString cacheFile, MString cacheDir, bool c
 	char fileName[512] = "";
 
 	formatString += cachePadding;
-	formatString += "d.%s";
+	formatString += "d%s%s";
 
 	const char* fmt = formatString.asChar();
 
-	MString cachePrefix = getBaseName(".", cacheFile);
+	//MStringArray cachePrefix;
+
+	/// user configurable file parsing in mel, needs to return  an array of {basename, predelim, postDelim}
+	//MGlobal::executeCommand(MString("partioGetBaseFileName \""+cacheFile+"\" \""+ formatExt +"\""), cachePrefix);
 
 	MString  newCacheFile;
 
 	if (!cacheStatic)
 	{
-		sprintf(fileName, fmt, cacheDir.asChar(), cachePrefix.asChar(), cacheFrame, formatExt.asChar());
+		sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(), cacheFrame, postDelim.asChar(), formatExt.asChar());
 		newCacheFile = fileName;
 	}
 	else
 	{
 		newCacheFile = cacheFile;
 	}
+
 	return newCacheFile;
 }
 ////////////////////////////////////////////////////////////////

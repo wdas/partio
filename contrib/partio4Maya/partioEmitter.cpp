@@ -68,6 +68,8 @@ MObject partioEmitter::aCacheOffset;
 MObject partioEmitter::aCacheActive;
 MObject partioEmitter::aCacheFormat;
 MObject partioEmitter::aCachePadding;
+MObject partioEmitter::aCachePreDelim;
+MObject partioEmitter::aCachePostDelim;
 MObject partioEmitter::aCacheStatic;
 MObject partioEmitter::aUseEmitterTransform;
 MObject partioEmitter::aSize;
@@ -189,6 +191,9 @@ MStatus partioEmitter::initialize()
 
     aCachePadding = nAttr.create("cachePadding", "cachPad" , MFnNumericData::kInt, 4, &status );
 
+	aCachePreDelim = tAttr.create ( "cachePreDelim", "cachPredlm", MFnStringData::kString );
+	aCachePostDelim = tAttr.create ( "cachePostDelim", "cachPstdlm", MFnStringData::kString );
+
 	aCacheStatic = nAttr.create("staticCache", "statC", MFnNumericData::kBoolean, 0, &status);
 	nAttr.setKeyable(true);
 
@@ -238,6 +243,8 @@ MStatus partioEmitter::initialize()
     status = addAttribute ( aCacheOffset );
     status = addAttribute ( aCacheActive );
     status = addAttribute ( aCachePadding );
+	status = addAttribute ( aCachePreDelim );
+	status = addAttribute ( aCachePostDelim );
 	status = addAttribute ( aCacheStatic );
     status = addAttribute ( aCacheFormat );
     status = addAttribute ( aUseEmitterTransform );
@@ -251,6 +258,8 @@ MStatus partioEmitter::initialize()
     status = attributeAffects ( aCachePrefix, mOutput );
     status = attributeAffects ( aCacheOffset, mOutput );
     status = attributeAffects ( aCachePadding, mOutput );
+	status = attributeAffects ( aCachePreDelim, mOutput );
+	status = attributeAffects ( aCachePostDelim, mOutput );
 	status = attributeAffects ( aCacheStatic, mOutput );
     status = attributeAffects ( aCacheFormat, mOutput );
     status = attributeAffects ( aUseEmitterTransform, mOutput );
@@ -273,12 +282,15 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 
     int cacheOffset 	= block.inputValue( aCacheOffset ).asInt();
     int cachePadding	= block.inputValue( aCachePadding ).asInt();
+	MString preDelim 	= block.inputValue( aCachePreDelim ).asString();
+	MString postDelim   = block.inputValue( aCachePostDelim).asString();
     short cacheFormat	= block.inputValue( aCacheFormat ).asShort();
     float jitterPos		= block.inputValue( aJitterPos ).asFloat();
     float jitterFreq	= block.inputValue( aJitterFreq ).asFloat();
     bool useEmitterTxfm	= block.inputValue( aUseEmitterTransform ).asBool();
 	bool cacheStatic    = block.inputValue( aCacheStatic ).asBool();
-
+	MString cacheDir = block.inputValue(aCacheDir).asString();
+    MString cachePrefix = block.inputValue(aCachePrefix).asString();
     MString formatExt;
 
     // Determine if we are requesting the output plug for this emitter node.
@@ -302,9 +314,6 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 		MGlobal::displayWarning("PartioEmitter->error:  was unable to create/find partioID attr");
 		return ( MS::kFailure );
 	}
-
-	MString cacheDir = block.inputValue(aCacheDir).asString();
-    MString cachePrefix = block.inputValue(aCachePrefix).asString();
 
     if (cacheDir  == "" || cachePrefix == "" )
     {
@@ -382,8 +391,8 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     int integerTime = (int)floor(cT.value()+.52);
 
 	// parse and get the new file name
-	MString newCacheFile = partio4Maya::updateFileName(cachePrefix, cacheDir,cacheStatic,cacheOffset,cachePadding,cacheFormat,integerTime, formatExt);
-
+	MString newCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
+														   preDelim, postDelim, cacheFormat,integerTime, formatExt);
     float deltaTime  = float(cT.value() - integerTime);
 
     // motion  blur rounding  frame logic

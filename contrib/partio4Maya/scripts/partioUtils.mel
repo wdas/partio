@@ -1,0 +1,126 @@
+/* partio4Maya  3/21/2012, John Cassella  http://luma-pictures.com and  http://redpawfx.com
+PARTIO Export GUI
+Copyright 2012 (c)  All rights reserved
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+Disclaimer: THIS SOFTWARE IS PROVIDED BY  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+IN NO EVENT SHALL  THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+*/
+
+global  proc string[]  partioGetBaseFileName(string $inFileName)
+{
+	string $preDelim , $postDelim, $ext = "";
+	int $padding = 0;
+	string $outFileName[] = {$inFileName,$preDelim,$postDelim, $ext, $padding};
+	int $l = `size $inFileName `;
+
+	int $foundExt = 1;
+
+	string $breakdownFileName = $inFileName;
+
+	while ($foundExt)
+	{
+		$l = `size $breakdownFileName`;
+		if ( `gmatch $breakdownFileName "*[a-z]"` || `gmatch $breakdownFileName "*[A-Z]"`)
+		{
+			$ext = (`substring $breakdownFileName $l $l`)+$ext;
+			$breakdownFileName = `substring $breakdownFileName 1 ($l-1)`;
+		}
+		else
+		{
+		    $foundExt = 0;
+		}
+	}
+
+	if (`size $ext` > 0)
+	{
+		$outFileName[3] = $ext;
+		if ($ext == "pts" || $ext == "xyz") // special case for static lidar files
+		{
+			return $outFileName;
+		}
+		$outFileName[0] = $breakdownFileName;
+
+	}
+	else
+	{
+		return $outFileName;
+	}
+
+	$l = `size $breakdownFileName`;
+	string $last = `substring $breakdownFileName $l $l`;
+
+	if ( $last == "_" || $last == ".")
+	{
+		$outFileName[2] = $last;
+		$breakdownFileName = `substring $breakdownFileName 1 ($l-1)`;
+		$outFileName[0] = $breakdownFileName;
+	}
+	else
+	{
+		return $outFileName;
+	}
+
+	int $foundNum = 1;
+
+	while ($foundNum)
+	{
+		$l = `size $breakdownFileName`;
+		if ( `gmatch $breakdownFileName "*[0-9]"`)
+		{
+			$breakdownFileName = `substring $breakdownFileName 1 ($l-1)`;
+			$padding ++;
+		}
+		else
+		{
+		    $foundNum = 0;
+		}
+	}
+
+	if ($padding > 0)
+	{
+		$outFileName[4] = $padding;
+		$outFileName[0] = $breakdownFileName;
+	}
+	else
+	{
+		return $outFileName;
+	}
+
+
+	$l = `size $breakdownFileName`;
+	string $last = `substring $breakdownFileName $l $l`;
+
+	if ( $last == "_" || $last == ".")
+	{
+		$outFileName[1] = $last;
+		$outFileName[0] = `substring $breakdownFileName 1 ($l-1)`;
+	}
+	else
+	{
+		return $outFileName;
+	}
+
+	return $outFileName;
+}
+
