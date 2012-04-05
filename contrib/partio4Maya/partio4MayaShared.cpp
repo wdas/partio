@@ -113,11 +113,6 @@ MString partio4Maya::updateFileName (MString cacheFile, MString cacheDir, bool c
 
 	const char* fmt = formatString.asChar();
 
-	//MStringArray cachePrefix;
-
-	/// user configurable file parsing in mel, needs to return  an array of {basename, predelim, postDelim}
-	//MGlobal::executeCommand(MString("partioGetBaseFileName \""+cacheFile+"\" \""+ formatExt +"\""), cachePrefix);
-
 	MString  newCacheFile;
 
 	if (!cacheStatic)
@@ -127,7 +122,7 @@ MString partio4Maya::updateFileName (MString cacheFile, MString cacheDir, bool c
 	}
 	else
 	{
-		newCacheFile = cacheFile;
+		newCacheFile = cacheDir+cacheFile;
 	}
 
 	return newCacheFile;

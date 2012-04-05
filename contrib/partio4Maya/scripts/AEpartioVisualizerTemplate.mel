@@ -63,7 +63,35 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 		editorTemplate -endLayout;
 
 	// include/call base class/node attributes
-	AEdependNodeTemplate $nodeName;
+	//AEdependNodeTemplate $nodeName;
+	editorTemplate -beginLayout ("Render Stats");
+		editorTemplate -beginNoOptimize;
+		editorTemplate -addControl "castsShadows";
+		editorTemplate -addControl "receiveShadows";
+		editorTemplate -addControl "motionBlur";
+		editorTemplate -addControl "primaryVisibility";
+		editorTemplate -addControl "smoothShading";
+		editorTemplate -addControl "visibleInReflections";
+		editorTemplate -addControl "visibleInRefractions";
+	editorTemplate -endLayout;
+
+	AEshapeTemplate $nodeName;  // adds place for renderer specific controls
+
+	editorTemplate -suppress "compInstObjGroups";
+	editorTemplate -suppress "ignoreSelfShadowing";
+	editorTemplate -suppress "geometryAntialiasingOverride";
+	editorTemplate -suppress "antialiasingLevel";
+	editorTemplate -suppress "shadingSamplesOverride";
+	editorTemplate -suppress "shadingSamples";
+	editorTemplate -suppress "maxShadingSamples";
+	editorTemplate -suppress "volumeSamplesOverride";
+	editorTemplate -suppress "volumeSamples";
+	editorTemplate -suppress "depthJitter";
+	editorTemplate -suppress "maxVisibilitySamplesOverride";
+	editorTemplate -suppress "maxVisibilitySamples";
+	editorTemplate -suppress "localPosition";
+	editorTemplate -suppress "localScale";
+
 
 	editorTemplate -addExtraControls;
 	editorTemplate -endScrollLayout;

@@ -66,6 +66,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partioVisualizer.h"
 #include "partio4MayaShared.h"
 #include "iconArrays.h"
+#include <set>
 
 // id is registered with autodesk no need to change
 #define ID_PARTIOVISUALIZER  0x00116ECF
@@ -105,6 +106,7 @@ MObject partioVisualizer::aDefaultAlpha;
 MObject partioVisualizer::aInvertAlpha;
 MObject partioVisualizer::aDrawStyle;
 MObject partioVisualizer::aForceReload;
+MObject partioVisualizer::aRenderCachePath;
 
 
 MCallbackId partioVisualizerOpenCallback;
@@ -262,7 +264,7 @@ MStatus partioVisualizer::initialize()
 
 	aDrawStyle = eAttr.create( "drawStyle", "drwStyl");
     eAttr.addField("points",	0);
-    //eAttr.addField("velocity",	1);
+    //eAttr.addField("velocity", 1);
     //eAttr.addField("spheres",	2);
 	eAttr.addField("boundingBox", 3);
 	eAttr.setDefault(0);
@@ -312,6 +314,9 @@ MStatus partioVisualizer::initialize()
 	aUpdateCache = nAttr.create("updateCache", "upc", MFnNumericData::kInt, 0);
 	nAttr.setHidden(true);
 
+	aRenderCachePath = tAttr.create ( "renderCachePath", "rcp", MFnStringData::kString );
+	nAttr.setHidden(true);
+
 	addAttribute( aUpdateCache );
 	addAttribute ( aSize );
 	addAttribute ( aFlipYZ );
@@ -335,6 +340,7 @@ MStatus partioVisualizer::initialize()
 	addAttribute ( aInvertAlpha );
 	addAttribute ( aDrawStyle );
 	addAttribute ( aForceReload );
+	addAttribute ( aRenderCachePath );
 	addAttribute ( time );
 
     attributeAffects ( aCacheDir, aUpdateCache );
@@ -376,7 +382,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
         return ( MS::kSuccess );
     }
 
-	// Determine if we are requesting the output plug for this emitter node.
+	// Determine if we are requesting the output plug for this node.
     //
     if (plug != aUpdateCache)
 	{
@@ -408,11 +414,16 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		bool forceReload = block.inputValue( aForceReload ).asBool();
 		int integerTime= block.inputValue(time).asInt();
 		bool flipYZ = block.inputValue( aFlipYZ ).asBool();
+		MString renderCachePath = block.inputValue( aRenderCachePath ).asString();
 
 		MString formatExt;
 		MString newCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
 														   preDelim, postDelim, cacheFormat,integerTime, formatExt);
 
+		if (renderCachePath != newCacheFile || renderCachePath != mLastFileLoaded )
+		{
+			block.outputValue(aRenderCachePath).setString(newCacheFile);
+		}
 		cacheChanged = false;
 //////////////////////////////////////////////
 /// Cache can change manually by changing one of the parts of the cache input...
@@ -432,6 +443,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 		if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()) && (newCacheFile != mLastFileLoaded || forceReload) )
 		{
+
 			cacheChanged = true;
 			mFlipped = false;
 			MGlobal::displayWarning(MString("PartioVisualizer->Loading: " + newCacheFile));

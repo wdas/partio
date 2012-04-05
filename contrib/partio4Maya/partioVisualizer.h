@@ -98,6 +98,7 @@ public:
 	static MObject  aInvertAlpha;
 	static MObject  aDrawStyle;
 	static MObject  aForceReload;
+	static MObject  aRenderCachePath;
 
 
 
