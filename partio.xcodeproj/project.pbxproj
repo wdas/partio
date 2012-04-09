@@ -1,0 +1,4864 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		1EE8B9808F074253AACD546B /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = FE0B136B6A804B08BC5EB58C /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				47730915B60546D3A1E00551 /* CMake Rules */,
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+				26F8BF9124684456924BD6F3 /* PBXTargetDependency */,
+				8396FA0803EE495BA82E5FBF /* PBXTargetDependency */,
+				02F32E2972D44963A2CA6A09 /* PBXTargetDependency */,
+				9C113A27CDCA4FDE9C6A66C9 /* PBXTargetDependency */,
+				9487623BB91F478484A67E6E /* PBXTargetDependency */,
+				1EEED75E98D046B9B3799E6E /* PBXTargetDependency */,
+				60EFCC20C88D4C558151E541 /* PBXTargetDependency */,
+				1D042633CF974509B209BA6F /* PBXTargetDependency */,
+				6BAE68988D5042D98D1AEE90 /* PBXTargetDependency */,
+				3DA88BA163344AA09AB7CCBF /* PBXTargetDependency */,
+				D8051CF75F3846F9AE3D2558 /* PBXTargetDependency */,
+				C12464A977B344679E6811B7 /* PBXTargetDependency */,
+				57A843400CD94989B7A10920 /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		69E18F222DFB4597B1FCD208 /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = F6B6E60650FB466091E06D1F /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				EA39749A82154D8BA90609A3 /* CMake Rules */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+		B09B845EAFEA488D9D52FCC9 /* install */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 72F9D6FF0296441A9FD75CBE /* Build configuration list for PBXAggregateTarget "install" */;
+			buildPhases = (
+				812F031D42AD47F487431B52 /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+				2C9AEAF7CC444A27BF459A99 /* PBXTargetDependency */,
+			);
+			name = install;
+			productName = install;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		000EC5BC79A849A8956DFF85 /* testkdtree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C3A18266006F409E925A069B /* testkdtree.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		0E551D0833F649B7BBDD40DF /* testiterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6F419AE56C794EF4B7E1DDBE /* testiterator.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		1EDFDAE63C1B416888E0213F /* makecircle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 523C40E79CD64E76AA3B67FC /* makecircle.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		2BB21A59CDD34FBD89BB5AF4 /* PTS.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3744CADC2CE24C39947D6E0B /* PTS.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		3AB9C9DA77B34632B29CC112 /* GEO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = DA9BECC7214142DAB39B9838 /* GEO.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		46BCA33E040C4C89A4B03D4B /* partconv.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B37D3DA303F54735AC59DCEA /* partconv.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		499EB7B0CD1D4A6CA2885E26 /* plugin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5C9C7BDCA3504F0EB39736EC /* plugin.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		4CCF8F181AD840FD9EB0206F /* ParticleIO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E5641722B2154F63A04DEAD0 /* ParticleIO.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		5538F5874CFB49BB8D850AD3 /* partioEmitter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6DECC183DF174E08A47BBCC1 /* partioEmitter.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		57868584EAAB49FE9E6A7286 /* PDC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7B1C27A43C7E4D338C3D0DA2 /* PDC.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		5D22498FD110439FB764BFD9 /* BGEO.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AD6566619C434C718CCF823B /* BGEO.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		6AF55EBC7322455BBE4BF631 /* test.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EB4BA84A78974D079754CDDD /* test.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		6BE730A47B854CBE9212866E /* partview.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3376B46D3EF54187A8C03FD8 /* partview.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		6E1C499FC8464442AB098FC6 /* ParticleSimpleInterleave.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1BB7E900283B4082A52BEC09 /* ParticleSimpleInterleave.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		724377EA0CDB436087104D11 /* ParticleHeaders.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 94E38CF2D4734F46B0B2DEDC /* ParticleHeaders.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		72D977CFC06B4B9F8D3ED5AC /* XYZ.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2CD736632EFD4E33B7E56EAE /* XYZ.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		7FEF8C828B894A6986779934 /* PRT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E615679B283C45D6BA0221BE /* PRT.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		84822F45784A4F8BBEDB113D /* PDA.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 6801F9848D7D4A76B9971ECC /* PDA.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		8CDF9469F850491AA6F3DEDD /* partinfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8216A4C22AE343D49F06F6F2 /* partinfo.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		8CE0AD6ABE104B728B736B4D /* partioExport.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 956418E2D17E4DFB9DF89597 /* partioExport.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		9832DFACE1904CEF9759BA07 /* partioVisualizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 69F710F9501449288A99FBD1 /* partioVisualizer.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		9933DF205372413E91AD1E5D /* partattr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FE808045A554D2CA212A653 /* partattr.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		9E3E23CAD48644FFAB63E470 /* PTC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8072AAF8E0DB4A56B9F66545 /* PTC.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		A1ED7AE650F64A8694B2BC16 /* Particle.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 81E036E1098C44BFA9F035D3 /* Particle.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		A9EFE8DDE6F0495C92E0F1E1 /* testcache.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 10B1D761FD664A48A8E73FE8 /* testcache.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		AF390AA904544D3EAF5F8FFC /* partioPYTHON_wrap.cxx in Sources */ = {isa = PBXBuildFile; fileRef = 7E926785A2C546E8A705CEF9 /* partioPYTHON_wrap.cxx */; settings = {COMPILER_FLAGS = ""; }; };
+		B5CFE6BC4B864146B02C97D6 /* ParticleSimple.cpp in Sources */ = {isa = PBXBuildFile; fileRef = AF714FDA315E49A0851DAB66 /* ParticleSimple.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		C21CFEC3965D4C098B389CD2 /* teststr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 23E01268E11545D690FB6436 /* teststr.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		C508E24FC4AF472C8C9E87DB /* ParticleCaching.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E203C96B95CF4B66AF7B3B7A /* ParticleCaching.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		C69B42F0E3974042B87AA0AF /* MC.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E905DB7B9D7947548917F907 /* MC.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		CD0646BEFCA2418D9646D329 /* ZIP.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2E595528061547479E5571DE /* ZIP.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		E63E311E0F084BF88AAC3FE2 /* partio4MayaShared.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EAF8B12781684F47801B4ED7 /* partio4MayaShared.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		ECD653F06617466E888B9692 /* BIN.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 47D62DDC0BF14A76BB89829A /* BIN.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		F51E87D92FDD4E8DAD8044D5 /* PDB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 2FDD420BBED64A9FB49F35F5 /* PDB.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		F8B2A557DB354BBB9AFD1598 /* makeline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 46ED19AC01C546FF9901DD2E /* makeline.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+		FCCA04E9D950446BBFA26AE2 /* RIB.cpp in Sources */ = {isa = PBXBuildFile; fileRef = BA658A28B95B4EFDB221F3C5 /* RIB.cpp */; settings = {COMPILER_FLAGS = ""; }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0EEDC75F37A548D78FD82972 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 616B0001BDA64B8F902DCB9F;
+			remoteInfo = makecircle;
+		};
+		168B0FA044604F5094DD5FCC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1EE8B9808F074253AACD546B;
+			remoteInfo = ALL_BUILD;
+		};
+		36C71EC0B77A4D4790B3AA5C /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1530DA66F62547FBBBA81B27;
+			remoteInfo = partattr;
+		};
+		4E5611B481AB43FD8FB1E1EC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 132CF1AC5D3B40DE96935B15;
+			remoteInfo = teststr;
+		};
+		50014187F1914F31B69CD529 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 69E18F222DFB4597B1FCD208;
+			remoteInfo = ZERO_CHECK;
+		};
+		51A5A7BFED6B4DCBA8C44EB7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B1A684B4A0C1407283A05F4C;
+			remoteInfo = testkdtree;
+		};
+		5D4E0DAE53D74073986E6F7E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E5CDA9A32926467EA86EA06F;
+			remoteInfo = makeline;
+		};
+		61D8EB977E2740FB98008483 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C4E07CC132A84BF6A2213446;
+			remoteInfo = _partio;
+		};
+		7ED6A2D79F184529BFCFD3FF /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 07B7ADC814FD44558CAEAF06;
+			remoteInfo = partview;
+		};
+		837F9754F33042DA80664679 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ED2663176393407C90C0B7F4;
+			remoteInfo = partio;
+		};
+		887C737151E84844AED2F9A7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 6CA89C43DAE84054B1F9260A;
+			remoteInfo = partconv;
+		};
+		95BD9407DE784CE7876D4B1D /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3C149B2E80C744B38A0FE7EE;
+			remoteInfo = testiterator;
+		};
+		A3F526CA4AC44672A6495802 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = ABFC65A518BA4422B3608464;
+			remoteInfo = testcache;
+		};
+		A42279CCC3EC4B20B5EA53B7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 3F3FD82C8A9B492AB87CE898;
+			remoteInfo = partinfo;
+		};
+		C86F9929482049588C92B82A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 246BF09AC59A40668FA4AE24;
+			remoteInfo = test;
+		};
+		D9ADDE34C1EB49D0BD98463F /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = FA65FA6C479D485DB717A67E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 1D9EF199A9674BA0879F525C;
+			remoteInfo = partio4Maya;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		01603A5BFB3A45DEA94CE8A9 /* partioVisualizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = partioVisualizer.h; path = contrib/partio4Maya/partioVisualizer.h; sourceTree = SOURCE_ROOT; };
+		10B1D761FD664A48A8E73FE8 /* testcache.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testcache.cpp; path = src/tests/testcache.cpp; sourceTree = SOURCE_ROOT; };
+		12B2938C653A4E1FB8DFEEF2 /* partio.i */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode; name = partio.i; path = src/py/partio.i; sourceTree = SOURCE_ROOT; };
+		1A81918C9D7D40648BC3D190 /* testcache */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = testcache; sourceTree = BUILT_PRODUCTS_DIR; };
+		1BB7E900283B4082A52BEC09 /* ParticleSimpleInterleave.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParticleSimpleInterleave.cpp; path = src/lib/core/ParticleSimpleInterleave.cpp; sourceTree = SOURCE_ROOT; };
+		23E01268E11545D690FB6436 /* teststr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = teststr.cpp; path = src/tests/teststr.cpp; sourceTree = SOURCE_ROOT; };
+		2B98E58EE90249BBA170FF76 /* partio.py */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode; name = partio.py; path = py/partio.py; sourceTree = SOURCE_ROOT; };
+		2CD736632EFD4E33B7E56EAE /* XYZ.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XYZ.cpp; path = src/lib/io/XYZ.cpp; sourceTree = SOURCE_ROOT; };
+		2E595528061547479E5571DE /* ZIP.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ZIP.cpp; path = src/lib/io/ZIP.cpp; sourceTree = SOURCE_ROOT; };
+		2FDD420BBED64A9FB49F35F5 /* PDB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PDB.cpp; path = src/lib/io/PDB.cpp; sourceTree = SOURCE_ROOT; };
+		2FE808045A554D2CA212A653 /* partattr.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = partattr.cpp; path = src/tools/partattr.cpp; sourceTree = SOURCE_ROOT; };
+		3376B46D3EF54187A8C03FD8 /* partview.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = partview.cpp; path = src/tools/partview.cpp; sourceTree = SOURCE_ROOT; };
+		3744CADC2CE24C39947D6E0B /* PTS.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PTS.cpp; path = src/lib/io/PTS.cpp; sourceTree = SOURCE_ROOT; };
+		43A9A7C301514349A0E64488 /* _partio.so */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = _partio.so; sourceTree = BUILT_PRODUCTS_DIR; };
+		46ED19AC01C546FF9901DD2E /* makeline.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makeline.cpp; path = src/tests/makeline.cpp; sourceTree = SOURCE_ROOT; };
+		47D62DDC0BF14A76BB89829A /* BIN.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BIN.cpp; path = src/lib/io/BIN.cpp; sourceTree = SOURCE_ROOT; };
+		523C40E79CD64E76AA3B67FC /* makecircle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = makecircle.cpp; path = src/tests/makecircle.cpp; sourceTree = SOURCE_ROOT; };
+		5C635A86789240D782619265 /* partview */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = partview; sourceTree = BUILT_PRODUCTS_DIR; };
+		5C9C7BDCA3504F0EB39736EC /* plugin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = plugin.cpp; path = contrib/partio4Maya/plugin.cpp; sourceTree = SOURCE_ROOT; };
+		612A48967DC441C59EAA7904 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		6801F9848D7D4A76B9971ECC /* PDA.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PDA.cpp; path = src/lib/io/PDA.cpp; sourceTree = SOURCE_ROOT; };
+		69F710F9501449288A99FBD1 /* partioVisualizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = partioVisualizer.cpp; path = contrib/partio4Maya/partioVisualizer.cpp; sourceTree = SOURCE_ROOT; };
+		6DECC183DF174E08A47BBCC1 /* partioEmitter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = partioEmitter.cpp; path = contrib/partio4Maya/partioEmitter.cpp; sourceTree = SOURCE_ROOT; };
+		6F419AE56C794EF4B7E1DDBE /* testiterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testiterator.cpp; path = src/tests/testiterator.cpp; sourceTree = SOURCE_ROOT; };
+		7B1C27A43C7E4D338C3D0DA2 /* PDC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PDC.cpp; path = src/lib/io/PDC.cpp; sourceTree = SOURCE_ROOT; };
+		7CAEB76DC5704F72977335B3 /* partio4Maya.bundle */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = partio4Maya.bundle; sourceTree = BUILT_PRODUCTS_DIR; };
+		7E926785A2C546E8A705CEF9 /* partioPYTHON_wrap.cxx */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = partioPYTHON_wrap.cxx; path = src/py/partioPYTHON_wrap.cxx; sourceTree = SOURCE_ROOT; };
+		7FAE5B7F954D455CA38877BB /* iconArrays.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = iconArrays.h; path = contrib/partio4Maya/iconArrays.h; sourceTree = SOURCE_ROOT; };
+		7FEFA952A8E64D5F868471A6 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CMakeLists.txt; path = contrib/partio4Maya/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		8072AAF8E0DB4A56B9F66545 /* PTC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PTC.cpp; path = src/lib/io/PTC.cpp; sourceTree = SOURCE_ROOT; };
+		81E036E1098C44BFA9F035D3 /* Particle.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Particle.cpp; path = src/lib/core/Particle.cpp; sourceTree = SOURCE_ROOT; };
+		8216A4C22AE343D49F06F6F2 /* partinfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = partinfo.cpp; path = src/tools/partinfo.cpp; sourceTree = SOURCE_ROOT; };
+		86C76D7D484D45EE81EB0600 /* libpartio.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; path = libpartio.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		8734DE7E6664403CB388AE7D /* makecircle */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = makecircle; sourceTree = BUILT_PRODUCTS_DIR; };
+		92AF8CEADE284E5484C3A495 /* partconv */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = partconv; sourceTree = BUILT_PRODUCTS_DIR; };
+		94E38CF2D4734F46B0B2DEDC /* ParticleHeaders.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParticleHeaders.cpp; path = src/lib/core/ParticleHeaders.cpp; sourceTree = SOURCE_ROOT; };
+		956418E2D17E4DFB9DF89597 /* partioExport.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = partioExport.cpp; path = contrib/partio4Maya/partioExport.cpp; sourceTree = SOURCE_ROOT; };
+		9CE6AF064C644AB5B9F08DA9 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CMakeLists.txt; path = src/tests/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		9E4E36B7B9B4482699E060E1 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CMakeLists.txt; path = src/lib/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		A451FD9D0D7D4334B151782E /* teststr */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = teststr; sourceTree = BUILT_PRODUCTS_DIR; };
+		AD6566619C434C718CCF823B /* BGEO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BGEO.cpp; path = src/lib/io/BGEO.cpp; sourceTree = SOURCE_ROOT; };
+		AF714FDA315E49A0851DAB66 /* ParticleSimple.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParticleSimple.cpp; path = src/lib/core/ParticleSimple.cpp; sourceTree = SOURCE_ROOT; };
+		AFA1B73810854FDE972D46B6 /* testiterator */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = testiterator; sourceTree = BUILT_PRODUCTS_DIR; };
+		B17C9AA85CBF441F90E9654E /* partioExport.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = partioExport.h; path = contrib/partio4Maya/partioExport.h; sourceTree = SOURCE_ROOT; };
+		B37D3DA303F54735AC59DCEA /* partconv.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = partconv.cpp; path = src/tools/partconv.cpp; sourceTree = SOURCE_ROOT; };
+		BA09F51EE4DE43BB944F1A22 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CMakeLists.txt; path = src/py/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		BA658A28B95B4EFDB221F3C5 /* RIB.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RIB.cpp; path = src/lib/io/RIB.cpp; sourceTree = SOURCE_ROOT; };
+		BAA3B29C78F64F779BE5138D /* partinfo */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = partinfo; sourceTree = BUILT_PRODUCTS_DIR; };
+		C3A18266006F409E925A069B /* testkdtree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = testkdtree.cpp; path = src/tests/testkdtree.cpp; sourceTree = SOURCE_ROOT; };
+		C3FE3DEB744944DD9C124680 /* testkdtree */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = testkdtree; sourceTree = BUILT_PRODUCTS_DIR; };
+		CF8DE1BBDE824DEF909B538D /* partioEmitter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = partioEmitter.h; path = contrib/partio4Maya/partioEmitter.h; sourceTree = SOURCE_ROOT; };
+		DA1F2B2C8BCD4DA483B4B36E /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = CMakeLists.txt; path = src/tools/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		DA9BECC7214142DAB39B9838 /* GEO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GEO.cpp; path = src/lib/io/GEO.cpp; sourceTree = SOURCE_ROOT; };
+		E203C96B95CF4B66AF7B3B7A /* ParticleCaching.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParticleCaching.cpp; path = src/lib/core/ParticleCaching.cpp; sourceTree = SOURCE_ROOT; };
+		E5641722B2154F63A04DEAD0 /* ParticleIO.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ParticleIO.cpp; path = src/lib/io/ParticleIO.cpp; sourceTree = SOURCE_ROOT; };
+		E615679B283C45D6BA0221BE /* PRT.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PRT.cpp; path = src/lib/io/PRT.cpp; sourceTree = SOURCE_ROOT; };
+		E905DB7B9D7947548917F907 /* MC.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MC.cpp; path = src/lib/io/MC.cpp; sourceTree = SOURCE_ROOT; };
+		EAF8B12781684F47801B4ED7 /* partio4MayaShared.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = partio4MayaShared.cpp; path = contrib/partio4Maya/partio4MayaShared.cpp; sourceTree = SOURCE_ROOT; };
+		EB4BA84A78974D079754CDDD /* test.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = test.cpp; path = src/tests/test.cpp; sourceTree = SOURCE_ROOT; };
+		F0C3E68EBDCE44DDB583532D /* partio4MayaShared.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = partio4MayaShared.h; path = contrib/partio4Maya/partio4MayaShared.h; sourceTree = SOURCE_ROOT; };
+		F7D23AA7711B4C91989B2814 /* makeline */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = makeline; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9F6DD3BC9BD449DB72AD7C4 /* partattr */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = partattr; sourceTree = BUILT_PRODUCTS_DIR; };
+		FB52BBD095BC43FEA9660C10 /* test */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; path = test; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		025B943A74C149E29E111E19 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				6F419AE56C794EF4B7E1DDBE /* testiterator.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		098229EC9943495B8725FC9D /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				69F710F9501449288A99FBD1 /* partioVisualizer.cpp */,
+				6DECC183DF174E08A47BBCC1 /* partioEmitter.cpp */,
+				956418E2D17E4DFB9DF89597 /* partioExport.cpp */,
+				EAF8B12781684F47801B4ED7 /* partio4MayaShared.cpp */,
+				5C9C7BDCA3504F0EB39736EC /* plugin.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		0BE0BD5A3235470EB276FE9E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				86C76D7D484D45EE81EB0600 /* libpartio.a */,
+				F9F6DD3BC9BD449DB72AD7C4 /* partattr */,
+				92AF8CEADE284E5484C3A495 /* partconv */,
+				BAA3B29C78F64F779BE5138D /* partinfo */,
+				5C635A86789240D782619265 /* partview */,
+				43A9A7C301514349A0E64488 /* _partio.so */,
+				8734DE7E6664403CB388AE7D /* makecircle */,
+				F7D23AA7711B4C91989B2814 /* makeline */,
+				FB52BBD095BC43FEA9660C10 /* test */,
+				1A81918C9D7D40648BC3D190 /* testcache */,
+				AFA1B73810854FDE972D46B6 /* testiterator */,
+				C3FE3DEB744944DD9C124680 /* testkdtree */,
+				A451FD9D0D7D4334B151782E /* teststr */,
+				7CAEB76DC5704F72977335B3 /* partio4Maya.bundle */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1013760F71204DA398A65B62 /* makeline */ = {
+			isa = PBXGroup;
+			children = (
+				C091ED75537C4204BB881B74 /* Source Files */,
+				9CE6AF064C644AB5B9F08DA9 /* CMakeLists.txt */,
+			);
+			name = makeline;
+			sourceTree = "<group>";
+		};
+		116E66616BA048D08EE47F80 /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				DB163B62FD1A4045907C860E /* CMake Rules */,
+				612A48967DC441C59EAA7904 /* CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		13A185E5FED8451EB5F7B5CF /* testiterator */ = {
+			isa = PBXGroup;
+			children = (
+				025B943A74C149E29E111E19 /* Source Files */,
+				9CE6AF064C644AB5B9F08DA9 /* CMakeLists.txt */,
+			);
+			name = testiterator;
+			sourceTree = "<group>";
+		};
+		20F48A84E2444B43A6942CDB /* testcache */ = {
+			isa = PBXGroup;
+			children = (
+				52AD7C2E424145DDA085667C /* Source Files */,
+				9CE6AF064C644AB5B9F08DA9 /* CMakeLists.txt */,
+			);
+			name = testcache;
+			sourceTree = "<group>";
+		};
+		35E8D6E1E97742CA82549FDC /* partview */ = {
+			isa = PBXGroup;
+			children = (
+				68B847D9C5E84029866B58BA /* Source Files */,
+				DA1F2B2C8BCD4DA483B4B36E /* CMakeLists.txt */,
+			);
+			name = partview;
+			sourceTree = "<group>";
+		};
+		3995AAC9075845138C9C9EDF /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				EB4BA84A78974D079754CDDD /* test.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		39B250BDA7824A2D85115952 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				8216A4C22AE343D49F06F6F2 /* partinfo.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		3ABFB4CC534442D3BD1670DF /* _partio */ = {
+			isa = PBXGroup;
+			children = (
+				BD6FE3B380664FD7B889256E /* Source Files */,
+				2B98E58EE90249BBA170FF76 /* partio.py */,
+				BA09F51EE4DE43BB944F1A22 /* CMakeLists.txt */,
+				12B2938C653A4E1FB8DFEEF2 /* partio.i */,
+			);
+			name = _partio;
+			sourceTree = "<group>";
+		};
+		3F6DF57DB3734D9FB2020F77 /* partinfo */ = {
+			isa = PBXGroup;
+			children = (
+				39B250BDA7824A2D85115952 /* Source Files */,
+				DA1F2B2C8BCD4DA483B4B36E /* CMakeLists.txt */,
+			);
+			name = partinfo;
+			sourceTree = "<group>";
+		};
+		405C2AFDD56E403DBFCA0FBB /* teststr */ = {
+			isa = PBXGroup;
+			children = (
+				C035B44545E449FB9B7BD7C3 /* Source Files */,
+				9CE6AF064C644AB5B9F08DA9 /* CMakeLists.txt */,
+			);
+			name = teststr;
+			sourceTree = "<group>";
+		};
+		4FC1C9644F0244C0953F8FD8 /* testkdtree */ = {
+			isa = PBXGroup;
+			children = (
+				5D360A6E35BB4A378DC15850 /* Source Files */,
+				9CE6AF064C644AB5B9F08DA9 /* CMakeLists.txt */,
+			);
+			name = testkdtree;
+			sourceTree = "<group>";
+		};
+		51B27A72DC564211A3F4F2B8 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				B37D3DA303F54735AC59DCEA /* partconv.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		52AD7C2E424145DDA085667C /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				10B1D761FD664A48A8E73FE8 /* testcache.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		5D360A6E35BB4A378DC15850 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				C3A18266006F409E925A069B /* testkdtree.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		5FB4A52200BF42F7B828B01E /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				116E66616BA048D08EE47F80 /* ALL_BUILD */,
+				F1BA79998E2A4090BA8A93C7 /* ZERO_CHECK */,
+				73E1A4119ED140AC979E2876 /* partio */,
+				665E4E6E95824E659F16B30A /* partattr */,
+				A4A1D47019CC4ED8817E93B9 /* partconv */,
+				3F6DF57DB3734D9FB2020F77 /* partinfo */,
+				35E8D6E1E97742CA82549FDC /* partview */,
+				3ABFB4CC534442D3BD1670DF /* _partio */,
+				BB4D3A5E7BC24F00B2BF2265 /* makecircle */,
+				1013760F71204DA398A65B62 /* makeline */,
+				E63BABE6224E42C8A5252CAF /* test */,
+				20F48A84E2444B43A6942CDB /* testcache */,
+				13A185E5FED8451EB5F7B5CF /* testiterator */,
+				4FC1C9644F0244C0953F8FD8 /* testkdtree */,
+				405C2AFDD56E403DBFCA0FBB /* teststr */,
+				DA2CBB7FD8E34E5A9B8F26F7 /* partio4Maya */,
+			);
+			name = Sources;
+			sourceTree = "<group>";
+		};
+		60494D1969524FD98E8439FE = {
+			isa = PBXGroup;
+			children = (
+				5FB4A52200BF42F7B828B01E /* Sources */,
+				CBE8FDBC9BDB42ED901A61F1 /* Resources */,
+				0BE0BD5A3235470EB276FE9E /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		665E4E6E95824E659F16B30A /* partattr */ = {
+			isa = PBXGroup;
+			children = (
+				9F4062DA1ABA4DBB91488B82 /* Source Files */,
+				DA1F2B2C8BCD4DA483B4B36E /* CMakeLists.txt */,
+			);
+			name = partattr;
+			sourceTree = "<group>";
+		};
+		68B847D9C5E84029866B58BA /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				3376B46D3EF54187A8C03FD8 /* partview.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		73E1A4119ED140AC979E2876 /* partio */ = {
+			isa = PBXGroup;
+			children = (
+				DB265201783B4BFE846B4972 /* Source Files */,
+				9E4E36B7B9B4482699E060E1 /* CMakeLists.txt */,
+			);
+			name = partio;
+			sourceTree = "<group>";
+		};
+		8F8E54464FE244A59D74617B /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				523C40E79CD64E76AA3B67FC /* makecircle.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		9F4062DA1ABA4DBB91488B82 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				2FE808045A554D2CA212A653 /* partattr.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		A4A1D47019CC4ED8817E93B9 /* partconv */ = {
+			isa = PBXGroup;
+			children = (
+				51B27A72DC564211A3F4F2B8 /* Source Files */,
+				DA1F2B2C8BCD4DA483B4B36E /* CMakeLists.txt */,
+			);
+			name = partconv;
+			sourceTree = "<group>";
+		};
+		BB4D3A5E7BC24F00B2BF2265 /* makecircle */ = {
+			isa = PBXGroup;
+			children = (
+				8F8E54464FE244A59D74617B /* Source Files */,
+				9CE6AF064C644AB5B9F08DA9 /* CMakeLists.txt */,
+			);
+			name = makecircle;
+			sourceTree = "<group>";
+		};
+		BD6FE3B380664FD7B889256E /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				7E926785A2C546E8A705CEF9 /* partioPYTHON_wrap.cxx */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		C035B44545E449FB9B7BD7C3 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				23E01268E11545D690FB6436 /* teststr.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		C091ED75537C4204BB881B74 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				46ED19AC01C546FF9901DD2E /* makeline.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		CBE8FDBC9BDB42ED901A61F1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Resources;
+			sourceTree = "<group>";
+		};
+		D8E1153C81BF405086B791A0 /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		DA2CBB7FD8E34E5A9B8F26F7 /* partio4Maya */ = {
+			isa = PBXGroup;
+			children = (
+				EEEC95F3ADD54ABF8CCB093F /* Header Files */,
+				098229EC9943495B8725FC9D /* Source Files */,
+				7FEFA952A8E64D5F868471A6 /* CMakeLists.txt */,
+			);
+			name = partio4Maya;
+			sourceTree = "<group>";
+		};
+		DB163B62FD1A4045907C860E /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		DB265201783B4BFE846B4972 /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				2CD736632EFD4E33B7E56EAE /* XYZ.cpp */,
+				8072AAF8E0DB4A56B9F66545 /* PTC.cpp */,
+				2E595528061547479E5571DE /* ZIP.cpp */,
+				7B1C27A43C7E4D338C3D0DA2 /* PDC.cpp */,
+				2FDD420BBED64A9FB49F35F5 /* PDB.cpp */,
+				3744CADC2CE24C39947D6E0B /* PTS.cpp */,
+				E5641722B2154F63A04DEAD0 /* ParticleIO.cpp */,
+				AD6566619C434C718CCF823B /* BGEO.cpp */,
+				47D62DDC0BF14A76BB89829A /* BIN.cpp */,
+				6801F9848D7D4A76B9971ECC /* PDA.cpp */,
+				E615679B283C45D6BA0221BE /* PRT.cpp */,
+				E905DB7B9D7947548917F907 /* MC.cpp */,
+				DA9BECC7214142DAB39B9838 /* GEO.cpp */,
+				BA658A28B95B4EFDB221F3C5 /* RIB.cpp */,
+				E203C96B95CF4B66AF7B3B7A /* ParticleCaching.cpp */,
+				AF714FDA315E49A0851DAB66 /* ParticleSimple.cpp */,
+				1BB7E900283B4082A52BEC09 /* ParticleSimpleInterleave.cpp */,
+				94E38CF2D4734F46B0B2DEDC /* ParticleHeaders.cpp */,
+				81E036E1098C44BFA9F035D3 /* Particle.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		E63BABE6224E42C8A5252CAF /* test */ = {
+			isa = PBXGroup;
+			children = (
+				3995AAC9075845138C9C9EDF /* Source Files */,
+				9CE6AF064C644AB5B9F08DA9 /* CMakeLists.txt */,
+			);
+			name = test;
+			sourceTree = "<group>";
+		};
+		EEEC95F3ADD54ABF8CCB093F /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				01603A5BFB3A45DEA94CE8A9 /* partioVisualizer.h */,
+				7FAE5B7F954D455CA38877BB /* iconArrays.h */,
+				F0C3E68EBDCE44DDB583532D /* partio4MayaShared.h */,
+				B17C9AA85CBF441F90E9654E /* partioExport.h */,
+				CF8DE1BBDE824DEF909B538D /* partioEmitter.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		F1BA79998E2A4090BA8A93C7 /* ZERO_CHECK */ = {
+			isa = PBXGroup;
+			children = (
+				D8E1153C81BF405086B791A0 /* CMake Rules */,
+				612A48967DC441C59EAA7904 /* CMakeLists.txt */,
+			);
+			name = ZERO_CHECK;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		07B7ADC814FD44558CAEAF06 /* partview */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 5C1EDAAA1DA3449A8FF2675B /* Build configuration list for PBXNativeTarget "partview" */;
+			buildPhases = (
+				6ADCE270A05648E8B265B6DA /* Sources */,
+				31AD2311340A4052A642A349 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = partview;
+			productName = partview;
+			productReference = 5C635A86789240D782619265 /* partview */;
+			productType = "com.apple.product-type.tool";
+		};
+		132CF1AC5D3B40DE96935B15 /* teststr */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 51154CA8278F45698BD35860 /* Build configuration list for PBXNativeTarget "teststr" */;
+			buildPhases = (
+				393B6C00C4CF4D56A0F8D20B /* Sources */,
+				DEB5C6209B744CF5B28FE11A /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = teststr;
+			productName = teststr;
+			productReference = A451FD9D0D7D4334B151782E /* teststr */;
+			productType = "com.apple.product-type.tool";
+		};
+		1530DA66F62547FBBBA81B27 /* partattr */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 7C436A9342E5444D98700125 /* Build configuration list for PBXNativeTarget "partattr" */;
+			buildPhases = (
+				83322DC8270740BDAE35D324 /* Sources */,
+				5E3EA33AF5A447D79DFC6D39 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = partattr;
+			productName = partattr;
+			productReference = F9F6DD3BC9BD449DB72AD7C4 /* partattr */;
+			productType = "com.apple.product-type.tool";
+		};
+		1D9EF199A9674BA0879F525C /* partio4Maya */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 046818DC4C2B49B7BA99E298 /* Build configuration list for PBXNativeTarget "partio4Maya" */;
+			buildPhases = (
+				7A21DB2EA7704976876EA1C1 /* Sources */,
+				B7F5716698C04F2FA448FAB3 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+			);
+			name = partio4Maya;
+			productName = partio4Maya;
+			productReference = 7CAEB76DC5704F72977335B3 /* partio4Maya.bundle */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		246BF09AC59A40668FA4AE24 /* test */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 731F46209D1D4571A9CA9EED /* Build configuration list for PBXNativeTarget "test" */;
+			buildPhases = (
+				02B6DB04E80644CF8875E6AB /* Sources */,
+				539B9D1E0D06438280DED047 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = test;
+			productName = test;
+			productReference = FB52BBD095BC43FEA9660C10 /* test */;
+			productType = "com.apple.product-type.tool";
+		};
+		3C149B2E80C744B38A0FE7EE /* testiterator */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 035204E215C44C7AB02FAF9B /* Build configuration list for PBXNativeTarget "testiterator" */;
+			buildPhases = (
+				81BFC125A272414CA680F04A /* Sources */,
+				36B192EDE4BB4B72ADED850D /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = testiterator;
+			productName = testiterator;
+			productReference = AFA1B73810854FDE972D46B6 /* testiterator */;
+			productType = "com.apple.product-type.tool";
+		};
+		3F3FD82C8A9B492AB87CE898 /* partinfo */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8A2D7DB7686447BCA47C7DD7 /* Build configuration list for PBXNativeTarget "partinfo" */;
+			buildPhases = (
+				210EC65C209E4CDEA1A4C851 /* Sources */,
+				BA2583B5A7004249854E50E8 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = partinfo;
+			productName = partinfo;
+			productReference = BAA3B29C78F64F779BE5138D /* partinfo */;
+			productType = "com.apple.product-type.tool";
+		};
+		616B0001BDA64B8F902DCB9F /* makecircle */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 95AB55966AC64CE49F58303E /* Build configuration list for PBXNativeTarget "makecircle" */;
+			buildPhases = (
+				5D4EF3DAAA224D629B1E533D /* Sources */,
+				C67FAF6829F2435CB8537AE6 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = makecircle;
+			productName = makecircle;
+			productReference = 8734DE7E6664403CB388AE7D /* makecircle */;
+			productType = "com.apple.product-type.tool";
+		};
+		6CA89C43DAE84054B1F9260A /* partconv */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AE259C0D558D40469AC6C15A /* Build configuration list for PBXNativeTarget "partconv" */;
+			buildPhases = (
+				66D42C3EF4AD4ECCBAFB0803 /* Sources */,
+				27D33649A3EC40E5BCA6A659 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = partconv;
+			productName = partconv;
+			productReference = 92AF8CEADE284E5484C3A495 /* partconv */;
+			productType = "com.apple.product-type.tool";
+		};
+		ABFC65A518BA4422B3608464 /* testcache */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1AE71A2B58CA44359B198469 /* Build configuration list for PBXNativeTarget "testcache" */;
+			buildPhases = (
+				A0A120D611444E13BD9E1DA9 /* Sources */,
+				EA8F150D393149588AF50570 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = testcache;
+			productName = testcache;
+			productReference = 1A81918C9D7D40648BC3D190 /* testcache */;
+			productType = "com.apple.product-type.tool";
+		};
+		B1A684B4A0C1407283A05F4C /* testkdtree */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A072846F508444E6BB81B765 /* Build configuration list for PBXNativeTarget "testkdtree" */;
+			buildPhases = (
+				686142033EF24EA780443F26 /* Sources */,
+				8D5D0DB3168A456F86312C48 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = testkdtree;
+			productName = testkdtree;
+			productReference = C3FE3DEB744944DD9C124680 /* testkdtree */;
+			productType = "com.apple.product-type.tool";
+		};
+		C4E07CC132A84BF6A2213446 /* _partio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0BCDDBC361BC4E108126130E /* Build configuration list for PBXNativeTarget "_partio" */;
+			buildPhases = (
+				71C648A4E73C4239A0AE47E9 /* CMake Rules */,
+				87F0183D6A2D48069443F086 /* Sources */,
+				A7C54CC6AC7F40398457BAE4 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = _partio;
+			productName = _partio;
+			productReference = 43A9A7C301514349A0E64488 /* _partio.so */;
+			productType = "com.apple.product-type.tool";
+		};
+		E5CDA9A32926467EA86EA06F /* makeline */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DEE240BA536943E69843CB5A /* Build configuration list for PBXNativeTarget "makeline" */;
+			buildPhases = (
+				83F8511BF97A4A42A4D99330 /* Sources */,
+				AA0E9DDACBB34DB2A55B6601 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+				13E3381D4BE4415DB992C44A /* PBXTargetDependency */,
+			);
+			name = makeline;
+			productName = makeline;
+			productReference = F7D23AA7711B4C91989B2814 /* makeline */;
+			productType = "com.apple.product-type.tool";
+		};
+		ED2663176393407C90C0B7F4 /* partio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EECD356C6CB44D5CA7C7B5C2 /* Build configuration list for PBXNativeTarget "partio" */;
+			buildPhases = (
+				75562C8DAF7040B88D23E422 /* Sources */,
+				BD9572B2C20142DF832C68B7 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8F64459B1782475E8704BBF8 /* PBXTargetDependency */,
+			);
+			name = partio;
+			productName = partio;
+			productReference = 86C76D7D484D45EE81EB0600 /* libpartio.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		FA65FA6C479D485DB717A67E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+			};
+			buildConfigurationList = 38BD14B98ED5496194598F93 /* Build configuration list for PBXProject "partio" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 60494D1969524FD98E8439FE;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1EE8B9808F074253AACD546B /* ALL_BUILD */,
+				69E18F222DFB4597B1FCD208 /* ZERO_CHECK */,
+				B09B845EAFEA488D9D52FCC9 /* install */,
+				ED2663176393407C90C0B7F4 /* partio */,
+				1530DA66F62547FBBBA81B27 /* partattr */,
+				6CA89C43DAE84054B1F9260A /* partconv */,
+				3F3FD82C8A9B492AB87CE898 /* partinfo */,
+				07B7ADC814FD44558CAEAF06 /* partview */,
+				C4E07CC132A84BF6A2213446 /* _partio */,
+				616B0001BDA64B8F902DCB9F /* makecircle */,
+				E5CDA9A32926467EA86EA06F /* makeline */,
+				246BF09AC59A40668FA4AE24 /* test */,
+				ABFC65A518BA4422B3608464 /* testcache */,
+				3C149B2E80C744B38A0FE7EE /* testiterator */,
+				B1A684B4A0C1407283A05F4C /* testkdtree */,
+				132CF1AC5D3B40DE96935B15 /* teststr */,
+				1D9EF199A9674BA0879F525C /* partio4Maya */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		27D33649A3EC40E5BCA6A659 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tools -f /Volumes/newhome/johnc/Desktop/partio_github/src/tools/CMakeScripts/partconv_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		31AD2311340A4052A642A349 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tools -f /Volumes/newhome/johnc/Desktop/partio_github/src/tools/CMakeScripts/partview_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		36B192EDE4BB4B72ADED850D /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tests -f /Volumes/newhome/johnc/Desktop/partio_github/src/tests/CMakeScripts/testiterator_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		47730915B60546D3A1E00551 /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github -f /Volumes/newhome/johnc/Desktop/partio_github/CMakeScripts/ALL_BUILD_cmakeRulesBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		539B9D1E0D06438280DED047 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tests -f /Volumes/newhome/johnc/Desktop/partio_github/src/tests/CMakeScripts/test_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		5E3EA33AF5A447D79DFC6D39 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tools -f /Volumes/newhome/johnc/Desktop/partio_github/src/tools/CMakeScripts/partattr_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		71C648A4E73C4239A0AE47E9 /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/py -f /Volumes/newhome/johnc/Desktop/partio_github/src/py/CMakeScripts/_partio_cmakeRulesBuildPhase.make$CONFIGURATION cmake_check_multiple_outputs all";
+			showEnvVarsInLog = 0;
+		};
+		812F031D42AD47F487431B52 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github -f /Volumes/newhome/johnc/Desktop/partio_github/CMakeScripts/install_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		8D5D0DB3168A456F86312C48 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tests -f /Volumes/newhome/johnc/Desktop/partio_github/src/tests/CMakeScripts/testkdtree_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		A7C54CC6AC7F40398457BAE4 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/py -f /Volumes/newhome/johnc/Desktop/partio_github/src/py/CMakeScripts/_partio_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		AA0E9DDACBB34DB2A55B6601 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tests -f /Volumes/newhome/johnc/Desktop/partio_github/src/tests/CMakeScripts/makeline_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		B7F5716698C04F2FA448FAB3 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya -f /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/CMakeScripts/partio4Maya_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		BA2583B5A7004249854E50E8 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tools -f /Volumes/newhome/johnc/Desktop/partio_github/src/tools/CMakeScripts/partinfo_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		BD9572B2C20142DF832C68B7 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/lib -f /Volumes/newhome/johnc/Desktop/partio_github/src/lib/CMakeScripts/partio_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		C67FAF6829F2435CB8537AE6 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tests -f /Volumes/newhome/johnc/Desktop/partio_github/src/tests/CMakeScripts/makecircle_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		DEB5C6209B744CF5B28FE11A /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tests -f /Volumes/newhome/johnc/Desktop/partio_github/src/tests/CMakeScripts/teststr_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		EA39749A82154D8BA90609A3 /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github -f /Volumes/newhome/johnc/Desktop/partio_github/CMakeScripts/ZERO_CHECK_cmakeRulesBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+		EA8F150D393149588AF50570 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Volumes/newhome/johnc/Desktop/partio_github/src/tests -f /Volumes/newhome/johnc/Desktop/partio_github/src/tests/CMakeScripts/testcache_postBuildPhase.make$CONFIGURATION all";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		02B6DB04E80644CF8875E6AB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6AF55EBC7322455BBE4BF631 /* test.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		210EC65C209E4CDEA1A4C851 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8CDF9469F850491AA6F3DEDD /* partinfo.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		393B6C00C4CF4D56A0F8D20B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C21CFEC3965D4C098B389CD2 /* teststr.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		5D4EF3DAAA224D629B1E533D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EDFDAE63C1B416888E0213F /* makecircle.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		66D42C3EF4AD4ECCBAFB0803 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				46BCA33E040C4C89A4B03D4B /* partconv.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		686142033EF24EA780443F26 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				000EC5BC79A849A8956DFF85 /* testkdtree.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		6ADCE270A05648E8B265B6DA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6BE730A47B854CBE9212866E /* partview.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		75562C8DAF7040B88D23E422 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				72D977CFC06B4B9F8D3ED5AC /* XYZ.cpp in Sources */,
+				9E3E23CAD48644FFAB63E470 /* PTC.cpp in Sources */,
+				CD0646BEFCA2418D9646D329 /* ZIP.cpp in Sources */,
+				57868584EAAB49FE9E6A7286 /* PDC.cpp in Sources */,
+				F51E87D92FDD4E8DAD8044D5 /* PDB.cpp in Sources */,
+				2BB21A59CDD34FBD89BB5AF4 /* PTS.cpp in Sources */,
+				4CCF8F181AD840FD9EB0206F /* ParticleIO.cpp in Sources */,
+				5D22498FD110439FB764BFD9 /* BGEO.cpp in Sources */,
+				ECD653F06617466E888B9692 /* BIN.cpp in Sources */,
+				84822F45784A4F8BBEDB113D /* PDA.cpp in Sources */,
+				7FEF8C828B894A6986779934 /* PRT.cpp in Sources */,
+				C69B42F0E3974042B87AA0AF /* MC.cpp in Sources */,
+				3AB9C9DA77B34632B29CC112 /* GEO.cpp in Sources */,
+				FCCA04E9D950446BBFA26AE2 /* RIB.cpp in Sources */,
+				C508E24FC4AF472C8C9E87DB /* ParticleCaching.cpp in Sources */,
+				B5CFE6BC4B864146B02C97D6 /* ParticleSimple.cpp in Sources */,
+				6E1C499FC8464442AB098FC6 /* ParticleSimpleInterleave.cpp in Sources */,
+				724377EA0CDB436087104D11 /* ParticleHeaders.cpp in Sources */,
+				A1ED7AE650F64A8694B2BC16 /* Particle.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		7A21DB2EA7704976876EA1C1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9832DFACE1904CEF9759BA07 /* partioVisualizer.cpp in Sources */,
+				5538F5874CFB49BB8D850AD3 /* partioEmitter.cpp in Sources */,
+				8CE0AD6ABE104B728B736B4D /* partioExport.cpp in Sources */,
+				E63E311E0F084BF88AAC3FE2 /* partio4MayaShared.cpp in Sources */,
+				499EB7B0CD1D4A6CA2885E26 /* plugin.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		81BFC125A272414CA680F04A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E551D0833F649B7BBDD40DF /* testiterator.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83322DC8270740BDAE35D324 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				9933DF205372413E91AD1E5D /* partattr.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		83F8511BF97A4A42A4D99330 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F8B2A557DB354BBB9AFD1598 /* makeline.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		87F0183D6A2D48069443F086 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF390AA904544D3EAF5F8FFC /* partioPYTHON_wrap.cxx in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		A0A120D611444E13BD9E1DA9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A9EFE8DDE6F0495C92E0F1E1 /* testcache.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		02F32E2972D44963A2CA6A09 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3F3FD82C8A9B492AB87CE898 /* partinfo */;
+			targetProxy = A42279CCC3EC4B20B5EA53B7 /* PBXContainerItemProxy */;
+		};
+		13E3381D4BE4415DB992C44A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ED2663176393407C90C0B7F4 /* partio */;
+			targetProxy = 837F9754F33042DA80664679 /* PBXContainerItemProxy */;
+		};
+		1D042633CF974509B209BA6F /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E5CDA9A32926467EA86EA06F /* makeline */;
+			targetProxy = 5D4E0DAE53D74073986E6F7E /* PBXContainerItemProxy */;
+		};
+		1EEED75E98D046B9B3799E6E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = ABFC65A518BA4422B3608464 /* testcache */;
+			targetProxy = A3F526CA4AC44672A6495802 /* PBXContainerItemProxy */;
+		};
+		26F8BF9124684456924BD6F3 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 07B7ADC814FD44558CAEAF06 /* partview */;
+			targetProxy = 7ED6A2D79F184529BFCFD3FF /* PBXContainerItemProxy */;
+		};
+		2C9AEAF7CC444A27BF459A99 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1EE8B9808F074253AACD546B /* ALL_BUILD */;
+			targetProxy = 168B0FA044604F5094DD5FCC /* PBXContainerItemProxy */;
+		};
+		3DA88BA163344AA09AB7CCBF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1530DA66F62547FBBBA81B27 /* partattr */;
+			targetProxy = 36C71EC0B77A4D4790B3AA5C /* PBXContainerItemProxy */;
+		};
+		57A843400CD94989B7A10920 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 1D9EF199A9674BA0879F525C /* partio4Maya */;
+			targetProxy = D9ADDE34C1EB49D0BD98463F /* PBXContainerItemProxy */;
+		};
+		60EFCC20C88D4C558151E541 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C4E07CC132A84BF6A2213446 /* _partio */;
+			targetProxy = 61D8EB977E2740FB98008483 /* PBXContainerItemProxy */;
+		};
+		6BAE68988D5042D98D1AEE90 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 6CA89C43DAE84054B1F9260A /* partconv */;
+			targetProxy = 887C737151E84844AED2F9A7 /* PBXContainerItemProxy */;
+		};
+		8396FA0803EE495BA82E5FBF /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B1A684B4A0C1407283A05F4C /* testkdtree */;
+			targetProxy = 51A5A7BFED6B4DCBA8C44EB7 /* PBXContainerItemProxy */;
+		};
+		8F64459B1782475E8704BBF8 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 69E18F222DFB4597B1FCD208 /* ZERO_CHECK */;
+			targetProxy = 50014187F1914F31B69CD529 /* PBXContainerItemProxy */;
+		};
+		9487623BB91F478484A67E6E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 616B0001BDA64B8F902DCB9F /* makecircle */;
+			targetProxy = 0EEDC75F37A548D78FD82972 /* PBXContainerItemProxy */;
+		};
+		9C113A27CDCA4FDE9C6A66C9 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 132CF1AC5D3B40DE96935B15 /* teststr */;
+			targetProxy = 4E5611B481AB43FD8FB1E1EC /* PBXContainerItemProxy */;
+		};
+		C12464A977B344679E6811B7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 246BF09AC59A40668FA4AE24 /* test */;
+			targetProxy = C86F9929482049588C92B82A /* PBXContainerItemProxy */;
+		};
+		D8051CF75F3846F9AE3D2558 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 3C149B2E80C744B38A0FE7EE /* testiterator */;
+			targetProxy = 95BD9407DE784CE7876D4B1D /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		036378FFFB13449A904630DC /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+					"-framework",
+					GLUT,
+					"-framework",
+					Cocoa,
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+					"-framework",
+					GLUT,
+					"-framework",
+					Cocoa,
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partview;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		0C143DC8431845C99F8D2931 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partconv;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		13C79B3966F548A89ED89069 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testcache;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		1669706BFB5E4270B156AEBD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = makecircle;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		1F63695255BD4BD9BDE2E6E9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Developer/SDKs/MacOSX10.6.sdk;
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/build;
+			};
+			name = Debug;
+		};
+		26D1B49C46F84373875C33B2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testkdtree;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		27C13D9CE2FA442A92F7039F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		297269608A93482C8FB07C99 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = test;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		2DE940EA90274D78883BEE6D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		3C4F423E9EEE4A46A5654720 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		4454694A9E4F43C0BD05BE86 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partconv;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		469B16A79F73448198229E50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = makeline;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		4E512F3FAA1C42D68A426471 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = teststr;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		502E0D43E4274053A73EE615 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = teststr;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		57CA3A2FA71E4C75BD2D594C /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partinfo;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		57F21974A0B04E4C8F772C41 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/lib/Release;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		58EE635AD018486694FC7322 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		5E175388C9004E4889A84C70 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+					"-framework",
+					GLUT,
+					"-framework",
+					Cocoa,
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+					"-framework",
+					GLUT,
+					"-framework",
+					Cocoa,
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partview;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		60F904B36CE54BF9BFF5BDDE /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = makeline;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		616291EE254B469BAA464C5D /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		61F89B5C8BDE49D6A4A5F632 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = test;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		63C573D157E14B3F8C217224 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partinfo;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		641D25858791498487C01AA0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+					"-framework",
+					GLUT,
+					"-framework",
+					Cocoa,
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+					"-framework",
+					GLUT,
+					"-framework",
+					Cocoa,
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partview;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		64E6970F2B2142AC9B8D1AD4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Developer/SDKs/MacOSX10.6.sdk;
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/build;
+			};
+			name = Release;
+		};
+		676FA336D9E24708A4F53ADD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/build/Release;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = .bundle;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					partio4Maya_EXPORTS,
+					PARTIO_USE_ZLIB,
+					MAC_PLUGIN,
+					OSMac_,
+					OSMac_MachO,
+					_BOOL,
+					REQUIRE_IOSTREAM,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Volumes/newhome/johnc/Desktop/partio_github/src/lib,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/.,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/..,
+					/usr/X11R6/include,
+					/usr/include/CC,
+					/Applications/Autodesk/maya2012.17/devkit/include,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../include,
+				);
+				INSTALL_PATH = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/build/Release;
+				LIBRARY_SEARCH_PATHS = (
+					"/Applications/Autodesk/maya2012.17/Maya.app/Contents/MacOS/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					/Applications/Autodesk/maya2012.17/Maya.app/Contents/MacOS,
+					"/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../lib/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../lib,
+				);
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+					"-lzlib",
+					"-lpartio",
+					"-lOpenMaya",
+					"-lFoundation",
+					"-lOpenMayaAnim",
+					"-lOpenMayaFX",
+					"-lOpenMayaUI",
+					"-lOpenMayaRender",
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partio4Maya;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		6903E0E918544093AC41AADA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		6A786098876941908859763F /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partattr;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		71F4391D36564CD6ACC41621 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		74A330A532C44816BA9BFAEB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/py/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = .so;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					_partio_EXPORTS,
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Volumes/newhome/johnc/Desktop/partio_github/src/lib,
+					/System/Library/Frameworks/Python.framework/Headers,
+					/Volumes/newhome/johnc/Desktop/partio_github/src/py,
+				);
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = BUNDLE;
+				MACH_O_TYPE = mh_bundle;
+				OTHER_CFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libpython2.6.dylib,
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = _partio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/py;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		74B4949948F940E9A5C02547 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/py/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = .so;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					_partio_EXPORTS,
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Volumes/newhome/johnc/Desktop/partio_github/src/lib,
+					/System/Library/Frameworks/Python.framework/Headers,
+					/Volumes/newhome/johnc/Desktop/partio_github/src/py,
+				);
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = BUNDLE;
+				MACH_O_TYPE = mh_bundle;
+				OTHER_CFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libpython2.6.dylib,
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = _partio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/py;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		7803460455BD4E19AFCBA7FB /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testkdtree;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		837F1674048947379EE2C12D /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/build/RelWithDebInfo;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = .bundle;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					partio4Maya_EXPORTS,
+					PARTIO_USE_ZLIB,
+					MAC_PLUGIN,
+					OSMac_,
+					OSMac_MachO,
+					_BOOL,
+					REQUIRE_IOSTREAM,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Volumes/newhome/johnc/Desktop/partio_github/src/lib,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/.,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/..,
+					/usr/X11R6/include,
+					/usr/include/CC,
+					/Applications/Autodesk/maya2012.17/devkit/include,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../include,
+				);
+				INSTALL_PATH = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/build/RelWithDebInfo;
+				LIBRARY_SEARCH_PATHS = (
+					"/Applications/Autodesk/maya2012.17/Maya.app/Contents/MacOS/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					/Applications/Autodesk/maya2012.17/Maya.app/Contents/MacOS,
+					"/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../lib/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../lib,
+				);
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				OTHER_CFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+					"-lzlib",
+					"-lpartio",
+					"-lOpenMaya",
+					"-lFoundation",
+					"-lOpenMayaAnim",
+					"-lOpenMayaFX",
+					"-lOpenMayaUI",
+					"-lOpenMayaRender",
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partio4Maya;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		84ECF136C8B64888B6D5B884 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/py/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = .so;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					_partio_EXPORTS,
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Volumes/newhome/johnc/Desktop/partio_github/src/lib,
+					/System/Library/Frameworks/Python.framework/Headers,
+					/Volumes/newhome/johnc/Desktop/partio_github/src/py,
+				);
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = BUNDLE;
+				MACH_O_TYPE = mh_bundle;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libpython2.6.dylib,
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = _partio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/py;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		8E832316E6794CA2973F728D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/lib/Debug;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		948AE033760C4B7A8A08711C /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testkdtree;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		9D8285754F9146A699079400 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testiterator;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		9DA0D336747944229E6A2C50 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partconv;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		9E7C707DB7F74EA9AB085355 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/py/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = .so;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					_partio_EXPORTS,
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Volumes/newhome/johnc/Desktop/partio_github/src/lib,
+					/System/Library/Frameworks/Python.framework/Headers,
+					/Volumes/newhome/johnc/Desktop/partio_github/src/py,
+				);
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = BUNDLE;
+				MACH_O_TYPE = mh_bundle;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libpython2.6.dylib,
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = _partio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/py;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		9E9DF0AA05B64D42BA6DC528 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/build/Debug;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = .bundle;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					partio4Maya_EXPORTS,
+					PARTIO_USE_ZLIB,
+					MAC_PLUGIN,
+					OSMac_,
+					OSMac_MachO,
+					_BOOL,
+					REQUIRE_IOSTREAM,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Volumes/newhome/johnc/Desktop/partio_github/src/lib,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/.,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/..,
+					/usr/X11R6/include,
+					/usr/include/CC,
+					/Applications/Autodesk/maya2012.17/devkit/include,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../include,
+				);
+				INSTALL_PATH = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/build/Debug;
+				LIBRARY_SEARCH_PATHS = (
+					"/Applications/Autodesk/maya2012.17/Maya.app/Contents/MacOS/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					/Applications/Autodesk/maya2012.17/Maya.app/Contents/MacOS,
+					"/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../lib/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../lib,
+				);
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				OTHER_CFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+					"-lzlib",
+					"-lpartio",
+					"-lOpenMaya",
+					"-lFoundation",
+					"-lOpenMayaAnim",
+					"-lOpenMayaFX",
+					"-lOpenMayaUI",
+					"-lOpenMayaRender",
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partio4Maya;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		9EC0A55E7F764F5E8BD417B5 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo;
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .a;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_STYLE = STATIC;
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		A05DD0A041734F6FBFFA4355 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = makeline;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		ABF61479A3B34AAB8589570D /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Developer/SDKs/MacOSX10.6.sdk;
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/build;
+			};
+			name = RelWithDebInfo;
+		};
+		AC49A518DAE047829D67F86B /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partattr;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		AD875EC0E1694BB3BDB87997 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testiterator;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		AFB6A6014B874AAE8B14D587 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		B4A376A1CF07484888079240 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testkdtree;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		B8D24B34DF444D61A1512660 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = makecircle;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		C11CDA300C1C434E94167691 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		C642DC3454274D088B4BF38D /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = makecircle;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		C717C1C533EA476A97AEC34B /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partinfo;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		CB61751BA2DE47AFBE595566 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		CFEE085E5051466F8A34E2A4 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/build/MinSizeRel;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = .bundle;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					partio4Maya_EXPORTS,
+					PARTIO_USE_ZLIB,
+					MAC_PLUGIN,
+					OSMac_,
+					OSMac_MachO,
+					_BOOL,
+					REQUIRE_IOSTREAM,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					/Volumes/newhome/johnc/Desktop/partio_github/src/lib,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/.,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/..,
+					/usr/X11R6/include,
+					/usr/include/CC,
+					/Applications/Autodesk/maya2012.17/devkit/include,
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../include,
+				);
+				INSTALL_PATH = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/build/MinSizeRel;
+				LIBRARY_SEARCH_PATHS = (
+					"/Applications/Autodesk/maya2012.17/Maya.app/Contents/MacOS/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					/Applications/Autodesk/maya2012.17/Maya.app/Contents/MacOS,
+					"/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../lib/$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)",
+					/Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya/../../lib,
+				);
+				LIBRARY_STYLE = DYNAMIC;
+				MACH_O_TYPE = mh_dylib;
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+					"-lzlib",
+					"-lpartio",
+					"-lOpenMaya",
+					"-lFoundation",
+					"-lOpenMayaAnim",
+					"-lOpenMayaFX",
+					"-lOpenMayaUI",
+					"-lOpenMayaRender",
+					"-framework",
+					OpenGL,
+					"-framework",
+					GLUT,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partio4Maya;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/contrib/partio4Maya;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		D5C1612A61974BB8A4DE51A7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partattr;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		D6A56613D29840B1A81B2D2F /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		D9AC1432F4754043859C3D62 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = test;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		DA1211ED58824ABDA2CE9DC3 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partconv;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		DB50392C913548C188FFC4DC /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = makeline;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		DD54FDB0118247258ECD0175 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		DF4EEDE277E143E3B53D7635 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testcache;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		E2EAFACBD5704E5B850F3E45 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testcache;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		E2FA548DA79842D9B97C075E /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = makecircle;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		E43D1DE2EE154023BFA8BCD7 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = "";
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		E4E24F921DDF424E88D881E9 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partinfo;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		E645A9AE9FE14B69B2437DD6 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = teststr;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		E7014C8E9FA24C43A6F09A82 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partattr;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		E7310825DC1C40C1BCDD02F5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testiterator;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		E9FA142404224A489141B859 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Release;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Release/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testcache;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Release;
+		};
+		EB02DC55ED214D56B56C6C69 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/MinSizeRel;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-DNDEBUG",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/MinSizeRel/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = testiterator;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = MinSizeRel;
+		};
+		EEFD4B728E7D4539BBD2C99E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = teststr;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		F6AB2EEFFF5941FABF18998F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/Debug;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/Debug/libpartio.a,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = test;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tests;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = Debug;
+		};
+		FAC9B345C98648178A99E0F7 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Developer/SDKs/MacOSX10.6.sdk;
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/build;
+			};
+			name = MinSizeRel;
+		};
+		FD83C7A48C2D4AF8ADAB0C27 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CONFIGURATION_BUILD_DIR = /Volumes/newhome/johnc/Desktop/partio_github/bin/RelWithDebInfo;
+				EXECUTABLE_PREFIX = "";
+				EXECUTABLE_SUFFIX = "";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					PARTIO_USE_ZLIB,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = /Volumes/newhome/johnc/Desktop/partio_github/src/lib;
+				INSTALL_PATH = "";
+				LIBRARY_SEARCH_PATHS = "";
+				OTHER_CFLAGS = (
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_CPLUSPLUSFLAGS = (
+					"-fPIC",
+					"-Wextra",
+					"-Wno-unused-parameter",
+				);
+				OTHER_LDFLAGS = (
+					"-Wl,-search_paths_first",
+					"-Wl,-headerpad_max_install_names",
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+					"-framework",
+					GLUT,
+					"-framework",
+					Cocoa,
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+					/usr/lib/libz.dylib,
+					/Volumes/newhome/johnc/Desktop/partio_github/lib/RelWithDebInfo/libpartio.a,
+					"-framework",
+					GLUT,
+					"-framework",
+					Cocoa,
+					"-framework",
+					AGL,
+					"-framework",
+					OpenGL,
+				);
+				OTHER_REZFLAGS = "";
+				PREBINDING = NO;
+				PRODUCT_NAME = partview;
+				SECTORDER_FLAGS = "";
+				SYMROOT = /Volumes/newhome/johnc/Desktop/partio_github/src/tools;
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		035204E215C44C7AB02FAF9B /* Build configuration list for PBXNativeTarget "testiterator" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E7310825DC1C40C1BCDD02F5 /* Debug */,
+				9D8285754F9146A699079400 /* Release */,
+				EB02DC55ED214D56B56C6C69 /* MinSizeRel */,
+				AD875EC0E1694BB3BDB87997 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		046818DC4C2B49B7BA99E298 /* Build configuration list for PBXNativeTarget "partio4Maya" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				9E9DF0AA05B64D42BA6DC528 /* Debug */,
+				676FA336D9E24708A4F53ADD /* Release */,
+				CFEE085E5051466F8A34E2A4 /* MinSizeRel */,
+				837F1674048947379EE2C12D /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		0BCDDBC361BC4E108126130E /* Build configuration list for PBXNativeTarget "_partio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				74A330A532C44816BA9BFAEB /* Debug */,
+				84ECF136C8B64888B6D5B884 /* Release */,
+				9E7C707DB7F74EA9AB085355 /* MinSizeRel */,
+				74B4949948F940E9A5C02547 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1AE71A2B58CA44359B198469 /* Build configuration list for PBXNativeTarget "testcache" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				13C79B3966F548A89ED89069 /* Debug */,
+				E9FA142404224A489141B859 /* Release */,
+				DF4EEDE277E143E3B53D7635 /* MinSizeRel */,
+				E2EAFACBD5704E5B850F3E45 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		38BD14B98ED5496194598F93 /* Build configuration list for PBXProject "partio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1F63695255BD4BD9BDE2E6E9 /* Debug */,
+				64E6970F2B2142AC9B8D1AD4 /* Release */,
+				FAC9B345C98648178A99E0F7 /* MinSizeRel */,
+				ABF61479A3B34AAB8589570D /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		51154CA8278F45698BD35860 /* Build configuration list for PBXNativeTarget "teststr" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EEFD4B728E7D4539BBD2C99E /* Debug */,
+				4E512F3FAA1C42D68A426471 /* Release */,
+				E645A9AE9FE14B69B2437DD6 /* MinSizeRel */,
+				502E0D43E4274053A73EE615 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		5C1EDAAA1DA3449A8FF2675B /* Build configuration list for PBXNativeTarget "partview" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5E175388C9004E4889A84C70 /* Debug */,
+				641D25858791498487C01AA0 /* Release */,
+				036378FFFB13449A904630DC /* MinSizeRel */,
+				FD83C7A48C2D4AF8ADAB0C27 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		72F9D6FF0296441A9FD75CBE /* Build configuration list for PBXAggregateTarget "install" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				58EE635AD018486694FC7322 /* Debug */,
+				C11CDA300C1C434E94167691 /* Release */,
+				AFB6A6014B874AAE8B14D587 /* MinSizeRel */,
+				E43D1DE2EE154023BFA8BCD7 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		731F46209D1D4571A9CA9EED /* Build configuration list for PBXNativeTarget "test" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F6AB2EEFFF5941FABF18998F /* Debug */,
+				297269608A93482C8FB07C99 /* Release */,
+				D9AC1432F4754043859C3D62 /* MinSizeRel */,
+				61F89B5C8BDE49D6A4A5F632 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		7C436A9342E5444D98700125 /* Build configuration list for PBXNativeTarget "partattr" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				D5C1612A61974BB8A4DE51A7 /* Debug */,
+				6A786098876941908859763F /* Release */,
+				E7014C8E9FA24C43A6F09A82 /* MinSizeRel */,
+				AC49A518DAE047829D67F86B /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		8A2D7DB7686447BCA47C7DD7 /* Build configuration list for PBXNativeTarget "partinfo" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				63C573D157E14B3F8C217224 /* Debug */,
+				C717C1C533EA476A97AEC34B /* Release */,
+				E4E24F921DDF424E88D881E9 /* MinSizeRel */,
+				57CA3A2FA71E4C75BD2D594C /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		95AB55966AC64CE49F58303E /* Build configuration list for PBXNativeTarget "makecircle" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B8D24B34DF444D61A1512660 /* Debug */,
+				1669706BFB5E4270B156AEBD /* Release */,
+				E2FA548DA79842D9B97C075E /* MinSizeRel */,
+				C642DC3454274D088B4BF38D /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A072846F508444E6BB81B765 /* Build configuration list for PBXNativeTarget "testkdtree" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B4A376A1CF07484888079240 /* Debug */,
+				26D1B49C46F84373875C33B2 /* Release */,
+				7803460455BD4E19AFCBA7FB /* MinSizeRel */,
+				948AE033760C4B7A8A08711C /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AE259C0D558D40469AC6C15A /* Build configuration list for PBXNativeTarget "partconv" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4454694A9E4F43C0BD05BE86 /* Debug */,
+				0C143DC8431845C99F8D2931 /* Release */,
+				DA1211ED58824ABDA2CE9DC3 /* MinSizeRel */,
+				9DA0D336747944229E6A2C50 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DEE240BA536943E69843CB5A /* Build configuration list for PBXNativeTarget "makeline" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				469B16A79F73448198229E50 /* Debug */,
+				A05DD0A041734F6FBFFA4355 /* Release */,
+				60F904B36CE54BF9BFF5BDDE /* MinSizeRel */,
+				DB50392C913548C188FFC4DC /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EECD356C6CB44D5CA7C7B5C2 /* Build configuration list for PBXNativeTarget "partio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8E832316E6794CA2973F728D /* Debug */,
+				57F21974A0B04E4C8F772C41 /* Release */,
+				616291EE254B469BAA464C5D /* MinSizeRel */,
+				9EC0A55E7F764F5E8BD417B5 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		F6B6E60650FB466091E06D1F /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DD54FDB0118247258ECD0175 /* Debug */,
+				6903E0E918544093AC41AADA /* Release */,
+				D6A56613D29840B1A81B2D2F /* MinSizeRel */,
+				71F4391D36564CD6ACC41621 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FE0B136B6A804B08BC5EB58C /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				2DE940EA90274D78883BEE6D /* Debug */,
+				27C13D9CE2FA442A92F7039F /* Release */,
+				3C4F423E9EEE4A46A5654720 /* MinSizeRel */,
+				CB61751BA2DE47AFBE595566 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = FA65FA6C479D485DB717A67E /* Project object */;
+}

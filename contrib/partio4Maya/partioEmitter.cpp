@@ -299,7 +299,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
         return ( MS::kUnknownParameter );
 
 	MPlugArray  connectionArray;
-    plug.connectedTo(connectionArray, FALSE, TRUE, &stat);
+    plug.connectedTo(connectionArray, false, true, &stat);
 
 	MPlug particleShapeOutPlug 	=  connectionArray[0];
 	MObject  particleShapeNode 	=  particleShapeOutPlug.node(&stat);
@@ -958,9 +958,9 @@ MStatus partioEmitter::createPPAttr( MFnParticleSystem  &part, MString attrName,
 		}
 			if (stat1 == MStatus::kSuccess && stat2 == MStatus::kSuccess)
 			{
-				initialStateAttr.setStorable (TRUE);
-				ppAttr.setStorable (TRUE);
-				ppAttr.setKeyable (TRUE);
+				initialStateAttr.setStorable (true);
+				ppAttr.setStorable (true);
+				ppAttr.setKeyable (true);
 				stat1 = part.addAttribute (initialStateAttrObj, MFnDependencyNode::kLocalDynamicAttr);
 				if (!stat1)
 				{

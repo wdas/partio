@@ -11,6 +11,11 @@ endif(COMMAND cmake_policy)
 IF ( UNIX AND NOT APPLE )
 	ADD_DEFINITIONS(-DLINUX)
 ENDIF()
+if( APPLE )
+	ADD_DEFINITIONS(-DMAC_PLUGIN)
+	ADD_DEFINITIONS(-DOSMac_)
+	ADD_DEFINITIONS(-DOSMac_MachO)
+ENDIF()
 
 SET(CMAKE_CXX_WARNING_LEVEL 4)
 
@@ -25,6 +30,25 @@ set (PLUGIN_NAME "partio4Maya")
 set (PLUGIN_SUFFIX ".so")
 set (CMAKE_PROJECT_NAME "partio4Maya")
 
+if(APPLE)
+	set (PLUGIN_SUFFIX ".bundle")
+	set (CMAKE_SHARED_LIBRARY_SUFFIX ".bundle")
+	set (SUFFIX ".bundle")
+ENDIF()
+
+if(WIN32)
+	set (PLUGIN_SUFFIX ".mll")
+	set (CMAKE_SHARED_LIBRARY_SUFFIX ".mll")
+	set (SUFFIX ".mll")
+ENDIF()
+
+if (LINUX)
+	set (PLUGIN_SUFFIX ".so")
+	set (CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+	set (SUFFIX ".so")
+ENDIF()
+	
+
 # update the base dir to where your copy of maya resides
 SET(MAYA_VERSION "2012-x64")
 if(WIN32)
@@ -32,8 +56,19 @@ if(WIN32)
 else(WIN32)
 	SET(MAYA_BASE_DIR "/usr/autodesk/maya${MAYA_VERSION}")
 ENDIF()
-SET(MAYA_INC_DIR ${MAYA_BASE_DIR}/include)
-SET(MAYA_LIB_DIR ${MAYA_BASE_DIR}/lib)
+if(APPLE)
+	SET(MAYA_BASE_DIR "/Applications/Autodesk/maya2012.17")
+ENDIF()
+
+if (APPLE) 
+	SET(MAYA_INC_DIR ${MAYA_BASE_DIR}/devkit/include)
+	SET(MAYA_LIB_DIR ${MAYA_BASE_DIR}/Maya.app/Contents/MacOS)
+else(APPLE)
+	SET(MAYA_INC_DIR ${MAYA_BASE_DIR}/include)
+	SET(MAYA_LIB_DIR ${MAYA_BASE_DIR}/lib)
+ENDIF()
+
+
 
 ## if building from the default partio contrib dir you can leave this alone
 SET (PARTIO_INCLUDE "../../include" )
@@ -60,8 +95,15 @@ FILE(GLOB partio4MayaINCLUDES "*.h")
 SET(TARGET_H ${partio4MayaINCLUDES})
 SET(TARGET_SRC ${partio4MayaCPP})
 
-SET(OPENGL_gl_LIBRARY "GL")
-SET(OPENGL_glu_LIBRARY "GLU")
+if(APPLE)
+	SET(OPENGL_gl_LIBRARY "-framework OpenGL")
+	SET(OPENGL_glu_LIBRARY "-framework GLUT")
+	SET(ZLIB "libzlib.a")
+else(APPLE)
+
+	SET(OPENGL_gl_LIBRARY "GL")
+	SET(OPENGL_glu_LIBRARY "GLU")
+endif()
 
 
 IF (WIN32)
@@ -76,5 +118,5 @@ IF (WIN32)
 ADD_LIBRARY(${PLUGIN_NAME} SHARED ${TARGET_H} ${TARGET_SRC})
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ./build)
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${PARTIO_LIB} ${MAYA_LIBS} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${ZLIB} ${PARTIO_LIB} ${MAYA_LIBS} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
 

@@ -1,0 +1,502 @@
+// !$*UTF8*$!
+{
+	07B7ADC814FD44558CAEAF06 /* partview */ = {
+		activeExec = 0;
+		executables = (
+			7202CAD815337FAE003872D6 /* partview */,
+		);
+	};
+	132CF1AC5D3B40DE96935B15 /* teststr */ = {
+		activeExec = 0;
+		executables = (
+			7202CAE015337FAE003872D6 /* teststr */,
+		);
+	};
+	1530DA66F62547FBBBA81B27 /* partattr */ = {
+		activeExec = 0;
+		executables = (
+			7202CAD515337FAE003872D6 /* partattr */,
+		);
+	};
+	1D9EF199A9674BA0879F525C /* partio4Maya */ = {
+		activeExec = 0;
+	};
+	1EE8B9808F074253AACD546B /* ALL_BUILD */ = {
+		activeExec = 0;
+	};
+	246BF09AC59A40668FA4AE24 /* test */ = {
+		activeExec = 0;
+		executables = (
+			7202CADC15337FAE003872D6 /* test */,
+		);
+	};
+	3C149B2E80C744B38A0FE7EE /* testiterator */ = {
+		activeExec = 0;
+		executables = (
+			7202CADE15337FAE003872D6 /* testiterator */,
+		);
+	};
+	3F3FD82C8A9B492AB87CE898 /* partinfo */ = {
+		activeExec = 0;
+		executables = (
+			7202CAD715337FAE003872D6 /* partinfo */,
+		);
+	};
+	616B0001BDA64B8F902DCB9F /* makecircle */ = {
+		activeExec = 0;
+		executables = (
+			7202CADA15337FAE003872D6 /* makecircle */,
+		);
+	};
+	69E18F222DFB4597B1FCD208 /* ZERO_CHECK */ = {
+		activeExec = 0;
+	};
+	6CA89C43DAE84054B1F9260A /* partconv */ = {
+		activeExec = 0;
+		executables = (
+			7202CAD615337FAE003872D6 /* partconv */,
+		);
+	};
+	7202CAD515337FAE003872D6 /* partattr */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		dylibVariantSuffix = "";
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = partattr;
+		savedGlobals = {
+		};
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CAD615337FAE003872D6 /* partconv */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = partconv;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CAD715337FAE003872D6 /* partinfo */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = partinfo;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CAD815337FAE003872D6 /* partview */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = partview;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CAD915337FAE003872D6 /* _partio */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = _partio;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CADA15337FAE003872D6 /* makecircle */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = makecircle;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CADB15337FAE003872D6 /* makeline */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = makeline;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CADC15337FAE003872D6 /* test */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = test;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CADD15337FAE003872D6 /* testcache */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testcache;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CADE15337FAE003872D6 /* testiterator */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testiterator;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CADF15337FAE003872D6 /* testkdtree */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = testkdtree;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CAE015337FAE003872D6 /* teststr */ = {
+		isa = PBXExecutable;
+		activeArgIndices = (
+		);
+		argumentStrings = (
+		);
+		autoAttachOnCrash = 1;
+		breakpointsEnabled = 0;
+		configStateDict = {
+		};
+		customDataFormattersEnabled = 1;
+		dataTipCustomDataFormattersEnabled = 1;
+		dataTipShowTypeColumn = 1;
+		dataTipSortType = 0;
+		debuggerPlugin = GDBDebugging;
+		disassemblyDisplayState = 0;
+		enableDebugStr = 1;
+		environmentEntries = (
+		);
+		executableSystemSymbolLevel = 0;
+		executableUserSymbolLevel = 0;
+		libgmallocEnabled = 0;
+		name = teststr;
+		showTypeColumn = 0;
+		sourceDirectories = (
+		);
+	};
+	7202CAE715337FCD003872D6 /* Source Control */ = {
+		isa = PBXSourceControlManager;
+		fallbackIsa = XCSourceControlManager;
+		isSCMEnabled = 0;
+		scmConfiguration = {
+			repositoryNamesForRoots = {
+				"" = "";
+			};
+		};
+	};
+	7202CAE815337FCD003872D6 /* Code sense */ = {
+		isa = PBXCodeSenseManager;
+		indexTemplatePath = "";
+	};
+	ABFC65A518BA4422B3608464 /* testcache */ = {
+		activeExec = 0;
+		executables = (
+			7202CADD15337FAE003872D6 /* testcache */,
+		);
+	};
+	B09B845EAFEA488D9D52FCC9 /* install */ = {
+		activeExec = 0;
+	};
+	B1A684B4A0C1407283A05F4C /* testkdtree */ = {
+		activeExec = 0;
+		executables = (
+			7202CADF15337FAE003872D6 /* testkdtree */,
+		);
+	};
+	C4E07CC132A84BF6A2213446 /* _partio */ = {
+		activeExec = 0;
+		executables = (
+			7202CAD915337FAE003872D6 /* _partio */,
+		);
+	};
+	E5CDA9A32926467EA86EA06F /* makeline */ = {
+		activeExec = 0;
+		executables = (
+			7202CADB15337FAE003872D6 /* makeline */,
+		);
+	};
+	ED2663176393407C90C0B7F4 /* partio */ = {
+		activeExec = 0;
+	};
+	FA65FA6C479D485DB717A67E /* Project object */ = {
+		activeBuildConfigurationName = Release;
+		activeExecutable = 7202CAD515337FAE003872D6 /* partattr */;
+		activeTarget = 1EE8B9808F074253AACD546B /* ALL_BUILD */;
+		codeSenseManager = 7202CAE815337FCD003872D6 /* Code sense */;
+		executables = (
+			7202CAD515337FAE003872D6 /* partattr */,
+			7202CAD615337FAE003872D6 /* partconv */,
+			7202CAD715337FAE003872D6 /* partinfo */,
+			7202CAD815337FAE003872D6 /* partview */,
+			7202CAD915337FAE003872D6 /* _partio */,
+			7202CADA15337FAE003872D6 /* makecircle */,
+			7202CADB15337FAE003872D6 /* makeline */,
+			7202CADC15337FAE003872D6 /* test */,
+			7202CADD15337FAE003872D6 /* testcache */,
+			7202CADE15337FAE003872D6 /* testiterator */,
+			7202CADF15337FAE003872D6 /* testkdtree */,
+			7202CAE015337FAE003872D6 /* teststr */,
+		);
+		perUserDictionary = {
+			PBXConfiguration.PBXFileTableDataSource3.PBXFileTableDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					861,
+					20,
+					48.16259765625,
+					43,
+					43,
+					20,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+					PBXFileDataSource_Target_ColumnID,
+				);
+			};
+			PBXConfiguration.PBXTargetDataSource.PBXTargetDataSource = {
+				PBXFileTableDataSourceColumnSortingDirectionKey = "-1";
+				PBXFileTableDataSourceColumnSortingKey = PBXFileDataSource_Filename_ColumnID;
+				PBXFileTableDataSourceColumnWidthsKey = (
+					20,
+					732,
+					60,
+					20,
+					48,
+					43,
+					43,
+				);
+				PBXFileTableDataSourceColumnsKey = (
+					PBXFileDataSource_FiletypeID,
+					PBXFileDataSource_Filename_ColumnID,
+					PBXTargetDataSource_PrimaryAttribute,
+					PBXFileDataSource_Built_ColumnID,
+					PBXFileDataSource_ObjectSize_ColumnID,
+					PBXFileDataSource_Errors_ColumnID,
+					PBXFileDataSource_Warnings_ColumnID,
+				);
+			};
+			PBXPerProjectTemplateStateSaveDate = 355703782;
+			PBXWorkspaceStateSaveDate = 355703782;
+		};
+		sourceControlManager = 7202CAE715337FCD003872D6 /* Source Control */;
+		userBuildSettings = {
+		};
+	};
+}
