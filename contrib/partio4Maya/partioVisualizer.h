@@ -46,7 +46,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MSceneMessage.h>
 #include <vector>
 
-#include "Partio.h"
+#include <Partio.h>
+#include <PartioAttribute.h>
+#include <PartioIterator.h>
 
 
 class partioVisualizer : public MPxLocatorNode
@@ -127,7 +129,7 @@ private:
 	float multiplier;
 	bool  frameChanged;
 
-	Partio::ParticlesData* particles;
+	Partio::ParticlesDataMutable* particles;
 	Partio::ParticleAttribute positionAttr;
 	Partio::ParticleAttribute colorAttr;
 	Partio::ParticleAttribute opacityAttr;
