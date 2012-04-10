@@ -45,9 +45,12 @@ MStatus initializePlugin ( MObject obj )
 	MStatus status;
 	MFnPlugin plugin ( obj, "Luma Pictures,RedpawFX,WDAS", "0.9.1a", "Any" );
 
-	status = plugin.registerNode ( "partioVisualizer", partioVisualizer::id,
-	                               &partioVisualizer::creator, &partioVisualizer::initialize,
-	                               MPxNode::kLocatorNode );
+	status = plugin.registerShape( "partioVisualizer", partioVisualizer::id,
+									&partioVisualizer::creator,
+									&partioVisualizer::initialize,
+									&partioVisualizerUI::creator);
+
+
 	if ( !status )
 	{
 		status.perror ( "registerNode partioVisualizer failed" );

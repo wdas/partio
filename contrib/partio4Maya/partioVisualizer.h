@@ -41,9 +41,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MTypeId.h>
 #include <maya/MStatus.h>
 #include <maya/MVector.h>
-#include <maya/MPxLocatorNode.h>
+#include <maya/MPxSurfaceShape.h>
+#include <maya/MPxSurfaceShapeUI.h>
 #include <maya/M3dView.h>
 #include <maya/MSceneMessage.h>
+#include <maya/MDrawData.h>
 #include <vector>
 
 #include <Partio.h>
@@ -51,7 +53,38 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <PartioIterator.h>
 
 
-class partioVisualizer : public MPxLocatorNode
+class partioVisualizerUI : public MPxSurfaceShapeUI
+{
+public:
+
+    partioVisualizerUI();
+    virtual ~partioVisualizerUI();
+	//virtual void draw( M3dView & view, const MDagPath & path,
+	//							  M3dView::DisplayStyle style,
+	//							  M3dView::DisplayStatus status );
+	virtual void draw(const MDrawRequest & request, M3dView & view);
+	virtual void getDrawRequests(const MDrawInfo & info,
+			bool objectAndActiveOnly, MDrawRequestQueue & requests);
+
+	void drawBoundingBox();
+	void drawPartio(int drawStyle);
+
+	bool GetPlugData();
+
+	static void * creator();
+
+
+protected:
+
+	float xMin, xMax, yMin, yMax, zMin, zMax;
+	int dUpdate;
+	GLuint dList;
+
+};
+
+
+
+class partioVisualizer : public MPxSurfaceShape
 {
 public:
 	partioVisualizer();
@@ -60,9 +93,10 @@ public:
     virtual MStatus   		compute( const MPlug& plug, MDataBlock& block );
 
 
-	virtual void            draw( M3dView & view, const MDagPath & path,
-								  M3dView::DisplayStyle style,
-								  M3dView::DisplayStatus status );
+	//virtual void            draw( M3dView & view, const MDagPath & path,
+	//							  M3dView::DisplayStyle style,
+	//							  M3dView::DisplayStatus status );
+
 
 	virtual bool            isBounded() const;
 	virtual MBoundingBox    boundingBox() const;
@@ -72,6 +106,7 @@ public:
 	static void 			reInit(void *data);
 	void 					initCallback();
 	virtual void 			postConstructor();
+
 
 	static MObject  time;
 	static MObject  aSize;         // The size of the logo
@@ -103,14 +138,23 @@ public:
 	static MObject  aRenderCachePath;
 
 
+	//void drawBoundingBox();
+	//void drawPartio(int drawStyle);
 
-	bool GetPlugData();
-
-	void drawBoundingBox();
-	void drawPartio(int drawStyle);
 
 public:
 	static	MTypeId		id;
+	float multiplier;
+	MBoundingBox bbox;
+	bool cacheChanged;
+	Partio::ParticlesDataMutable* particles;
+	Partio::ParticleAttribute positionAttr;
+	Partio::ParticleAttribute colorAttr;
+	Partio::ParticleAttribute opacityAttr;
+	float* rgb;
+	float* rgba;
+	float* flipPos;
+
 
 private:
 	MString mLastFileLoaded;
@@ -124,27 +168,13 @@ private:
 	float mLastAlpha;
 	bool mLastInvertAlpha;
 	bool mLastFlipStatus;
-	bool cacheChanged;
 	bool mFlipped;
-	float multiplier;
 	bool  frameChanged;
 
-	Partio::ParticlesDataMutable* particles;
-	Partio::ParticleAttribute positionAttr;
-	Partio::ParticleAttribute colorAttr;
-	Partio::ParticleAttribute opacityAttr;
-	float* rgb;
-	float* rgba;
-	float* flipPos;
 
-	MBoundingBox bbox;
+
 	MStringArray attributeList;
 
-protected:
 
-	float xMin, xMax, yMin, yMax, zMin, zMax;
-
-	int dUpdate;
-	GLuint dList;
 };
 

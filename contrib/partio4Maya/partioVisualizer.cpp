@@ -43,7 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MString.h>
 #include <maya/MTypes.h>
 
-#include <maya/MPxLocatorNode.h>
+#include <maya/MPxSurfaceShape.h>
+#include <maya/MPxNode.h>
 #include <maya/MTypeId.h>
 #include <maya/MPlug.h>
 #include <maya/MVector.h>
@@ -126,8 +127,10 @@ partioVisualizer::partioVisualizer()
 	mLastRadiusFromIndex(-1),
 	mLastColor(1,0,0),
 	cacheChanged(false),
-	multiplier(1.0)
+	multiplier(1.0),
+	bbox(MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0)))
 {
+	cout << "creator" << endl;
 	particles = NULL;
 	flipPos = (float *) malloc(sizeof(float));
 	rgb = (float *) malloc (sizeof(float));
@@ -137,6 +140,8 @@ partioVisualizer::partioVisualizer()
 /// DESTRUCTOR
 partioVisualizer::~partioVisualizer()
 {
+	cout << "destructor" << endl;
+
 	if (particles)
 	{
 		particles->release();
@@ -147,10 +152,12 @@ partioVisualizer::~partioVisualizer()
 	MSceneMessage::removeCallback( partioVisualizerOpenCallback);
     MSceneMessage::removeCallback( partioVisualizerImportCallback);
     MSceneMessage::removeCallback( partioVisualizerReferenceCallback);
+
 }
 
 void* partioVisualizer::creator()
 {
+	cout << "creator1" << endl;
 	return new partioVisualizer();
 }
 
@@ -158,9 +165,13 @@ void* partioVisualizer::creator()
 void partioVisualizer::postConstructor()
 {
 
+	cout << "postConstructor" << endl;
+	setRenderable(true);
 	partioVisualizerOpenCallback = MSceneMessage::addCallback(MSceneMessage::kAfterOpen, partioVisualizer::reInit, this);
     partioVisualizerImportCallback = MSceneMessage::addCallback(MSceneMessage::kAfterImport, partioVisualizer::reInit, this);
     partioVisualizerReferenceCallback = MSceneMessage::addCallback(MSceneMessage::kAfterReference, partioVisualizer::reInit, this);
+
+
 }
 
 ///////////////////////////////////
@@ -169,6 +180,8 @@ void partioVisualizer::postConstructor()
 
 void partioVisualizer::initCallback()
 {
+
+	cout << "init callback" << endl;
     MObject tmo = thisMObject();
 
     short extENum;
@@ -186,18 +199,25 @@ void partioVisualizer::initCallback()
 	MPlug(tmo,aInvertAlpha).getValue(mLastInvertAlpha);
 	cacheChanged = false;
 
+
+
 }
 
 void partioVisualizer::reInit(void *data)
 {
+
+	cout << "re-init" << endl;
     partioVisualizer  *vizNode = (partioVisualizer*) data;
     vizNode->initCallback();
+
+
 }
 
 
 MStatus partioVisualizer::initialize()
 {
 
+	cout << "startInit" << endl;
 	MFnEnumAttribute eAttr;
 	MFnUnitAttribute uAttr;
 	MFnNumericAttribute nAttr;
@@ -364,7 +384,7 @@ MStatus partioVisualizer::initialize()
 	attributeAffects ( aForceReload, aUpdateCache );
 	attributeAffects (time, aUpdateCache);
 
-
+	cout << "endInit" << endl;
 	return MS::kSuccess;
 }
 
@@ -374,6 +394,7 @@ MStatus partioVisualizer::initialize()
 MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 {
 
+	cout << "compute" << endl;
 	bool cacheActive = block.inputValue(aCacheActive).asBool();
 	int colorFromIndex  = block.inputValue( aColorFrom ).asInt();
 	int opacityFromIndex= block.inputValue( aAlphaFrom ).asInt();
@@ -386,11 +407,13 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
     //
     if (plug != aUpdateCache)
 	{
+		cout << "outearly" << endl;
         return ( MS::kUnknownParameter );
 	}
 
 	else
 	{
+		cout << "cacheCompute"<< endl;
 		MStatus stat;
 
 		MString cacheDir = block.inputValue(aCacheDir).asString();
@@ -398,6 +421,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 		if (cacheDir  == "" || cachePrefix == "" )
 		{
+			cout << "no cache" << endl;
 			MGlobal::displayError("PartioEmitter->Error: Please specify cache file!");
 			return ( MS::kFailure );
 		}
@@ -730,25 +754,33 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 		}
 	}
+	cout << " compute end" << endl;
+
+
 	return MS::kSuccess;
 }
 
-void partioVisualizer::draw( M3dView & view, const MDagPath & /*path*/,
-							 M3dView::DisplayStyle style,
-							 M3dView::DisplayStatus status )
+void partioVisualizerUI::draw( const MDrawRequest & request, M3dView & view )
+//void ( M3dView & view, const MDagPath & /*path*/,
+//							 M3dView::DisplayStyle style,
+//							 M3dView::DisplayStatus status )
 {
+	MDrawData data = request.drawData();
+	cout << "draw start" << endl;
+
+	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
 
 	bool updateDList = GetPlugData();
 
-	MObject thisNode = thisMObject();
-	MPlug sizePlug( thisNode, aSize );
+	MObject thisNode = shapeNode->thisMObject();
+	MPlug sizePlug( thisNode, shapeNode->aSize );
 	MDistance sizeVal;
 	sizePlug.getValue( sizeVal );
 
-	multiplier = (float) sizeVal.asCentimeters();
+	shapeNode->multiplier= (float) sizeVal.asCentimeters();
 
 	int drawStyle = 0;
-	MPlug drawStylePlug( thisNode, aDrawStyle );
+	MPlug drawStylePlug( thisNode, shapeNode->aDrawStyle );
 	drawStylePlug.getValue( drawStyle );
 
 	view.beginGL();
@@ -763,7 +795,7 @@ void partioVisualizer::draw( M3dView & view, const MDagPath & /*path*/,
 		glEndList();
 	}
 
-	if (drawStyle < 3 && style != M3dView::kBoundingBox)
+	if (drawStyle < 3 )
 	{
 		drawPartio(drawStyle);
 	}
@@ -772,12 +804,16 @@ void partioVisualizer::draw( M3dView & view, const MDagPath & /*path*/,
 		drawBoundingBox();
 	}
 
+
 	//glCallList(dList); ??? not sure we need this ?
 	//cout <<"glCallList" <<  glGetError() << endl;
 
-	partio4Maya::drawPartioLogo(multiplier);
+	partio4Maya::drawPartioLogo(shapeNode->multiplier);
 
 	view.endGL();
+	cout << "draw end" << endl;
+
+
 }
 
 
@@ -785,10 +821,15 @@ void partioVisualizer::draw( M3dView & view, const MDagPath & /*path*/,
 //////////////////////////////////////////////////////////////////
 ////  getPlugData is a util to update the drawing of the UI stuff
 
-bool partioVisualizer::GetPlugData() {
+bool partioVisualizerUI::GetPlugData()
+{
+	cout << "get plug data" << endl;
+
 	MStatus stat;
 
-	MObject thisNode = thisMObject();
+	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
+
+	MObject thisNode = shapeNode->thisMObject();
 
 	int update = 0;
 
@@ -801,15 +842,23 @@ bool partioVisualizer::GetPlugData() {
 		return false;
 	}
 
+
+	return false;
+
 }
 
 
 ////////////////////////////////////////////
 /// DRAW Bounding box
-void  partioVisualizer::drawBoundingBox()
+void  partioVisualizerUI::drawBoundingBox()
 {
-	MPoint  bboxMin = bbox.min();
-	MPoint  bboxMax = bbox.max();
+	cout << "Draw boundingBox" << endl;
+
+	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
+
+
+	MPoint  bboxMin = shapeNode->bbox.min();
+	MPoint  bboxMax = shapeNode->bbox.max();
 	xMin = float(bboxMin.x);
 	yMin = float(bboxMin.y);
 	zMin = float(bboxMin.z);
@@ -860,44 +909,50 @@ void  partioVisualizer::drawBoundingBox()
 	glVertex3f (xMax,yMin,zMax);
 
 	glEnd();
+
+
 }
 
 
 ////////////////////////////////////////////
 /// DRAW PARTIO
 
-void partioVisualizer::drawPartio(int drawStyle)
+void partioVisualizerUI::drawPartio(int drawStyle)
 {
-	MObject thisNode = thisMObject();
-	MPlug drawSkipPlug( thisNode, aDrawSkip );
+	cout << "Draw partio" << endl;
+
+	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
+
+	MObject thisNode = shapeNode->thisMObject();
+	MPlug drawSkipPlug( thisNode, shapeNode->aDrawSkip );
 	int drawSkipVal;
 	drawSkipPlug.getValue( drawSkipVal );
 
-	MPlug flipYZPlug( thisNode, aFlipYZ );
+	MPlug flipYZPlug( thisNode, shapeNode->aFlipYZ );
 	bool flipYZVal;
 	flipYZPlug.getValue( flipYZVal );
 
 	int stride =  3*sizeof(float)*(drawSkipVal);
 
 
-	MPlug pointSizePlug( thisNode, aPointSize );
+	MPlug pointSizePlug( thisNode, shapeNode->aPointSize );
 	float pointSizeVal;
 	pointSizePlug.getValue( pointSizeVal );
 
-	MPlug colorFromPlug( thisNode, aColorFrom);
+	MPlug colorFromPlug( thisNode, shapeNode->aColorFrom);
 	int colorFromVal;
 	colorFromPlug.getValue( colorFromVal );
 
-	MPlug alphaFromPlug( thisNode, aAlphaFrom);
+	MPlug alphaFromPlug( thisNode, shapeNode->aAlphaFrom);
 	int alphaFromVal;
 	alphaFromPlug.getValue( alphaFromVal );
 
-	MPlug defaultAlphaPlug( thisNode, aDefaultAlpha);
+	MPlug defaultAlphaPlug( thisNode, shapeNode->aDefaultAlpha);
 	float defaultAlphaVal;
 	defaultAlphaPlug.getValue( defaultAlphaVal );
 
 
-	if (particles)
+	if (shapeNode->particles)
 	{
 
 		struct Point { float p[3]; };
@@ -928,21 +983,21 @@ void partioVisualizer::drawPartio(int drawStyle)
 		// pointer copy  way  after everything is settled down a bit for main interaction.   It is a significant  improvement on large
 		// datasets in user interactivity speed to use pointers
 
-		if(!cacheChanged)
+		if(!shapeNode->cacheChanged)
 		{
 			glEnableClientState( GL_VERTEX_ARRAY );
 			glEnableClientState( GL_COLOR_ARRAY );
 
 			glPointSize(pointSizeVal);
-			if (particles->numParticles() > 0)
+			if (shapeNode->particles->numParticles() > 0)
 			{
 				// now setup the position/color/alpha output pointers
 
-				const float * partioPositions = particles->data<float>(positionAttr,0);
+				const float * partioPositions = shapeNode->particles->data<float>(shapeNode->positionAttr,0);
 
 				if(flipYZVal)
 				{
-					glVertexPointer( 3, GL_FLOAT, stride, flipPos );
+					glVertexPointer( 3, GL_FLOAT, stride, shapeNode->flipPos );
 				}
 				else
 				{
@@ -951,13 +1006,13 @@ void partioVisualizer::drawPartio(int drawStyle)
 
 				if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
 				{
-					glColorPointer(  4, GL_FLOAT, stride, rgba );
+					glColorPointer(  4, GL_FLOAT, stride, shapeNode->rgba );
 				}
 				else
 				{
-					glColorPointer(  3, GL_FLOAT, stride, rgb );
+					glColorPointer(  3, GL_FLOAT, stride, shapeNode->rgb );
 				}
-				glDrawArrays( GL_POINTS, 0, (particles->numParticles()/(drawSkipVal+1)) );
+				glDrawArrays( GL_POINTS, 0, (shapeNode->particles->numParticles()/(drawSkipVal+1)) );
 			}
 			glDisableClientState( GL_VERTEX_ARRAY );
 			glDisableClientState( GL_COLOR_ARRAY );
@@ -972,23 +1027,23 @@ void partioVisualizer::drawPartio(int drawStyle)
 
 			glBegin(GL_POINTS);
 
-			for (int i=0;i<particles->numParticles();i++)
+			for (int i=0;i<shapeNode->particles->numParticles();i++)
 			{
 				if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
 				{
-					glColor4f(rgb[i*3],rgb[(i*3)+1],rgb[(i*3)+2], rgba[(i*4)+3] );
+					glColor4f(shapeNode->rgb[i*3],shapeNode->rgb[(i*3)+1],shapeNode->rgb[(i*3)+2], shapeNode->rgba[(i*4)+3] );
 				}
 				else
 				{
-					glColor3f(rgb[i*3],rgb[(i*3)+1],rgb[(i*3)+2]);
+					glColor3f(shapeNode->rgb[i*3],shapeNode->rgb[(i*3)+1],shapeNode->rgb[(i*3)+2]);
 				}
 				if (flipYZVal)
 				{
-					glVertex3f(flipPos[0], flipPos[1], flipPos[2]);
+					glVertex3f(shapeNode->flipPos[0], shapeNode->flipPos[1], shapeNode->flipPos[2]);
 				}
 				else
 				{
-					const float * partioPositions = particles->data<float>(positionAttr,i);
+					const float * partioPositions = shapeNode->particles->data<float>(shapeNode->positionAttr,i);
 					glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
 				}
 			}
@@ -997,22 +1052,66 @@ void partioVisualizer::drawPartio(int drawStyle)
 
 		}
 	} // if (particles)
+
+
 }
+
 
 /////////////////////////////////////////////////////
 /// procs to override bounding box mode...
 bool partioVisualizer::isBounded() const
 {
+	cout << "isbounded" << endl;
     return true;
 }
 
 MBoundingBox partioVisualizer::boundingBox() const
 {
+	cout << "boundingBox" << endl;
 	MPoint corner1 = bbox.min();
 	MPoint corner2 = bbox.max();
-
 	return MBoundingBox( corner1, corner2 );
 }
+
+
+
+partioVisualizerUI::partioVisualizerUI()
+{
+}
+partioVisualizerUI::~partioVisualizerUI()
+{
+}
+
+void* partioVisualizerUI::creator()
+{
+	return new partioVisualizerUI();
+}
+
+
+void partioVisualizerUI::getDrawRequests(const MDrawInfo & info,
+		bool /*objectAndActiveOnly*/, MDrawRequestQueue & queue)
+{
+	cout << "get draw requests" << endl;
+	// The draw data is used to pass geometry through the
+	// draw queue. The data should hold all the information
+	// needed to draw the shape.
+	//
+
+	MVectorArray* geomPtr;
+	geomPtr->setLength(1);
+	//geomPtr->append(MVector(0,0,0));
+
+	MDrawData data;
+    MDrawRequest request = info.getPrototype( *this );
+
+    // Stuff our data into the draw request, it'll be used when the drawing
+    // actually happens
+	getDrawData( geomPtr, data );
+    request.setDrawData( data );
+	queue.add(request);
+
+}
+
 
 
 
