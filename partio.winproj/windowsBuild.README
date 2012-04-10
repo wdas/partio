@@ -1,0 +1,19 @@
+When Cmake-ing for windows...
+
+point the  "Where is the source code"  directory path to the top level 
+partio directory that contains the first  CMakeLists.txt file 
+
+point "where to build the binaries"  at this  partio.winproj folder 
+to keep the code source tree clean
+
+unrar the  3 winReqLibs archives in place and hopefully cmake will find everything. 
+
+if you have any problems: 
+post general issues for partio / building etc.  at:
+
+https://github.com/wdas/partio/issues
+
+and issues regarding partio4Maya at:
+
+https://github.com/redpawfx/partio/issues
+
