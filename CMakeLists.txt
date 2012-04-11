@@ -45,6 +45,22 @@ SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
 ## Use verbose make file
 SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
 
+
+## Choose build options
+# Disney specific method of choosing variant
+IF("$ENV{FLAVOR}" STREQUAL "optimize")
+    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "type of build" FORCE)
+ENDIF("$ENV{FLAVOR}" STREQUAL "optimize")
+IF("$ENV{FLAVOR}" STREQUAL "debug")
+    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
+ENDIF("$ENV{FLAVOR}" STREQUAL "debug")
+# Set to release if nothing else defined
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE "Release" CACHE STRING
+      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
+      FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
 ## project name & version
 PROJECT( partio )
 SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
@@ -57,6 +73,7 @@ SET( PARTIO_HOME "L:/partio" )
 # output executable and library path
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
 SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+SET(INCLUDE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/include)
 
 ## Setup platform specific helper defines build variants
 IF(WIN32)
@@ -78,20 +95,6 @@ ELSE(WIN32)
 	SET( CMAKE_CXX_FLAGS "-fPIC")
 ENDIF(WIN32)
 
-## Choose build options
-# Disney specific method of choosing variant
-IF("$ENV{FLAVOR}" STREQUAL "optimize")
-    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "type of build" FORCE)
-ENDIF("$ENV{FLAVOR}" STREQUAL "optimize")
-IF("$ENV{FLAVOR}" STREQUAL "debug")
-    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
-ENDIF("$ENV{FLAVOR}" STREQUAL "debug")
-# Set to release if nothing else defined
-IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE "Release" CACHE STRING
-      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
-      FORCE)
-ENDIF(NOT CMAKE_BUILD_TYPE)
 
 ## Set install location
 EXECUTE_PROCESS(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -127,6 +130,16 @@ ENDIF(ZLIB_FOUND)
 SET( PARTIO_LIBRARIES freeglut zlib partio )
 # make it so partio can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/lib )
+
+# install partio headers for use by other programs
+install(
+	FILES
+	${CMAKE_SOURCE_DIR}/src/lib/PartioAttribute.h
+	${CMAKE_SOURCE_DIR}/src/lib/Partio.h
+	${CMAKE_SOURCE_DIR}/src/lib/PartioIterator.h
+	DESTINATION ${INCLUDE_OUTPUT_PATH}
+	)
+
 
 ## Traverse subdirectories
 ADD_SUBDIRECTORY (src/lib)
