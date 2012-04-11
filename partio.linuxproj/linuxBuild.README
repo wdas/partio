@@ -1,0 +1,70 @@
+CMAKE BUILD INSTRUCTIONS FOR LINUX:
+
+package requirements: 
+you will need the runtime and development libs for the following: 
+
+(versions may vary by installation,  the defaults for fedora 15/16 seem to work for us) 
+cmake
+zlib
+glut
+openGL
+Swig (for python bindings) 
+
+//////////////////
+Using the  GUI: 
+
+point the  "Where is the source code"  directory path to the top level 
+partio directory that contains the first  CMakeLists.txt file 
+
+point "where to build the binaries"  at this  partio.linuxproj folder 
+to keep the code source tree clean
+
+run Configure,  once  to parse the  CMakeLists files to gather everything.
+Most likely you will want to create default UNIX MAKEFILES  unless  you are  using  a specific dev environment 
+
+If you get any errors or warnings saying things are missing,  edit the appropriate CMakeLists.txt files  to fix the problems and re-run configure 
+Hit configure again to accept everything and then,
+
+Hit generate.  
+
+This will create  all the make files for you.  
+
+/////////////////
+FROM A SHELL: 
+
+navigate to the  partio.linuxproj folder, cmake-ing in a subFolder will keep the source tree clean. 
+
+type:  cmake  UNIX MAKEFILES  ../   
+
+you may also substitute :
+  Unix Makefiles              = Generates standard UNIX makefiles.
+  CodeBlocks - Unix Makefiles = Generates CodeBlocks project files.
+  Eclipse CDT4 - Unix Makefiles
+                              = Generates Eclipse CDT 4.0 project files.
+  KDevelop3                   = Generates KDevelop 3 project files.
+  KDevelop3 - Unix Makefiles  = Generates KDevelop 3 project files.
+
+
+If you get any errors or warnings saying things are missing,  edit the appropriate CMakeLists.txt files  to fix the problems and re-run cmake command 
+
+This will create  all the make/build files for you.  
+
+///////////////////////
+MAKING THE PROJECT
+
+in a shell,  go to the   partio.linuxproj folder  and type  "make" 
+
+If everything goes well   it should make it all the way thru the build process. 
+
+then type make install  and the install builder will finish putting things at the top level partio dir from the build process.
+(the install process is a work in progress) 
+
+if you have any problems: 
+post general issues for partio / building etc.  at:
+
+https://github.com/wdas/partio/issues
+
+and issues regarding partio4Maya at:
+
+https://github.com/redpawfx/partio/issues
+
