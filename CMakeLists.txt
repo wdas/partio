@@ -86,15 +86,14 @@ IF(WIN32)
 	SET( GLUT_INCLUDE_DIR "${PARTIO_HOME}/winReqLibs/freeglut-2.8.0-1/include")
 	SET( GLUT_LIBRARY_DIR "${PARTIO_HOME}/winReqLibs/freeglut-2.8.0-1/lib/x64")
 	SET( SWIG_EXECUTABLE "${PARTIO_HOME}/winReqLibs/swigwin-2.0.4/swig.exe")
-	
-	# we want to push the partio lib up to the main dir
-	SET( LIBRARY_OUTPUT_PATH "${PARTIO_HOME}/lib")
 
 ELSE(WIN32)
 	ADD_DEFINITIONS (-Wextra -Wno-unused-parameter)
 	SET( CMAKE_CXX_FLAGS "-fPIC")
 ENDIF(WIN32)
 
+# we want to push the partio lib up to the main dir
+	SET( LIBRARY_OUTPUT_PATH "${PARTIO_HOME}/lib")
 
 ## Set install location
 EXECUTE_PROCESS(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -130,7 +129,7 @@ ENDIF(ZLIB_FOUND)
 IF (WIN32)
 	SET( PARTIO_LIBRARIES freeglut zlib partio )
 ELSEIF(APPLE)
-	SET( PARTIO_LIBRARIES freeglut zlib partio ) 
+	SET( PARTIO_LIBRARIES ${ZLIB_LIBRARY} partio ) 
 ELSEIF (UNIX)
 	SET( PARTIO_LIBRARIES glut z partio )
 ENDIF()

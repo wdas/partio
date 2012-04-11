@@ -30,12 +30,12 @@ SET(MAYA_VERSION_2012 TRUE)
 ## add one to this list to match your install if none match
 
 IF(APPLE)
-  FIND_PATH(MAYA_BASE_DIR include/maya/MFn.h PATH
+  FIND_PATH(MAYA_BASE_DIR Maya.app PATH
   	ENV MAYA_LOCATION
-  	"/Applications/Autodesk/maya2012.17/Maya.app/Contents"
-  	"/Applications/Autodesk/maya2012/Maya.app/Contents"
-  	"/Applications/Autodesk/maya2011/Maya.app/Contents"
-  	"/Applications/Autodesk/maya2010/Maya.app/Contents"
+  	"/Applications/Autodesk/maya2012.17"
+  	"/Applications/Autodesk/maya2012"
+  	"/Applications/Autodesk/maya2011"
+  	"/Applications/Autodesk/maya2010"
   	)
   FIND_PATH(MAYA_LIBRARY_DIR libOpenMaya.dylib
     PATHS
@@ -96,20 +96,12 @@ FIND_PATH(MAYA_INCLUDE_DIR maya/MFn.h
     ENV MAYA_LOCATION
     ${MAYA_BASE_DIR}
   PATH_SUFFIXES
-	../../devkit/include/
+	devkit/include/
 	include/
-  DOC "Maya's devkit headers path"
+  DOC "Maya's Include headers path"
 )
 
-FIND_PATH(MAYA_LIBRARY_DIR OpenMaya
-  PATHS
-    ENV MAYA_LOCATION
-    ${MAYA_BASE_DIR}
-  PATH_SUFFIXES
-	../../devkit/include/
-	include/
-  DOC "Maya's devkit headers path"
-)
+
 
 LIST(APPEND MAYA_INCLUDE_DIRS ${MAYA_INCLUDE_DIR})
 
@@ -118,7 +110,7 @@ FIND_PATH(MAYA_DEVKIT_INC_DIR GL/glext.h
     ENV MAYA_LOCATION
     ${MAYA_BASE_DIR}
   PATH_SUFFIXES
-	/devkit/plug-ins/
+	devkit/plug-ins/
   DOC "Maya's devkit headers path"
 )
 LIST(APPEND MAYA_INCLUDE_DIRS ${MAYA_DEVKIT_INC_DIR})
@@ -141,7 +133,7 @@ FOREACH(MAYA_LIB
       ENV MAYA_LOCATION
       ${MAYA_BASE_DIR}
     PATH_SUFFIXES
-      	MacOS/
+    Maya.app/contents/MacOS/
 	lib/
     DOC "Maya's ${MAYA_LIB} library path"
   )
@@ -154,7 +146,7 @@ FIND_PROGRAM(MAYA_EXECUTABLE Maya
     ENV MAYA_LOCATION
     ${MAYA_BASE_DIR}
   PATH_SUFFIXES
-    	MacOS/
+    MacOS/
 	bin/
   DOC "Maya's executable path"
 )

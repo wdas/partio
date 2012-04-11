@@ -95,6 +95,8 @@ SET(MAYA_LIBS OpenMaya Foundation OpenMayaAnim OpenMayaFX OpenMayaUI OpenMayaRen
 
 IF (WIN32)
 	SET(PARTIO_LIB  partio)
+elseif(APPLE)
+	SET(PARTIO_LIB  libpartio.a)
 elseif(LINUX)
 	SET(PARTIO_LIB  libpartio.a)
 ENDIF()
