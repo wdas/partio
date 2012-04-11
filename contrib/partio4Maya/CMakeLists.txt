@@ -53,13 +53,13 @@ find_package(MAYA)
 
 ## if building from the default partio contrib dir you can leave this alone
 SET (PARTIO_INCLUDE "../../include" )
-SET (PARTIO_LIB   "../../lib")
+SET (PARTIO_LIBDIR   "../../lib")
 
 set (STD_INCLUDES "." ".." "/usr/X11R6/include" "/usr/include" "/usr/include/CC")
 set (STD_LIB "/usr/lib/")
 
 include_directories (${STD_INCLUDES} ${partio4MayaINCLUDES} ${MAYA_INCLUDE_DIRS} ${PARTIO_INCLUDE})
-link_directories  ( ${STD_LIB} ${MAYA_LIBRARY_DIR} ${PARTIO_LIB} ${ZLIB_LIBRARY_DIR})
+link_directories  ( ${STD_LIB} ${MAYA_LIBRARY_DIR} ${PARTIO_LIBDIR} ${ZLIB_LIBRARY_DIR})
 
 add_definitions(-D_BOOL)
 add_definitions(-DREQUIRE_IOSTREAM)
@@ -88,14 +88,14 @@ elseif(WIN32)
 else()
 	SET(OPENGL_gl_LIBRARY "GL")
 	SET(OPENGL_glu_LIBRARY "GLU")
-	SET(ZLIB "zlib")
+	SET(ZLIB "z")
 endif()
 
 SET(MAYA_LIBS OpenMaya Foundation OpenMayaAnim OpenMayaFX OpenMayaUI OpenMayaRender)
 
 IF (WIN32)
 	SET(PARTIO_LIB  partio)
-ELSE()
+elseif(LINUX)
 	SET(PARTIO_LIB  libpartio.a)
 ENDIF()
 
