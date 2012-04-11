@@ -93,7 +93,7 @@ ELSE(WIN32)
 ENDIF(WIN32)
 
 # we want to push the partio lib up to the main dir
-	SET( LIBRARY_OUTPUT_PATH "${PARTIO_HOME}/lib")
+	SET( LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/lib")
 
 ## Set install location
 EXECUTE_PROCESS(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
