@@ -38,5 +38,6 @@
 *.build
 ._*
 CMakeScripts
+CMakeFiles
 partio.build
 
