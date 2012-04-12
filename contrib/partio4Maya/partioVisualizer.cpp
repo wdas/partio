@@ -394,6 +394,7 @@ MStatus partioVisualizer::initialize()
 MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 {
 
+	cout << plug.name() << endl;
 	cout << "compute" << endl;
 	bool cacheActive = block.inputValue(aCacheActive).asBool();
 	int colorFromIndex  = block.inputValue( aColorFrom ).asInt();
@@ -770,7 +771,7 @@ void partioVisualizerUI::draw( const MDrawRequest & request, M3dView & view )
 
 	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
 
-	bool updateDList = GetPlugData();
+	//bool updateDList = GetPlugData();
 
 	MObject thisNode = shapeNode->thisMObject();
 	MPlug sizePlug( thisNode, shapeNode->aSize );
@@ -785,6 +786,7 @@ void partioVisualizerUI::draw( const MDrawRequest & request, M3dView & view )
 
 	view.beginGL();
 
+	/*
 	if(updateDList)
 	{
 		if(dList == 0)
@@ -794,6 +796,8 @@ void partioVisualizerUI::draw( const MDrawRequest & request, M3dView & view )
 		glNewList(dList, GL_COMPILE);
 		glEndList();
 	}
+
+*/
 
 	if (drawStyle < 3 )
 	{
@@ -821,15 +825,13 @@ void partioVisualizerUI::draw( const MDrawRequest & request, M3dView & view )
 //////////////////////////////////////////////////////////////////
 ////  getPlugData is a util to update the drawing of the UI stuff
 
-bool partioVisualizerUI::GetPlugData()
+bool partioVisualizer::GetPlugData()
 {
 	cout << "get plug data" << endl;
 
 	MStatus stat;
 
-	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
-
-	MObject thisNode = shapeNode->thisMObject();
+	MObject thisNode = thisMObject();
 
 	int update = 0;
 
@@ -909,7 +911,6 @@ void  partioVisualizerUI::drawBoundingBox()
 	glVertex3f (xMax,yMin,zMax);
 
 	glEnd();
-
 
 }
 
@@ -1092,23 +1093,23 @@ void partioVisualizerUI::getDrawRequests(const MDrawInfo & info,
 		bool /*objectAndActiveOnly*/, MDrawRequestQueue & queue)
 {
 	cout << "get draw requests" << endl;
-	// The draw data is used to pass geometry through the
-	// draw queue. The data should hold all the information
-	// needed to draw the shape.
-	//
-
-	MVectorArray* geomPtr;
-	geomPtr->setLength(1);
-	//geomPtr->append(MVector(0,0,0));
 
 	MDrawData data;
+    partioVisualizer* shape = (partioVisualizer*) surfaceShape();
+
+	shape->GetPlugData();
+	Partio::ParticleAttribute* geomPtr = &shape->positionAttr;
+
+    // This call creates a prototype draw request that we can fill
+    // in and then add to the draw queue.
+    //
     MDrawRequest request = info.getPrototype( *this );
 
     // Stuff our data into the draw request, it'll be used when the drawing
     // actually happens
-	getDrawData( geomPtr, data );
+    getDrawData( geomPtr, data );
+
     request.setDrawData( data );
-	queue.add(request);
 
 }
 

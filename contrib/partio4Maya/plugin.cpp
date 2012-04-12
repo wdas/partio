@@ -31,7 +31,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partioEmitter.h"
 #include "partioExport.h"
 #include "partio4MayaShared.h"
+#include "mayaPartioReaderShape.h"
 #include <maya/MFnPlugin.h>
+
+
 
 MStatus initializePlugin ( MObject obj )
 {
@@ -56,6 +59,16 @@ MStatus initializePlugin ( MObject obj )
 		status.perror ( "registerNode partioVisualizer failed" );
 		return status;
 	}
+
+	status = plugin.registerShape("mayaPartioReaderShape",
+			mayaPartioReaderShape::id, &mayaPartioReaderShape::creator,
+			&mayaPartioReaderShape::initialize, &CPartioReaderUI::creator);
+	if (!status)
+	{
+		status.perror("registerNode");
+		return status;
+	}
+
 	status = plugin.registerNode ( "partioEmitter", partioEmitter::id,
 	                               &partioEmitter::creator, &partioEmitter::initialize,
 	                               MPxNode::kEmitterNode );
@@ -82,6 +95,11 @@ MStatus uninitializePlugin ( MObject obj )
 	if ( !status )
 	{
 		status.perror ( "deregisterNode partioVisualizer failed" );
+		return status;
+	}
+	status = plugin.deregisterNode(mayaPartioReaderShape::id);
+	if (!status) {
+		status.perror("deregisterNode");
 		return status;
 	}
 	status = plugin.deregisterNode ( partioEmitter::id );

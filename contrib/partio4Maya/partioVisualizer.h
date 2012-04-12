@@ -69,16 +69,13 @@ public:
 	void drawBoundingBox();
 	void drawPartio(int drawStyle);
 
-	bool GetPlugData();
-
 	static void * creator();
 
 
 protected:
 
 	float xMin, xMax, yMin, yMax, zMin, zMax;
-	int dUpdate;
-	GLuint dList;
+
 
 };
 
@@ -107,6 +104,7 @@ public:
 	void 					initCallback();
 	virtual void 			postConstructor();
 
+	bool GetPlugData();
 
 	static MObject  time;
 	static MObject  aSize;         // The size of the logo
@@ -175,6 +173,9 @@ private:
 
 	MStringArray attributeList;
 
+protected:
+	int dUpdate;
+	GLuint dList;
 
 };
 
