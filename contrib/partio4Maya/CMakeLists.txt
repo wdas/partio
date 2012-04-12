@@ -19,6 +19,8 @@ ENDIF()
 
 SET(CMAKE_CXX_WARNING_LEVEL 4)
 
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+
 
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 ## allow more human readable "if then else" constructs
@@ -27,7 +29,6 @@ SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
 SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
 
 set (PLUGIN_NAME "partio4Maya")
-set (PLUGIN_SUFFIX ".so")
 set (CMAKE_PROJECT_NAME "partio4Maya")
 
 if(APPLE)
@@ -42,43 +43,23 @@ if(WIN32)
 	set (SUFFIX ".mll")
 ENDIF()
 
-if (LINUX)
+if (UNIX)
 	set (PLUGIN_SUFFIX ".so")
 	set (CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 	set (SUFFIX ".so")
 ENDIF()
 	
-
-# update the base dir to where your copy of maya resides
-SET(MAYA_VERSION "2012-x64")
-if(WIN32)
-	SET(MAYA_BASE_DIR "C:/Program Files/Autodesk/Maya${MAYA_VERSION}")
-else(WIN32)
-	SET(MAYA_BASE_DIR "/usr/autodesk/maya${MAYA_VERSION}")
-ENDIF()
-if(APPLE)
-	SET(MAYA_BASE_DIR "/Applications/Autodesk/maya2012.17")
-ENDIF()
-
-if (APPLE) 
-	SET(MAYA_INC_DIR ${MAYA_BASE_DIR}/devkit/include)
-	SET(MAYA_LIB_DIR ${MAYA_BASE_DIR}/Maya.app/Contents/MacOS)
-else(APPLE)
-	SET(MAYA_INC_DIR ${MAYA_BASE_DIR}/include)
-	SET(MAYA_LIB_DIR ${MAYA_BASE_DIR}/lib)
-ENDIF()
-
-
+find_package(MAYA)
 
 ## if building from the default partio contrib dir you can leave this alone
 SET (PARTIO_INCLUDE "../../include" )
-SET (PARTIO_LIB   "../../lib")
+SET (PARTIO_LIBDIR   "../../lib")
 
 set (STD_INCLUDES "." ".." "/usr/X11R6/include" "/usr/include" "/usr/include/CC")
 set (STD_LIB "/usr/lib/")
 
-include_directories (${STD_INCLUDES} ${partio4MayaINCLUDES} ${MAYA_INC_DIR} ${PARTIO_INCLUDE})
-link_directories  ( ${STD_LIB} ${MAYA_LIB_DIR} ${PARTIO_LIB})
+include_directories (${STD_INCLUDES} ${partio4MayaINCLUDES} ${MAYA_INCLUDE_DIRS} ${PARTIO_INCLUDE})
+link_directories  ( ${STD_LIB} ${MAYA_LIBRARY_DIR} ${PARTIO_LIBDIR} ${ZLIB_LIBRARY_DIR})
 
 add_definitions(-D_BOOL)
 add_definitions(-DREQUIRE_IOSTREAM)
@@ -99,24 +80,38 @@ if(APPLE)
 	SET(OPENGL_gl_LIBRARY "-framework OpenGL")
 	SET(OPENGL_glu_LIBRARY "-framework GLUT")
 	SET(ZLIB "libzlib.a")
-else(APPLE)
+elseif(WIN32)
 
+	SET(OPENGL_gl_LIBRARY "openGL32")
+	SET(OPENGL_glu_LIBRARY "glu32")
+	SET(ZLIB "zlib.lib")
+else()
 	SET(OPENGL_gl_LIBRARY "GL")
 	SET(OPENGL_glu_LIBRARY "GLU")
+	SET(ZLIB "z")
 endif()
 
+SET(MAYA_LIBS OpenMaya Foundation OpenMayaAnim OpenMayaFX OpenMayaUI OpenMayaRender)
 
 IF (WIN32)
-	   SET(MAYA_LIBS OpenMaya Foundation OpenMayaAnim OpenMayaFX OpenMayaUI OpenMayaRender)
-	   SET(PARTIO_LIB  partio)
-	ELSE()
-		SET(MAYA_LIBS OpenMaya Foundation OpenMayaAnim OpenMayaFX OpenMayaUI OpenMayaRender)
-		SET(PARTIO_LIB  libpartio.a)
-	ENDIF()
+	SET(PARTIO_LIB  partio)
+elseif(APPLE)
+	SET(PARTIO_LIB  libpartio.a)
+elseif(UNIX)
+	SET(PARTIO_LIB  libpartio.a)
+ENDIF()
 
 
 ADD_LIBRARY(${PLUGIN_NAME} SHARED ${TARGET_H} ${TARGET_SRC})
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ./build)
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
+
+## need these to build for windows or else the plugin won't load
+IF(WIN32)
+	set_target_properties(${PLUGIN_NAME} PROPERTIES LINK_FLAGS "/export:initializePlugin /export:uninitializePlugin")
+ENDIF()
+
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${ZLIB} ${PARTIO_LIB} ${MAYA_LIBS} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
+
+INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/ DESTINATION contrib/partio4Maya )
 

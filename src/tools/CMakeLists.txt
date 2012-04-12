@@ -33,6 +33,7 @@
 
 include_directories(
    ${CMAKE_SOURCE_DIR}/src/lib
+   ${GLUT_INCLUDE_DIR}
 )
 
 IF(GLUT_FOUND AND OPENGL_FOUND)

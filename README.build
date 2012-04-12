@@ -1,0 +1,179 @@
+===================================================================
+Partio - A library for particle IO and manipulation
+- Andrew Selle, Walt Disney Animation Studios
+- John Cassella, Luma Pictures and redpawFX
+
+if you have any problems: 
+post general issues for partio / building etc.  at:
+
+https://github.com/wdas/partio/issues
+
+and issues regarding partio4Maya at:
+
+https://github.com/redpawfx/partio/issues
+
+===================================================================
+
+
+For now, Latest PRE_BUILT binary package is available from: https://github.com/redpawfx/partio/downloads
+
+
+BUILDING PARTIO:
+========================================
+package requirements:
+========================================
+
+WINDOWS:
+========
+The Partio package comes with some of the requirements not usually installed in windows:  
+These are contained in  RAR files in the "winReqLibs"  folder,  
+unrar the  3 archives in place to use them with the partio build process
+
+Additionally you will need: 
+cmake for windows  (www.cmake.org)
+python for windows  (www.python.org) 
+
+installed using the default windows installers and locations. 
+
+LINUX/OSX: 
+==========
+you will need the runtime and development libs for the following: 
+
+(versions may vary by installation,  the defaults for fedora 15/16 seem to work for us) 
+cmake
+zlib
+glut
+openGL
+Swig (for python bindings)
+
+OSX will also need xcode 
+
+
+Geting Started
+==============
+
+Partio supports  both scons and cmake build files.
+We would rather not support more than that.
+
+CMake  has been updated significantly to work fully cross platform  Linux/OSX/WIN  as of  4/10/2012   (redpawfx)
+SCons has not been udpated recently
+
+Best bet is probably working with cmake at this point, but for completeness sake:
+
+====================================
+Super impatient scons building guide
+====================================
+
+$ cd partio
+$ scons -j 4
+(dist/ will now have your build)
+
+OR....
+
+========================================================================
+Super impatient cmake building guide (linux/osx, windows users read on) 
+========================================================================
+
+$ cd partio
+$ makeDir  partio.build
+$ cd partio.build
+$ cmake UNIX MAKEFILES  ../
+$ make
+$ (optional)  make install
+
+
+===========================================
+CMAKE  BUILD INSTRUCTIONS
+===========================================
+
+edit the last line of the  top level  CMakeLists.txt file  to comment out the contrib  projects (partio4maya)  if you do not want to build them 
+
+USING  CMAKE GUI
+================
+
+make a subdirectory inside the top level partio directory  called  partio.build
+this will keep your source tree clean. 
+
+point the  "Where is the source code"  directory path to the top level 
+partio directory that contains the first  CMakeLists.txt file 
+
+point "where to build the binaries"  at this  partio.build folder 
+to keep the code source tree clean
+
+run Configure,  once  to parse the  CMakeLists files to gather everything.
+Most likely you will want to create default UNIX MAKEFILES  unless  you are  using  a specific dev environment like Visual Studio, XCode, or  KDevelop/CodeBlocks
+
+If you get any errors or warnings saying things are missing, double check the requirements list and try editing the appropriate CMakeLists.txt files
+to fix the problems and re-run configure
+
+If you have a non-standard  Maya installation you may find that you have to edit the  contrib/partio4Maya/cmake/FindMAYA.cmake  file  to add your proper maya path
+to the search lists so Cmake can find your maya install.
+
+The GUI will go red with a list of "found" libraries and paths.. 
+Hit configure again to accept everything and then,
+
+Hit generate.  
+
+This will create  all the make files/project files for you.
+
+
+OR....
+
+FROM A SHELL
+=============
+
+make a subdirectory inside the top level partio directory  called  partio.build
+this will keep your source tree clean. 
+
+cd into that directory 
+
+type:  cmake  UNIX MAKEFILES  ../   
+
+depending on your platform, you may also have other options
+type: cmake --help
+
+and look at the bottom of the help page to see what other build output options are available
+
+
+If you get any errors or warnings saying things are missing,   double check the requirements list and try editing the appropriate CMakeLists.txt files
+to fix the problems and re-run the cmake command
+
+This will create  all the make/build files for you.
+
+
+THEN... 
+
+
+Open up your  dev environment:   Shell, Kdevelop, Visual Studio, or XCode
+
+
+if you're building from a shell:
+
+type:  make;  and then optionally  make install;
+
+and as long as nothing errors out, you're done. 
+
+
+Other build envs:  
+
+make sure the output is set to  "Release"  (debug will most likely error out on python bindings only unless you have python debug stuff installed as well) 
+There will be an  "ALL_BUILD"  build item.  
+Run it 
+then run  "INSTALL" 
+
+and as long as everything goes well you should have the whole suite of tools built. 
+
+
+
+=====================
+KNOWN BUGS / ISSUES
+=====================
+
+OSX  partview is  crashy and does not respond to user input, it will crash on some keyboard input as well
+
+Partio4Maya is  still in alpha but is  fairly  robust , use at your own risk.
+
+
+
+
+
