@@ -60,14 +60,6 @@ MStatus initializePlugin ( MObject obj )
 		return status;
 	}
 
-	status = plugin.registerShape("mayaPartioReaderShape",
-			mayaPartioReaderShape::id, &mayaPartioReaderShape::creator,
-			&mayaPartioReaderShape::initialize, &CPartioReaderUI::creator);
-	if (!status)
-	{
-		status.perror("registerNode");
-		return status;
-	}
 
 	status = plugin.registerNode ( "partioEmitter", partioEmitter::id,
 	                               &partioEmitter::creator, &partioEmitter::initialize,
@@ -97,11 +89,7 @@ MStatus uninitializePlugin ( MObject obj )
 		status.perror ( "deregisterNode partioVisualizer failed" );
 		return status;
 	}
-	status = plugin.deregisterNode(mayaPartioReaderShape::id);
-	if (!status) {
-		status.perror("deregisterNode");
-		return status;
-	}
+
 	status = plugin.deregisterNode ( partioEmitter::id );
 	if ( !status )
 	{

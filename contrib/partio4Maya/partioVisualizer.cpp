@@ -69,6 +69,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "iconArrays.h"
 #include <set>
 
+#define _USE_MGL_FT_
+#include <maya/MGLFunctionTable.h>
+static MGLFunctionTable *gGLFT = NULL;
+
+
 // id is registered with autodesk no need to change
 #define ID_PARTIOVISUALIZER  0x00116ECF
 
@@ -114,6 +119,14 @@ MCallbackId partioVisualizerOpenCallback;
 MCallbackId partioVisualizerImportCallback;
 MCallbackId partioVisualizerReferenceCallback;
 
+partioVizReaderCache::partioVizReaderCache()
+{
+	token = 0;
+	bbox = MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0));
+	dList = 0;
+}
+
+
 /// CREATOR
 partioVisualizer::partioVisualizer()
 :   mLastFileLoaded(""),
@@ -127,28 +140,25 @@ partioVisualizer::partioVisualizer()
 	mLastRadiusFromIndex(-1),
 	mLastColor(1,0,0),
 	cacheChanged(false),
-	multiplier(1.0),
-	bbox(MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0)))
+	multiplier(1.0)
 {
-	cout << "creator" << endl;
-	particles = NULL;
-	flipPos = (float *) malloc(sizeof(float));
-	rgb = (float *) malloc (sizeof(float));
-	rgba = (float *) malloc(sizeof(float));
+	pvCache.particles = NULL;
+	pvCache.flipPos = (float *) malloc(sizeof(float));
+	pvCache.rgb = (float *) malloc (sizeof(float));
+	pvCache.rgba = (float *) malloc(sizeof(float));
 
 }
 /// DESTRUCTOR
 partioVisualizer::~partioVisualizer()
 {
-	cout << "destructor" << endl;
 
-	if (particles)
+	if (pvCache.particles)
 	{
-		particles->release();
+		pvCache.particles->release();
 	}
-	free(flipPos);
-	free(rgb);
-	free(rgba);
+	free(pvCache.flipPos);
+	free(pvCache.rgb);
+	free(pvCache.rgba);
 	MSceneMessage::removeCallback( partioVisualizerOpenCallback);
     MSceneMessage::removeCallback( partioVisualizerImportCallback);
     MSceneMessage::removeCallback( partioVisualizerReferenceCallback);
@@ -157,21 +167,16 @@ partioVisualizer::~partioVisualizer()
 
 void* partioVisualizer::creator()
 {
-	cout << "creator1" << endl;
-	return new partioVisualizer();
+	return new partioVisualizer;
 }
 
 /// POST CONSTRUCTOR
 void partioVisualizer::postConstructor()
 {
-
-	cout << "postConstructor" << endl;
 	setRenderable(true);
 	partioVisualizerOpenCallback = MSceneMessage::addCallback(MSceneMessage::kAfterOpen, partioVisualizer::reInit, this);
     partioVisualizerImportCallback = MSceneMessage::addCallback(MSceneMessage::kAfterImport, partioVisualizer::reInit, this);
     partioVisualizerReferenceCallback = MSceneMessage::addCallback(MSceneMessage::kAfterReference, partioVisualizer::reInit, this);
-
-
 }
 
 ///////////////////////////////////
@@ -181,7 +186,6 @@ void partioVisualizer::postConstructor()
 void partioVisualizer::initCallback()
 {
 
-	cout << "init callback" << endl;
     MObject tmo = thisMObject();
 
     short extENum;
@@ -205,24 +209,19 @@ void partioVisualizer::initCallback()
 
 void partioVisualizer::reInit(void *data)
 {
-
-	cout << "re-init" << endl;
     partioVisualizer  *vizNode = (partioVisualizer*) data;
     vizNode->initCallback();
-
-
 }
 
 
 MStatus partioVisualizer::initialize()
 {
 
-	cout << "startInit" << endl;
-	MFnEnumAttribute eAttr;
-	MFnUnitAttribute uAttr;
+	MFnEnumAttribute 	eAttr;
+	MFnUnitAttribute 	uAttr;
 	MFnNumericAttribute nAttr;
-	MFnTypedAttribute tAttr;
-	MStatus			 stat;
+	MFnTypedAttribute 	tAttr;
+	MStatus			 	stat;
 
 	time = nAttr.create( "time", "tm", MFnNumericData::kLong ,0);
 	uAttr.setKeyable( true );
@@ -337,7 +336,7 @@ MStatus partioVisualizer::initialize()
 	aRenderCachePath = tAttr.create ( "renderCachePath", "rcp", MFnStringData::kString );
 	nAttr.setHidden(true);
 
-	addAttribute( aUpdateCache );
+	addAttribute ( aUpdateCache );
 	addAttribute ( aSize );
 	addAttribute ( aFlipYZ );
 	addAttribute ( aDrawSkip );
@@ -384,18 +383,22 @@ MStatus partioVisualizer::initialize()
 	attributeAffects ( aForceReload, aUpdateCache );
 	attributeAffects (time, aUpdateCache);
 
-	cout << "endInit" << endl;
+
 	return MS::kSuccess;
 }
 
+
+partioVizReaderCache* partioVisualizer::updateParticleCache()
+{
+	GetPlugData(); // force update to run compute function where we want to do all the work
+    return &pvCache;
+}
 
 // COMPUTE FUNCTION
 
 MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 {
 
-	cout << plug.name() << endl;
-	cout << "compute" << endl;
 	bool cacheActive = block.inputValue(aCacheActive).asBool();
 	int colorFromIndex  = block.inputValue( aColorFrom ).asInt();
 	int opacityFromIndex= block.inputValue( aAlphaFrom ).asInt();
@@ -408,13 +411,11 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
     //
     if (plug != aUpdateCache)
 	{
-		cout << "outearly" << endl;
         return ( MS::kUnknownParameter );
 	}
 
 	else
 	{
-		cout << "cacheCompute"<< endl;
 		MStatus stat;
 
 		MString cacheDir = block.inputValue(aCacheDir).asString();
@@ -422,7 +423,6 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 		if (cacheDir  == "" || cachePrefix == "" )
 		{
-			cout << "no cache" << endl;
 			MGlobal::displayError("PartioEmitter->Error: Please specify cache file!");
 			return ( MS::kFailure );
 		}
@@ -472,12 +472,12 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			cacheChanged = true;
 			mFlipped = false;
 			MGlobal::displayWarning(MString("PartioVisualizer->Loading: " + newCacheFile));
-			particles=0; // resets the particles
+			pvCache.particles=0; // resets the particles
 
-			particles=read(newCacheFile.asChar());
+			pvCache.particles=read(newCacheFile.asChar());
 
 			mLastFileLoaded = newCacheFile;
-			if (particles->numParticles() == 0)
+			if (pvCache.particles->numParticles() == 0)
 			{
 				return (MS::kSuccess);
 			}
@@ -487,14 +487,14 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			ParticleAttribute velAttribute;
 
 			char partCount[50];
-			sprintf (partCount, "%d", particles->numParticles());
+			sprintf (partCount, "%d", pvCache.particles->numParticles());
 			MGlobal::displayInfo(MString ("PartioVisualizer-> LOADED: ") + partCount + MString (" particles"));
 
 
-			float * floatToRGB = (float *) realloc(rgb, particles->numParticles()*sizeof(float)*3);
+			float * floatToRGB = (float *) realloc(pvCache.rgb, pvCache.particles->numParticles()*sizeof(float)*3);
 			if (floatToRGB != NULL)
 			{
-				rgb =  floatToRGB;
+				pvCache.rgb =  floatToRGB;
 			}
 			else
 			{
@@ -502,10 +502,10 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 				return (MS::kFailure);
 			}
 
-			float * newRGBA = (float *) realloc(rgba,particles->numParticles()*sizeof(float)*4);
+			float * newRGBA = (float *) realloc(pvCache.rgba,pvCache.particles->numParticles()*sizeof(float)*4);
 			if (newRGBA != NULL)
 			{
-				rgba =  newRGBA;
+				pvCache.rgba =  newRGBA;
 			}
 			else
 			{
@@ -513,9 +513,10 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 				return (MS::kFailure);
 			}
 
-			bbox.clear();
+			pvCache.bbox.clear();
 
-			if (!particles->attributeInfo("position",positionAttr) && !particles->attributeInfo("Position",positionAttr))
+			if (!pvCache.particles->attributeInfo("position",pvCache.positionAttr) &&
+				!pvCache.particles->attributeInfo("Position",pvCache.positionAttr))
 			{
 				MGlobal::displayError("PartioVisualizer->Failed to find position attribute ");
 				return ( MS::kFailure );
@@ -523,11 +524,11 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			else
 			{
 				// resize the bounding box
-				for (int i=0;i<particles->numParticles();i++)
+				for (int i=0;i<pvCache.particles->numParticles();i++)
 				{
-					const float * partioPositions = particles->data<float>(positionAttr,i);
+					const float * partioPositions = pvCache.particles->data<float>(pvCache.positionAttr,i);
 					MPoint pos (partioPositions[0], partioPositions[1], partioPositions[2]);
-					bbox.expand(pos);
+					pvCache.bbox.expand(pos);
 				}
 			}
 
@@ -536,7 +537,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 		}
 
-		if (particles)
+		if (pvCache.particles)
 		{
 			/// TODO:  this does not work when scrubbing yet.. really need to put the  resort of channels into the  partio side as a filter
 			/// this is only a temporary hack until we start adding  filter functions to partio
@@ -544,18 +545,18 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			// only flip the axis stuff if we need to
 			if ( cacheChanged && flipYZ  && !mFlipped )
 			{
-				float * floatToPos = (float *) realloc(flipPos, particles->numParticles()*sizeof(float)*3);
+				float * floatToPos = (float *) realloc(pvCache.flipPos, pvCache.particles->numParticles()*sizeof(float)*3);
 				if (floatToPos != NULL)
 				{
-					flipPos =  floatToPos;
+					pvCache.flipPos =  floatToPos;
 				}
 
-				for (int i=0;i<particles->numParticles();i++)
+				for (int i=0;i<pvCache.particles->numParticles();i++)
 				{
-					const float * attrVal = particles->data<float>(positionAttr,i);
-					flipPos[(i*3)] 		= attrVal[0];
-					flipPos[((i*3)+1)] 	= -attrVal[2];
-					flipPos[((i*3)+2)] 	= attrVal[1];
+					const float * attrVal = pvCache.particles->data<float>(pvCache.positionAttr,i);
+					pvCache.flipPos[(i*3)] 		= attrVal[0];
+					pvCache.flipPos[((i*3)+1)] 	= -attrVal[2];
+					pvCache.flipPos[((i*3)+2)] 	= attrVal[1];
 				}
 				mFlipped = true;
 			}
@@ -563,7 +564,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			// something changed..
 			if  (cacheChanged || mLastColorFromIndex != colorFromIndex || mLastColor != defaultColor)
 			{
-				int numAttrs = particles->numAttributes();
+				int numAttrs = pvCache.particles->numAttributes();
 				if (colorFromIndex+1 > numAttrs || opacityFromIndex+1 > numAttrs)
 				{
 					// reset the attrs
@@ -578,43 +579,43 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 				if(colorFromIndex >=0)
 				{
-					particles->attributeInfo(colorFromIndex,colorAttr);
+					pvCache.particles->attributeInfo(colorFromIndex,pvCache.colorAttr);
 					// VECTOR or  4+ element float attrs
-					if (colorAttr.type == VECTOR || colorAttr.count > 3) // assuming first 3 elements are rgb
+					if (pvCache.colorAttr.type == VECTOR || pvCache.colorAttr.count > 3) // assuming first 3 elements are rgb
 					{
-						for (int i=0;i<particles->numParticles();i++)
+						for (int i=0;i<pvCache.particles->numParticles();i++)
 						{
-							const float * attrVal = particles->data<float>(colorAttr,i);
-							rgb[(i*3)] 		= attrVal[0];
-							rgb[((i*3)+1)] 	= attrVal[1];
-							rgb[((i*3)+2)] 	= attrVal[2];
-							rgba[i*4] 		= attrVal[0];
-							rgba[(i*4)+1] 	= attrVal[1];
-							rgba[(i*4)+2] 	= attrVal[2];
+							const float * attrVal = pvCache.particles->data<float>(pvCache.colorAttr,i);
+							pvCache.rgb[(i*3)] 		= attrVal[0];
+							pvCache.rgb[((i*3)+1)] 	= attrVal[1];
+							pvCache.rgb[((i*3)+2)] 	= attrVal[2];
+							pvCache.rgba[i*4] 		= attrVal[0];
+							pvCache.rgba[(i*4)+1] 	= attrVal[1];
+							pvCache.rgba[(i*4)+2] 	= attrVal[2];
 						}
 					}
 					else // single FLOAT
 					{
-						for (int i=0;i<particles->numParticles();i++)
+						for (int i=0;i<pvCache.particles->numParticles();i++)
 						{
-							const float * attrVal = particles->data<float>(colorAttr,i);
+							const float * attrVal = pvCache.particles->data<float>(pvCache.colorAttr,i);
 
-							rgb[(i*3)] = rgb[((i*3)+1)] = rgb[((i*3)+2)] 	= attrVal[0];
-							rgba[i*4]  = rgba[(i*4)+1] 	= rgba[(i*4)+2] 	= attrVal[0];
+							pvCache.rgb[(i*3)] = pvCache.rgb[((i*3)+1)] = pvCache.rgb[((i*3)+2)] 	= attrVal[0];
+							pvCache.rgba[i*4]  = pvCache.rgba[(i*4)+1] 	= pvCache.rgba[(i*4)+2] 	= attrVal[0];
 						}
 					}
 				}
 
 				else
 				{
-					for (int i=0;i<particles->numParticles();i++)
+					for (int i=0;i<pvCache.particles->numParticles();i++)
 					{
-						rgb[(i*3)] 		= defaultColor[0];
-						rgb[((i*3)+1)] 	= defaultColor[1];
-						rgb[((i*3)+2)] 	= defaultColor[2];
-						rgba[i*4] 		= defaultColor[0];
-						rgba[(i*4)+1] 	= defaultColor[1];
-						rgba[(i*4)+2] 	= defaultColor[2];
+						pvCache.rgb[(i*3)] 		= defaultColor[0];
+						pvCache.rgb[((i*3)+1)] 	= defaultColor[1];
+						pvCache.rgb[((i*3)+2)] 	= defaultColor[2];
+						pvCache.rgba[i*4] 		= defaultColor[0];
+						pvCache.rgba[(i*4)+1] 	= defaultColor[1];
+						pvCache.rgba[(i*4)+2] 	= defaultColor[2];
 					}
 
 				}
@@ -627,47 +628,47 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			{
 				if (opacityFromIndex >=0)
 				{
-					particles->attributeInfo(opacityFromIndex,opacityAttr);
-					if (opacityAttr.count == 1)  // single float value for opacity
+					pvCache.particles->attributeInfo(opacityFromIndex,pvCache.opacityAttr);
+					if (pvCache.opacityAttr.count == 1)  // single float value for opacity
 					{
-						for (int i=0;i<particles->numParticles();i++)
+						for (int i=0;i<pvCache.particles->numParticles();i++)
 						{
-							const float * attrVal = particles->data<float>(opacityAttr,i);
+							const float * attrVal = pvCache.particles->data<float>(pvCache.opacityAttr,i);
 							float temp = attrVal[0];
 							if (invertAlpha)
 							{
 								temp = float(1.0-temp);
 
 							}
-							rgba[(i*4)+3] = temp;
+							pvCache.rgba[(i*4)+3] = temp;
 						}
 					}
 					else
 					{
-						if (opacityAttr.count == 4)   // we have an  RGBA 4 float attribute ?
+						if (pvCache.opacityAttr.count == 4)   // we have an  RGBA 4 float attribute ?
 						{
-							for (int i=0;i<particles->numParticles();i++)
+							for (int i=0;i<pvCache.particles->numParticles();i++)
 							{
-								const float * attrVal = particles->data<float>(opacityAttr,i);
+								const float * attrVal = pvCache.particles->data<float>(pvCache.opacityAttr,i);
 								float temp = attrVal[3];
 								if (invertAlpha)
 								{
 									temp = float(1.0-temp);
 								}
-								rgba[(i*4)+3] = temp;
+								pvCache.rgba[(i*4)+3] = temp;
 							}
 						}
 						else
 						{
-							for (int i=0;i<particles->numParticles();i++)
+							for (int i=0;i<pvCache.particles->numParticles();i++)
 							{
-								const float * attrVal = particles->data<float>(opacityAttr,i);
+								const float * attrVal = pvCache.particles->data<float>(pvCache.opacityAttr,i);
 								float lum = float((attrVal[0]*0.2126)+(attrVal[1]*0.7152)+(attrVal[2]*.0722));
 								if (invertAlpha)
 								{
 									lum = float(1.0-lum);
  								}
-								rgba[(i*4)+3] =  lum;
+								pvCache.rgba[(i*4)+3] =  lum;
 							}
 						}
 					}
@@ -679,9 +680,9 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 					{
 						mLastAlpha= 1-defaultAlpha;
 					}
-					for (int i=0;i<particles->numParticles();i++)
+					for (int i=0;i<pvCache.particles->numParticles();i++)
 					{
-						rgba[(i*4)+3] = mLastAlpha;
+						pvCache.rgba[(i*4)+3] = mLastAlpha;
 					}
 				}
 				mLastAlpha = defaultAlpha;
@@ -697,9 +698,9 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 	float drawSkipVal = drawSkipHnd.asDouble();
 	*/
 
-	if (particles) // update the AE Controls for attrs in the cache
+	if (pvCache.particles) // update the AE Controls for attrs in the cache
 	{
-		unsigned int numAttr=particles->numAttributes();
+		unsigned int numAttr=pvCache.particles->numAttributes();
 		MPlug zPlug (thisMObject(), aPartioAttributes);
 
 		if ((colorFromIndex+1) > zPlug.numElements())
@@ -723,7 +724,6 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 				command += x;
 				command += "]";
 				command += ";";
-
 			}
 
 			MGlobal::executeCommand(command);
@@ -736,7 +736,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			for (unsigned int i=0;i<numAttr;i++)
 			{
 				ParticleAttribute attr;
-				particles->attributeInfo(i,attr);
+				pvCache.particles->attributeInfo(i,attr);
 
 				// crazy casting string to  char
 				char *temp;
@@ -752,26 +752,64 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 				delete [] temp;
 			}
-
 		}
 	}
-	cout << " compute end" << endl;
-
-
 	return MS::kSuccess;
 }
 
-void partioVisualizerUI::draw( const MDrawRequest & request, M3dView & view )
-//void ( M3dView & view, const MDagPath & /*path*/,
-//							 M3dView::DisplayStyle style,
-//							 M3dView::DisplayStatus status )
+
+/////////////////////////////////////////////////////
+/// procs to override bounding box mode...
+bool partioVisualizer::isBounded() const
+{
+    return true;
+}
+
+MBoundingBox partioVisualizer::boundingBox() const
+{
+	// Returns the bounding box for the shape.
+    partioVisualizer* nonConstThis = const_cast<partioVisualizer*>(this);
+    partioVizReaderCache* geom = nonConstThis->updateParticleCache();
+
+	MPoint corner1 = geom->bbox.min();
+	MPoint corner2 = geom->bbox.max();
+	return MBoundingBox( corner1, corner2 );
+}
+
+//////////////////////////////////////////////////////////////////
+////  getPlugData is a util to update the drawing of the UI stuff
+
+bool partioVisualizer::GetPlugData()
+{
+	MStatus stat;
+
+	MObject thisNode = thisMObject();
+	int update = 0;
+	MPlug updatePlug(thisNode, aUpdateCache );
+	updatePlug.getValue( update );
+	if(update != dUpdate)
+	{
+		dUpdate = update;
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+	return false;
+
+}
+
+// note the "const" at the end, its different than other draw calls
+void partioVisualizerUI::draw( const MDrawRequest& request, M3dView& view ) const
 {
 	MDrawData data = request.drawData();
-	cout << "draw start" << endl;
+
+	view.displayStyle();
 
 	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
 
-	//bool updateDList = GetPlugData();
+	partioVizReaderCache* cache = (partioVizReaderCache*) data.geometry();
 
 	MObject thisNode = shapeNode->thisMObject();
 	MPlug sizePlug( thisNode, shapeNode->aSize );
@@ -786,87 +824,37 @@ void partioVisualizerUI::draw( const MDrawRequest & request, M3dView & view )
 
 	view.beginGL();
 
-	/*
-	if(updateDList)
+	if (drawStyle < 3 && view.displayStyle() != M3dView::kBoundingBox )
 	{
-		if(dList == 0)
-		{
-			dList = glGenLists(1);
-		}
-		glNewList(dList, GL_COMPILE);
-		glEndList();
-	}
-
-*/
-
-	if (drawStyle < 3 )
-	{
-		drawPartio(drawStyle);
+		drawPartio(cache,drawStyle);
 	}
 	else
 	{
 		drawBoundingBox();
 	}
 
-
-	//glCallList(dList); ??? not sure we need this ?
-	//cout <<"glCallList" <<  glGetError() << endl;
-
 	partio4Maya::drawPartioLogo(shapeNode->multiplier);
 
 	view.endGL();
-	cout << "draw end" << endl;
-
-
 }
-
-
-
-//////////////////////////////////////////////////////////////////
-////  getPlugData is a util to update the drawing of the UI stuff
-
-bool partioVisualizer::GetPlugData()
-{
-	cout << "get plug data" << endl;
-
-	MStatus stat;
-
-	MObject thisNode = thisMObject();
-
-	int update = 0;
-
-	MPlug updatePlug(thisNode, partioVisualizer::aUpdateCache );
-	updatePlug.getValue( update );
-	if(update != dUpdate){
-		dUpdate = update;
-		return true;
-	}else{
-		return false;
-	}
-
-
-	return false;
-
-}
-
 
 ////////////////////////////////////////////
 /// DRAW Bounding box
-void  partioVisualizerUI::drawBoundingBox()
+void  partioVisualizerUI::drawBoundingBox() const
 {
-	cout << "Draw boundingBox" << endl;
+
 
 	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
 
+	MPoint  bboxMin = shapeNode->pvCache.bbox.min();
+	MPoint  bboxMax = shapeNode->pvCache.bbox.max();
 
-	MPoint  bboxMin = shapeNode->bbox.min();
-	MPoint  bboxMax = shapeNode->bbox.max();
-	xMin = float(bboxMin.x);
-	yMin = float(bboxMin.y);
-	zMin = float(bboxMin.z);
-	xMax = float(bboxMax.x);
-	yMax = float(bboxMax.y);
-	zMax = float(bboxMax.z);
+	float xMin = float(bboxMin.x);
+	float yMin = float(bboxMin.y);
+	float zMin = float(bboxMin.z);
+	float xMax = float(bboxMax.x);
+	float yMax = float(bboxMax.y);
+	float zMax = float(bboxMax.z);
 
 	/// draw the bounding box
 	glBegin (GL_LINES);
@@ -918,10 +906,8 @@ void  partioVisualizerUI::drawBoundingBox()
 ////////////////////////////////////////////
 /// DRAW PARTIO
 
-void partioVisualizerUI::drawPartio(int drawStyle)
+void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle) const
 {
-	cout << "Draw partio" << endl;
-
 	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
 
 	MObject thisNode = shapeNode->thisMObject();
@@ -934,7 +920,6 @@ void partioVisualizerUI::drawPartio(int drawStyle)
 	flipYZPlug.getValue( flipYZVal );
 
 	int stride =  3*sizeof(float)*(drawSkipVal);
-
 
 	MPlug pointSizePlug( thisNode, shapeNode->aPointSize );
 	float pointSizeVal;
@@ -953,9 +938,8 @@ void partioVisualizerUI::drawPartio(int drawStyle)
 	defaultAlphaPlug.getValue( defaultAlphaVal );
 
 
-	if (shapeNode->particles)
+	if (pvCache->particles)
 	{
-
 		struct Point { float p[3]; };
 		//glPushAttrib( GL_ALL_ATTRIB_BITS);
 
@@ -990,15 +974,15 @@ void partioVisualizerUI::drawPartio(int drawStyle)
 			glEnableClientState( GL_COLOR_ARRAY );
 
 			glPointSize(pointSizeVal);
-			if (shapeNode->particles->numParticles() > 0)
+			if (pvCache->particles->numParticles() > 0)
 			{
 				// now setup the position/color/alpha output pointers
 
-				const float * partioPositions = shapeNode->particles->data<float>(shapeNode->positionAttr,0);
+				const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,0);
 
 				if(flipYZVal)
 				{
-					glVertexPointer( 3, GL_FLOAT, stride, shapeNode->flipPos );
+					glVertexPointer( 3, GL_FLOAT, stride, pvCache->flipPos );
 				}
 				else
 				{
@@ -1007,13 +991,13 @@ void partioVisualizerUI::drawPartio(int drawStyle)
 
 				if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
 				{
-					glColorPointer(  4, GL_FLOAT, stride, shapeNode->rgba );
+					glColorPointer(  4, GL_FLOAT, stride, pvCache->rgba );
 				}
 				else
 				{
-					glColorPointer(  3, GL_FLOAT, stride, shapeNode->rgb );
+					glColorPointer(  3, GL_FLOAT, stride, pvCache->rgb );
 				}
-				glDrawArrays( GL_POINTS, 0, (shapeNode->particles->numParticles()/(drawSkipVal+1)) );
+				glDrawArrays( GL_POINTS, 0, (pvCache->particles->numParticles()/(drawSkipVal+1)) );
 			}
 			glDisableClientState( GL_VERTEX_ARRAY );
 			glDisableClientState( GL_COLOR_ARRAY );
@@ -1028,53 +1012,33 @@ void partioVisualizerUI::drawPartio(int drawStyle)
 
 			glBegin(GL_POINTS);
 
-			for (int i=0;i<shapeNode->particles->numParticles();i++)
+			for (int i=0;i<pvCache->particles->numParticles();i++)
 			{
 				if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
 				{
-					glColor4f(shapeNode->rgb[i*3],shapeNode->rgb[(i*3)+1],shapeNode->rgb[(i*3)+2], shapeNode->rgba[(i*4)+3] );
+					glColor4f(pvCache->rgb[i*3],pvCache->rgb[(i*3)+1],pvCache->rgb[(i*3)+2], pvCache->rgba[(i*4)+3] );
 				}
 				else
 				{
-					glColor3f(shapeNode->rgb[i*3],shapeNode->rgb[(i*3)+1],shapeNode->rgb[(i*3)+2]);
+					glColor3f(pvCache->rgb[i*3],pvCache->rgb[(i*3)+1],pvCache->rgb[(i*3)+2]);
 				}
 				if (flipYZVal)
 				{
-					glVertex3f(shapeNode->flipPos[0], shapeNode->flipPos[1], shapeNode->flipPos[2]);
+					glVertex3f(pvCache->flipPos[0], pvCache->flipPos[1], pvCache->flipPos[2]);
 				}
 				else
 				{
-					const float * partioPositions = shapeNode->particles->data<float>(shapeNode->positionAttr,i);
+					const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
 					glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
 				}
 			}
 
 			glEnd( );
-
 		}
 	} // if (particles)
 
 
 }
-
-
-/////////////////////////////////////////////////////
-/// procs to override bounding box mode...
-bool partioVisualizer::isBounded() const
-{
-	cout << "isbounded" << endl;
-    return true;
-}
-
-MBoundingBox partioVisualizer::boundingBox() const
-{
-	cout << "boundingBox" << endl;
-	MPoint corner1 = bbox.min();
-	MPoint corner2 = bbox.max();
-	return MBoundingBox( corner1, corner2 );
-}
-
-
 
 partioVisualizerUI::partioVisualizerUI()
 {
@@ -1092,24 +1056,21 @@ void* partioVisualizerUI::creator()
 void partioVisualizerUI::getDrawRequests(const MDrawInfo & info,
 		bool /*objectAndActiveOnly*/, MDrawRequestQueue & queue)
 {
-	cout << "get draw requests" << endl;
 
 	MDrawData data;
-    partioVisualizer* shape = (partioVisualizer*) surfaceShape();
+    MDrawRequest request = info.getPrototype(*this);
+    partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
+	partioVizReaderCache* geom = shapeNode->updateParticleCache();
 
-	shape->GetPlugData();
-	Partio::ParticleAttribute* geomPtr = &shape->positionAttr;
+    getDrawData(geom, data);
+    request.setDrawData(data);
 
-    // This call creates a prototype draw request that we can fill
-    // in and then add to the draw queue.
-    //
-    MDrawRequest request = info.getPrototype( *this );
+    // Are we displaying locators?
+    if (!info.objectDisplayStatus(M3dView::kDisplayLocators))
+        return;
 
-    // Stuff our data into the draw request, it'll be used when the drawing
-    // actually happens
-    getDrawData( geomPtr, data );
-
-    request.setDrawData( data );
+	//getDrawRequestsWireFrame(request, info);
+    queue.add(request);
 
 }
 
