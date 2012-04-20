@@ -51,7 +51,9 @@ readers()
     static bool initialized=false;
     if(!initialized){
         data["bgeo"]=readBGEO;
+        data["bhclassic"]=readBGEO;
         data["geo"]=readGEO;
+        data["hclassic"]=readGEO;
         data["pdb"]=readPDB;
         data["pdb32"]=readPDB32;
         data["pdb64"]=readPDB64;
