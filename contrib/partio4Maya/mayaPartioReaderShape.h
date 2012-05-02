@@ -11,7 +11,6 @@
 #include <maya/MObject.h>
 #include <maya/MPlug.h>
 #include <maya/MDataBlock.h>
-#include <maya/MPxEmitterNode.h>
 
 #include <maya/MPxSurfaceShape.h>
 #include <maya/MPxSurfaceShapeUI.h>
@@ -22,22 +21,20 @@
 #include <maya/MSelectionList.h>
 
 
-#include <maya/MPxSurfaceShape.h>
-#include <maya/MPxSurfaceShapeUI.h>
-
 #include <maya/MFnNumericAttribute.h>
 #include <maya/MFnEnumAttribute.h>
 #include <maya/MFnTypedAttribute.h>
+#include <maya/MFnUnitAttribute.h>
 
 #include <maya/MDagPath.h>
-#include <maya/MDrawData.h>
 #include <maya/MFnDependencyNode.h>
-#include <maya/MFnNumericAttribute.h>
-#include <maya/MFnUnitAttribute.h>
+
+
 #include <maya/MFnVectorArrayData.h>
 #include <maya/MFnDoubleArrayData.h>
 #include <maya/MFnArrayAttrsData.h>
 #include <maya/MFnMatrixData.h>
+#include <maya/MFnMeshData.h>
 
 
 #include "Partio.h"
@@ -62,14 +59,13 @@ public:
 
 	int token;
 
+	MBoundingBox bbox;
 
-	   MBoundingBox bbox;
+	//Partio::ParticlesDataMutable* p;
+	//Partio::ParticleAttribute positionhandle;
 
+	int dList;
 
-	Partio::ParticlesDataMutable* p;
-	Partio::ParticleAttribute positionhandle;
-
-	   int dList;
 };
 
 // Shape class - defines the non-UI part of a shape node
@@ -81,19 +77,20 @@ public:
 
 	virtual void postConstructor();
 	virtual MStatus compute(const MPlug& plug, MDataBlock& data);
-	virtual bool getInternalValueInContext(const MPlug&, MDataHandle&,
-			MDGContext &context);
-	virtual bool setInternalValueInContext(const MPlug&, const MDataHandle&,
-			MDGContext &context);
+	//virtual bool getInternalValueInContext(const MPlug&, MDataHandle&,
+	//		MDGContext &context);
+	//virtual bool setInternalValueInContext(const MPlug&, const MDataHandle&,
+	//		MDGContext &context);
 
 	virtual bool isBounded() const;
 	virtual MBoundingBox boundingBox() const;
 
-	MStatus GetPointsFromCache();
+	//MStatus GetPointsFromCache();
 
 	static void* creator();
 	static MStatus initialize();
 	CPartioReaderCache* particleCache();
+	bool GetPlugData();
 
 
 
@@ -110,9 +107,14 @@ private:
 	static MObject s_frameNumber;
 	static MObject s_useSubFrame;
 	static MObject s_frameOffset;
+	static MObject s_updateNode;
 
 public:
 	static MTypeId id;
+
+protected:
+	int dUpdate;
+
 }; // class mayaPartioReaderShape
 
 
@@ -128,10 +130,10 @@ public:
 			MPointArray &worldSpaceSelectPts) const;
 
 	void getDrawRequestsWireFrame(MDrawRequest&, const MDrawInfo&);
-	void			getDrawRequestsShaded(	  MDrawRequest&,
-											  const MDrawInfo&,
-											  MDrawRequestQueue&,
-											  MDrawData& data );
+	//void getDrawRequestsShaded(	  MDrawRequest&,
+	//										  const MDrawInfo&,
+	//										  MDrawRequestQueue&,
+	//										  MDrawData& data );
 
 	static void * creator();
 	// Draw Tokens
@@ -147,3 +149,4 @@ public:
 }; // class CArnoldStandInShapeUI
 
 #endif
+
