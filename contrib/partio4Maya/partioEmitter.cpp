@@ -53,7 +53,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "iconArrays.h"
 
 // id is registered with autodesk no need to change
-#define ID_PARTIOEMITTER  0x00116ECE
+#define ID_PARTIOEMITTER  0x00116ED0
 
 using namespace Partio;
 using namespace std;
