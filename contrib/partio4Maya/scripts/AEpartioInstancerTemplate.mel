@@ -1,0 +1,380 @@
+/* partio4Maya  3/12/2012, John Cassella  http://luma-pictures.com and  http://redpawfx.com
+PARTIO Export
+Copyright 2012 (c)  All rights reserved
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+Disclaimer: THIS SOFTWARE IS PROVIDED BY  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+IN NO EVENT SHALL  THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+*/
+
+global proc AEpartioInstancerTemplate( string $nodeName )
+{
+	editorTemplate -callCustom pioInstLogoHeader pioInstLogoHeader $nodeName;
+	editorTemplate -beginLayout "Global" -collapse 0;
+	editorTemplate -addControl "cacheActive";
+	editorTemplate -addControl "staticCache";
+	editorTemplate -addControl "flipYZ";
+	editorTemplate -callCustom pioInstAEoutpathNew pioInstAEoutpathReplace cacheDir;
+	editorTemplate -addControl "cachePrefix";
+	editorTemplate -addControl "cacheOffset";
+	editorTemplate -addControl "cachePadding";
+	editorTemplate -addControl "cacheFormat";
+	editorTemplate -addControl "iconSize";
+	editorTemplate -callCustom pioInstForceUpdate pioInstForceUpdate $nodeName;
+
+
+	editorTemplate -endLayout;
+
+	editorTemplate -beginScrollLayout;
+
+		editorTemplate -beginLayout "General Parameters" -collapse 0;
+			editorTemplate -addControl "pointSize";
+			editorTemplate -addControl "drawStyle";
+			editorTemplate -addControl "drawSkip";
+			editorTemplate -addControl "defaultPointColor";
+			editorTemplate -addControl "defaultAlpha";
+			editorTemplate -addControl "invertAlpha";
+		    //editorTemplate -addControl "useEmitterTransform";
+		    //editorTemplate -addControl -l "Jitter Position Magnitude" "jitterPos" ;
+		    //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
+		editorTemplate -endLayout;
+		editorTemplate -beginLayout "Channel Control" -collapse 0;
+		editorTemplate -callCustom "pioInstCustomAttrsManage" "pioInstCustomAttrsManage" $nodeName;
+		editorTemplate -endLayout;
+
+	// include/call base class/node attributes
+	//AEdependNodeTemplate $nodeName;
+	editorTemplate -beginLayout ("Render Stats");
+		editorTemplate -beginNoOptimize;
+		editorTemplate -addControl "castsShadows";
+		editorTemplate -addControl "receiveShadows";
+		editorTemplate -addControl "motionBlur";
+		editorTemplate -addControl "primaryVisibility";
+		editorTemplate -addControl "smoothShading";
+		editorTemplate -addControl "visibleInReflections";
+		editorTemplate -addControl "visibleInRefractions";
+	editorTemplate -endLayout;
+
+	AEshapeTemplate $nodeName;  // adds place for renderer specific controls
+
+	editorTemplate -suppress "compInstObjGroups";
+	editorTemplate -suppress "ignoreSelfShadowing";
+	editorTemplate -suppress "geometryAntialiasingOverride";
+	editorTemplate -suppress "antialiasingLevel";
+	editorTemplate -suppress "shadingSamplesOverride";
+	editorTemplate -suppress "shadingSamples";
+	editorTemplate -suppress "maxShadingSamples";
+	editorTemplate -suppress "volumeSamplesOverride";
+	editorTemplate -suppress "volumeSamples";
+	editorTemplate -suppress "depthJitter";
+	editorTemplate -suppress "maxVisibilitySamplesOverride";
+	editorTemplate -suppress "maxVisibilitySamples";
+	editorTemplate -suppress "localPosition";
+	editorTemplate -suppress "localScale";
+
+
+	editorTemplate -addExtraControls;
+	editorTemplate -endScrollLayout;
+}
+
+
+global proc int pioInstAEassignCacheFileCB( string $fileAttribute,
+									 string $fileName,
+									 string $fileType )
+{
+	string $components[];
+  	tokenize $fileAttribute "." $components;
+  	string $nodeName = $components[0];
+
+  	string $fileNameComp[];
+
+	string $baseFileName = basename($fileName,"");
+
+	string $fileParts[] = `partioGetBaseFileName($baseFileName)`;
+	string $fileBaseName = $fileParts[0];
+	int $pad = $fileParts[4];
+	string $ext = $fileParts[3];
+
+	setAttr ($nodeName + ".cachePrefix") -type "string" $fileBaseName;
+
+	int $extIndex = 0;
+
+	switch ($ext)
+	{
+		case "bgeo":
+			$extIndex = 0;
+			break;
+		case "geo":
+			$extIndex = 1;
+			break;
+		case "pda":
+			$extIndex = 2;
+			break;
+		case "pdb":
+			$extIndex = 3;
+			break;
+		case "pdc":
+			$extIndex = 4;
+			break;
+		case "mc":
+			$extIndex = 5;
+			break;
+		case "bin":
+			$extIndex = 6;
+			break;
+		case "prt":
+			$extIndex = 7;
+			break;
+		case "ptc":
+			$extIndex = 8;
+			break;
+		case "pts":
+			$extIndex = 9;
+			break;
+		case "xyz":
+			$extIndex = 10;
+			break;
+		case "rib":
+			$extIndex = 11;
+			break;
+		case "ass":
+			$extIndex = 12;
+			break;
+		default:
+			$extIndex = 4;
+			break;
+
+	}
+
+	setAttr ($nodeName + ".staticCache") 0;
+	if ($ext == "pdc")
+	{
+		$pad = 0;
+	}
+
+	else if ($ext == "mc")
+	{
+		$pad = 0;
+	}
+	else if ($ext == "pts" || $ext == "xyz")
+	{
+		setAttr ($nodeName + ".staticCache") 1;
+		$pad = 0;
+	}
+
+	setAttr ($nodeName + ".cachePadding") $pad;
+	setAttr ($nodeName + ".cacheFormat") $extIndex;
+	setAttr ($nodeName + ".cachePreDelim") -type "string" $fileParts[1];
+	setAttr ($nodeName + ".cachePostDelim") -type "string" $fileParts[2];
+
+	$fileName = substituteAllString($fileName, basename($fileName, ""), "");
+  	setAttr $fileAttribute -type "string" $fileName;
+
+	// This will force an update to display the effects
+	// of the new cachefile.
+	//
+	currentTime `currentTime -q`;
+
+  string $currentDir = `workspace -q -dir`;
+  retainWorkingDirectory ($currentDir);
+
+  return true;
+}
+
+global proc pioInstAEcacheFileBrowser( string $cmd, string $cacheName )
+{
+    string  $workspace = `workspace -q -fn`;
+    setWorkingDirectory $workspace "diskCache" "data";
+
+    fileBrowser ($cmd, "Partio Cache Directory", "", 0);
+}
+
+global proc pioInstAEoutpathNew(string $cacheName)
+{
+	setUITemplate -pst attributeEditorTemplate;
+		columnLayout -adj true;
+			rowLayout -nc 3 outpathLayout;
+        		text -label "Particle Path" outpathText;
+		        textField diskNameField;
+		            symbolButton -image "navButtonBrowse.png" browser;
+				setParent ..;
+
+		setParent ..;
+
+	setUITemplate -ppt;
+	setParent ..;
+
+	pioInstAEoutpathReplace( $cacheName );
+}
+
+global proc pioInstAEoutpathReplace(string $cacheName)
+{
+	string $fileName = `getAttr $cacheName`;
+	string	$buffer[];
+	tokenize($cacheName, ".", $buffer);
+	string	$nodeName = $buffer[0];
+
+	// Filename Attribute
+  connectControl diskNameField $cacheName;
+  string $command = "pioInstAEassignCacheFileCB " + " " + $cacheName;
+  button -e -c ("pioInstAEcacheFileBrowser \"" + $command + "\" " + $nodeName ) browser;
+}
+
+
+global proc string pioInstStripNodeName (string $nodeName) {
+	string $buffer[];
+	tokenize $nodeName "." $buffer;
+	return $buffer[0];
+}
+
+global proc pioInstCustomAttrsManage (string $nodeName)
+{
+    $nodeName = pioInstStripNodeName ($nodeName);
+    if (`columnLayout -q -exists "foobar"`)
+    { deleteUI "foobar"; }
+
+    columnLayout  foobar;
+
+    string $multiList[] = `listAttr -multi ($nodeName+".partioCacheAttributes")`;
+
+	int $rotationFrom = `getAttr ($nodeName+".rotationFrom")` + 2;
+	int $scaleFrom = `getAttr ($nodeName+".scaleFrom")` + 2;
+	int $indexFrom  = `getAttr ($nodeName+".indexFrom")` + 2;
+	int $shadIndexFrom  = `getAttr ($nodeName+".shaderIndexFrom")` + 2;
+
+
+	string $rotationMenu = `optionMenuGrp -label "Rotation from->"`;
+	menuItem -l "None";
+
+    for ($multi in $multiList)
+    {
+		string $tok[];
+		tokenize $multi "[" $tok;
+		string $index = $tok[1];
+		$index = substituteAllString($index, "]", "");
+		string $attr = `getAttr ($nodeName+"."+$multi)`;
+       	 menuItem -label $attr;
+    }
+	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 0 + " " + $rotationMenu)  $rotationMenu;
+
+
+    string $scaleMenu = `optionMenuGrp -label "Scale from->"`;
+	menuItem -l "None";
+    for ($multi in $multiList)
+    {
+		string $tok[];
+		tokenize $multi "[" $tok;
+		string $index = $tok[1];
+		$index = substituteAllString($index, "]", "");
+		string $attr = `getAttr ($nodeName+"."+$multi)`;
+       	 menuItem -label $attr;
+    }
+    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $scaleMenu)  $scaleMenu;
+
+	string $indexMenu = `optionMenuGrp -label "index from->"`;
+	menuItem -l "None";
+    for ($multi in $multiList)
+    {
+		string $tok[];
+		tokenize $multi "[" $tok;
+		string $index = $tok[1];
+		$index = substituteAllString($index, "]", "");
+		string $attr = `getAttr ($nodeName+"."+$multi)`;
+       	 menuItem -label $attr;
+    }
+    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $indexMenu)  $indexMenu;
+
+
+	string $shaderIndexMenu = `optionMenuGrp -label "shaderIndex from->"`;
+	menuItem -l "None";
+    for ($multi in $multiList)
+    {
+		string $tok[];
+		tokenize $multi "[" $tok;
+		string $index = $tok[1];
+		$index = substituteAllString($index, "]", "");
+		string $attr = `getAttr ($nodeName+"."+$multi)`;
+       	 menuItem -label $attr;
+    }
+	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $shaderIndexMenu)  $shaderIndexMenu;
+
+
+	if (`size($multiList)`)
+	{
+		optionMenuGrp -e -sl $rotationFrom  $rotationMenu;
+		optionMenuGrp -e -sl $scaleFrom $scaleMenu;
+		optionMenuGrp -e -sl $indexFrom  $indexMenu;
+		optionMenuGrp -e -sl $shadIndexFrom $shaderIndexMenu;
+	}
+
+}
+
+global proc pioInstSwitchAttributeFrom(string $nodeName, int $attr, string $menu)
+{
+	string $attrList[] = {"rotationFrom", "scaleFrom", "indexFrom", "shaderIndexFrom"};
+	int $sel = `optionMenuGrp -q -sl $menu`;
+
+	setAttr ($nodeName+"."+$attrList[$attr]) ($sel-2);
+
+}
+
+global proc pioInstForceUpdate(string $nodeName)
+{
+	$nodeName = pioInstStripNodeName ($nodeName);
+	if (!`button -q -exists  pioInstReloadButton`)
+	{	rowLayout -nc 1 ;
+		button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioInstReloadButton;
+	}
+}
+
+global proc  pioInstLogoHeader(string $nodeName)
+{
+	if (!`symbolButton -q -exists  pioInstHeaderIcon`)
+	{	rowLayout -nc 2 ;
+		symbolButton -h 45 -w 235 -c "pioInstSwapAboutText()" -image "partioVisualizer_logo.png" pioInstHeaderIcon;
+		text -fn "smallBoldLabelFont" -l "Partio Visualizer!!" pioInstAboutText;
+	}
+}
+
+
+global proc  pioInstSwapAboutText()
+{
+
+	string $text1 =  "Partio Visualizer!!";
+	string $text2 =  "Partio Visualizer by: \n John Cassella  (redpawfx)\n  for Luma-Pictures  2012";
+
+	string $text = `text -q -l pioInstAboutText`;
+	if (`gmatch $text "Partio Visualizer!!"`)
+	{
+		text -e -l $text2  pioInstAboutText;
+	}
+	else
+	{
+		text -e -l $text1 pioInstAboutText;
+	}
+
+}
+
+
+
+
