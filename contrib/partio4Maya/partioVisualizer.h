@@ -41,37 +41,66 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MTypeId.h>
 #include <maya/MStatus.h>
 #include <maya/MVector.h>
-#include <maya/MPxLocatorNode.h>
+#include <maya/MPxSurfaceShape.h>
+#include <maya/MPxSurfaceShapeUI.h>
 #include <maya/M3dView.h>
 #include <maya/MSceneMessage.h>
+#include <maya/MDrawData.h>
 #include <vector>
 
 #include <Partio.h>
 #include <PartioAttribute.h>
 #include <PartioIterator.h>
 
+class partioVizReaderCache
+{
+public:
+	partioVizReaderCache();
+	int token;
+	MBoundingBox bbox;
+	int dList;
+	Partio::ParticlesDataMutable* particles;
+	Partio::ParticleAttribute positionAttr;
+	Partio::ParticleAttribute colorAttr;
+	Partio::ParticleAttribute opacityAttr;
+	float* rgb;
+	float* rgba;
+	float* flipPos;
 
-class partioVisualizer : public MPxLocatorNode
+};
+
+
+class partioVisualizerUI : public MPxSurfaceShapeUI
+{
+public:
+
+    partioVisualizerUI();
+    virtual ~partioVisualizerUI();
+	virtual void draw(const MDrawRequest & request, M3dView & view) const;
+	virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
+	void 	drawBoundingBox() const;
+	void 	drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
+	static void * creator();
+
+};
+
+class partioVisualizer : public MPxSurfaceShape
 {
 public:
 	partioVisualizer();
 	virtual ~partioVisualizer();
 
     virtual MStatus   		compute( const MPlug& plug, MDataBlock& block );
-
-
-	virtual void            draw( M3dView & view, const MDagPath & path,
-								  M3dView::DisplayStyle style,
-								  M3dView::DisplayStatus status );
-
 	virtual bool            isBounded() const;
 	virtual MBoundingBox    boundingBox() const;
-
 	static  void *          creator();
 	static  MStatus         initialize();
 	static void 			reInit(void *data);
 	void 					initCallback();
 	virtual void 			postConstructor();
+
+	bool GetPlugData();
+	partioVizReaderCache* updateParticleCache();
 
 	static MObject  time;
 	static MObject  aSize;         // The size of the logo
@@ -103,16 +132,14 @@ public:
 	static MObject  aRenderCachePath;
 
 
+	static	MTypeId			id;
+	float 					multiplier;
+	bool 					cacheChanged;
+	partioVizReaderCache  	pvCache;
 
-	bool GetPlugData();
-
-	void drawBoundingBox();
-	void drawPartio(int drawStyle);
-
-public:
-	static	MTypeId		id;
 
 private:
+
 	MString mLastFileLoaded;
 	MString mLastPath;
 	MString mLastPrefix;
@@ -124,27 +151,14 @@ private:
 	float mLastAlpha;
 	bool mLastInvertAlpha;
 	bool mLastFlipStatus;
-	bool cacheChanged;
 	bool mFlipped;
-	float multiplier;
 	bool  frameChanged;
-
-	Partio::ParticlesDataMutable* particles;
-	Partio::ParticleAttribute positionAttr;
-	Partio::ParticleAttribute colorAttr;
-	Partio::ParticleAttribute opacityAttr;
-	float* rgb;
-	float* rgba;
-	float* flipPos;
-
-	MBoundingBox bbox;
 	MStringArray attributeList;
 
 protected:
 
-	float xMin, xMax, yMin, yMax, zMin, zMax;
-
 	int dUpdate;
 	GLuint dList;
+
 };
 

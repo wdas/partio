@@ -31,7 +31,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partioEmitter.h"
 #include "partioExport.h"
 #include "partio4MayaShared.h"
+#include "mayaPartioReaderShape.h"
 #include <maya/MFnPlugin.h>
+
+
 
 MStatus initializePlugin ( MObject obj )
 {
@@ -45,14 +48,19 @@ MStatus initializePlugin ( MObject obj )
 	MStatus status;
 	MFnPlugin plugin ( obj, "Luma Pictures,RedpawFX,WDAS", "0.9.1a", "Any" );
 
-	status = plugin.registerNode ( "partioVisualizer", partioVisualizer::id,
-	                               &partioVisualizer::creator, &partioVisualizer::initialize,
-	                               MPxNode::kLocatorNode );
+	status = plugin.registerShape( "partioVisualizer", partioVisualizer::id,
+									&partioVisualizer::creator,
+									&partioVisualizer::initialize,
+									&partioVisualizerUI::creator);
+
+
 	if ( !status )
 	{
 		status.perror ( "registerNode partioVisualizer failed" );
 		return status;
 	}
+
+
 	status = plugin.registerNode ( "partioEmitter", partioEmitter::id,
 	                               &partioEmitter::creator, &partioEmitter::initialize,
 	                               MPxNode::kEmitterNode );
@@ -81,6 +89,7 @@ MStatus uninitializePlugin ( MObject obj )
 		status.perror ( "deregisterNode partioVisualizer failed" );
 		return status;
 	}
+
 	status = plugin.deregisterNode ( partioEmitter::id );
 	if ( !status )
 	{

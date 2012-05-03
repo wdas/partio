@@ -163,7 +163,7 @@ void partio4Maya::buildSupportedExtensionList(std::map<short,MString> &formatExt
 void partio4Maya::drawPartioLogo(float multiplier)
 {
     glBegin ( GL_LINES );
-	glColor4f(0.0,0.0,0.0,1.0);
+
 	int i,d;
 
     int last = P1Count - 1;
