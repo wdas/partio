@@ -1,5 +1,5 @@
 /* partio4Maya  3/12/2012, John Cassella  http://luma-pictures.com and  http://redpawfx.com
-PARTIO Export
+PARTIO Visualizer
 Copyright 2012 (c)  All rights reserved
 
 Redistribution and use in source and binary forms, with or without
