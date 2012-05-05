@@ -34,6 +34,7 @@ global proc AEpartioInstancerTemplate( string $nodeName )
 	editorTemplate -addControl "cacheActive";
 	editorTemplate -addControl "staticCache";
 	editorTemplate -addControl "flipYZ";
+	editorTemplate -addControl "computeVeloPos";
 	editorTemplate -callCustom pioInstAEoutpathNew pioInstAEoutpathReplace cacheDir;
 	editorTemplate -addControl "cachePrefix";
 	editorTemplate -addControl "cacheOffset";
@@ -302,7 +303,7 @@ global proc pioInstCustomAttrsManage (string $nodeName)
 		string $attr = `getAttr ($nodeName+"."+$multi)`;
        	 menuItem -label $attr;
     }
-    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $indexMenu)  $indexMenu;
+    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $indexMenu)  $indexMenu;
 
 
 	string $shaderIndexMenu = `optionMenuGrp -label "shaderIndex from->"`;
@@ -316,7 +317,7 @@ global proc pioInstCustomAttrsManage (string $nodeName)
 		string $attr = `getAttr ($nodeName+"."+$multi)`;
        	 menuItem -label $attr;
     }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $shaderIndexMenu)  $shaderIndexMenu;
+	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 3 + " " + $shaderIndexMenu)  $shaderIndexMenu;
 
 
 	if (`size($multiList)`)

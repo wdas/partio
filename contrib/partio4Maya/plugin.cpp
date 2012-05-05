@@ -32,7 +32,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partioEmitter.h"
 #include "partioExport.h"
 #include "partio4MayaShared.h"
-#include "mayaPartioReaderShape.h"
 #include <maya/MFnPlugin.h>
 
 

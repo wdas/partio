@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/M3dView.h>
 #include <maya/MSceneMessage.h>
 #include <maya/MDrawData.h>
+#include <maya/MFnArrayAttrsData.h>
 #include <vector>
 
 #include <Partio.h>
@@ -61,15 +62,15 @@ public:
 	int dList;
 	Partio::ParticlesDataMutable* particles;
 	Partio::ParticleAttribute positionAttr;
+	Partio::ParticleAttribute velocityAttr;
 	Partio::ParticleAttribute rotationAttr;
 	Partio::ParticleAttribute scaleAttr;
 	Partio::ParticleAttribute indexAttr;
 	Partio::ParticleAttribute shaderIndexAttr;
 	float* flipPos;
-	MVectorArray  	rotationArray;
-	MVectorArray  	scaleArray;
-	MIntArray		indexArray;
-	MIntArray 		shaderIndexArray;
+	MFnArrayAttrsData instanceData;
+	MObject instanceDataObj;
+
 
 };
 
@@ -104,7 +105,9 @@ public:
 	virtual void 			postConstructor();
 
 	bool GetPlugData();
+	void addParticleAttr(int attrIndex, MString attrName );
 	partioInstReaderCache* updateParticleCache();
+
 
 	static MObject  time;
 	static MObject  aSize;         // The size of the logo
@@ -134,6 +137,7 @@ public:
 	static MObject	aInMeshInstances;
 	static MObject	aOutMesh;
 	static MObject	aInstanceData;
+	static MObject  aComputeVeloPos;
 
 
 	static	MTypeId			id;
@@ -152,14 +156,11 @@ private:
 	bool mFlipped;
 	bool  frameChanged;
 	MStringArray attributeList;
-	int rotationFromIndex;
-	int scaleFromIndex;
-	int indexFromIndex;
-	int shaderIndexFromIndex;
 	int mLastRotationFromIndex;
 	int mLastScaleFromIndex;
 	int mLastIndexFromIndex;
 	int mLastShaderIndexFromIndex;
+	bool canMotionBlur;
 
 protected:
 

@@ -751,6 +751,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			}
 		}
 	}
+	block.setClean(plug);
 	return MS::kSuccess;
 }
 

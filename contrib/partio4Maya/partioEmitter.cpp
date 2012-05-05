@@ -86,7 +86,12 @@ MCallbackId partioEmitterConnectionMade;
 
 
 partioEmitter::partioEmitter()
-        :lastWorldPoint ( 0, 0, 0, 1 )
+        :lastWorldPoint ( 0, 0, 0, 1 ),
+        mLastFileLoaded(""),
+        mLastPath(""),
+		mLastPrefix(""),
+		mLastExt(""),
+		cacheChanged(false)
 {
 }
 
