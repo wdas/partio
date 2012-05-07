@@ -387,6 +387,7 @@ MStatus partioVisualizer::initialize()
 	attributeAffects ( aDrawStyle, aUpdateCache );
 	attributeAffects ( aForceReload, aUpdateCache );
 	attributeAffects (time, aUpdateCache);
+	attributeAffects (time,aRenderCachePath);
 
 
 	return MS::kSuccess;
@@ -451,9 +452,12 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		MString newCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
 														   preDelim, postDelim, cacheFormat,integerTime, formatExt);
 
-		if (renderCachePath != newCacheFile || renderCachePath != mLastFileLoaded )
+		MString  renderCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
+														   preDelim, postDelim, cacheFormat,-123456789, formatExt);
+
+		if (renderCachePath != renderCacheFile || renderCachePath != mLastFileLoaded )
 		{
-			block.outputValue(aRenderCachePath).setString(newCacheFile);
+			block.outputValue(aRenderCachePath).setString(renderCacheFile);
 		}
 		cacheChanged = false;
 
