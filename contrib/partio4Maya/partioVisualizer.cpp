@@ -455,7 +455,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		MString  renderCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
 														   preDelim, postDelim, cacheFormat,-123456789, formatExt);
 
-		if (renderCachePath != renderCacheFile || renderCachePath != mLastFileLoaded )
+		if (renderCachePath != renderCacheFile || forceReload )
 		{
 			block.outputValue(aRenderCachePath).setString(renderCacheFile);
 		}

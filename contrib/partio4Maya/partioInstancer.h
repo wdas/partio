@@ -62,6 +62,7 @@ public:
 	int dList;
 	Partio::ParticlesDataMutable* particles;
 	Partio::ParticleAttribute positionAttr;
+	Partio::ParticleAttribute idAttr;
 	Partio::ParticleAttribute velocityAttr;
 	Partio::ParticleAttribute rotationAttr;
 	Partio::ParticleAttribute scaleAttr;

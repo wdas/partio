@@ -574,6 +574,36 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 				}
 
 			}
+			////////////////////////////////
+			// particleID
+			if (!pvCache.particles->attributeInfo("id",pvCache.idAttr) &&
+				!pvCache.particles->attributeInfo("ID",pvCache.idAttr) &&
+				!pvCache.particles->attributeInfo("particleId",pvCache.idAttr) &&
+				!pvCache.particles->attributeInfo("ParticleId",pvCache.idAttr))
+			{
+				MGlobal::displayError("PartioInstancer->Failed to find id attribute ");
+				return ( MS::kFailure );
+			}
+
+			MDoubleArray  idArray;
+			if(pvCache.instanceData.checkArrayExist("id",doubleType))
+			{
+				idArray = pvCache.instanceData.getDoubleData(MString("id"),&stat);
+				CHECK_MSTATUS(stat);
+			}
+			else
+			{
+				idArray = pvCache.instanceData.doubleArray(MString("id"),&stat);
+				CHECK_MSTATUS(stat);
+			}
+			idArray.clear();
+
+			for (int i=0;i<pvCache.particles->numParticles();i++)
+			{
+				const int* attrVal    = pvCache.particles->data<int>(pvCache.idAttr,i);
+
+				idArray.append((double)attrVal[0]);
+			}
 
 			/*
 			/// TODO:  this does not work when scrubbing yet.. really need to put the  resort of channels into the  partio side as a filter
