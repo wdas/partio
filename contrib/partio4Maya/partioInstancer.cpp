@@ -450,7 +450,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 		bool computeMotionBlur =block.inputValue( aComputeVeloPos).asBool();
 
 		int fps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
-		int integerTime = (int)floor((inputTime.value()/fps)+.52);
+		int integerTime = (int)floor((inputTime.value())+.52);
 		float deltaTime  = float(inputTime.value()/fps - integerTime);
 
 		bool motionBlurStep = false;
