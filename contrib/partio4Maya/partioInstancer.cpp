@@ -451,7 +451,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
 		int fps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
 		int integerTime = (int)floor((inputTime.value())+.52);
-		float deltaTime  = float(inputTime.value()/fps - integerTime);
+		float deltaTime  = float(inputTime.value() - integerTime);
 
 		bool motionBlurStep = false;
 		// motion  blur rounding  frame logic
