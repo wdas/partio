@@ -728,7 +728,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 					}
 					indexArray.clear();
 
-					pvCache.particles->attributeInfo(scaleFromIndex,pvCache.indexAttr);
+					pvCache.particles->attributeInfo(indexFromIndex,pvCache.indexAttr);
 					if (pvCache.indexAttr.count == 1)  // single float value for index
 					{
 						for (int i=0;i<pvCache.particles->numParticles();i++)
