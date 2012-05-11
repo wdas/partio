@@ -352,8 +352,8 @@ global proc  pioInstLogoHeader(string $nodeName)
 {
 	if (!`symbolButton -q -exists  pioInstHeaderIcon`)
 	{	rowLayout -nc 2 ;
-		symbolButton -h 45 -w 235 -c "pioInstSwapAboutText()" -image "partioVisualizer_logo.png" pioInstHeaderIcon;
-		text -fn "smallBoldLabelFont" -l "Partio Visualizer!!" pioInstAboutText;
+		symbolButton -h 45 -w 235 -c "pioInstSwapAboutText()" -image "partioInstancer_logo.png" pioInstHeaderIcon;
+		text -fn "smallBoldLabelFont" -l "Partio Instancer!!" pioInstAboutText;
 	}
 }
 
@@ -361,11 +361,11 @@ global proc  pioInstLogoHeader(string $nodeName)
 global proc  pioInstSwapAboutText()
 {
 
-	string $text1 =  "Partio Visualizer!!";
-	string $text2 =  "Partio Visualizer by: \n John Cassella  (redpawfx)\n  for Luma-Pictures  2012";
+	string $text1 =  "Partio Instancer!!";
+	string $text2 =  "Partio Instancer by: \n John Cassella  (redpawfx)\n  for Luma-Pictures  2012";
 
 	string $text = `text -q -l pioInstAboutText`;
-	if (`gmatch $text "Partio Visualizer!!"`)
+	if (`gmatch $text "Partio Instancer!!"`)
 	{
 		text -e -l $text2  pioInstAboutText;
 	}
