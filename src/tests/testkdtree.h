@@ -36,14 +36,20 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #define TESTKDTREE_H
 
 #include <Partio.h>
+#include "core/KdTree.h"
 
 namespace PartioTests {
 
-	Partio::ParticlesDataMutable* makeKDTreeData();
+struct KdTreeTestData {
 
-	//! Currently this does not actually test the KD tree independently, but rather
-    //! through a ParticlesDataMutable instance
-	void test_KDTree();
+    Partio::KdTree<3>* m_fourPtTree;
+
+};
+
+// KdTreeTestData makeKDTreeData();
+// void freeKDTreeData( KdTreeTestData& );
+
+void test_KDTree();
 }
 
 #endif

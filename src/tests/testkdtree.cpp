@@ -37,94 +37,58 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <iostream>
 #include <cmath>
 #include <stdexcept>
+
 #include "partiotesting.h"
 #include "testkdtree.h"
+#include "core/KdTree.h"
 
 // using namespace Partio;
 namespace PartioTests {
-Partio::ParticlesDataMutable* makeKDTreeData()
+
+KdTreeTestData makeKDTreeData()
 {
-    Partio::ParticlesDataMutable& foo=*Partio::create();
-    Partio::ParticleAttribute positionAttr=foo.addAttribute("position",Partio::VECTOR,3);
-    Partio::ParticleAttribute idAttr=foo.addAttribute("id",Partio::INT,1);
+    // kd tree with 4 data points located on the diagonal of a cube
+    float ptData[] = { 1.0f, 1.0f, 1.0f,
+                       0.5f, 0.5f, 0.5f,
+                    -0.5f, -0.5f, -0.5f,
+                    -1.0f, -1.0f, -1.0f };
+    KdTreeTestData testData;
+    testData.m_fourPtTree = new Partio::KdTree<3>();
+    testData.m_fourPtTree->setPoints(ptData, 4);
+    return testData;
 
-    std::cout << "Inserting points ...\n";
-    for (int i = 0; i < GRIDN; i++)
-        for (int j = 0; j < GRIDN; ++j)
-            for (int k = 0; k < GRIDN; ++k) {
-                Partio::ParticleIndex pi = foo.addParticle();
-                float* pos = foo.dataWrite<float>(positionAttr, pi);
-                int* id = foo.dataWrite<int>(idAttr, pi);
+}
 
-                pos[0] = i * 1.0f / (GRIDN - 1);
-                pos[1] = j * 1.0f / (GRIDN - 1);
-                pos[2] = k * 1.0f / (GRIDN - 1);
-                id[0]= i * 100 + j * 10 + k;
-            }
-    std::cout << "Building tree ...\n";
-    foo.sort();
-    std::cout << "Done\n";
-    return &foo;
+namespace Internal {
+    // just instantiate empty tree and check that size is 0
+    void test_KdTreeSize(const KdTreeTestData& dat)
+    {
+        Partio::KdTree<2> emptyTree;
+        TESTEXPECT(emptyTree.size() == 0);
+        TESTEXPECT(dat.m_fourPtTree->size() == 4);
+
+    }
+
+    void freeKDTreeData( KdTreeTestData& data )
+    {
+        delete data.m_fourPtTree;
+    }
+
 }
 
 void test_KDTree()
 {
 	std::cout << "------- Executing test_KDTree() -------" << std::endl;
-    Partio::ParticlesDataMutable* foo=makeKDTreeData();
-
-    Partio::ParticleAttribute posAttr;
-
-    // check that position attribute exists
-
-    TESTEXPECT (foo->attributeInfo("position", posAttr));
-    std::cout << "Testing lookup with stl types ...\n";
+    KdTreeTestData testData = makeKDTreeData();
+    try
     {
-        std::vector<uint64_t> indices;
-        std::vector<float>    dists;
-        float point[3] = {0.51, 0.52, 0.53};
-
-        foo->findNPoints(point, 5, 0.15f, indices, dists);
-        TESTEXPECT (indices.size() == 5);
-
-        const float *pos = foo->data<float>(posAttr, indices[0]);
-        TESTEXPECT (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[1]);
-        TESTEXPECT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[2]);
-        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
-        pos = foo->data<float>(posAttr, indices[3]);
-        // the following tests fail ( points are retrieved in the opposite order )
-        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[4]);
-        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
-
-        std::cout << "Test finished\n";
+        Internal::test_KdTreeSize(testData);
     }
-    std::cout << "Testing lookup with pod types ...\n";
+    catch(std::exception& excep)
     {
-        uint64_t indices[10];
-        float dists[10];
-        float point[3] = {0.51, 0.52, 0.53};
-
-        float finalDist;
-        int returned=foo->findNPoints(point, 5, 0.15f, indices, dists,&finalDist);
-        TESTEXPECT(returned == 5);
-
-        const float *pos = foo->data<float>(posAttr, indices[0]);
-        TESTEXPECT (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[1]);
-        TESTEXPECT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[2]);
-        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
-        // the following tests fail ( points are retrieved in the opposite order )
-        pos = foo->data<float>(posAttr, indices[3]);
-        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
-        pos = foo->data<float>(posAttr, indices[4]);
-        TESTEXPECT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
-
-        std::cout << "Test finished\n";
+        std::cerr << "Encountered exception " << excep.what() << " during testing" << std::endl;
     }
-    foo->release();
+    Internal::freeKDTreeData(testData);
 
 }
 
