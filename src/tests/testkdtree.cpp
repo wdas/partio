@@ -33,45 +33,91 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#include <Partio.h>
 #include <iostream>
 #include <cmath>
 #include <stdexcept>
 
+
+#include <Partio.h>
 #include "partiotesting.h"
 #include "testkdtree.h"
 #include "core/KdTree.h"
 
-// using namespace Partio;
 namespace PartioTests {
 
-KdTreeTestData makeKDTreeData()
-{
-    // kd tree with 4 data points located on the diagonal of a cube
-    float ptData[] = { 1.0f, 1.0f, 1.0f,
+namespace Internal {
+
+    void setUp4ptData(Partio::KdTree<3>& dat)
+    {
+        float ptData[] = { 1.0f, 1.0f, 1.0f,
                        0.5f, 0.5f, 0.5f,
                     -0.5f, -0.5f, -0.5f,
                     -1.0f, -1.0f, -1.0f };
-    KdTreeTestData testData;
-    testData.m_fourPtTree = new Partio::KdTree<3>();
-    testData.m_fourPtTree->setPoints(ptData, 4);
-    return testData;
+        dat.setPoints(ptData, 4);
+    }
 
-}
-
-namespace Internal {
     // just instantiate empty tree and check that size is 0
-    void test_KdTreeSize(const KdTreeTestData& dat)
+
+    void test_KdTree_size()
     {
         Partio::KdTree<2> emptyTree;
         TESTEXPECT(emptyTree.size() == 0);
-        TESTEXPECT(dat.m_fourPtTree->size() == 4);
+        Partio::KdTree<3> fourPtTree;
+        setUp4ptData(fourPtTree);
+        TESTEXPECT(fourPtTree.size() == 4);
+        std::cout << "[Finished test_KdTree_size]" << std::endl;
 
     }
 
-    void freeKDTreeData( KdTreeTestData& data )
+    void test_KdTree_point()
     {
-        delete data.m_fourPtTree;
+        Partio::KdTree<3> fourPtTree;
+        setUp4ptData(fourPtTree);
+
+        const float* pt0 = fourPtTree.point(0);
+        const float* pt3 = fourPtTree.point(3);
+        for(size_t i = 0; i < 3; i++)
+        {
+            TESTEXPECT(pt0[i] == 1.0f);
+            TESTEXPECT(pt3[i] == -1.0f);
+        }
+        std::cout << "[Finished test_KdTree_point]" << std::endl;
+
+    }
+
+    void test_KdTree_bbox()
+    {
+        Partio::KdTree<3> fourPtTree;
+        setUp4ptData(fourPtTree);
+
+        const Partio::BBox<3>& fourPtBox = fourPtTree.bbox();
+        for(size_t i = 0; i < 3; i++)
+        {
+            TESTEXPECT(fourPtBox.max[i] == 1.0f);
+            TESTEXPECT(fourPtBox.min[i] == -1.0f);
+        }
+        std::cout << "[Finished test_KdTree_bbox]" << std::endl;
+    }
+
+    // currently not working as expected, need to understanad findPoints better
+    void test_KdTree_findPoints()
+    {
+        Partio::KdTree<3> fourPtTree;
+        setUp4ptData(fourPtTree);
+        const float origin[3] = {0.0f, 0.0f, 0.0f};
+        Partio::BBox<3> testBox(origin);
+        testBox.grow(0.75);
+
+        std::vector<uint64_t> result;
+        result.resize(2);
+
+        fourPtTree.findPoints(result, testBox);
+        TESTASSERT(result.size() == 2);
+        TESTEXPECT(result[0] == 2);
+        TESTEXPECT(result[1] == 1);
+
+        std::cout << "[Finished test_KdTree_findPoints]" << std::endl;
+
     }
 
 }
@@ -79,16 +125,18 @@ namespace Internal {
 void test_KDTree()
 {
 	std::cout << "------- Executing test_KDTree() -------" << std::endl;
-    KdTreeTestData testData = makeKDTreeData();
     try
     {
-        Internal::test_KdTreeSize(testData);
+        Internal::test_KdTree_size();
+        Internal::test_KdTree_point();
+        Internal::test_KdTree_bbox();
+      //  Internal::test_KdTree_findPoints();
     }
     catch(std::exception& excep)
     {
         std::cerr << "Encountered exception " << excep.what() << " during testing" << std::endl;
     }
-    Internal::freeKDTreeData(testData);
+    std::cout << "------- finished -------" << std::endl;
 
 }
 

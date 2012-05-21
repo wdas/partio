@@ -35,19 +35,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifndef TESTKDTREE_H
 #define TESTKDTREE_H
 
+#include <memory>
+
 #include <Partio.h>
 #include "core/KdTree.h"
 
 namespace PartioTests {
 
-struct KdTreeTestData {
-
-    Partio::KdTree<3>* m_fourPtTree;
-
-};
-
-// KdTreeTestData makeKDTreeData();
-// void freeKDTreeData( KdTreeTestData& );
 
 void test_KDTree();
 }
