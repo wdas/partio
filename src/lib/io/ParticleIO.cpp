@@ -58,6 +58,7 @@ readers()
         data["pdb64"]=readPDB64;
         data["pda"]=readPDA;
         data["ptc"]=readPTC;
+        data["ptf"]=readPTC;
         data["itbl"]=readBGEO;
         data["atbl"]=readBGEO;
     }
@@ -77,6 +78,7 @@ writers()
         data["pdb64"]=writePDB64;
         data["pda"]=writePDA;
         data["ptc"]=writePTC;
+        data["ptf"]=writePTC;
         data["itbl"]=writeBGEO;
         data["atbl"]=writeBGEO;
     }
