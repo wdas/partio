@@ -64,6 +64,9 @@ readers()
         data["prt"]=readPRT;
         data["bin"]=readBIN;
         data["pts"]=readPTS;
+        data["ptf"]=readPTC;
+        data["itbl"]=readBGEO;
+        data["atbl"]=readBGEO;
     }
     return data;
 }
@@ -85,6 +88,9 @@ writers()
         data["pdc"]=writePDC;
         data["prt"]=writePRT;
         data["bin"]=writeBIN;
+        data["ptf"]=writePTC;
+        data["itbl"]=writeBGEO;
+        data["atbl"]=writeBGEO;
     }
     return data;
 }
