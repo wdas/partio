@@ -49,8 +49,8 @@ namespace Internal {
 
     void setUp4ptData(Partio::KdTree<3>& dat)
     {
-        float ptData[] = { 1.0f, 1.0f, 1.0f,
-                       0.5f, 0.5f, 0.5f,
+        float ptData[] = { 0.9f, 1.0f, 1.0f,
+                       0.5f, 0.4f, 0.5f,
                     -0.5f, -0.5f, -0.5f,
                     -1.0f, -1.0f, -1.0f };
         dat.setPoints(ptData, 4);
@@ -75,10 +75,11 @@ namespace Internal {
         setUp4ptData(fourPtTree);
 
         const float* pt0 = fourPtTree.point(0);
+        float expPt0[3] = {0.9f, 1.0f, 1.0f};
         const float* pt3 = fourPtTree.point(3);
         for(size_t i = 0; i < 3; i++)
         {
-            TESTEXPECT(pt0[i] == 1.0f);
+            TESTEXPECT(pt0[i] == expPt0[i]);
             TESTEXPECT(pt3[i] == -1.0f);
         }
         std::cout << "[Finished test_KdTree_point]" << std::endl;
@@ -91,9 +92,10 @@ namespace Internal {
         setUp4ptData(fourPtTree);
 
         const Partio::BBox<3>& fourPtBox = fourPtTree.bbox();
+        float expMax[3] = {0.9, 1.0f, 1.0f};
         for(size_t i = 0; i < 3; i++)
         {
-            TESTEXPECT(fourPtBox.max[i] == 1.0f);
+            TESTEXPECT(fourPtBox.max[i] == expMax[i]);
             TESTEXPECT(fourPtBox.min[i] == -1.0f);
         }
         std::cout << "[Finished test_KdTree_bbox]" << std::endl;
@@ -104,21 +106,67 @@ namespace Internal {
     {
         Partio::KdTree<3> fourPtTree;
         setUp4ptData(fourPtTree);
+        fourPtTree.sort();
+
         const float origin[3] = {0.0f, 0.0f, 0.0f};
         Partio::BBox<3> testBox(origin);
-        testBox.grow(0.75);
+        testBox.grow(0.76f);
 
         std::vector<uint64_t> result;
         result.resize(2);
 
         fourPtTree.findPoints(result, testBox);
-        TESTASSERT(result.size() == 2);
-        TESTEXPECT(result[0] == 2);
-        TESTEXPECT(result[1] == 1);
+        const float expPt1[3] = {-0.5f, -0.5f, -0.5f};
+        const float expPt2[3] = {0.5f, 0.4f, 0.5f};
 
+        TESTEXPECT( PartioTests::floatArraysEq<3>(fourPtTree.point(result[1]), expPt1) );
+        TESTEXPECT( PartioTests::floatArraysEq<3>(fourPtTree.point(result[0]), expPt2) );
+        std::cout << result[0] << " " << result[1] << std::endl;
         std::cout << "[Finished test_KdTree_findPoints]" << std::endl;
 
     }
+
+     void test_KdTree_findNPoints()
+    {
+        Partio::KdTree<3> fourPtTree;
+        setUp4ptData(fourPtTree);
+        fourPtTree.sort();
+
+        std::vector<uint64_t> result;
+        std::vector<float> distSq;
+
+        result.resize(2);
+        distSq.resize(2);
+
+        const float origin[3] = {0.0f, 0.0f, 0.0f};
+        float findNPointsResult = fourPtTree.findNPoints( result, distSq, origin, 2, 1.0f );
+
+        const float* pt0 = fourPtTree.point( result[0] );
+        const float expPt0[3] = {-0.5f, -0.5f, -0.5f};
+
+        TESTEXPECT(PartioTests::floatArraysEq<3>(pt0, expPt0));
+
+        const float* pt1 = fourPtTree.point( result[1] );
+        const float expPt1[3] = {0.5f, 0.4f, 0.5f};
+        TESTEXPECT(PartioTests::floatArraysEq<3>(pt1, expPt1));
+        TESTEXPECT(distSq[0] == 0.75f && distSq[1] == 0.66f);
+
+        // fourPtTree.findNPoints( result, distSq, origin, 3, 1.0f );
+        // now find only 1 point
+        result.clear(); distSq.clear();
+        fourPtTree.findNPoints(result, distSq, origin, 4, 3.0f);
+        const float* pt = fourPtTree.point( result[0] );
+        const float expPt[3] = {-1.0f, -1.0f, -1.0f};
+        TESTEXPECT( PartioTests::floatArraysEq<3>(pt, expPt));
+        TESTEXPECT( distSq[0] == 3.0f);
+
+        // non-stl containers
+
+        fourPtTree.findNPoints( result, distSq, origin, 2, 1.0f );
+        std::cout << "[Finished test_KdTree_findNPoints]" << std::endl;
+
+    }
+
 
 }
 
@@ -130,7 +178,7 @@ void test_KDTree()
         Internal::test_KdTree_size();
         Internal::test_KdTree_point();
         Internal::test_KdTree_bbox();
-      //  Internal::test_KdTree_findPoints();
+        Internal::test_KdTree_findNPoints();
     }
     catch(std::exception& excep)
     {
