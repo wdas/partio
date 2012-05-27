@@ -210,6 +210,8 @@ template <int k> class KdTree
     /** \brief returns number of points in tree
     */
     int size() const { return _points.size(); }
+    /** \brief Returns the bounding box containing all points in the tree
+    */
     const BBox<k>& bbox() const { return _bbox; }
     const float* point(int i) const { return _points[i].p; }
     uint64_t id(int i) const { return _ids[i]; }
