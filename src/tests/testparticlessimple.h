@@ -32,25 +32,16 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
-
+#ifndef TESTPARTICLESSIMPLE_H
+#define TESTPARTICLESSIMPLE_H
 
 #include <Partio.h>
 
-// include all tests
-#include "teststr.h"
-#include "testkdtree.h"
-#include "testcache.h"
-#include "testiterator.h"
-#include "testsaveload.h"
-#include "testparticlessimple.h"
+namespace PartioTests {
 
-int main(int argc, char* argv[])
-{
-	PartioTests::test_str();
-	PartioTests::test_KDTree();
-	PartioTests::test_SaveLoad();
-	PartioTests::test_Cache();
-	PartioTests::test_iterator();
-	PartioTests::test_ParticlesSimple();
-	return 0;
+Partio::ParticlesDataMutable* makeParticlesSimpleData();
+void test_ParticlesSimple();
+
 }
+
+#endif

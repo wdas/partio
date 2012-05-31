@@ -38,7 +38,7 @@ foreach(item makecircle makeline)
 endforeach(item)
 # individual test executables retained for legacy reasons
 
-foreach(item testkdtree testcache testiterator testsaveload teststr)
+foreach(item testkdtree testcache testiterator testsaveload teststr testparticlessimple)
     ADD_EXECUTABLE(${item} "${item}.cpp" "${item}_main.cpp")
     target_link_libraries(${item} ${PARTIO_LIBRARIES})
     install(TARGETS ${item} DESTINATION test)
@@ -46,7 +46,7 @@ endforeach(item)
 
 # execute all tests
 
-ADD_EXECUTABLE(testall testall.cpp testkdtree.cpp testcache.cpp testiterator.cpp testsaveload.cpp teststr.cpp)
+ADD_EXECUTABLE(testall testall.cpp testkdtree.cpp testcache.cpp testiterator.cpp testsaveload.cpp teststr.cpp testparticlessimple.cpp)
 target_link_libraries(testall ${PARTIO_LIBRARIES})
 install(TARGETS testall DESTINATION test)
 

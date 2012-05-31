@@ -33,24 +33,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-
-#include <Partio.h>
-
-// include all tests
-#include "teststr.h"
-#include "testkdtree.h"
-#include "testcache.h"
-#include "testiterator.h"
-#include "testsaveload.h"
 #include "testparticlessimple.h"
 
 int main(int argc, char* argv[])
 {
-	PartioTests::test_str();
-	PartioTests::test_KDTree();
-	PartioTests::test_SaveLoad();
-	PartioTests::test_Cache();
-	PartioTests::test_iterator();
-	PartioTests::test_ParticlesSimple();
-	return 0;
+    PartioTests::test_ParticlesSimple();
 }
