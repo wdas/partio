@@ -161,8 +161,21 @@ namespace Internal {
         TESTEXPECT( distSq[0] == 3.0f);
 
         // non-stl containers
+        uint64_t _result[2];
+        float _distSq[2];
+        float _finalSearchRadius2[2];
+        fourPtTree.findNPoints( _result, _distSq, _finalSearchRadius2, origin, 2, 1.0f );
 
-        fourPtTree.findNPoints( result, distSq, origin, 2, 1.0f );
+        const float* _pt0 = fourPtTree.point( _result[0] );
+        const float _expPt0[3] = {-0.5f, -0.5f, -0.5f};
+
+        TESTEXPECT(PartioTests::floatArraysEq<3>(_pt0, _expPt0));
+
+        const float* _pt1 = fourPtTree.point( _result[1] );
+        const float _expPt1[3] = {0.5f, 0.4f, 0.5f};
+        TESTEXPECT(PartioTests::floatArraysEq<3>(_pt1, _expPt1));
+        TESTEXPECT(_distSq[0] == 0.75f && _distSq[1] == 0.66f);
+
         std::cout << "[Finished test_KdTree_findNPoints]" << std::endl;
 
     }
