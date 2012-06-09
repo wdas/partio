@@ -574,29 +574,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 							command += ";";
 							MGlobal::executeCommandOnIdle(command);
 
-							/*
-							cout <<  "partioEmitter->adding ppAttr " << ppAttrName << endl;
-							MString command;
-							command += "if (!`attributeExists ";
-							command += ppAttrName;
-							command += " ";
-							command += partName;
-							command += "`){";
-							command += "addAttr -ln \"";
-							command += ppAttrName;
-							command +="0\"  -dt vectorArray ";
-							command += partName;
-							command += ";addAttr -ln \"";
-							command += ppAttrName;
-							command +="\"  -dt vectorArray ";
-							command += partName;
-							command += ";setAttr -e -keyable true ";
-							command += partName;
-							command += ".";
-							command += ppAttrName;
-							command +=";}";
-							MGlobal::executeCommandOnIdle(command);
-							*/
+
 						}
 						if (part.isPerParticleVectorAttribute(ppAttrName))
 						{
@@ -623,28 +601,6 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 							command += ";";
 							MGlobal::executeCommandOnIdle(command);
 
-							/*
-							MString command;
-							command += "if (!`attributeExists ";
-							command += ppAttrName;
-							command += "";
-							command += partName;
-							command += "`){";
-							command += "addAttr -ln \"";
-							command += ppAttrName;
-							command +="0\"  -dt doubleArray ";
-							command += partName;
-							command += ";addAttr -ln \"";
-							command += ppAttrName;
-							command +="\"  -dt doubleArray ";
-							command += partName;
-							command += ";setAttr -e -keyable true ";
-							command += partName;
-							command += ".";
-							command += ppAttrName;
-							command +=";";
-							MGlobal::executeCommandOnIdle(command);
-							*/
 						}
 						if (part.isPerParticleDoubleAttribute(ppAttrName))
 						{

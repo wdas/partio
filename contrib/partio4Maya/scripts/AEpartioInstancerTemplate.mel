@@ -33,7 +33,7 @@ global proc AEpartioInstancerTemplate( string $nodeName )
 	editorTemplate -beginLayout "Global" -collapse 0;
 	editorTemplate -addControl "cacheActive";
 	editorTemplate -addControl "staticCache";
-	editorTemplate -addControl "flipYZ";
+	//editorTemplate -addControl "flipYZ";
 	editorTemplate -addControl "computeVeloPos";
 	editorTemplate -callCustom pioInstAEoutpathNew pioInstAEoutpathReplace cacheDir;
 	editorTemplate -addControl "cachePrefix";
@@ -306,6 +306,7 @@ global proc pioInstCustomAttrsManage (string $nodeName)
     optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $indexMenu)  $indexMenu;
 
 
+
 	string $shaderIndexMenu = `optionMenuGrp -label "shaderIndex from->"`;
 	menuItem -l "None";
     for ($multi in $multiList)
@@ -362,7 +363,7 @@ global proc  pioInstSwapAboutText()
 {
 
 	string $text1 =  "Partio Instancer!!";
-	string $text2 =  "Partio Instancer by: \n John Cassella  (redpawfx)\n  for Luma-Pictures  2012";
+	string $text2 =  "Partio Instancer by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2012";
 
 	string $text = `text -q -l pioInstAboutText`;
 	if (`gmatch $text "Partio Instancer!!"`)

@@ -46,6 +46,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/M3dView.h>
 #include <maya/MSceneMessage.h>
 #include <maya/MDrawData.h>
+#include <maya/MSelectionList.h>
+#include <maya/MDagPath.h>
 #include <vector>
 
 #include <Partio.h>
@@ -81,6 +83,9 @@ public:
 	void 	drawBoundingBox() const;
 	void 	drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
 	static void * creator();
+	virtual bool	select( MSelectInfo &selectInfo,
+							MSelectionList &selectionList,
+							MPointArray &worldSpaceSelectPts ) const;
 
 };
 

@@ -434,25 +434,25 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			return ( MS::kFailure );
 		}
 
-		bool cacheStatic	= block.inputValue( aCacheStatic ).asBool();
-		int cacheOffset 	= block.inputValue( aCacheOffset ).asInt();
-		int cachePadding	= block.inputValue( aCachePadding ).asInt();
-		MString preDelim 	= block.inputValue( aCachePreDelim ).asString();
-		MString postDelim   = block.inputValue( aCachePostDelim).asString();
-		short cacheFormat	= block.inputValue( aCacheFormat ).asShort();
-		MFloatVector defaultColor = block.inputValue( aDefaultPointColor ).asFloatVector();
-		float defaultAlpha = block.inputValue( aDefaultAlpha ).asFloat();
-		bool invertAlpha 	= block.inputValue( aInvertAlpha ).asBool();
-		bool forceReload 	= block.inputValue( aForceReload ).asBool();
-		int integerTime		= block.inputValue(time).asInt();
-		bool flipYZ 		= block.inputValue( aFlipYZ ).asBool();
-		MString renderCachePath = block.inputValue( aRenderCachePath ).asString();
+		bool cacheStatic			= block.inputValue( aCacheStatic ).asBool();
+		int cacheOffset 			= block.inputValue( aCacheOffset ).asInt();
+		int cachePadding			= block.inputValue( aCachePadding ).asInt();
+		MString preDelim 			= block.inputValue( aCachePreDelim ).asString();
+		MString postDelim   		= block.inputValue( aCachePostDelim).asString();
+		short cacheFormat			= block.inputValue( aCacheFormat ).asShort();
+		MFloatVector defaultColor 	= block.inputValue( aDefaultPointColor ).asFloatVector();
+		float defaultAlpha 			= block.inputValue( aDefaultAlpha ).asFloat();
+		bool invertAlpha 			= block.inputValue( aInvertAlpha ).asBool();
+		bool forceReload 			= block.inputValue( aForceReload ).asBool();
+		int integerTime				= block.inputValue(time).asInt();
+		bool flipYZ 				= block.inputValue( aFlipYZ ).asBool();
+		MString renderCachePath 	= block.inputValue( aRenderCachePath ).asString();
 
 		MString formatExt;
-		MString newCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
+		MString newCacheFile 		= partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
 														   preDelim, postDelim, cacheFormat,integerTime, formatExt);
 
-		MString  renderCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
+		MString  renderCacheFile 	= partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
 														   preDelim, postDelim, cacheFormat,-123456789, formatExt);
 
 		if (renderCachePath != renderCacheFile || forceReload )
@@ -476,6 +476,12 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 //////////////////////////////////////////////
 /// or it can change from a time input change
+
+		if(!partio4Maya::partioCacheExists(newCacheFile.asChar()))
+		{
+			pvCache.particles=0; // resets the particles
+			pvCache.bbox.clear();
+		}
 
 		if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()) && (newCacheFile != mLastFileLoaded || forceReload) )
 		{
@@ -773,9 +779,27 @@ MBoundingBox partioVisualizer::boundingBox() const
     partioVisualizer* nonConstThis = const_cast<partioVisualizer*>(this);
     partioVizReaderCache* geom = nonConstThis->updateParticleCache();
 
+
 	MPoint corner1 = geom->bbox.min();
 	MPoint corner2 = geom->bbox.max();
 	return MBoundingBox( corner1, corner2 );
+}
+
+//
+// Select function. Gets called when the bbox for the object is selected.
+// This function just selects the object without doing any intersection tests.
+//
+bool partioVisualizerUI::select( MSelectInfo &selectInfo,
+							 MSelectionList &selectionList,
+							 MPointArray &worldSpaceSelectPts ) const
+{
+	MSelectionMask priorityMask( MSelectionMask::kSelectObjectsMask );
+	MSelectionList item;
+	item.add( selectInfo.selectPath() );
+	MPoint xformedPt;
+	selectInfo.addSelection( item, xformedPt, selectionList,
+							 worldSpaceSelectPts, priorityMask, false );
+	return true;
 }
 
 //////////////////////////////////////////////////////////////////

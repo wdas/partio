@@ -485,6 +485,12 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 //////////////////////////////////////////////
 /// or it can change from a time input change
 
+		if(!partio4Maya::partioCacheExists(newCacheFile.asChar()))
+		{
+			pvCache.particles=0; // resets the particles
+			pvCache.bbox.clear();
+		}
+
 		if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()) && (newCacheFile != mLastFileLoaded || forceReload) )
 		{
 			cacheChanged = true;
@@ -531,6 +537,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 			}
 
 			pvCache.bbox.clear();
+
 			if (!pvCache.particles->attributeInfo("position",pvCache.positionAttr) &&
 				!pvCache.particles->attributeInfo("Position",pvCache.positionAttr))
 			{
@@ -849,6 +856,23 @@ MBoundingBox partioInstancer::boundingBox() const
 	return MBoundingBox( corner1, corner2 );
 }
 
+//
+// Select function. Gets called when the bbox for the object is selected.
+// This function just selects the object without doing any intersection tests.
+//
+bool partioInstancerUI::select( MSelectInfo &selectInfo,
+							 MSelectionList &selectionList,
+							 MPointArray &worldSpaceSelectPts ) const
+{
+	MSelectionMask priorityMask( MSelectionMask::kSelectObjectsMask );
+	MSelectionList item;
+	item.add( selectInfo.selectPath() );
+	MPoint xformedPt;
+	selectInfo.addSelection( item, xformedPt, selectionList,
+							 worldSpaceSelectPts, priorityMask, false );
+	return true;
+}
+
 //////////////////////////////////////////////////////////////////
 ////  getPlugData is a util to update the drawing of the UI stuff
 
@@ -995,47 +1019,12 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
 		struct Point { float p[3]; };
 		glPushAttrib(GL_CURRENT_BIT);
 
-		// THIS IS KINDA TRICKY.... we do this switch between drawing procedures because on big caches, when the reallocation happens
-		// its big enough that it apparently frees the memory that the GL_Color arrays are using and  causes a segfault.
-		// so we only draw once  using the "one by one" method  when the arrays change size, and then  swap back to  the speedier
-		// pointer copy  way  after everything is settled down a bit for main interaction.   It is a significant  improvement on large
-		// datasets in user interactivity speed to use pointers
 
-		/*
-		//if(!shapeNode->cacheChanged)
-		//{
-			glEnableClientState( GL_VERTEX_ARRAY );
+		/// looping thru particles one by one...
 
-			glPointSize(pointSizeVal);
-			if (pvCache->particles->numParticles() > 0)
-			{
-				// now setup the position/color/alpha output pointers
-
-				const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,0);
-
-				if(flipYZVal)
-				{
-					glVertexPointer( 3, GL_FLOAT, stride, pvCache->flipPos );
-				}
-				else
-				{
-					glVertexPointer( 3, GL_FLOAT, stride, partioPositions );
-				}
-
-				glDrawArrays( GL_POINTS, 0, (pvCache->particles->numParticles()) );
-			}
-			glDisableClientState( GL_VERTEX_ARRAY );
-
-		//}
-
-		else
-		{
-		*/
-			/// looping thru particles one by one...
-
-			glPointSize(pointSizeVal);
-			glColor3f(1.0,1.0,1.0);
-			glBegin(GL_POINTS);
+		glPointSize(pointSizeVal);
+		glColor3f(1.0,1.0,1.0);
+		glBegin(GL_POINTS);
 
 			for (int i=0;i<pvCache->particles->numParticles();i++)
 			{
@@ -1043,8 +1032,7 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
 					glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
 			}
 
-			glEnd( );
-		//}
+		glEnd( );
 
 		glDisable(GL_POINT_SMOOTH);
 		glPopAttrib();

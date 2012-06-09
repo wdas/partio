@@ -33,7 +33,7 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 	editorTemplate -beginLayout "Global" -collapse 0;
 	editorTemplate -addControl "cacheActive";
 	editorTemplate -addControl "staticCache";
-	editorTemplate -addControl "flipYZ";
+	//editorTemplate -addControl "flipYZ";
 	editorTemplate -callCustom pioVizAEoutpathNew pioVizAEoutpathReplace cacheDir;
 	editorTemplate -addControl "cachePrefix";
 	editorTemplate -addControl "cacheOffset";
@@ -346,7 +346,7 @@ global proc  pioVizSwapAboutText()
 {
 
 	string $text1 =  "Partio Visualizer!!";
-	string $text2 =  "Partio Visualizer by: \n John Cassella  (redpawfx)\n  for Luma-Pictures  2012";
+	string $text2 =  "Partio Visualizer by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2012";
 
 	string $text = `text -q -l pioVizAboutText`;
 	if (`gmatch $text "Partio Visualizer!!"`)
