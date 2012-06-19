@@ -36,6 +36,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifndef _Camera_h_
 #define _Camera_h_
 
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif //
 
 class Vec3
 {
