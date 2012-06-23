@@ -130,12 +130,21 @@ MString partio4Maya::updateFileName (MString cacheFile, MString cacheDir, bool c
 	}
 	else
 	{
-		MString formatString =  "%s%s%s<frame>%s%s";
-		char fileName[512] = "";
-		const char* fmt = formatString.asChar();
+
 		if (!cacheStatic)
 		{
+			MString formatString =  "%s%s%s<frame>%s%s";
+			char fileName[512] = "";
+			const char* fmt = formatString.asChar();
 			sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(),  postDelim.asChar(), formatExt.asChar());
+			newCacheFile = fileName;
+		}
+		else
+		{
+			MString formatString =  "%s%s";
+			char fileName[512] = "";
+			const char* fmt = formatString.asChar();
+			sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar());
 			newCacheFile = fileName;
 		}
 	}
