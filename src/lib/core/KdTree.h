@@ -35,6 +35,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifndef KdTree_h
 #define KdTree_h
 
+
+#include <string.h>
+#include <vector>
+#include <float.h>
+#include <algorithm>
+#include <cassert>
+
 namespace Partio
 {
 
@@ -54,12 +61,6 @@ namespace Partio
       determined based on the node's overall subtree size (left+right+1).
       This can be propagated down during traversal.
 */
-
-#include <string.h>
-#include <vector>
-#include <float.h>
-#include <algorithm>
-#include <cassert>
 
 template <int k> class BBox
 {
@@ -206,7 +207,11 @@ template <int k> class KdTree
  public:
     KdTree();
     ~KdTree();
+    /** \brief returns number of points in tree
+    */
     int size() const { return _points.size(); }
+    /** \brief Returns the bounding box containing all points in the tree
+    */
     const BBox<k>& bbox() const { return _bbox; }
     const float* point(int i) const { return _points[i].p; }
     uint64_t id(int i) const { return _ids[i]; }

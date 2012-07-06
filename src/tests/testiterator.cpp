@@ -37,15 +37,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <iostream>
 #include <typeinfo>
 #include <cstdlib>
-
+#include "testiterator.h"
 #include "Timer.h"
 
-int main(int argc,char *argv[])
+namespace PartioTests {
+
+void test_iterator()
 {
     Timer* timer=new Timer("make array");
-    
     Partio::ParticlesDataMutable& foo=*Partio::create();
-    int nParticles=10000000;
+    const int nParticles=10000000;
     foo.addParticles(nParticles);
     Partio::ParticleAttribute position=foo.addAttribute("position",Partio::VECTOR,3);
     Partio::ParticleAttribute radius=foo.addAttribute("radius",Partio::FLOAT,1);
@@ -76,7 +77,7 @@ int main(int argc,char *argv[])
 //        Partio::Data<float,3>& X=it.data<Partio::Data<float,3> >(position);
         //const Partio::Data<float,1>& r=it.data<Partio::Data<float,1> >(radius);
         //const Partio::Data<float,2>& l=it.data<Partio::Data<float,2> >(life);
-        
+
 //        std::cerr<<"write guy X="<<X<<std::endl; // " life="<<l<<" radius="<<r<<std::endl;
         X[1]+=.1*i;// 100.;
         i++;
@@ -86,7 +87,7 @@ int main(int argc,char *argv[])
 
         {
             Timer timer("Access and sum with iterator");
-            
+
             Partio::ParticlesData& fooc=foo;
             float sum=0;
             Partio::ParticlesDataMutable::const_iterator it=fooc.begin();
@@ -96,34 +97,34 @@ int main(int argc,char *argv[])
             it.addAccessor(Xacc);
             it.addAccessor(racc);
             it.addAccessor(lacc);
-            
+
             for(;it!=fooc.end();++it){
                 const Partio::Data<float,3>& X=Xacc.data<Partio::Data<float,3> >(it);
                 const Partio::Data<float,1>& r=racc.data<Partio::Data<float,1> >(it);
                 const Partio::Data<float,2>& l=lacc.data<Partio::Data<float,2> >(it);
-                
+
 //                std::cerr<<"guy X="<<X[0]<<" "<<X[1]<<" "<<X[2]<<" life="<<l<<" radius="<<r<<std::endl;
                 sum+= X[0]+r[0]+l[0];
             }
             std::cerr<<"sum is "<<sum<<std::endl;
             iteratorTimes.push_back( timer.Stop_Time());
         }
-    
+
         {
             Timer timer("Access and sum by hand");
-            
+
             Partio::ParticlesData& fooc=foo;
             float sum=0;
             for(uint64_t i=0;i<(uint64_t)fooc.numParticles();i++){
                 const float* X=fooc.data<float>(position,i);
                 const float* r=fooc.data<float>(radius,i);
                 const float* l=fooc.data<float>(life,i);
-                
+
 //                std::cerr<<"guy X="<<X[0]<<" "<<X[1]<<" "<<X[2]<<" life="<<l<<" radius="<<r<<std::endl;
                 sum+= X[0]+r[0]+l[0];
             }
             std::cerr<<"sum is "<<sum<<std::endl;
-           
+
             handTimes.push_back( timer.Stop_Time());
 
         }
@@ -153,7 +154,7 @@ int main(int argc,char *argv[])
                 l+=2;
             }
             std::cerr<<"sum is "<<sum<<std::endl;
-           
+
             rawTimes.push_back( timer.Stop_Time());
 
         }
@@ -174,7 +175,6 @@ int main(int argc,char *argv[])
     std::cerr<<"Hand "<<avgHand<<" s "<<megs/avgHand<<" MB/s"<<std::endl;
     std::cerr<<"Raw "<<raw<<" s "<<megs/raw<<" MB/s"<<std::endl;
 
-    return 0;
-
 }
 
+}

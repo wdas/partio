@@ -31,8 +31,22 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-foreach(item testiterator test testcache teststr makecircle makeline testkdtree)
+foreach(item makecircle makeline)
     ADD_EXECUTABLE(${item} "${item}.cpp")
     target_link_libraries(${item} ${PARTIO_LIBRARIES})
     install(TARGETS ${item} DESTINATION test)
 endforeach(item)
+# individual test executables retained for legacy reasons
+
+foreach(item testkdtree testcache testiterator testsaveload teststr testparticlessimple)
+    ADD_EXECUTABLE(${item} "${item}.cpp" "${item}_main.cpp")
+    target_link_libraries(${item} ${PARTIO_LIBRARIES})
+    install(TARGETS ${item} DESTINATION test)
+endforeach(item)
+
+# execute all tests
+
+ADD_EXECUTABLE(testall testall.cpp testkdtree.cpp testcache.cpp testiterator.cpp testsaveload.cpp teststr.cpp testparticlessimple.cpp)
+target_link_libraries(testall ${PARTIO_LIBRARIES})
+install(TARGETS testall DESTINATION test)
+
