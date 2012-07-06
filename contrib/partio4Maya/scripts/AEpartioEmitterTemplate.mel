@@ -247,7 +247,7 @@ global proc  pioEmSwapAboutText()
 {
 
 	string $text1 =  "Partio Emitter Tips: \n  turn on LifespanPP,  max Particles to -1\n and conserve to 0";
-	string $text2 =  "Partio Emitter by: \n John Cassella  (redpawfx)\n  for Luma-Pictures  2011";
+	string $text2 =  "Partio Emitter by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2011";
 
 	string $text = `text -q -l pioEmAboutText`;
 	if (`gmatch $text "Partio Emitter Tips:*"`)

@@ -28,10 +28,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
 #include "partioVisualizer.h"
+#include "partioInstancer.h"
 #include "partioEmitter.h"
 #include "partioExport.h"
 #include "partio4MayaShared.h"
-#include "mayaPartioReaderShape.h"
 #include <maya/MFnPlugin.h>
 
 
@@ -46,7 +46,7 @@ MStatus initializePlugin ( MObject obj )
 	MGlobal::executeCommand("source partioUtils.mel");
 
 	MStatus status;
-	MFnPlugin plugin ( obj, "Luma Pictures,RedpawFX,WDAS", "0.9.1a", "Any" );
+	MFnPlugin plugin ( obj, "Luma Pictures,RedpawFX,WDAS", "0.9.2a", "Any" );
 
 	status = plugin.registerShape( "partioVisualizer", partioVisualizer::id,
 									&partioVisualizer::creator,
@@ -57,6 +57,17 @@ MStatus initializePlugin ( MObject obj )
 	if ( !status )
 	{
 		status.perror ( "registerNode partioVisualizer failed" );
+		return status;
+	}
+	status = plugin.registerShape( "partioInstancer", partioInstancer::id,
+									&partioInstancer::creator,
+									&partioInstancer::initialize,
+									&partioInstancerUI::creator);
+
+
+	if ( !status )
+	{
+		status.perror ( "registerNode partioInstancer failed" );
 		return status;
 	}
 
@@ -87,6 +98,12 @@ MStatus uninitializePlugin ( MObject obj )
 	if ( !status )
 	{
 		status.perror ( "deregisterNode partioVisualizer failed" );
+		return status;
+	}
+	status = plugin.deregisterNode ( partioInstancer::id );
+	if ( !status )
+	{
+		status.perror ( "deregisterNode partioInstancer failed" );
 		return status;
 	}
 

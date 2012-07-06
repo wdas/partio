@@ -27,20 +27,21 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-global proc AEpartioVisualizerTemplate( string $nodeName )
+global proc AEpartioInstancerTemplate( string $nodeName )
 {
-	editorTemplate -callCustom pioVizLogoHeader pioVizLogoHeader $nodeName;
+	editorTemplate -callCustom pioInstLogoHeader pioInstLogoHeader $nodeName;
 	editorTemplate -beginLayout "Global" -collapse 0;
 	editorTemplate -addControl "cacheActive";
 	editorTemplate -addControl "staticCache";
 	//editorTemplate -addControl "flipYZ";
-	editorTemplate -callCustom pioVizAEoutpathNew pioVizAEoutpathReplace cacheDir;
+	editorTemplate -addControl "computeVeloPos";
+	editorTemplate -callCustom pioInstAEoutpathNew pioInstAEoutpathReplace cacheDir;
 	editorTemplate -addControl "cachePrefix";
 	editorTemplate -addControl "cacheOffset";
 	editorTemplate -addControl "cachePadding";
 	editorTemplate -addControl "cacheFormat";
 	editorTemplate -addControl "iconSize";
-	editorTemplate -callCustom pioVizForceUpdate pioVizForceUpdate $nodeName;
+	editorTemplate -callCustom pioInstForceUpdate pioInstForceUpdate $nodeName;
 
 
 	editorTemplate -endLayout;
@@ -59,7 +60,7 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 		    //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
 		editorTemplate -endLayout;
 		editorTemplate -beginLayout "Channel Control" -collapse 0;
-		editorTemplate -callCustom "pioVizCustomAttrsManage" "pioVizCustomAttrsManage" $nodeName;
+		editorTemplate -callCustom "pioInstCustomAttrsManage" "pioInstCustomAttrsManage" $nodeName;
 		editorTemplate -endLayout;
 
 	// include/call base class/node attributes
@@ -98,7 +99,7 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 }
 
 
-global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
+global proc int pioInstAEassignCacheFileCB( string $fileAttribute,
 									 string $fileName,
 									 string $fileType )
 {
@@ -201,7 +202,7 @@ global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
   return true;
 }
 
-global proc pioVizAEcacheFileBrowser( string $cmd, string $cacheName )
+global proc pioInstAEcacheFileBrowser( string $cmd, string $cacheName )
 {
     string  $workspace = `workspace -q -fn`;
     setWorkingDirectory $workspace "diskCache" "data";
@@ -209,7 +210,7 @@ global proc pioVizAEcacheFileBrowser( string $cmd, string $cacheName )
     fileBrowser ($cmd, "Partio Cache Directory", "", 0);
 }
 
-global proc pioVizAEoutpathNew(string $cacheName)
+global proc pioInstAEoutpathNew(string $cacheName)
 {
 	setUITemplate -pst attributeEditorTemplate;
 		columnLayout -adj true;
@@ -224,10 +225,10 @@ global proc pioVizAEoutpathNew(string $cacheName)
 	setUITemplate -ppt;
 	setParent ..;
 
-	pioVizAEoutpathReplace( $cacheName );
+	pioInstAEoutpathReplace( $cacheName );
 }
 
-global proc pioVizAEoutpathReplace(string $cacheName)
+global proc pioInstAEoutpathReplace(string $cacheName)
 {
 	string $fileName = `getAttr $cacheName`;
 	string	$buffer[];
@@ -236,20 +237,20 @@ global proc pioVizAEoutpathReplace(string $cacheName)
 
 	// Filename Attribute
   connectControl diskNameField $cacheName;
-  string $command = "pioVizAEassignCacheFileCB " + " " + $cacheName;
-  button -e -c ("pioVizAEcacheFileBrowser \"" + $command + "\" " + $nodeName ) browser;
+  string $command = "pioInstAEassignCacheFileCB " + " " + $cacheName;
+  button -e -c ("pioInstAEcacheFileBrowser \"" + $command + "\" " + $nodeName ) browser;
 }
 
 
-global proc string pioVizStripNodeName (string $nodeName) {
+global proc string pioInstStripNodeName (string $nodeName) {
 	string $buffer[];
 	tokenize $nodeName "." $buffer;
 	return $buffer[0];
 }
 
-global proc pioVizCustomAttrsManage (string $nodeName)
+global proc pioInstCustomAttrsManage (string $nodeName)
 {
-    $nodeName = pioVizStripNodeName ($nodeName);
+    $nodeName = pioInstStripNodeName ($nodeName);
     if (`columnLayout -q -exists "foobar"`)
     { deleteUI "foobar"; }
 
@@ -257,12 +258,13 @@ global proc pioVizCustomAttrsManage (string $nodeName)
 
     string $multiList[] = `listAttr -multi ($nodeName+".partioCacheAttributes")`;
 
-	int $colorFrom = `getAttr ($nodeName+".colorFrom")` + 2;
-	int $opacityFrom = `getAttr ($nodeName+".opacityFrom")` + 2;
-	int $radiusFrom  = `getAttr ($nodeName+".radiusFrom")` + 2;
+	int $rotationFrom = `getAttr ($nodeName+".rotationFrom")` + 2;
+	int $scaleFrom = `getAttr ($nodeName+".scaleFrom")` + 2;
+	int $indexFrom  = `getAttr ($nodeName+".indexFrom")` + 2;
+	int $shadIndexFrom  = `getAttr ($nodeName+".shaderIndexFrom")` + 2;
 
 
-	string $colorMenu = `optionMenuGrp -label "Color from->"`;
+	string $rotationMenu = `optionMenuGrp -label "Rotation from->"`;
 	menuItem -l "None";
 
     for ($multi in $multiList)
@@ -274,10 +276,10 @@ global proc pioVizCustomAttrsManage (string $nodeName)
 		string $attr = `getAttr ($nodeName+"."+$multi)`;
        	 menuItem -label $attr;
     }
-	optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 0 + " " + $colorMenu)  $colorMenu;
+	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 0 + " " + $rotationMenu)  $rotationMenu;
 
 
-    string $opacMenu = `optionMenuGrp -label "Opacity from->"`;
+    string $scaleMenu = `optionMenuGrp -label "Scale from->"`;
 	menuItem -l "None";
     for ($multi in $multiList)
     {
@@ -288,10 +290,9 @@ global proc pioVizCustomAttrsManage (string $nodeName)
 		string $attr = `getAttr ($nodeName+"."+$multi)`;
        	 menuItem -label $attr;
     }
-    optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $opacMenu)  $opacMenu;
+    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $scaleMenu)  $scaleMenu;
 
-	/*
-	string $radiusMenu = `optionMenuGrp -label "Radius from->"`;
+	string $indexMenu = `optionMenuGrp -label "index from->"`;
 	menuItem -l "None";
     for ($multi in $multiList)
     {
@@ -302,60 +303,76 @@ global proc pioVizCustomAttrsManage (string $nodeName)
 		string $attr = `getAttr ($nodeName+"."+$multi)`;
        	 menuItem -label $attr;
     }
-	optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $radiusMenu)  $radiusMenu;
-	*/
+    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $indexMenu)  $indexMenu;
+
+
+
+	string $shaderIndexMenu = `optionMenuGrp -label "shaderIndex from->"`;
+	menuItem -l "None";
+    for ($multi in $multiList)
+    {
+		string $tok[];
+		tokenize $multi "[" $tok;
+		string $index = $tok[1];
+		$index = substituteAllString($index, "]", "");
+		string $attr = `getAttr ($nodeName+"."+$multi)`;
+       	 menuItem -label $attr;
+    }
+	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 3 + " " + $shaderIndexMenu)  $shaderIndexMenu;
+
 
 	if (`size($multiList)`)
 	{
-		optionMenuGrp -e -sl $colorFrom  $colorMenu;
-		optionMenuGrp -e -sl $opacityFrom $opacMenu;
-		//optionMenuGrp -e -sl $radiusFrom $radiusMenu;
+		optionMenuGrp -e -sl $rotationFrom  $rotationMenu;
+		optionMenuGrp -e -sl $scaleFrom $scaleMenu;
+		optionMenuGrp -e -sl $indexFrom  $indexMenu;
+		optionMenuGrp -e -sl $shadIndexFrom $shaderIndexMenu;
 	}
 
 }
 
-global proc pioVizSwitchAttributeFrom(string $nodeName, int $attr, string $menu)
+global proc pioInstSwitchAttributeFrom(string $nodeName, int $attr, string $menu)
 {
-	string $attrList[] = {"colorFrom", "opacityFrom", "radiusFrom"};
+	string $attrList[] = {"rotationFrom", "scaleFrom", "indexFrom", "shaderIndexFrom"};
 	int $sel = `optionMenuGrp -q -sl $menu`;
 
 	setAttr ($nodeName+"."+$attrList[$attr]) ($sel-2);
 
 }
 
-global proc pioVizForceUpdate(string $nodeName)
+global proc pioInstForceUpdate(string $nodeName)
 {
-	$nodeName = pioVizStripNodeName ($nodeName);
-	if (!`button -q -exists  pioVizReloadButton`)
+	$nodeName = pioInstStripNodeName ($nodeName);
+	if (!`button -q -exists  pioInstReloadButton`)
 	{	rowLayout -nc 1 ;
-		button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioVizReloadButton;
+		button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioInstReloadButton;
 	}
 }
 
-global proc  pioVizLogoHeader(string $nodeName)
+global proc  pioInstLogoHeader(string $nodeName)
 {
-	if (!`symbolButton -q -exists  pioVizHeaderIcon`)
+	if (!`symbolButton -q -exists  pioInstHeaderIcon`)
 	{	rowLayout -nc 2 ;
-		symbolButton -h 45 -w 235 -c "pioVizSwapAboutText()" -image "partioVisualizer_logo.png" pioVizHeaderIcon;
-		text -fn "smallBoldLabelFont" -l "Partio Visualizer!!" pioVizAboutText;
+		symbolButton -h 45 -w 235 -c "pioInstSwapAboutText()" -image "partioInstancer_logo.png" pioInstHeaderIcon;
+		text -fn "smallBoldLabelFont" -l "Partio Instancer!!" pioInstAboutText;
 	}
 }
 
 
-global proc  pioVizSwapAboutText()
+global proc  pioInstSwapAboutText()
 {
 
-	string $text1 =  "Partio Visualizer!!";
-	string $text2 =  "Partio Visualizer by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2012";
+	string $text1 =  "Partio Instancer!!";
+	string $text2 =  "Partio Instancer by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2012";
 
-	string $text = `text -q -l pioVizAboutText`;
-	if (`gmatch $text "Partio Visualizer!!"`)
+	string $text = `text -q -l pioInstAboutText`;
+	if (`gmatch $text "Partio Instancer!!"`)
 	{
-		text -e -l $text2  pioVizAboutText;
+		text -e -l $text2  pioInstAboutText;
 	}
 	else
 	{
-		text -e -l $text1 pioVizAboutText;
+		text -e -l $text1 pioInstAboutText;
 	}
 
 }

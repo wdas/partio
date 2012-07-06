@@ -1,5 +1,5 @@
-/* partio4Maya  3/12/2012, John Cassella  http://luma-pictures.com and  http://redpawfx.com
-PARTIO Visualizer
+/* partio4Maya  5/02/2012, John Cassella  http://luma-pictures.com and  http://redpawfx.com
+PARTIO Instancer
 Copyright 2012 (c)  All rights reserved
 
 Redistribution and use in source and binary forms, with or without
@@ -63,7 +63,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MTime.h>
 #include <maya/MGlobal.h>
 
-#include "partioVisualizer.h"
+#include "partioInstancer.h"
 #include "partio4MayaShared.h"
 #include "iconArrays.h"
 #include <set>
@@ -74,7 +74,7 @@ static MGLFunctionTable *gGLFT = NULL;
 
 
 // id is registered with autodesk no need to change
-#define ID_PARTIOVISUALIZER  0x00116ECF
+#define ID_PARTIOVISUALIZER  0x00116ED5
 
 #define LEAD_COLOR				18	// green
 #define ACTIVE_COLOR			15	// white
@@ -82,49 +82,67 @@ static MGLFunctionTable *gGLFT = NULL;
 #define DORMANT_COLOR			4	// blue
 #define HILITE_COLOR			17	// pale blue
 
+/*
+Names and types of all array attributes  the maya instancer looks for
+used by the geometry instancer nodes:
+position (vectorArray)
+scale (vectorArray)
+shear (vectorArray)
+visibility (doubleArray)
+objectIndex (doubleArray)
+rotationType (doubleArray)
+rotation (vectorArray)
+aimDirection (vectorArray)
+aimPosition (vectorArray)
+aimAxis (vectorArray)
+aimUpAxis (vectorArray)
+aimWorldUp (vectorArray)
+age (doubleArray)
+id (doubleArray)
+*/
+
 using namespace Partio;
 using namespace std;
 
 /// ///////////////////////////////////////////////////
 /// PARTIO VISUALIZER
 
-MTypeId partioVisualizer::id( ID_PARTIOVISUALIZER );
+MTypeId partioInstancer::id( ID_PARTIOVISUALIZER );
 
-MObject partioVisualizer::time;
-MObject partioVisualizer::aDrawSkip;
-MObject partioVisualizer::aUpdateCache;
-MObject partioVisualizer::aSize;         // The size of the logo
-MObject partioVisualizer::aFlipYZ;
-MObject partioVisualizer::aCacheDir;
-MObject partioVisualizer::aCachePrefix;
-MObject partioVisualizer::aUseTransform;
-MObject partioVisualizer::aCacheActive;
-MObject partioVisualizer::aCacheOffset;
-MObject partioVisualizer::aCacheStatic;
-MObject partioVisualizer::aCacheFormat;
-MObject partioVisualizer::aCachePadding;
-MObject partioVisualizer::aCachePreDelim;
-MObject partioVisualizer::aCachePostDelim;
-MObject partioVisualizer::aJitterPos;
-MObject partioVisualizer::aJitterFreq;
-MObject partioVisualizer::aPartioAttributes;
-MObject partioVisualizer::aColorFrom;
-MObject partioVisualizer::aRadiusFrom;
-MObject partioVisualizer::aAlphaFrom;
-MObject partioVisualizer::aPointSize;
-MObject partioVisualizer::aDefaultPointColor;
-MObject partioVisualizer::aDefaultAlpha;
-MObject partioVisualizer::aInvertAlpha;
-MObject partioVisualizer::aDrawStyle;
-MObject partioVisualizer::aForceReload;
-MObject partioVisualizer::aRenderCachePath;
+MObject partioInstancer::time;
+MObject partioInstancer::aUpdateCache;
+MObject partioInstancer::aSize;         // The size of the logo
+MObject partioInstancer::aFlipYZ;
+MObject partioInstancer::aCacheDir;
+MObject partioInstancer::aCachePrefix;
+MObject partioInstancer::aUseTransform;
+MObject partioInstancer::aCacheActive;
+MObject partioInstancer::aCacheOffset;
+MObject partioInstancer::aCacheStatic;
+MObject partioInstancer::aCacheFormat;
+MObject partioInstancer::aCachePadding;
+MObject partioInstancer::aCachePreDelim;
+MObject partioInstancer::aCachePostDelim;
+MObject partioInstancer::aPartioAttributes;
+MObject partioInstancer::aPointSize;
+MObject partioInstancer::aDrawStyle;
+MObject partioInstancer::aForceReload;
+MObject partioInstancer::aRenderCachePath;
+MObject	partioInstancer::aRotationFrom;
+MObject	partioInstancer::aScaleFrom;
+MObject	partioInstancer::aIndexFrom;
+MObject	partioInstancer::aShaderIndexFrom;
+MObject	partioInstancer::aInMeshInstances;
+MObject	partioInstancer::aOutMesh;
+MObject	partioInstancer::aInstanceData;
+MObject partioInstancer::aComputeVeloPos;
 
 
-MCallbackId partioVisualizerOpenCallback;
-MCallbackId partioVisualizerImportCallback;
-MCallbackId partioVisualizerReferenceCallback;
+MCallbackId partioInstancerOpenCallback;
+MCallbackId partioInstancerImportCallback;
+MCallbackId partioInstancerReferenceCallback;
 
-partioVizReaderCache::partioVizReaderCache()
+partioInstReaderCache::partioInstReaderCache()
 {
 	token = 0;
 	bbox = MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0));
@@ -132,29 +150,31 @@ partioVizReaderCache::partioVizReaderCache()
 }
 
 
-/// CREATOR
-partioVisualizer::partioVisualizer()
+/// Constructor
+partioInstancer::partioInstancer()
 :   mLastFileLoaded(""),
-	mLastAlpha(0.0),
-	mLastInvertAlpha(false),
 	mLastPath(""),
 	mLastPrefix(""),
 	mLastExt(""),
-	mLastColorFromIndex(-1),
-	mLastAlphaFromIndex(-1),
-	mLastRadiusFromIndex(-1),
-	mLastColor(1,0,0),
+	mLastRotationFromIndex(-1),
+	mLastScaleFromIndex(-1),
+	mLastIndexFromIndex(-1),
+	mLastShaderIndexFromIndex(-1),
 	cacheChanged(false),
-	multiplier(1.0)
+	multiplier(1.0),
+	canMotionBlur(false)
 {
 	pvCache.particles = NULL;
 	pvCache.flipPos = (float *) malloc(sizeof(float));
-	pvCache.rgb = (float *) malloc (sizeof(float));
-	pvCache.rgba = (float *) malloc(sizeof(float));
+
+	// create the instanceData object
+	MStatus stat;
+	pvCache.instanceDataObj = pvCache.instanceData.create ( &stat );
+	CHECK_MSTATUS(stat);
 
 }
 /// DESTRUCTOR
-partioVisualizer::~partioVisualizer()
+partioInstancer::~partioInstancer()
 {
 
 	if (pvCache.particles)
@@ -162,33 +182,32 @@ partioVisualizer::~partioVisualizer()
 		pvCache.particles->release();
 	}
 	free(pvCache.flipPos);
-	free(pvCache.rgb);
-	free(pvCache.rgba);
-	MSceneMessage::removeCallback( partioVisualizerOpenCallback);
-    MSceneMessage::removeCallback( partioVisualizerImportCallback);
-    MSceneMessage::removeCallback( partioVisualizerReferenceCallback);
+
+	MSceneMessage::removeCallback( partioInstancerOpenCallback);
+    MSceneMessage::removeCallback( partioInstancerImportCallback);
+    MSceneMessage::removeCallback( partioInstancerReferenceCallback);
 
 }
 
-void* partioVisualizer::creator()
+void* partioInstancer::creator()
 {
-	return new partioVisualizer;
+	return new partioInstancer;
 }
 
 /// POST CONSTRUCTOR
-void partioVisualizer::postConstructor()
+void partioInstancer::postConstructor()
 {
 	setRenderable(true);
-	partioVisualizerOpenCallback = MSceneMessage::addCallback(MSceneMessage::kAfterOpen, partioVisualizer::reInit, this);
-    partioVisualizerImportCallback = MSceneMessage::addCallback(MSceneMessage::kAfterImport, partioVisualizer::reInit, this);
-    partioVisualizerReferenceCallback = MSceneMessage::addCallback(MSceneMessage::kAfterReference, partioVisualizer::reInit, this);
+	partioInstancerOpenCallback = MSceneMessage::addCallback(MSceneMessage::kAfterOpen, partioInstancer::reInit, this);
+    partioInstancerImportCallback = MSceneMessage::addCallback(MSceneMessage::kAfterImport, partioInstancer::reInit, this);
+    partioInstancerReferenceCallback = MSceneMessage::addCallback(MSceneMessage::kAfterReference, partioInstancer::reInit, this);
 }
 
 ///////////////////////////////////
 /// init after opening
 ///////////////////////////////////
 
-void partioVisualizer::initCallback()
+void partioInstancer::initCallback()
 {
 
     MObject tmo = thisMObject();
@@ -200,26 +219,19 @@ void partioVisualizer::initCallback()
 
     MPlug(tmo,aCacheDir).getValue(mLastPath);
     MPlug(tmo,aCachePrefix).getValue(mLastPrefix);
-	MPlug(tmo,aDefaultAlpha).getValue(mLastAlpha);
-	MPlug(tmo,aColorFrom).getValue(mLastColorFromIndex);
-	MPlug(tmo,aAlphaFrom).getValue(mLastAlphaFromIndex);
-	MPlug(tmo,aRadiusFrom).getValue(mLastRadiusFromIndex);
 	MPlug(tmo,aSize).getValue(multiplier);
-	MPlug(tmo,aInvertAlpha).getValue(mLastInvertAlpha);
 	cacheChanged = false;
 
-
-
 }
 
-void partioVisualizer::reInit(void *data)
+void partioInstancer::reInit(void *data)
 {
-    partioVisualizer  *vizNode = (partioVisualizer*) data;
-    vizNode->initCallback();
+    partioInstancer  *instNode = (partioInstancer*) data;
+    instNode->initCallback();
 }
 
 
-MStatus partioVisualizer::initialize()
+MStatus partioInstancer::initialize()
 {
 
 	MFnEnumAttribute 	eAttr;
@@ -228,7 +240,7 @@ MStatus partioVisualizer::initialize()
 	MFnTypedAttribute 	tAttr;
 	MStatus			 	stat;
 
-	time = nAttr.create( "time", "tm", MFnNumericData::kLong ,0);
+	time = uAttr.create("time", "tm", MFnUnitAttribute::kTime, 0.0, &stat );
 	uAttr.setKeyable( true );
 
 	aSize = uAttr.create( "iconSize", "isz", MFnUnitAttribute::kDistance );
@@ -237,15 +249,6 @@ MStatus partioVisualizer::initialize()
 	aFlipYZ = nAttr.create( "flipYZ", "fyz", MFnNumericData::kBoolean);
 	nAttr.setDefault ( false );
 	nAttr.setKeyable ( true );
-
-	aDrawSkip = nAttr.create( "drawSkip", "dsk", MFnNumericData::kLong ,0);
-	nAttr.setKeyable( true );
-	nAttr.setReadable( true );
-	nAttr.setWritable( true );
-	nAttr.setConnectable( true );
-	nAttr.setStorable( true );
-	nAttr.setMin(0);
-	nAttr.setMax(1000);
 
 	aCacheDir = tAttr.create ( "cacheDir", "cachD", MFnStringData::kString );
     tAttr.setReadable ( true );
@@ -288,7 +291,7 @@ MStatus partioVisualizer::initialize()
 
 	aDrawStyle = eAttr.create( "drawStyle", "drwStyl");
     eAttr.addField("points",	0);
-    //eAttr.addField("velocity", 1);
+    eAttr.addField("index#",	1);
     //eAttr.addField("spheres",	2);
 	eAttr.addField("boundingBox", 3);
 	eAttr.setDefault(0);
@@ -301,34 +304,8 @@ MStatus partioVisualizer::initialize()
     aPartioAttributes = tAttr.create ("partioCacheAttributes", "pioCAts", MFnStringData::kString);
     tAttr.setArray(true);
 
-	aColorFrom = nAttr.create("colorFrom", "cfrm", MFnNumericData::kInt, -1, &stat);
-	nAttr.setDefault(-1);
-	nAttr.setKeyable(true);
-
-	aAlphaFrom = nAttr.create("opacityFrom", "ofrm", MFnNumericData::kInt, -1, &stat);
-	nAttr.setDefault(-1);
-	nAttr.setKeyable(true);
-
-	aRadiusFrom = nAttr.create("radiusFrom", "rfrm", MFnNumericData::kInt, -1, &stat);
-	nAttr.setDefault(-1);
-	nAttr.setKeyable(true);
-
 	aPointSize = nAttr.create("pointSize", "ptsz", MFnNumericData::kInt, 2, &stat);
 	nAttr.setDefault(2);
-	nAttr.setKeyable(true);
-
-	aDefaultPointColor = nAttr.createColor("defaultPointColor", "dpc", &stat);
-	nAttr.setDefault(1.0f, 0.0f, 0.0f);
-	nAttr.setKeyable(true);
-
-	aDefaultAlpha = nAttr.create("defaultAlpha", "dalf", MFnNumericData::kFloat, 1.0, &stat);
-	nAttr.setDefault(1.0);
-	nAttr.setMin(0.0);
-	nAttr.setMax(1.0);
-	nAttr.setKeyable(true);
-
-	aInvertAlpha= nAttr.create("invertAlpha", "ialph", MFnNumericData::kBoolean, false, &stat);
-	nAttr.setDefault(false);
 	nAttr.setKeyable(true);
 
 	aForceReload = nAttr.create("forceReload", "frel", MFnNumericData::kBoolean, false, &stat);
@@ -339,12 +316,37 @@ MStatus partioVisualizer::initialize()
 	nAttr.setHidden(true);
 
 	aRenderCachePath = tAttr.create ( "renderCachePath", "rcp", MFnStringData::kString );
-	nAttr.setHidden(true);
+	tAttr.setHidden(true);
+
+	aRotationFrom = nAttr.create("rotationFrom", "rfrm", MFnNumericData::kInt, -1, &stat);
+	nAttr.setDefault(-1);
+	nAttr.setKeyable(true);
+
+	aScaleFrom = nAttr.create("scaleFrom", "sfrm", MFnNumericData::kInt, -1, &stat);
+	nAttr.setDefault(-1);
+	nAttr.setKeyable(true);
+
+	aIndexFrom = nAttr.create("indexFrom", "ifrm", MFnNumericData::kInt, -1, &stat);
+	nAttr.setDefault(-1);
+	nAttr.setKeyable(true);
+
+	aShaderIndexFrom = nAttr.create("shaderIndexFrom", "sifrm", MFnNumericData::kInt, -1, &stat);
+	nAttr.setDefault(-1);
+	nAttr.setKeyable(true);
+
+	aInstanceData = tAttr.create( "instanceData", "instd", MFnArrayAttrsData::kDynArrayAttrs, &stat);
+	tAttr.setKeyable(false);
+	tAttr.setStorable(false);
+	tAttr.setHidden(false);
+	tAttr.setReadable(true);
+
+	aComputeVeloPos = nAttr.create("computeVeloPos", "cvp", MFnNumericData::kBoolean, false, &stat);
+	tAttr.setKeyable(false);
+
 
 	addAttribute ( aUpdateCache );
 	addAttribute ( aSize );
 	addAttribute ( aFlipYZ );
-	addAttribute ( aDrawSkip );
 	addAttribute ( aCacheDir );
     addAttribute ( aCachePrefix );
     addAttribute ( aCacheOffset );
@@ -355,16 +357,16 @@ MStatus partioVisualizer::initialize()
 	addAttribute ( aCachePostDelim );
     addAttribute ( aCacheFormat );
     addAttribute ( aPartioAttributes );
-	addAttribute ( aColorFrom );
-	addAttribute ( aAlphaFrom );
-	addAttribute ( aRadiusFrom );
 	addAttribute ( aPointSize );
-	addAttribute ( aDefaultPointColor );
-	addAttribute ( aDefaultAlpha );
-	addAttribute ( aInvertAlpha );
 	addAttribute ( aDrawStyle );
 	addAttribute ( aForceReload );
 	addAttribute ( aRenderCachePath );
+	addAttribute ( aRotationFrom );
+	addAttribute ( aScaleFrom );
+	addAttribute ( aIndexFrom );
+	addAttribute ( aShaderIndexFrom );
+	addAttribute ( aInstanceData );
+	addAttribute ( aComputeVeloPos );
 	addAttribute ( time );
 
     attributeAffects ( aCacheDir, aUpdateCache );
@@ -377,24 +379,23 @@ MStatus partioVisualizer::initialize()
 	attributeAffects ( aCachePreDelim, aUpdateCache );
 	attributeAffects ( aCachePostDelim, aUpdateCache );
     attributeAffects ( aCacheFormat, aUpdateCache );
-	attributeAffects ( aColorFrom, aUpdateCache );
-	attributeAffects ( aAlphaFrom, aUpdateCache );
-	attributeAffects ( aRadiusFrom, aUpdateCache );
 	attributeAffects ( aPointSize, aUpdateCache );
-	attributeAffects ( aDefaultPointColor, aUpdateCache );
-	attributeAffects ( aDefaultAlpha, aUpdateCache );
-	attributeAffects ( aInvertAlpha, aUpdateCache );
 	attributeAffects ( aDrawStyle, aUpdateCache );
 	attributeAffects ( aForceReload, aUpdateCache );
+	attributeAffects ( aInstanceData, aUpdateCache );
+	attributeAffects ( aRotationFrom, aUpdateCache );
+	attributeAffects ( aScaleFrom, aUpdateCache );
+	attributeAffects ( aIndexFrom, aUpdateCache );
+	attributeAffects ( aShaderIndexFrom, aUpdateCache );
+	attributeAffects ( aComputeVeloPos, aUpdateCache );
 	attributeAffects (time, aUpdateCache);
-	attributeAffects (time,aRenderCachePath);
-
+	attributeAffects (time, aInstanceData);
 
 	return MS::kSuccess;
 }
 
 
-partioVizReaderCache* partioVisualizer::updateParticleCache()
+partioInstReaderCache* partioInstancer::updateParticleCache()
 {
 	GetPlugData(); // force update to run compute function where we want to do all the work
     return &pvCache;
@@ -402,11 +403,14 @@ partioVizReaderCache* partioVisualizer::updateParticleCache()
 
 // COMPUTE FUNCTION
 
-MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
+MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 {
+	MStatus stat;
+	int rotationFromIndex  		= block.inputValue( aRotationFrom ).asInt();
+	int scaleFromIndex			= block.inputValue( aScaleFrom ).asInt();
+	int indexFromIndex 			= block.inputValue( aIndexFrom ).asInt();
+	int shaderIndexFromIndex	= block.inputValue( aShaderIndexFrom).asInt();
 
-	int colorFromIndex  = block.inputValue( aColorFrom ).asInt();
-	int opacityFromIndex= block.inputValue( aAlphaFrom ).asInt();
 	bool cacheActive = block.inputValue(aCacheActive).asBool();
 
     if (!cacheActive)
@@ -416,14 +420,13 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 	// Determine if we are requesting the output plug for this node.
     //
-    if (plug != aUpdateCache)
+    if (plug != aUpdateCache && plug != aInstanceData)
 	{
         return ( MS::kUnknownParameter );
 	}
 
 	else
 	{
-		MStatus stat;
 
 		MString cacheDir 	= block.inputValue(aCacheDir).asString();
 		MString cachePrefix = block.inputValue(aCachePrefix).asString();
@@ -434,30 +437,35 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			return ( MS::kFailure );
 		}
 
-		bool cacheStatic			= block.inputValue( aCacheStatic ).asBool();
-		int cacheOffset 			= block.inputValue( aCacheOffset ).asInt();
-		int cachePadding			= block.inputValue( aCachePadding ).asInt();
-		MString preDelim 			= block.inputValue( aCachePreDelim ).asString();
-		MString postDelim   		= block.inputValue( aCachePostDelim).asString();
-		short cacheFormat			= block.inputValue( aCacheFormat ).asShort();
-		MFloatVector defaultColor 	= block.inputValue( aDefaultPointColor ).asFloatVector();
-		float defaultAlpha 			= block.inputValue( aDefaultAlpha ).asFloat();
-		bool invertAlpha 			= block.inputValue( aInvertAlpha ).asBool();
-		bool forceReload 			= block.inputValue( aForceReload ).asBool();
-		int integerTime				= block.inputValue(time).asInt();
-		bool flipYZ 				= block.inputValue( aFlipYZ ).asBool();
-		MString renderCachePath 	= block.inputValue( aRenderCachePath ).asString();
+		bool cacheStatic	= block.inputValue( aCacheStatic ).asBool();
+		int cacheOffset 	= block.inputValue( aCacheOffset ).asInt();
+		int cachePadding	= block.inputValue( aCachePadding ).asInt();
+		MString preDelim 	= block.inputValue( aCachePreDelim ).asString();
+		MString postDelim   = block.inputValue( aCachePostDelim).asString();
+		short cacheFormat	= block.inputValue( aCacheFormat ).asShort();
+		bool forceReload 	= block.inputValue( aForceReload ).asBool();
+		MTime inputTime		= block.inputValue(time).asTime();
+		bool flipYZ 		= block.inputValue( aFlipYZ ).asBool();
+		MString renderCachePath = block.inputValue( aRenderCachePath ).asString();
+		bool computeMotionBlur =block.inputValue( aComputeVeloPos).asBool();
 
+		int fps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
+		int integerTime = (int)floor((inputTime.value())+.52);
+		float deltaTime  = float(inputTime.value() - integerTime);
+
+		bool motionBlurStep = false;
+		// motion  blur rounding  frame logic
+		if ((deltaTime < 1 || deltaTime > -1)&& deltaTime !=0)  // motion blur step?
+		{
+			motionBlurStep = true;
+		}
 		MString formatExt;
-		MString newCacheFile 		= partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
+		MString newCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
 														   preDelim, postDelim, cacheFormat,integerTime, formatExt);
 
-		MString  renderCacheFile 	= partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
-														   preDelim, postDelim, cacheFormat,-123456789, formatExt);
-
-		if (renderCachePath != renderCacheFile || forceReload )
+		if (renderCachePath != newCacheFile || renderCachePath != mLastFileLoaded )
 		{
-			block.outputValue(aRenderCachePath).setString(renderCacheFile);
+			block.outputValue(aRenderCachePath).setString(newCacheFile);
 		}
 		cacheChanged = false;
 
@@ -485,10 +493,9 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 		if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()) && (newCacheFile != mLastFileLoaded || forceReload) )
 		{
-
 			cacheChanged = true;
 			mFlipped = false;
-			MGlobal::displayWarning(MString("PartioVisualizer->Loading: " + newCacheFile));
+			MGlobal::displayWarning(MString("PartioInstancer->Loading: " + newCacheFile));
 			pvCache.particles=0; // resets the particles
 
 			pvCache.particles=read(newCacheFile.asChar());
@@ -501,29 +508,32 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 			char partCount[50];
 			sprintf (partCount, "%d", pvCache.particles->numParticles());
-			MGlobal::displayInfo(MString ("PartioVisualizer-> LOADED: ") + partCount + MString (" particles"));
+			MGlobal::displayInfo(MString ("PartioInstancer-> LOADED: ") + partCount + MString (" particles"));
+			block.outputValue(aForceReload).setBool(false);
+			block.setClean(aForceReload);
 
+			pvCache.instanceData.clear();
 
-			float * floatToRGB = (float *) realloc(pvCache.rgb, pvCache.particles->numParticles()*sizeof(float)*3);
-			if (floatToRGB != NULL)
-			{
-				pvCache.rgb =  floatToRGB;
-			}
-			else
-			{
-				MGlobal::displayError("PartioVisualizer->unable to allocate new memory for particles");
-				return (MS::kFailure);
-			}
+		}
 
-			float * newRGBA = (float *) realloc(pvCache.rgba,pvCache.particles->numParticles()*sizeof(float)*4);
-			if (newRGBA != NULL)
+		if (pvCache.particles)
+		{
+
+			MFnArrayAttrsData::Type vectorType(MFnArrayAttrsData::kVectorArray);
+			MFnArrayAttrsData::Type doubleType(MFnArrayAttrsData::kDoubleArray);
+
+			canMotionBlur = false;
+			if(computeMotionBlur)
 			{
-				pvCache.rgba =  newRGBA;
-			}
-			else
-			{
-				MGlobal::displayError("PartioVisualizer->unable to allocate new memory for particles");
-				return (MS::kFailure);
+				if ((pvCache.particles->attributeInfo("velocity",pvCache.velocityAttr) ||
+					pvCache.particles->attributeInfo("Velocity",pvCache.velocityAttr)) )
+				{
+					canMotionBlur = true;
+				}
+				else
+				{
+					MGlobal::displayWarning("PartioInstancer->Failed to find velocity attribute motion blur will be impaired ");
+				}
 			}
 
 			pvCache.bbox.clear();
@@ -531,27 +541,78 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			if (!pvCache.particles->attributeInfo("position",pvCache.positionAttr) &&
 				!pvCache.particles->attributeInfo("Position",pvCache.positionAttr))
 			{
-				MGlobal::displayError("PartioVisualizer->Failed to find position attribute ");
+				MGlobal::displayError("PartioInstancer->Failed to find position attribute ");
 				return ( MS::kFailure );
 			}
 			else
 			{
+				MVectorArray  positionArray;
+				if(pvCache.instanceData.checkArrayExist("position",vectorType))
+				{
+					positionArray = pvCache.instanceData.getVectorData(MString("position"),&stat);
+					CHECK_MSTATUS(stat);
+				}
+				else
+				{
+					positionArray = pvCache.instanceData.vectorArray(MString("position"),&stat);
+					CHECK_MSTATUS(stat);
+				}
+				positionArray.clear();
+
 				// resize the bounding box
 				for (int i=0;i<pvCache.particles->numParticles();i++)
 				{
 					const float * partioPositions = pvCache.particles->data<float>(pvCache.positionAttr,i);
 					MPoint pos (partioPositions[0], partioPositions[1], partioPositions[2]);
+
+					if(canMotionBlur)
+					{
+						const float * vel = pvCache.particles->data<float>(pvCache.velocityAttr,i);
+
+						MVector velo(vel[0],vel[1],vel[2]);
+						if (motionBlurStep)
+						{
+							pos += (velo/24)*deltaTime; // TODO: get frame rate here
+						}
+					}
+
+					positionArray.append(pos);
 					pvCache.bbox.expand(pos);
 				}
+
+			}
+			////////////////////////////////
+			// particleID
+			if (!pvCache.particles->attributeInfo("id",pvCache.idAttr) &&
+				!pvCache.particles->attributeInfo("ID",pvCache.idAttr) &&
+				!pvCache.particles->attributeInfo("particleId",pvCache.idAttr) &&
+				!pvCache.particles->attributeInfo("ParticleId",pvCache.idAttr))
+			{
+				MGlobal::displayError("PartioInstancer->Failed to find id attribute ");
+				return ( MS::kFailure );
 			}
 
-			block.outputValue(aForceReload).setBool(false);
-			block.setClean(aForceReload);
+			MDoubleArray  idArray;
+			if(pvCache.instanceData.checkArrayExist("id",doubleType))
+			{
+				idArray = pvCache.instanceData.getDoubleData(MString("id"),&stat);
+				CHECK_MSTATUS(stat);
+			}
+			else
+			{
+				idArray = pvCache.instanceData.doubleArray(MString("id"),&stat);
+				CHECK_MSTATUS(stat);
+			}
+			idArray.clear();
 
-		}
+			for (int i=0;i<pvCache.particles->numParticles();i++)
+			{
+				const int* attrVal    = pvCache.particles->data<int>(pvCache.idAttr,i);
 
-		if (pvCache.particles)
-		{
+				idArray.append((double)attrVal[0]);
+			}
+
+			/*
 			/// TODO:  this does not work when scrubbing yet.. really need to put the  resort of channels into the  partio side as a filter
 			/// this is only a temporary hack until we start adding  filter functions to partio
 
@@ -573,135 +634,138 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 				}
 				mFlipped = true;
 			}
+			*/
 
-			// something changed..
-			if  (cacheChanged || mLastColorFromIndex != colorFromIndex || mLastColor != defaultColor)
+
+			if  ( cacheChanged || rotationFromIndex != mLastRotationFromIndex ||
+					scaleFromIndex != mLastScaleFromIndex ||
+					indexFromIndex != mLastIndexFromIndex ||
+					shaderIndexFromIndex != mLastShaderIndexFromIndex	)
 			{
-				int numAttrs = pvCache.particles->numAttributes();
-				if (colorFromIndex+1 > numAttrs || opacityFromIndex+1 > numAttrs)
+				////////////////////////////////
+				// ROTATION
+				if (rotationFromIndex >=0)
 				{
-					// reset the attrs
-					block.outputValue(aColorFrom).setInt(-1);
-					block.setClean(aColorFrom);
-					block.outputValue(aAlphaFrom).setInt(-1);
-					block.setClean(aAlphaFrom);
+					MVectorArray  rotationArray;
+					if(pvCache.instanceData.checkArrayExist("rotation",vectorType))
+					{
+						rotationArray = pvCache.instanceData.getVectorData(MString("rotation"),&stat);
+						CHECK_MSTATUS(stat);
+					}
+					else
+					{
+						rotationArray = pvCache.instanceData.vectorArray(MString("rotation"),&stat);
+						CHECK_MSTATUS(stat);
+					}
+					rotationArray.clear();
 
-					colorFromIndex  = block.inputValue( aColorFrom ).asInt();
-					opacityFromIndex= block.inputValue( aAlphaFrom ).asInt();
-				}
-
-				if(colorFromIndex >=0)
-				{
-					pvCache.particles->attributeInfo(colorFromIndex,pvCache.colorAttr);
-					// VECTOR or  4+ element float attrs
-					if (pvCache.colorAttr.type == VECTOR || pvCache.colorAttr.count > 3) // assuming first 3 elements are rgb
+					pvCache.particles->attributeInfo(rotationFromIndex,pvCache.rotationAttr);
+					if (pvCache.rotationAttr.count == 1)  // single float value for rotation
 					{
 						for (int i=0;i<pvCache.particles->numParticles();i++)
 						{
-							const float * attrVal = pvCache.particles->data<float>(pvCache.colorAttr,i);
-							pvCache.rgb[(i*3)] 		= attrVal[0];
-							pvCache.rgb[((i*3)+1)] 	= attrVal[1];
-							pvCache.rgb[((i*3)+2)] 	= attrVal[2];
-							pvCache.rgba[i*4] 		= attrVal[0];
-							pvCache.rgba[(i*4)+1] 	= attrVal[1];
-							pvCache.rgba[(i*4)+2] 	= attrVal[2];
-						}
-					}
-					else // single FLOAT
-					{
-						for (int i=0;i<pvCache.particles->numParticles();i++)
-						{
-							const float * attrVal = pvCache.particles->data<float>(pvCache.colorAttr,i);
-
-							pvCache.rgb[(i*3)] = pvCache.rgb[((i*3)+1)] = pvCache.rgb[((i*3)+2)] 	= attrVal[0];
-							pvCache.rgba[i*4]  = pvCache.rgba[(i*4)+1] 	= pvCache.rgba[(i*4)+2] 	= attrVal[0];
-						}
-					}
-				}
-
-				else
-				{
-					for (int i=0;i<pvCache.particles->numParticles();i++)
-					{
-						pvCache.rgb[(i*3)] 		= defaultColor[0];
-						pvCache.rgb[((i*3)+1)] 	= defaultColor[1];
-						pvCache.rgb[((i*3)+2)] 	= defaultColor[2];
-						pvCache.rgba[i*4] 		= defaultColor[0];
-						pvCache.rgba[(i*4)+1] 	= defaultColor[1];
-						pvCache.rgba[(i*4)+2] 	= defaultColor[2];
-					}
-
-				}
-				mLastColorFromIndex = colorFromIndex;
-				mLastColor = defaultColor;
-			}
-
-			if  (cacheChanged || opacityFromIndex != mLastAlphaFromIndex || defaultAlpha != mLastAlpha || invertAlpha != mLastInvertAlpha)
-			{
-				if (opacityFromIndex >=0)
-				{
-					pvCache.particles->attributeInfo(opacityFromIndex,pvCache.opacityAttr);
-					if (pvCache.opacityAttr.count == 1)  // single float value for opacity
-					{
-						for (int i=0;i<pvCache.particles->numParticles();i++)
-						{
-							const float * attrVal = pvCache.particles->data<float>(pvCache.opacityAttr,i);
-							float temp = attrVal[0];
-							if (invertAlpha)
-							{
-								temp = float(1.0-temp);
-
-							}
-							pvCache.rgba[(i*4)+3] = temp;
+							const float * attrVal = pvCache.particles->data<float>(pvCache.rotationAttr,i);
+							rotationArray.append(MVector(attrVal[0],attrVal[0],attrVal[0]));
 						}
 					}
 					else
 					{
-						if (pvCache.opacityAttr.count == 4)   // we have an  RGBA 4 float attribute ?
+						if (pvCache.rotationAttr.count >= 3)   // we have a 4 float attribute ?
 						{
 							for (int i=0;i<pvCache.particles->numParticles();i++)
 							{
-								const float * attrVal = pvCache.particles->data<float>(pvCache.opacityAttr,i);
-								float temp = attrVal[3];
-								if (invertAlpha)
-								{
-									temp = float(1.0-temp);
-								}
-								pvCache.rgba[(i*4)+3] = temp;
-							}
-						}
-						else
-						{
-							for (int i=0;i<pvCache.particles->numParticles();i++)
-							{
-								const float * attrVal = pvCache.particles->data<float>(pvCache.opacityAttr,i);
-								float lum = float((attrVal[0]*0.2126)+(attrVal[1]*0.7152)+(attrVal[2]*.0722));
-								if (invertAlpha)
-								{
-									lum = float(1.0-lum);
- 								}
-								pvCache.rgba[(i*4)+3] =  lum;
+								const float * attrVal = pvCache.particles->data<float>(pvCache.rotationAttr,i);
+								rotationArray.append(MVector(attrVal[0],attrVal[1],attrVal[2]));
 							}
 						}
 					}
 				}
-				else
+				////////////////////////////////
+				// SCALE
+				if (scaleFromIndex >=0)
 				{
-					mLastAlpha = defaultAlpha;
-					if (invertAlpha)
+					MVectorArray  scaleArray;
+					if(pvCache.instanceData.checkArrayExist("scale",vectorType))
 					{
-						mLastAlpha= 1-defaultAlpha;
+						scaleArray = pvCache.instanceData.getVectorData(MString("scale"),&stat);
+						CHECK_MSTATUS(stat);
 					}
-					for (int i=0;i<pvCache.particles->numParticles();i++)
+					else
 					{
-						pvCache.rgba[(i*4)+3] = mLastAlpha;
+						scaleArray = pvCache.instanceData.vectorArray(MString("scale"),&stat);
+						CHECK_MSTATUS(stat);
+					}
+					scaleArray.clear();
+
+					pvCache.particles->attributeInfo(scaleFromIndex,pvCache.scaleAttr);
+					if (pvCache.scaleAttr.count == 1)  // single float value for scale
+					{
+						for (int i=0;i<pvCache.particles->numParticles();i++)
+						{
+							const float * attrVal = pvCache.particles->data<float>(pvCache.scaleAttr,i);
+							scaleArray.append(MVector(attrVal[0],attrVal[0],attrVal[0]));
+						}
+					}
+					else
+					{
+						if (pvCache.scaleAttr.count >= 3)   // we have a 4 float attribute ?
+						{
+							for (int i=0;i<pvCache.particles->numParticles();i++)
+							{
+								const float * attrVal = pvCache.particles->data<float>(pvCache.scaleAttr,i);
+								scaleArray.append(MVector(attrVal[0],attrVal[1],attrVal[2]));
+							}
+						}
 					}
 				}
-				mLastAlpha = defaultAlpha;
-				mLastAlphaFromIndex =opacityFromIndex;
-				mLastInvertAlpha = invertAlpha;
+				////////////////////////////////
+				// instanceIndex
+				if (indexFromIndex >=0)
+				{
+					MDoubleArray  indexArray;
+					if(pvCache.instanceData.checkArrayExist("objectIndex",doubleType))
+					{
+						indexArray = pvCache.instanceData.getDoubleData(MString("objectIndex"),&stat);
+						CHECK_MSTATUS(stat);
+					}
+					else
+					{
+						indexArray = pvCache.instanceData.doubleArray(MString("objectIndex"),&stat);
+						CHECK_MSTATUS(stat);
+					}
+					indexArray.clear();
+
+					pvCache.particles->attributeInfo(indexFromIndex,pvCache.indexAttr);
+					if (pvCache.indexAttr.count == 1)  // single float value for index
+					{
+						for (int i=0;i<pvCache.particles->numParticles();i++)
+						{
+							const float * attrVal = pvCache.particles->data<float>(pvCache.indexAttr,i);
+							indexArray.append((double)(int)attrVal[0]);
+						}
+					}
+					else
+					{
+						if (pvCache.indexAttr.count >= 3)   // we have a 4 float attribute ?
+						{
+							for (int i=0;i<pvCache.particles->numParticles();i++)
+							{
+								const float * attrVal = pvCache.particles->data<float>(pvCache.indexAttr,i);
+								indexArray.append((double)(int)attrVal[0]);
+							}
+						}
+					}
+				}
+
+				mLastRotationFromIndex = rotationFromIndex;
+				mLastScaleFromIndex = scaleFromIndex;
+				mLastIndexFromIndex = indexFromIndex;
+				mLastShaderIndexFromIndex = shaderIndexFromIndex;
 			}
 		}
+	//cout << pvCache.instanceData.list()<< endl;
+	block.outputValue(aInstanceData).set(pvCache.instanceDataObj);
+	block.setClean(aInstanceData);
 	}
 
 
@@ -710,13 +774,21 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		unsigned int numAttr=pvCache.particles->numAttributes();
 		MPlug zPlug (thisMObject(), aPartioAttributes);
 
-		if ((colorFromIndex+1) > zPlug.numElements())
+		if ((rotationFromIndex+1) > zPlug.numElements())
 		{
-			block.outputValue(aColorFrom).setInt(-1);
+			block.outputValue(aRotationFrom).setInt(-1);
 		}
-		if ((opacityFromIndex+1) > zPlug.numElements())
+		if ((scaleFromIndex+1) > zPlug.numElements())
 		{
-			block.outputValue(aAlphaFrom).setInt(-1);
+			block.outputValue(aScaleFrom).setInt(-1);
+		}
+		if ((indexFromIndex+1) > zPlug.numElements())
+		{
+			block.outputValue(aIndexFrom).setInt(-1);
+		}
+		if ((shaderIndexFromIndex+1) > zPlug.numElements())
+		{
+			block.outputValue(aShaderIndexFrom).setInt(-1);
 		}
 
 		if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache
@@ -736,7 +808,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			MGlobal::executeCommand(command);
 			zPlug.setNumElements(0);
 
-			//cout << "partioVisualizer->refreshing AE controls" << endl;
+			//cout << "partioInstancer->refreshing AE controls" << endl;
 
 			attributeList.clear();
 
@@ -768,17 +840,16 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 /////////////////////////////////////////////////////
 /// procs to override bounding box mode...
-bool partioVisualizer::isBounded() const
+bool partioInstancer::isBounded() const
 {
     return true;
 }
 
-MBoundingBox partioVisualizer::boundingBox() const
+MBoundingBox partioInstancer::boundingBox() const
 {
 	// Returns the bounding box for the shape.
-    partioVisualizer* nonConstThis = const_cast<partioVisualizer*>(this);
-    partioVizReaderCache* geom = nonConstThis->updateParticleCache();
-
+    partioInstancer* nonConstThis = const_cast<partioInstancer*>(this);
+    partioInstReaderCache* geom = nonConstThis->updateParticleCache();
 
 	MPoint corner1 = geom->bbox.min();
 	MPoint corner2 = geom->bbox.max();
@@ -789,7 +860,7 @@ MBoundingBox partioVisualizer::boundingBox() const
 // Select function. Gets called when the bbox for the object is selected.
 // This function just selects the object without doing any intersection tests.
 //
-bool partioVisualizerUI::select( MSelectInfo &selectInfo,
+bool partioInstancerUI::select( MSelectInfo &selectInfo,
 							 MSelectionList &selectionList,
 							 MPointArray &worldSpaceSelectPts ) const
 {
@@ -805,7 +876,7 @@ bool partioVisualizerUI::select( MSelectInfo &selectInfo,
 //////////////////////////////////////////////////////////////////
 ////  getPlugData is a util to update the drawing of the UI stuff
 
-bool partioVisualizer::GetPlugData()
+bool partioInstancer::GetPlugData()
 {
 	MObject thisNode = thisMObject();
 	int update = 0;
@@ -825,13 +896,13 @@ bool partioVisualizer::GetPlugData()
 }
 
 // note the "const" at the end, its different than other draw calls
-void partioVisualizerUI::draw( const MDrawRequest& request, M3dView& view ) const
+void partioInstancerUI::draw( const MDrawRequest& request, M3dView& view ) const
 {
 	MDrawData data = request.drawData();
 
-	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
+	partioInstancer* shapeNode = (partioInstancer*) surfaceShape();
 
-	partioVizReaderCache* cache = (partioVizReaderCache*) data.geometry();
+	partioInstReaderCache* cache = (partioInstReaderCache*) data.geometry();
 
 	MObject thisNode = shapeNode->thisMObject();
 	MPlug sizePlug( thisNode, shapeNode->aSize );
@@ -862,11 +933,11 @@ void partioVisualizerUI::draw( const MDrawRequest& request, M3dView& view ) cons
 
 ////////////////////////////////////////////
 /// DRAW Bounding box
-void  partioVisualizerUI::drawBoundingBox() const
+void  partioInstancerUI::drawBoundingBox() const
 {
 
 
-	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
+	partioInstancer* shapeNode = (partioInstancer*) surfaceShape();
 
 	MPoint  bboxMin = shapeNode->pvCache.bbox.min();
 	MPoint  bboxMax = shapeNode->pvCache.bbox.max();
@@ -928,134 +999,41 @@ void  partioVisualizerUI::drawBoundingBox() const
 ////////////////////////////////////////////
 /// DRAW PARTIO
 
-void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle) const
+void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle) const
 {
-	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
+	partioInstancer* shapeNode = (partioInstancer*) surfaceShape();
 
 	MObject thisNode = shapeNode->thisMObject();
-	MPlug drawSkipPlug( thisNode, shapeNode->aDrawSkip );
-	int drawSkipVal;
-	drawSkipPlug.getValue( drawSkipVal );
-
 	MPlug flipYZPlug( thisNode, shapeNode->aFlipYZ );
 	bool flipYZVal;
 	flipYZPlug.getValue( flipYZVal );
-
-	int stride =  3*sizeof(float)*(drawSkipVal);
 
 	MPlug pointSizePlug( thisNode, shapeNode->aPointSize );
 	float pointSizeVal;
 	pointSizePlug.getValue( pointSizeVal );
 
-	MPlug colorFromPlug( thisNode, shapeNode->aColorFrom);
-	int colorFromVal;
-	colorFromPlug.getValue( colorFromVal );
-
-	MPlug alphaFromPlug( thisNode, shapeNode->aAlphaFrom);
-	int alphaFromVal;
-	alphaFromPlug.getValue( alphaFromVal );
-
-	MPlug defaultAlphaPlug( thisNode, shapeNode->aDefaultAlpha);
-	float defaultAlphaVal;
-	defaultAlphaPlug.getValue( defaultAlphaVal );
-
+	int stride =  3*sizeof(float);
 
 	if (pvCache->particles)
 	{
 		struct Point { float p[3]; };
 		glPushAttrib(GL_CURRENT_BIT);
 
-		if (alphaFromVal >=0 || defaultAlphaVal < 1) //testing settings
-		{
 
-				// TESTING AROUND with dept/transparency  sorting issues..
-				glDepthMask(true);
-				//cout << "depthMask"<<  glGetError() << endl;
-				glEnable(GL_DEPTH_TEST);
-				//cout << "depth test" <<  glGetError() << endl;
-				glEnable(GL_BLEND);
-				//cout << "blend" <<  glGetError() << endl;
-//				glBlendEquation(GL_FUNC_ADD);
-				//cout << "blend eq" <<  glGetError() << endl;
-				glEnable(GL_POINT_SMOOTH);
-				glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				//cout << "blend func" <<  glGetError() << endl;
-				//glAlphaFunc(GL_GREATER, .01);
-				//glEnable(GL_ALPHA_TEST);
-		}
+		/// looping thru particles one by one...
 
-		// THIS IS KINDA TRICKY.... we do this switch between drawing procedures because on big caches, when the reallocation happens
-		// its big enough that it apparently frees the memory that the GL_Color arrays are using and  causes a segfault.
-		// so we only draw once  using the "one by one" method  when the arrays change size, and then  swap back to  the speedier
-		// pointer copy  way  after everything is settled down a bit for main interaction.   It is a significant  improvement on large
-		// datasets in user interactivity speed to use pointers
-
-		if(!shapeNode->cacheChanged)
-		{
-			glEnableClientState( GL_VERTEX_ARRAY );
-			glEnableClientState( GL_COLOR_ARRAY );
-
-			glPointSize(pointSizeVal);
-			if (pvCache->particles->numParticles() > 0)
-			{
-				// now setup the position/color/alpha output pointers
-
-				const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,0);
-
-				if(flipYZVal)
-				{
-					glVertexPointer( 3, GL_FLOAT, stride, pvCache->flipPos );
-				}
-				else
-				{
-					glVertexPointer( 3, GL_FLOAT, stride, partioPositions );
-				}
-
-				if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
-				{
-					glColorPointer(  4, GL_FLOAT, stride, pvCache->rgba );
-				}
-				else
-				{
-					glColorPointer(  3, GL_FLOAT, stride, pvCache->rgb );
-				}
-				glDrawArrays( GL_POINTS, 0, (pvCache->particles->numParticles()/(drawSkipVal+1)) );
-			}
-			glDisableClientState( GL_VERTEX_ARRAY );
-			glDisableClientState( GL_COLOR_ARRAY );
-		}
-
-		else
-		{
-			/// looping thru particles one by one...
-
-			glPointSize(pointSizeVal);
-
-			glBegin(GL_POINTS);
+		glPointSize(pointSizeVal);
+		glColor3f(1.0,1.0,1.0);
+		glBegin(GL_POINTS);
 
 			for (int i=0;i<pvCache->particles->numParticles();i++)
 			{
-				if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
-				{
-					glColor4f(pvCache->rgb[i*3],pvCache->rgb[(i*3)+1],pvCache->rgb[(i*3)+2], pvCache->rgba[(i*4)+3] );
-				}
-				else
-				{
-					glColor3f(pvCache->rgb[i*3],pvCache->rgb[(i*3)+1],pvCache->rgb[(i*3)+2]);
-				}
-				if (flipYZVal)
-				{
-					glVertex3f(pvCache->flipPos[0], pvCache->flipPos[1], pvCache->flipPos[2]);
-				}
-				else
-				{
 					const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
 					glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
-				}
 			}
 
-			glEnd( );
-		}
+		glEnd( );
+
 		glDisable(GL_POINT_SMOOTH);
 		glPopAttrib();
 	} // if (particles)
@@ -1063,27 +1041,27 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
 }
 
-partioVisualizerUI::partioVisualizerUI()
+partioInstancerUI::partioInstancerUI()
 {
 }
-partioVisualizerUI::~partioVisualizerUI()
+partioInstancerUI::~partioInstancerUI()
 {
 }
 
-void* partioVisualizerUI::creator()
+void* partioInstancerUI::creator()
 {
-	return new partioVisualizerUI();
+	return new partioInstancerUI();
 }
 
 
-void partioVisualizerUI::getDrawRequests(const MDrawInfo & info,
+void partioInstancerUI::getDrawRequests(const MDrawInfo & info,
 		bool /*objectAndActiveOnly*/, MDrawRequestQueue & queue)
 {
 
 	MDrawData data;
     MDrawRequest request = info.getPrototype(*this);
-    partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
-	partioVizReaderCache* geom = shapeNode->updateParticleCache();
+    partioInstancer* shapeNode = (partioInstancer*) surfaceShape();
+	partioInstReaderCache* geom = shapeNode->updateParticleCache();
 
     getDrawData(geom, data);
     request.setDrawData(data);

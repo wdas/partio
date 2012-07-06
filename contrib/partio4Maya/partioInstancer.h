@@ -1,5 +1,5 @@
 /* partio4Maya  3/12/2012, John Cassella  http://luma-pictures.com and  http://redpawfx.com
-PARTIO Visualizer
+PARTIO Instancer
 Copyright 2012 (c)  All rights reserved
 
 Redistribution and use in source and binary forms, with or without
@@ -46,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/M3dView.h>
 #include <maya/MSceneMessage.h>
 #include <maya/MDrawData.h>
+#include <maya/MFnArrayAttrsData.h>
 #include <maya/MSelectionList.h>
 #include <maya/MDagPath.h>
 #include <vector>
@@ -54,34 +55,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <PartioAttribute.h>
 #include <PartioIterator.h>
 
-class partioVizReaderCache
+class partioInstReaderCache
 {
 public:
-	partioVizReaderCache();
+	partioInstReaderCache();
 	int token;
 	MBoundingBox bbox;
 	int dList;
 	Partio::ParticlesDataMutable* particles;
 	Partio::ParticleAttribute positionAttr;
-	Partio::ParticleAttribute colorAttr;
-	Partio::ParticleAttribute opacityAttr;
-	float* rgb;
-	float* rgba;
+	Partio::ParticleAttribute idAttr;
+	Partio::ParticleAttribute velocityAttr;
+	Partio::ParticleAttribute rotationAttr;
+	Partio::ParticleAttribute scaleAttr;
+	Partio::ParticleAttribute indexAttr;
+	Partio::ParticleAttribute shaderIndexAttr;
 	float* flipPos;
+	MFnArrayAttrsData instanceData;
+	MObject instanceDataObj;
+
 
 };
 
 
-class partioVisualizerUI : public MPxSurfaceShapeUI
+class partioInstancerUI : public MPxSurfaceShapeUI
 {
 public:
 
-    partioVisualizerUI();
-    virtual ~partioVisualizerUI();
+    partioInstancerUI();
+    virtual ~partioInstancerUI();
 	virtual void draw(const MDrawRequest & request, M3dView & view) const;
 	virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
 	void 	drawBoundingBox() const;
-	void 	drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
+	void 	drawPartio(partioInstReaderCache* pvCache, int drawStyle) const;
 	static void * creator();
 	virtual bool	select( MSelectInfo &selectInfo,
 							MSelectionList &selectionList,
@@ -89,11 +95,11 @@ public:
 
 };
 
-class partioVisualizer : public MPxSurfaceShape
+class partioInstancer : public MPxSurfaceShape
 {
 public:
-	partioVisualizer();
-	virtual ~partioVisualizer();
+	partioInstancer();
+	virtual ~partioInstancer();
 
     virtual MStatus   		compute( const MPlug& plug, MDataBlock& block );
 	virtual bool            isBounded() const;
@@ -105,11 +111,12 @@ public:
 	virtual void 			postConstructor();
 
 	bool GetPlugData();
-	partioVizReaderCache* updateParticleCache();
+	void addParticleAttr(int attrIndex, MString attrName );
+	partioInstReaderCache* updateParticleCache();
+
 
 	static MObject  time;
 	static MObject  aSize;         // The size of the logo
-	static MObject  aDrawSkip;
 	static MObject  aFlipYZ;
 	static MObject 	aUpdateCache;
 	static MObject 	aCacheDir;
@@ -125,22 +132,24 @@ public:
 	static MObject 	aJitterPos;
 	static MObject 	aJitterFreq;
 	static MObject 	aPartioAttributes;
-	static MObject  aColorFrom;
-	static MObject  aAlphaFrom;
-	static MObject  aRadiusFrom;
 	static MObject  aPointSize;
-	static MObject  aDefaultPointColor;
-	static MObject  aDefaultAlpha;
-	static MObject  aInvertAlpha;
 	static MObject  aDrawStyle;
 	static MObject  aForceReload;
 	static MObject  aRenderCachePath;
+	static MObject	aRotationFrom;
+	static MObject	aScaleFrom;
+	static MObject	aIndexFrom;
+	static MObject	aShaderIndexFrom;
+	static MObject	aInMeshInstances;
+	static MObject	aOutMesh;
+	static MObject	aInstanceData;
+	static MObject  aComputeVeloPos;
 
 
 	static	MTypeId			id;
 	float 					multiplier;
 	bool 					cacheChanged;
-	partioVizReaderCache  	pvCache;
+	partioInstReaderCache  	pvCache;
 
 
 private:
@@ -149,16 +158,15 @@ private:
 	MString mLastPath;
 	MString mLastPrefix;
 	MString mLastExt;
-	int mLastColorFromIndex;
-	int mLastAlphaFromIndex;
-	int mLastRadiusFromIndex;
-	MFloatVector mLastColor;
-	float mLastAlpha;
-	bool mLastInvertAlpha;
 	bool mLastFlipStatus;
 	bool mFlipped;
 	bool  frameChanged;
 	MStringArray attributeList;
+	int mLastRotationFromIndex;
+	int mLastScaleFromIndex;
+	int mLastIndexFromIndex;
+	int mLastShaderIndexFromIndex;
+	bool canMotionBlur;
 
 protected:
 

@@ -83,46 +83,70 @@ MString partio4Maya::updateFileName (MString cacheFile, MString cacheDir, bool c
 						MString preDelim, MString postDelim, short cacheFormat,int integerTime, MString &formatExt)
 {
 	formatExt = setExt(cacheFormat);
+	bool tempFix = false;
 
-	int cacheFrame =  integerTime + cacheOffset;
-
-	MString formatString =  "%s%s%s%0";
-	// special case for PDCs and maya nCache files because of the funky naming convention  TODO: support substepped/retiming  caches
-	if (formatExt == "pdc")
-	{
-		cacheFrame *= (int)(6000 / 24);
-		cachePadding = 1;
-	}
-
-	else if (formatExt == "mc")
-	{
-		cachePadding = 1;
-		formatString = "%s%sFrame%0";
-		int idx = cacheFile.rindexW("Frame");
-
-		if (idx != -1)
-		{
-			cacheFile = cacheFile.substring(0, idx-1);
-		}
-	}
-
-	char fileName[512] = "";
-
-	formatString += cachePadding;
-	formatString += "d%s%s";
-
-	const char* fmt = formatString.asChar();
-
+	int cacheFrame;
 	MString  newCacheFile;
-
-	if (!cacheStatic)
+	if(integerTime != -123456789)
 	{
-		sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(), cacheFrame, postDelim.asChar(), formatExt.asChar());
-		newCacheFile = fileName;
+		cacheFrame =  integerTime + cacheOffset;
+
+		MString formatString =  "%s%s%s%0";
+		// special case for PDCs and maya nCache files because of the funky naming convention  TODO: support substepped/retiming  caches
+		if (formatExt == "pdc")
+		{
+			cacheFrame *= (int)(6000 / 24);
+			cachePadding = 1;
+		}
+
+		else if (formatExt == "mc")
+		{
+			cachePadding = 1;
+			formatString = "%s%sFrame%0";
+			int idx = cacheFile.rindexW("Frame");
+
+			if (idx != -1)
+			{
+				cacheFile = cacheFile.substring(0, idx-1);
+			}
+		}
+
+		char fileName[512] = "";
+
+		formatString += cachePadding;
+		formatString += "d%s%s";
+
+		const char* fmt = formatString.asChar();
+
+		if (!cacheStatic)
+		{
+			sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(), cacheFrame, postDelim.asChar(), formatExt.asChar());
+			newCacheFile = fileName;
+		}
+		else
+		{
+			newCacheFile = cacheDir+cacheFile;
+		}
 	}
 	else
 	{
-		newCacheFile = cacheDir+cacheFile;
+
+		if (!cacheStatic)
+		{
+			MString formatString =  "%s%s%s<frame>%s%s";
+			char fileName[512] = "";
+			const char* fmt = formatString.asChar();
+			sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(),  postDelim.asChar(), formatExt.asChar());
+			newCacheFile = fileName;
+		}
+		else
+		{
+			MString formatString =  "%s%s";
+			char fileName[512] = "";
+			const char* fmt = formatString.asChar();
+			sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar());
+			newCacheFile = fileName;
+		}
 	}
 
 	return newCacheFile;
