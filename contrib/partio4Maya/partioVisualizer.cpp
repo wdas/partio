@@ -124,11 +124,15 @@ MCallbackId partioVisualizerOpenCallback;
 MCallbackId partioVisualizerImportCallback;
 MCallbackId partioVisualizerReferenceCallback;
 
-partioVizReaderCache::partioVizReaderCache()
+partioVizReaderCache::partioVizReaderCache():
+	token(0),
+	bbox(MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0))),
+	dList(0),
+	particles(NULL),
+	rgb(NULL),
+	rgba(NULL),
+	flipPos(NULL)
 {
-	token = 0;
-	bbox = MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0));
-	dList = 0;
 }
 
 
@@ -145,7 +149,9 @@ partioVisualizer::partioVisualizer()
 	mLastRadiusFromIndex(-1),
 	mLastColor(1,0,0),
 	cacheChanged(false),
-	multiplier(1.0)
+	frameChanged(false),
+	multiplier(1.0),
+	mFlipped(false)
 {
 	pvCache.particles = NULL;
 	pvCache.flipPos = (float *) malloc(sizeof(float));
@@ -207,8 +213,6 @@ void partioVisualizer::initCallback()
 	MPlug(tmo,aSize).getValue(multiplier);
 	MPlug(tmo,aInvertAlpha).getValue(mLastInvertAlpha);
 	cacheChanged = false;
-
-
 
 }
 
