@@ -84,14 +84,14 @@ static MGLFunctionTable *gGLFT = NULL;
 
 /*
 Names and types of all array attributes  the maya instancer looks for
-used by the geometry instancer nodes:
-position (vectorArray)
-scale (vectorArray)
+used by the geometry instancer nodes:  ( * = currently implemented)
+position (vectorArray)  *
+scale (vectorArray) *
 shear (vectorArray)
 visibility (doubleArray)
-objectIndex (doubleArray)
+objectIndex (doubleArray) *
 rotationType (doubleArray)
-rotation (vectorArray)
+rotation (vectorArray) *
 aimDirection (vectorArray)
 aimPosition (vectorArray)
 aimAxis (vectorArray)
@@ -142,11 +142,13 @@ MCallbackId partioInstancerOpenCallback;
 MCallbackId partioInstancerImportCallback;
 MCallbackId partioInstancerReferenceCallback;
 
-partioInstReaderCache::partioInstReaderCache()
+partioInstReaderCache::partioInstReaderCache():
+	token(0),
+	bbox(MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0))),
+	dList(0),
+	particles(NULL),
+	flipPos(NULL)
 {
-	token = 0;
-	bbox = MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0));
-	dList = 0;
 }
 
 
@@ -161,8 +163,10 @@ partioInstancer::partioInstancer()
 	mLastIndexFromIndex(-1),
 	mLastShaderIndexFromIndex(-1),
 	cacheChanged(false),
+	frameChanged(false),
 	multiplier(1.0),
-	canMotionBlur(false)
+	canMotionBlur(false),
+	mFlipped(false)
 {
 	pvCache.particles = NULL;
 	pvCache.flipPos = (float *) malloc(sizeof(float));
