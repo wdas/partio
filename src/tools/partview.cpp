@@ -251,6 +251,7 @@ static void render()
                     rgba[(i*3)+3] = alpha[i];
                 }
                 glColorPointer(  4, GL_FLOAT, 0, rgba );
+				free(rgba);
             }
             else
             {
@@ -284,6 +285,7 @@ static void render()
                 }
                 glColorPointer(  3, GL_FLOAT, 0, rgba );
             }
+            free(rgba);
         }
 
     }
@@ -296,6 +298,7 @@ static void render()
     glEnd();
 
     glutSwapBuffers();
+
 
 }
 
@@ -423,6 +426,7 @@ void  reloadParticleFile(int direction)
 		int result = stat(particleFile.c_str(),&statinfo);
 		if (result >=0)
 		{
+			particles=0;
 			particles=read(particleFile.c_str());
 			if (!glutGetWindow()) {
 				return;

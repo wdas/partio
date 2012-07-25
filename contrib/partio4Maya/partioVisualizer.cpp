@@ -515,6 +515,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			}
 			else
 			{
+				free(pvCache.rgb);
 				MGlobal::displayError("PartioVisualizer->unable to allocate new memory for particles");
 				return (MS::kFailure);
 			}
@@ -526,6 +527,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			}
 			else
 			{
+				free(pvCache.rgba);
 				MGlobal::displayError("PartioVisualizer->unable to allocate new memory for particles");
 				return (MS::kFailure);
 			}
@@ -566,6 +568,12 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 				if (floatToPos != NULL)
 				{
 					pvCache.flipPos =  floatToPos;
+				}
+				else
+				{
+					free(pvCache.flipPos);
+					MGlobal::displayError("PartioVisualizer->unable to allocate new memory for flip particles");
+					return (MS::kFailure);
 				}
 
 				for (int i=0;i<pvCache.particles->numParticles();i++)
