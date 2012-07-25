@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partioInstancer.h"
 #include "partioEmitter.h"
 #include "partioExport.h"
+#include "partioImport.h"
 #include "partio4MayaShared.h"
 #include <maya/MFnPlugin.h>
 
@@ -84,7 +85,16 @@ MStatus initializePlugin ( MObject obj )
 	status = plugin.registerCommand("partioExport",PartioExport::creator );
 
 	if (!status)
+	{
 		status.perror("registerCommand partioExport failed");
+		return status;
+	}
+	status = plugin.registerCommand("partioImport",PartioImport::creator );
+
+	if (!status)
+	{
+		status.perror("registerCommand partioImport failed");
+	}
 
 	return status;
 }
@@ -116,7 +126,15 @@ MStatus uninitializePlugin ( MObject obj )
 
 	status = plugin.deregisterCommand("partioExport");
 	if (!status)
+	{
 		status.perror("deregisterCommand partioExport failed");
-
+		return status;
+	}
+	status = plugin.deregisterCommand("partioImport");
+	if (!status)
+	{
+		status.perror("deregisterCommand partioImport failed");
+	}
 	return status;
+
 }
