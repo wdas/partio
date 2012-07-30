@@ -79,7 +79,7 @@ MSyntax PartioImport::createSyntax()
 
 	syntax.addFlag(kParticleS, kParticleL ,  MSyntax::kString);
 	syntax.addFlag(kHelpFlagS, kHelpFlagL ,  MSyntax::kNoArg);
-	syntax.addFlag(kAttributeFlagS, kAttributeFlagL, MSyntax::kString);
+	syntax.addFlag(kAttributeFlagS, kAttributeFlagL, MSyntax::kString, MSyntax::kString);
 	syntax.makeFlagMultiUse( kAttributeFlagS );
 	syntax.addFlag(kFlipFlagS, kFlipFlagL, MSyntax::kNoArg);
 	syntax.addArg(MSyntax::kString);
@@ -139,9 +139,7 @@ MStatus PartioImport::doIt(const MArgList& Args)
 
 	/// loop thru the rest of the attributes given
 	MStringArray  attrNames;
-
-	//attrNames.append(MString("id"));
-	//attrNames.append(MString("position"));
+	MStringArray  mayaAttrNames;
 
 	bool worldVeloCheck = false;
 
@@ -169,11 +167,20 @@ MStatus PartioImport::doIt(const MArgList& Args)
 		else
 		{
 			attrNames.append(AttrName);
+			if (argList.length() > 1)
+			{
+				mayaAttrNames.append(argList.asString( 1 ));
+			}
+			else
+			{
+				mayaAttrNames.append(AttrName);
+			}
 		}
 	}
 
 	MString particleCache; // particleCache file
 	argData.getCommandArgument(0, particleCache);
+
 
 	if(!partio4Maya::partioCacheExists(particleCache.asChar()))
 	{
@@ -184,9 +191,10 @@ MStatus PartioImport::doIt(const MArgList& Args)
 	if (makeParticle)
 	{
 		MStringArray foo;
-		MGlobal::executeCommand("particle -n partioImport", foo);
+		MGlobal::executeCommand("particle -n partioImport -p 0 0 0", foo);
 		particleShape = foo[1];
 	}
+
 
 	MSelectionList list;
 	list.add(particleShape);
@@ -203,11 +211,23 @@ MStatus PartioImport::doIt(const MArgList& Args)
 	MFnParticleSystem partSys(objNode, &stat);
 	MString partName = partSys.particleName();
 
+	if (!makeParticle)
+	{
+		// delete all particles in the system first
+		MVectorArray clearOut;
+		clearOut.clear();
+		partSys.setCount(0);
+		partSys.setPerParticleAttribute("position", clearOut);
+		partSys.setPerParticleAttribute("velocity", clearOut);
+	}
+
 	if (stat == MStatus::kSuccess) // particle object was found and attached to
 	{
 		Partio::ParticlesDataMutable* particles;
 		Partio::ParticleAttribute positionAttr;
 		Partio::ParticleAttribute velocityAttr;
+
+		MGlobal::displayInfo(MString ("PartioImport-> LOADING: ") + particleCache);
 		particles=read(particleCache.asChar());
 		bool hasVelo = true;
 
@@ -219,7 +239,8 @@ MStatus PartioImport::doIt(const MArgList& Args)
 
 		char partCount[50];
 		sprintf (partCount, "%d", particles->numParticles());
-		MGlobal::displayInfo(MString ("PartioImport-> LOADING: ") + partCount + MString (" particles"));
+		MGlobal::displayInfo(MString ("PartioImport-> LOADED: ") + partCount + MString (" particles"));
+
 
 		if (!particles->attributeInfo("position",positionAttr) &&
 			!particles->attributeInfo("Position",positionAttr))
@@ -236,51 +257,56 @@ MStatus PartioImport::doIt(const MArgList& Args)
 			hasVelo = false;
 		}
 
-		MPointArray positons;
+		MPointArray positions;
 		MVectorArray velocities;
 		std::map<std::string,  MVectorArray  > vectorAttrArrays;
 		std::map<std::string,  MDoubleArray  > doubleAttrArrays;
+		// we use this mapping to allow for direct writing of attrs to PP variables
+		std::map<std::string, std::string > userPPMapping;
 
 		for (unsigned int i=0;i<attrNames.length();i++)
 		{
-			cout << attrNames[i] << endl;
 			Partio::ParticleAttribute testAttr;
 			if (particles->attributeInfo(attrNames[i].asChar(), testAttr))
 			{
 
 				if (testAttr.count == 3)
 				{
-					if (!partSys.isPerParticleVectorAttribute(attrNames[i]))
+					if (!partSys.isPerParticleVectorAttribute(mayaAttrNames[i]))
 					{
-						MGlobal::displayInfo(MString("partioImport->adding ppAttr " + attrNames[i]) );
+						MGlobal::displayInfo(MString("partioImport->adding ppAttr " + mayaAttrNames[i]) );
 						MString command;
 						command += "pioEmAddPPAttr ";
-						command += attrNames[i];
+						command += mayaAttrNames[i];
 						command += " vectorArray ";
 						command += partName;
 						command += ";";
-						MGlobal::executeCommandOnIdle(command);
+						MGlobal::executeCommand(command);
 					}
 
 					MVectorArray vAttribute;
+					vAttribute.setLength(particles->numParticles());
 					vectorAttrArrays[attrNames[i].asChar()] = vAttribute;
+					userPPMapping[attrNames[i].asChar()] = mayaAttrNames[i].asChar();
 				}
 				else if (testAttr.count == 1)
 				{
 					if (!partSys.isPerParticleDoubleAttribute(attrNames[i]))
 					{
-						MGlobal::displayInfo(MString("PartioEmiter->adding ppAttr " + attrNames[i]));
+						MGlobal::displayInfo(MString("PartioEmiter->adding ppAttr " + mayaAttrNames[i]));
 						MString command;
 						command += "pioEmAddPPAttr ";
-						command += attrNames[i];
+						command += mayaAttrNames[i];
 						command += " doubleArray ";
 						command += partName;
 						command += ";";
-						MGlobal::executeCommandOnIdle(command);
+						MGlobal::executeCommand(command);
 					}
 
 					MDoubleArray dAttribute;
+					dAttribute.setLength(particles->numParticles());
 					doubleAttrArrays[attrNames[i].asChar()] = dAttribute;
+					userPPMapping[attrNames[i].asChar()] = mayaAttrNames[i].asChar();
 				}
 				else
 				{
@@ -291,29 +317,69 @@ MStatus PartioImport::doIt(const MArgList& Args)
 
 ////////////////////////////////////////////////
 ///  final particle loop
+
+		std::map <std::string, MVectorArray >::iterator vecIt;
+		std::map <std::string, MDoubleArray >::iterator doubleIt;
+
 		for (int i=0;i<particles->numParticles();i++)
 		{
 			const float * partioPositions = particles->data<float>(positionAttr,i);
 			MPoint pos (partioPositions[0], partioPositions[1], partioPositions[2]);
-			positons.append(pos);
+			positions.append(pos);
 			if (hasVelo)
 			{
 				const float * partioVelocities = particles->data<float>(velocityAttr,i);
 				MPoint vel (partioVelocities[0], partioVelocities[1], partioVelocities[2]);
 				velocities.append(vel);
 			}
-			else
-			{
-				velocities.setLength(particles->numParticles());
-			}
-		}
-////////////////////////////////////////////////
 
+			if (vectorAttrArrays.size() > 0)
+			{
+				for (vecIt = vectorAttrArrays.begin(); vecIt != vectorAttrArrays.end(); vecIt++)
+				{
+					ParticleAttribute vectorAttr;
+					particles->attributeInfo(vecIt->first.c_str(), vectorAttr);
+					const float* vecVal = particles->data<float>(vectorAttr, i);
+					vectorAttrArrays[vecIt->first][i] = MVector(vecVal[0],vecVal[1],vecVal[2]);
+				}
+			}
+			if (doubleAttrArrays.size() > 0)
+			{
+				for (doubleIt = doubleAttrArrays.begin(); doubleIt != doubleAttrArrays.end(); doubleIt++)
+				{
+					ParticleAttribute doubleAttr;
+					particles->attributeInfo(doubleIt->first.c_str(),doubleAttr);
+					const float*  doubleVal = particles->data<float>(doubleAttr, i);
+					doubleAttrArrays[doubleIt->first][i] = doubleVal[0];
+				}
+			}
+
+		}
+		if (!hasVelo)
+
+		{
+			velocities.setLength(particles->numParticles());
+		}
+
+////////////////////////////////////////////////
+/// Finally.... emit
 		if (particles)
 		{
 			particles->release();
 		}
-		partSys.emit(positons,velocities);
+
+		partSys.setCount(positions.length());
+		stat = partSys.emit(positions,velocities);
+
+		for (doubleIt = doubleAttrArrays.begin(); doubleIt != doubleAttrArrays.end(); doubleIt++)
+		{
+			partSys.setPerParticleAttribute(MString(userPPMapping[doubleIt->first].c_str()), doubleAttrArrays[doubleIt->first]);
+		}
+		for (vecIt = vectorAttrArrays.begin(); vecIt != vectorAttrArrays.end(); vecIt++)
+		{
+			partSys.setPerParticleAttribute(MString(userPPMapping[vecIt->first].c_str()), vectorAttrArrays[vecIt->first]);
+		}
+
 		partSys.saveInitialState();
 	}
 	else
@@ -331,13 +397,14 @@ void PartioImport::printUsage()
 	usage += "\tpartioImport -p/particle <particleShapeName> [Options] </full/path/to/particleCacheFile> \n";
 	usage += "\n";
 	usage += "\t[Options]\n";
-	usage += "\t\t-atr/attribute (multi use)  <PP attribute name>\n";
+	usage += "\t\t-p/particle <particleShapeName> (if none defined, one will be created)";
+	usage += "\t\t-atr/attribute (multi use) <cache Attr Name>  <PP attribute name>\n";
 	usage += "\t\t     (position/velocity/id) are always imported \n";
-	usage += "\t\t-flp/flip  (flip y->z axis to go to Z up packages) \n";
+	//usage += "\t\t-flp/flip  (flip y->z axis to go to Z up packages) \n";
 	usage += "\n";
 	usage += "\tExample:\n";
 	usage += "\n";
-	usage += "partioImport -p particleShape1 -atr rgbPP -at opacityPP  \"/file/path/to/fooBar.0001.prt\"  \n\n";
+	usage += "partioImport -p particleShape1 -atr \"pointColor\" \"rgbPP\" -atr \"opacity\" \"opacityPP\"  \"/file/path/to/fooBar.0001.prt\"  \n\n";
 
 	MGlobal::displayInfo(usage);
 
