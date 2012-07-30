@@ -82,15 +82,14 @@ MStatus initializePlugin ( MObject obj )
 		return status;
 	}
 
-	status = plugin.registerCommand("partioExport",PartioExport::creator );
-
+	status = plugin.registerCommand("partioExport",PartioExport::creator, PartioExport::createSyntax );
 	if (!status)
 	{
 		status.perror("registerCommand partioExport failed");
 		return status;
 	}
-	status = plugin.registerCommand("partioImport",PartioImport::creator );
 
+	status = plugin.registerCommand("partioImport",PartioImport::creator, PartioImport::createSyntax );
 	if (!status)
 	{
 		status.perror("registerCommand partioImport failed");

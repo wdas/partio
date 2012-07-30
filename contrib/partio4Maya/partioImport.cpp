@@ -33,6 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MPxCommand.h>
 #include <maya/MArgList.h>
 #include <maya/MArgParser.h>
+#include <maya/MArgDatabase.h>
 #include <maya/MSyntax.h>
 #include <maya/MGlobal.h>
 #include <maya/MString.h>
@@ -54,12 +55,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <shlobj.h>
 #endif
 
-#define  kHelpFlagS			"-h"
-#define  kHelpFlagL			"-help"
-#define  kAttributeFlagS	"-atr"
-#define  kAttributeFlagL	"-attribute"
-#define  kFlipFlagS			"-flp"
-#define  kFlipFlagL			"-flip"
+static const char *kAttributeFlagS	= "-atr";
+static const char *kAttributeFlagL  = "-attribute";
+static const char *kFlipFlagS		= "-flp";
+static const char *kFlipFlagL		= "-flip";
+static const char *kHelpFlagS 		= "-h";
+static const char *kHelpFlagL 		= "-help";
+static const char *kParticleL		= "-particle";
+static const char *kParticleS		= "-p";
 
 using namespace std;
 using namespace Partio;
@@ -74,7 +77,8 @@ MSyntax PartioImport::createSyntax()
 
 	MSyntax syntax;
 
-	syntax.addFlag(kHelpFlagS, kHelpFlagL,  MSyntax::kNoArg);
+	syntax.addFlag(kParticleS, kParticleL ,  MSyntax::kString);
+	syntax.addFlag(kHelpFlagS, kHelpFlagL ,  MSyntax::kNoArg);
 	syntax.addFlag(kAttributeFlagS, kAttributeFlagL, MSyntax::kString);
 	syntax.makeFlagMultiUse( kAttributeFlagS );
 	syntax.addFlag(kFlipFlagS, kFlipFlagL, MSyntax::kNoArg);
@@ -94,17 +98,39 @@ void* PartioImport::creator()
 
 MStatus PartioImport::doIt(const MArgList& Args)
 {
+	bool makeParticle = false;
 
 	MStatus status;
-	MArgParser argData(createSyntax(), Args, &status);
+	MArgDatabase argData(syntax(), Args, &status);
 
-	if( argData.isFlagSet(kHelpFlagL))
+	if (status == MStatus::kFailure)
+	{
+		MGlobal::displayError("Error parsing arguments" );
+	}
+
+	if( argData.isFlagSet(kHelpFlagL) )
 	{
 		printUsage();
 		return MStatus::kFailure;
 	}
 
-	if( argData.isFlagSet(kFlipFlagL))
+	MString particleShape;
+	if (argData.isFlagSet(kParticleL) )
+	{
+		argData.getFlagArgument(kParticleL, 0, particleShape );
+		if (particleShape == "")
+		{
+			printUsage();
+			MGlobal::displayError("Please supply particleShape argument" );
+			return MStatus::kFailure;
+		}
+	}
+	else
+	{
+		makeParticle = true;
+	}
+
+	if( argData.isFlagSet(kFlipFlagL) || argData.isFlagSet(kFlipFlagS))
 	{
 	}
 
@@ -113,8 +139,9 @@ MStatus PartioImport::doIt(const MArgList& Args)
 
 	/// loop thru the rest of the attributes given
 	MStringArray  attrNames;
-	attrNames.append(MString("id"));
-	attrNames.append(MString("position"));
+
+	//attrNames.append(MString("id"));
+	//attrNames.append(MString("position"));
 
 	bool worldVeloCheck = false;
 
@@ -128,7 +155,8 @@ MStatus PartioImport::doIt(const MArgList& Args)
 		if( !status ) return status;
 
 		if( AttrName == "position" || AttrName == "worldPosition"  ||
-			AttrName == "id" || AttrName == "particleId") {}
+			AttrName == "id" || AttrName == "particleId")
+		{}
 
 		else if( AttrName == "worldVelocity" || AttrName == "velocity" )
 		{
@@ -153,47 +181,146 @@ MStatus PartioImport::doIt(const MArgList& Args)
 		return MStatus::kFailure;
 	}
 
-	Partio::ParticlesDataMutable* particles;
-	Partio::ParticleAttribute positionAttr;
-	particles=read(particleCache.asChar());
-
-	if (!particles || particles->numParticles() <=0)
+	if (makeParticle)
 	{
-		MGlobal::displayError("Particle Cache cannot be read, or does not Contain any particles");
+		MStringArray foo;
+		MGlobal::executeCommand("particle -n partioImport", foo);
+		particleShape = foo[1];
+	}
+
+	MSelectionList list;
+	list.add(particleShape);
+	MObject objNode;
+	list.getDependNode(0, objNode);
+
+	if( objNode.apiType() != MFn::kParticle && objNode.apiType() != MFn::kNParticle )
+	{
+		MGlobal::displayError("PartioImport-> can't find your PARTICLESHAPE.");
 		return MStatus::kFailure;
 	}
 
-	char partCount[50];
-	sprintf (partCount, "%d", particles->numParticles());
-	MGlobal::displayInfo(MString ("PartioImport-> LOADING: ") + partCount + MString (" particles"));
+	MStatus stat;
+	MFnParticleSystem partSys(objNode, &stat);
+	MString partName = partSys.particleName();
 
-	if (!particles->attributeInfo("position",positionAttr) &&
-		!particles->attributeInfo("Position",positionAttr))
+	if (stat == MStatus::kSuccess) // particle object was found and attached to
+	{
+		Partio::ParticlesDataMutable* particles;
+		Partio::ParticleAttribute positionAttr;
+		Partio::ParticleAttribute velocityAttr;
+		particles=read(particleCache.asChar());
+		bool hasVelo = true;
+
+		if (!particles || particles->numParticles() <=0)
+		{
+			MGlobal::displayError("Particle Cache cannot be read, or does not Contain any particles");
+			return MStatus::kFailure;
+		}
+
+		char partCount[50];
+		sprintf (partCount, "%d", particles->numParticles());
+		MGlobal::displayInfo(MString ("PartioImport-> LOADING: ") + partCount + MString (" particles"));
+
+		if (!particles->attributeInfo("position",positionAttr) &&
+			!particles->attributeInfo("Position",positionAttr))
 		{
 			MGlobal::displayError("PartioImport->Failed to find position attribute ");
 			return ( MS::kFailure );
 		}
+		if (!particles->attributeInfo("velocity",velocityAttr) &&
+			!particles->attributeInfo("Velocity",velocityAttr) &&
+			!particles->attributeInfo("vel",velocityAttr) &&
+			!particles->attributeInfo("Vel",velocityAttr))
+		{
+			MGlobal::displayWarning("PartioImport->Failed to find Velocity attribute ");
+			hasVelo = false;
+		}
 
+		MPointArray positons;
+		MVectorArray velocities;
+		std::map<std::string,  MVectorArray  > vectorAttrArrays;
+		std::map<std::string,  MDoubleArray  > doubleAttrArrays;
 
-	MStatus stat;
-	MFnParticleSystem part;
+		for (unsigned int i=0;i<attrNames.length();i++)
+		{
+			cout << attrNames[i] << endl;
+			Partio::ParticleAttribute testAttr;
+			if (particles->attributeInfo(attrNames[i].asChar(), testAttr))
+			{
 
-	MObject partMObj = part.create(&stat);
-	part.setCount(1);
+				if (testAttr.count == 3)
+				{
+					if (!partSys.isPerParticleVectorAttribute(attrNames[i]))
+					{
+						MGlobal::displayInfo(MString("partioImport->adding ppAttr " + attrNames[i]) );
+						MString command;
+						command += "pioEmAddPPAttr ";
+						command += attrNames[i];
+						command += " vectorArray ";
+						command += partName;
+						command += ";";
+						MGlobal::executeCommandOnIdle(command);
+					}
 
-	if (stat == MStatus::kSuccess)
-	{
-		part.emit(MPoint(1,1,1,0));
+					MVectorArray vAttribute;
+					vectorAttrArrays[attrNames[i].asChar()] = vAttribute;
+				}
+				else if (testAttr.count == 1)
+				{
+					if (!partSys.isPerParticleDoubleAttribute(attrNames[i]))
+					{
+						MGlobal::displayInfo(MString("PartioEmiter->adding ppAttr " + attrNames[i]));
+						MString command;
+						command += "pioEmAddPPAttr ";
+						command += attrNames[i];
+						command += " doubleArray ";
+						command += partName;
+						command += ";";
+						MGlobal::executeCommandOnIdle(command);
+					}
+
+					MDoubleArray dAttribute;
+					doubleAttrArrays[attrNames[i].asChar()] = dAttribute;
+				}
+				else
+				{
+					MGlobal::displayError(MString("PartioEmitter->skipping attr: " + MString(attrNames[i])));
+				}
+			}
+		}
+
+////////////////////////////////////////////////
+///  final particle loop
+		for (int i=0;i<particles->numParticles();i++)
+		{
+			const float * partioPositions = particles->data<float>(positionAttr,i);
+			MPoint pos (partioPositions[0], partioPositions[1], partioPositions[2]);
+			positons.append(pos);
+			if (hasVelo)
+			{
+				const float * partioVelocities = particles->data<float>(velocityAttr,i);
+				MPoint vel (partioVelocities[0], partioVelocities[1], partioVelocities[2]);
+				velocities.append(vel);
+			}
+			else
+			{
+				velocities.setLength(particles->numParticles());
+			}
+		}
+////////////////////////////////////////////////
+
+		if (particles)
+		{
+			particles->release();
+		}
+		partSys.emit(positons,velocities);
+		partSys.saveInitialState();
 	}
 	else
 	{
 		return stat;
 	}
 
-	if (particles)
-	{
-		particles->release();
-	}
 	return MStatus::kSuccess;
 }
 
@@ -201,7 +328,7 @@ void PartioImport::printUsage()
 {
 
 	MString usage = "\n-----------------------------------------------------------------------------\n";
-	usage += "\tpartioImport [Options] /full/path/to/particleCacheFile \n";
+	usage += "\tpartioImport -p/particle <particleShapeName> [Options] </full/path/to/particleCacheFile> \n";
 	usage += "\n";
 	usage += "\t[Options]\n";
 	usage += "\t\t-atr/attribute (multi use)  <PP attribute name>\n";
@@ -210,7 +337,7 @@ void PartioImport::printUsage()
 	usage += "\n";
 	usage += "\tExample:\n";
 	usage += "\n";
-	usage += "partioImport  -atr position -atr rgbPP -at opacityPP  \"/file/path/to/fooBar.0001.prt\"  \n\n";
+	usage += "partioImport -p particleShape1 -atr rgbPP -at opacityPP  \"/file/path/to/fooBar.0001.prt\"  \n\n";
 
 	MGlobal::displayInfo(usage);
 

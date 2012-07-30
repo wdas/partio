@@ -39,9 +39,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MFnParticleSystem.h>
 #include <maya/MDoubleArray.h>
 #include <maya/MVectorArray.h>
+#include <maya/MPointArray.h>
 #include <maya/MIntArray.h>
 #include <maya/MSelectionList.h>
 #include <maya/MPoint.h>
+#include <maya/MTime.h>
 
 #include <iostream>
 #include <memory>
@@ -65,7 +67,7 @@ public:
 	// Syntax methods
 
 	virtual bool		hasSyntax();
-	static MSyntax		createSyntax();
+	static  MSyntax		createSyntax();
 
 	MStatus doIt(const MArgList&);
 	void printUsage();
