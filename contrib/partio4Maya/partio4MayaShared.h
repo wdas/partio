@@ -40,11 +40,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <sys/stat.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <ctype.h>
 #include <map>
 #include <maya/MString.h>
 #include <maya/MDataBlock.h>
 #include <maya/MVector.h>
 #include <maya/MGlobal.h>
+#include <maya/MStringArray.h>
 
 
 #ifdef OSMac_MachO_
@@ -78,8 +80,13 @@ class partio4Maya
 public:
 
 	static bool 	partioCacheExists(const char* fileName);
-	static MString 	updateFileName (MString cacheFile ,MString cacheDir, bool cacheStatic, int cacheOffset, int cachePadding,
-									MString preDelim, MString postDelim, short cacheFormat,int ingegerTime,MString &formatExt);
+	static MStringArray partioGetBaseFileName(MString inFileName);
+	static void 	updateFileName (MString cacheFile, MString cacheDir,
+									 bool cacheStatic, int cacheOffset,
+									 short cacheFormat, int integerTime,
+									 int &cachePadding, MString &formatExt,
+									 MString &outputFramePath, MString &outputRenderPath);
+
 	static MString 	setExt(short extNum);
 	static void 	buildSupportedExtensionList(std::map<short,MString> &formatExtMap,bool write);
 	static void 	drawPartioLogo(float multiplier);

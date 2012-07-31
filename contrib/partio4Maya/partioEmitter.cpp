@@ -396,8 +396,17 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     int integerTime = (int)floor(cT.value()+.52);
 
 	// parse and get the new file name
-	MString newCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
-														   preDelim, postDelim, cacheFormat,integerTime, formatExt);
+	MString newCacheFile = "";
+	MString renderCacheFile = "";
+
+	partio4Maya::updateFileName( cachePrefix,  cacheDir,
+								cacheStatic,  cacheOffset,
+								cacheFormat,  integerTime,
+								cachePadding, formatExt,
+								newCacheFile, renderCacheFile
+								);
+
+
     float deltaTime  = float(cT.value() - integerTime);
 
     // motion  blur rounding  frame logic

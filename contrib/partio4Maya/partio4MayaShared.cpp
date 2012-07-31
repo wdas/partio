@@ -79,77 +79,230 @@ bool partio4Maya::partioCacheExists(const char* fileName)
 }
 
 
-MString partio4Maya::updateFileName (MString cacheFile, MString cacheDir, bool cacheStatic, int cacheOffset, int cachePadding,
-						MString preDelim, MString postDelim, short cacheFormat,int integerTime, MString &formatExt)
+///////////////////////////////////////////
+/// C++ version of the same mel procedure
+MStringArray partio4Maya::partioGetBaseFileName(MString inFileName)
+{
+	MString preDelim = "";
+	MString postDelim =  "";
+	MString ext = "";
+	MString padding = "";
+
+	MStringArray outFileName;
+	outFileName.append(inFileName);
+	outFileName.append(preDelim);
+	outFileName.append(postDelim);
+	outFileName.append(ext);
+	outFileName.append(padding);
+
+	///////////////////////////////////////////////////////////
+	/// first we strip off and determine the file extension
+	int l = inFileName.length();
+	bool foundExt = true;
+
+	MString breakdownFileName = inFileName;
+
+	const char* c = breakdownFileName.asChar();
+	int end = breakdownFileName.length()-1;
+	while (foundExt)
+	{
+		if (isalpha(c[end]))
+		{
+			end--;
+		}
+		else
+		{
+			foundExt = false;
+			ext = breakdownFileName.substringW(end+1, (breakdownFileName.length()-1) );
+			breakdownFileName = breakdownFileName.substringW(0,end);
+		}
+	}
+
+
+	cout << "brek" << breakdownFileName << endl;
+	cout << "ext = " << ext << endl;
+
+	if (ext.length() > 0)
+	{
+		outFileName[3] = ext;
+		//if (ext == "pts" || ext == "xyz") // special case for static lidar files
+		//{
+		//	return outFileName;
+		//}
+		outFileName[0] = breakdownFileName;
+	}
+	else
+	{
+		return outFileName;
+	}
+
+	//////////////////////////////////////////////////////////////
+	/// then we  determine the postDelim character (only support  "." or  "_"
+
+	l = breakdownFileName.length()-1;
+	MString last =  breakdownFileName.substringW(l,l);
+
+	if ( last == "_" || last == ".")
+	{
+		outFileName[2] = last;
+		breakdownFileName = breakdownFileName.substringW(0,(l-1));
+		outFileName[0] = breakdownFileName;
+	}
+	else
+	{
+		return outFileName;
+	}
+
+	/////////////////////////////////////////////////////////////
+	/// now lets  get the frame numbers to determine padding
+
+	bool foundNum = true;
+	const char* f = breakdownFileName.asChar();
+	end = breakdownFileName.length()-1;
+
+	while (foundNum)
+	{
+		if (isdigit(f[end]))
+		{
+			end--;
+			padding += "#";
+		}
+		else
+		{
+			foundNum = false;
+			breakdownFileName = breakdownFileName.substringW(0,end);
+		}
+	}
+
+	if (padding.length() > 0)
+	{
+		outFileName[4] = padding;
+		outFileName[0] = breakdownFileName;
+	}
+	else
+	{
+		outFileName[4] = "-1";
+		return outFileName;
+	}
+
+	/////////////////////////////////////////////////////////////
+	///  lastly  we  get the  preDelim character, again only supporting "." or "_"
+
+	l = breakdownFileName.length()-1;
+	last =  breakdownFileName.substringW(l,l);
+
+
+	if ( last == "_" || last == ".")
+	{
+		outFileName[1] = last;
+		breakdownFileName = breakdownFileName.substringW(0,(l-1));
+		outFileName[0] = breakdownFileName;
+	}
+	else
+	{
+		return outFileName;
+	}
+
+	/////////////////////////////////////////////////////////////////////////
+	/// if we've gotten here, we have a fully populated outputFileNameArray
+
+	return outFileName;
+
+}
+
+
+
+
+void partio4Maya::updateFileName (MString cacheFile, MString cacheDir,
+									 bool cacheStatic, int cacheOffset,
+									 short cacheFormat, int integerTime,
+									 int &cachePadding, MString &formatExt,
+									 MString &outputFramePath, MString &outputRenderPath
+									)
 {
 	formatExt = setExt(cacheFormat);
+
+	MStringArray fileParts = partioGetBaseFileName(cacheFile);
+
+	MString cachePrefix = fileParts[0];
+	MString preDelim = fileParts[1];
+	MString postDelim = fileParts[2];
+	cout << postDelim << endl;
+	formatExt = fileParts[3];
+	cout << formatExt << endl;
+	cachePadding = fileParts[4].length();
+
 	bool tempFix = false;
 
 	int cacheFrame;
 	MString  newCacheFile;
-	if(integerTime != -123456789)
+	MString  renderCacheFile;
+
+///////////////////////////////////////////////
+///  output path  as normal
+
+	cacheFrame =  integerTime + cacheOffset;
+
+	MString formatString =  "%s%s%s%0";
+	// special case for PDCs and maya nCache files because of the funky naming convention  TODO: support substepped/retiming  caches
+	if (formatExt == "pdc")
 	{
-		cacheFrame =  integerTime + cacheOffset;
+		cacheFrame *= (int)(6000 / 24);
+		cachePadding = 1;
+	}
 
-		MString formatString =  "%s%s%s%0";
-		// special case for PDCs and maya nCache files because of the funky naming convention  TODO: support substepped/retiming  caches
-		if (formatExt == "pdc")
+	else if (formatExt == "mc")
+	{
+		cachePadding = 1;
+		formatString = "%s%sFrame%0";
+		int idx = cacheFile.rindexW("Frame");
+
+		if (idx != -1)
 		{
-			cacheFrame *= (int)(6000 / 24);
-			cachePadding = 1;
+			cacheFile = cacheFile.substringW(0, idx-1);
 		}
+	}
 
-		else if (formatExt == "mc")
-		{
-			cachePadding = 1;
-			formatString = "%s%sFrame%0";
-			int idx = cacheFile.rindexW("Frame");
+	char fileName[512] = "";
 
-			if (idx != -1)
-			{
-				cacheFile = cacheFile.substring(0, idx-1);
-			}
-		}
+	formatString += cachePadding;
+	formatString += "d%s%s";
 
-		char fileName[512] = "";
+	const char* fmt = formatString.asChar();
 
-		formatString += cachePadding;
-		formatString += "d%s%s";
-
-		const char* fmt = formatString.asChar();
-
-		if (!cacheStatic)
-		{
-			sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(), cacheFrame, postDelim.asChar(), formatExt.asChar());
-			newCacheFile = fileName;
-		}
-		else
-		{
-			newCacheFile = cacheDir+cacheFile;
-		}
+	if (!cacheStatic)
+	{
+		sprintf(fileName, fmt, cacheDir.asChar(), cachePrefix.asChar(), preDelim.asChar(), cacheFrame, postDelim.asChar(), formatExt.asChar());
+		newCacheFile = fileName;
 	}
 	else
 	{
-
-		if (!cacheStatic)
-		{
-			MString formatString =  "%s%s%s<frame>%s%s";
-			char fileName[512] = "";
-			const char* fmt = formatString.asChar();
-			sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(),  postDelim.asChar(), formatExt.asChar());
-			newCacheFile = fileName;
-		}
-		else
-		{
-			MString formatString =  "%s%s";
-			char fileName[512] = "";
-			const char* fmt = formatString.asChar();
-			sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar());
-			newCacheFile = fileName;
-		}
+		newCacheFile = cacheDir+cacheFile;
 	}
 
-	return newCacheFile;
+///////////////////////////////////////////
+/// output path for render output path
+
+
+	if (!cacheStatic)
+	{
+		formatString =  "%s%s%s<frame>%s%s";
+		char fileName[512] = "";
+		const char* fmt = formatString.asChar();
+		sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(),  postDelim.asChar(), formatExt.asChar());
+		renderCacheFile = fileName;
+	}
+	else
+	{
+		MString formatString =  "%s%s";
+		char fileName[512] = "";
+		const char* fmt = formatString.asChar();
+		sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar());
+		renderCacheFile = fileName;
+	}
+
+	outputFramePath =  newCacheFile;
+	outputRenderPath = renderCacheFile;
 }
 ////////////////////////////////////////////////////////////////
 MString partio4Maya::setExt(short extEnum)

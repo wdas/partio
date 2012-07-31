@@ -104,6 +104,7 @@ global  proc string[]  partioGetBaseFileName(string $inFileName)
 	}
 	else
 	{
+		$outFileName[4] = -1;
 		return $outFileName;
 	}
 

@@ -464,8 +464,16 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 			motionBlurStep = true;
 		}
 		MString formatExt;
-		MString newCacheFile = partio4Maya::updateFileName(cachePrefix,cacheDir,cacheStatic,cacheOffset,cachePadding,
-														   preDelim, postDelim, cacheFormat,integerTime, formatExt);
+
+		MString newCacheFile = "";
+		MString renderCacheFile = "";
+
+		partio4Maya::updateFileName( cachePrefix,  cacheDir,
+									 cacheStatic,  cacheOffset,
+									 cacheFormat,  integerTime,
+									 cachePadding, formatExt,
+									 newCacheFile, renderCacheFile
+									);
 
 		if (renderCachePath != newCacheFile || renderCachePath != mLastFileLoaded )
 		{

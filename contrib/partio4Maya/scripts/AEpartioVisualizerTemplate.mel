@@ -109,13 +109,15 @@ global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
   	string $fileNameComp[];
 
 	string $baseFileName = basename($fileName,"");
+	print $baseFileName;
 
 	string $fileParts[] = `partioGetBaseFileName($baseFileName)`;
 	string $fileBaseName = $fileParts[0];
 	int $pad = $fileParts[4];
 	string $ext = $fileParts[3];
 
-	setAttr ($nodeName + ".cachePrefix") -type "string" $fileBaseName;
+	setAttr ($nodeName + ".cachePrefix") -type "string" $baseFileName;
+
 
 	int $extIndex = 0;
 
@@ -166,7 +168,16 @@ global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
 
 	}
 
-	setAttr ($nodeName + ".staticCache") 0;
+// if padding is not -1 we have a number in the file name otherwise we want to use static cache
+	if ($pad >=0)
+	{
+		setAttr ($nodeName + ".staticCache") 0;
+	}
+	else
+	{
+		setAttr ($nodeName + ".staticCache") 1;
+	}
+
 	if ($ext == "pdc")
 	{
 		$pad = 0;
@@ -178,14 +189,11 @@ global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
 	}
 	else if ($ext == "pts" || $ext == "xyz")
 	{
-		setAttr ($nodeName + ".staticCache") 1;
 		$pad = 0;
 	}
 
 	setAttr ($nodeName + ".cachePadding") $pad;
 	setAttr ($nodeName + ".cacheFormat") $extIndex;
-	setAttr ($nodeName + ".cachePreDelim") -type "string" $fileParts[1];
-	setAttr ($nodeName + ".cachePostDelim") -type "string" $fileParts[2];
 
 	$fileName = substituteAllString($fileName, basename($fileName, ""), "");
   	setAttr $fileAttribute -type "string" $fileName;
