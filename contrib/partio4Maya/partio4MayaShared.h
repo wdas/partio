@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <stdio.h>
 #include <ctype.h>
 #include <map>
+#include <sstream>
 #include <maya/MString.h>
 #include <maya/MDataBlock.h>
 #include <maya/MVector.h>

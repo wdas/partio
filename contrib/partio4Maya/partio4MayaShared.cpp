@@ -87,6 +87,7 @@ MStringArray partio4Maya::partioGetBaseFileName(MString inFileName)
 	MString postDelim =  "";
 	MString ext = "";
 	MString padding = "";
+	MString origFrameString = "";
 
 	MStringArray outFileName;
 	outFileName.append(inFileName);
@@ -94,6 +95,7 @@ MStringArray partio4Maya::partioGetBaseFileName(MString inFileName)
 	outFileName.append(postDelim);
 	outFileName.append(ext);
 	outFileName.append(padding);
+	outFileName.append(origFrameString);
 
 	///////////////////////////////////////////////////////////
 	/// first we strip off and determine the file extension
@@ -117,10 +119,6 @@ MStringArray partio4Maya::partioGetBaseFileName(MString inFileName)
 			breakdownFileName = breakdownFileName.substringW(0,end);
 		}
 	}
-
-
-	cout << "brek" << breakdownFileName << endl;
-	cout << "ext = " << ext << endl;
 
 	if (ext.length() > 0)
 	{
@@ -170,6 +168,7 @@ MStringArray partio4Maya::partioGetBaseFileName(MString inFileName)
 		else
 		{
 			foundNum = false;
+			origFrameString = breakdownFileName.substringW(end+1,(breakdownFileName.length()-1));
 			breakdownFileName = breakdownFileName.substringW(0,end);
 		}
 	}
@@ -178,6 +177,7 @@ MStringArray partio4Maya::partioGetBaseFileName(MString inFileName)
 	{
 		outFileName[4] = padding;
 		outFileName[0] = breakdownFileName;
+		outFileName[5] = origFrameString;
 	}
 	else
 	{
@@ -227,10 +227,9 @@ void partio4Maya::updateFileName (MString cacheFile, MString cacheDir,
 	MString cachePrefix = fileParts[0];
 	MString preDelim = fileParts[1];
 	MString postDelim = fileParts[2];
-	cout << postDelim << endl;
-	formatExt = fileParts[3];
-	cout << formatExt << endl;
+	//formatExt = fileParts[3];
 	cachePadding = fileParts[4].length();
+	MString origFrameString = fileParts[5];
 
 	bool tempFix = false;
 
@@ -270,36 +269,35 @@ void partio4Maya::updateFileName (MString cacheFile, MString cacheDir,
 
 	const char* fmt = formatString.asChar();
 
-	if (!cacheStatic)
+	if (cacheStatic)
 	{
-		sprintf(fileName, fmt, cacheDir.asChar(), cachePrefix.asChar(), preDelim.asChar(), cacheFrame, postDelim.asChar(), formatExt.asChar());
-		newCacheFile = fileName;
+		stringstream s_str;
+		s_str << origFrameString.asChar();
+		s_str >> cacheFrame;
 	}
-	else
-	{
-		newCacheFile = cacheDir+cacheFile;
-	}
+
+	sprintf(fileName, fmt, cacheDir.asChar(), cachePrefix.asChar(), preDelim.asChar(), cacheFrame, postDelim.asChar(), formatExt.asChar());
+
+	newCacheFile = fileName;
+
 
 ///////////////////////////////////////////
 /// output path for render output path
 
 
-	if (!cacheStatic)
+	MString frameString = "<frame>";
+	if (cacheStatic)
 	{
-		formatString =  "%s%s%s<frame>%s%s";
-		char fileName[512] = "";
-		const char* fmt = formatString.asChar();
-		sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(),  postDelim.asChar(), formatExt.asChar());
-		renderCacheFile = fileName;
+		frameString = origFrameString;
 	}
-	else
-	{
-		MString formatString =  "%s%s";
-		char fileName[512] = "";
-		const char* fmt = formatString.asChar();
-		sprintf(fileName, fmt, cacheDir.asChar(), cacheFile.asChar());
-		renderCacheFile = fileName;
-	}
+
+
+	formatString =  "%s%s%s%s%s%s";
+	char rfileName[512] = "";
+	const char* rfmt = formatString.asChar();
+	sprintf(rfileName, rfmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(), frameString.asChar(), postDelim.asChar(), formatExt.asChar());
+	renderCacheFile = rfileName;
+
 
 	outputFramePath =  newCacheFile;
 	outputRenderPath = renderCacheFile;

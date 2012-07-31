@@ -102,7 +102,6 @@ MObject partioVisualizer::aCacheActive;
 MObject partioVisualizer::aCacheOffset;
 MObject partioVisualizer::aCacheStatic;
 MObject partioVisualizer::aCacheFormat;
-MObject partioVisualizer::aCachePadding;
 MObject partioVisualizer::aJitterPos;
 MObject partioVisualizer::aJitterFreq;
 MObject partioVisualizer::aPartioAttributes;
@@ -274,7 +273,6 @@ MStatus partioVisualizer::initialize()
     aCacheActive = nAttr.create("cacheActive", "cAct", MFnNumericData::kBoolean, 1, &stat);
     nAttr.setKeyable(true);
 
-    aCachePadding = nAttr.create("cachePadding", "cachPad" , MFnNumericData::kInt, 4, &stat );
 
     aCacheFormat = eAttr.create( "cacheFormat", "cachFmt");
 	std::map<short,MString> formatExtMap;
@@ -352,7 +350,6 @@ MStatus partioVisualizer::initialize()
     addAttribute ( aCacheOffset );
 	addAttribute ( aCacheStatic );
     addAttribute ( aCacheActive );
-    addAttribute ( aCachePadding );
     addAttribute ( aCacheFormat );
     addAttribute ( aPartioAttributes );
 	addAttribute ( aColorFrom );
@@ -373,7 +370,6 @@ MStatus partioVisualizer::initialize()
     attributeAffects ( aCacheFile, aUpdateCache );
     attributeAffects ( aCacheOffset, aUpdateCache );
 	attributeAffects ( aCacheStatic, aUpdateCache );
-    attributeAffects ( aCachePadding, aUpdateCache );
     attributeAffects ( aCacheFormat, aUpdateCache );
 	attributeAffects ( aColorFrom, aUpdateCache );
 	attributeAffects ( aAlphaFrom, aUpdateCache );
@@ -448,14 +444,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		MString renderCachePath 	= block.inputValue( aRenderCachePath ).asString();
 
 		MString formatExt = "";
-		MString cachePrefix = "";
 		int cachePadding = 0;
-
-		//outFileName.append(inFileName); 0
-		//outFileName.append(preDelim);   1
-		//outFileName.append(postDelim);  2
-		//outFileName.append(ext);        3
-		//outFileName.append(padding);    4
 
 		MString newCacheFile = "";
 		MString renderCacheFile = "";
@@ -504,7 +493,10 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			pvCache.bbox.clear();
 		}
 
-		if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()) && (newCacheFile != mLastFileLoaded || forceReload) )
+		if ( newCacheFile != "" &&
+			 partio4Maya::partioCacheExists(newCacheFile.asChar()) &&
+			 (newCacheFile != mLastFileLoaded || forceReload)
+		   )
 		{
 
 			cacheChanged = true;

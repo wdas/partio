@@ -37,7 +37,6 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 	editorTemplate -callCustom pioVizAEoutpathNew pioVizAEoutpathReplace cacheDir;
 	editorTemplate -addControl "cachePrefix";
 	editorTemplate -addControl "cacheOffset";
-	editorTemplate -addControl "cachePadding";
 	editorTemplate -addControl "cacheFormat";
 	editorTemplate -addControl "iconSize";
 	editorTemplate -callCustom pioVizForceUpdate pioVizForceUpdate $nodeName;
@@ -192,7 +191,6 @@ global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
 		$pad = 0;
 	}
 
-	setAttr ($nodeName + ".cachePadding") $pad;
 	setAttr ($nodeName + ".cacheFormat") $extIndex;
 
 	$fileName = substituteAllString($fileName, basename($fileName, ""), "");
