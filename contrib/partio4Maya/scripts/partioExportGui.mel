@@ -192,16 +192,19 @@ global proc buildParticleEntry (string $particle, string $parent, int $color )
     $particleExportCheckbox = ($particle+"exportCheckBox");
     $particleRampCheckbox = ($particle+"rampCheckbox");
     $particleSupressedCheckbox = ($particle+"supressedCheckbox");
+	$particleOverrideName = ($particle+"overrideNameText");
 
 
     if (!`rowLayout -exists ($particle+"checkboxRowLayout")`)
     {
-        rowLayout -ebg true -bgc $uiColor $uiColor $uiColor -nc 3 -cw3 335 75 75  ($particle+"checkboxRowLayout");
-        checkBox  -l  ("Check to Export Attributes for "+$particle)  $particleExportCheckbox;
+        rowLayout -ebg true -bgc $uiColor $uiColor $uiColor -nc 4 -cw3 230 75 75  ($particle+"checkboxRowLayout");
+        checkBox  -l  ("Check to Export ")  $particleExportCheckbox;
+		textFieldGrp -text $particle $particleOverrideName;
         checkBox  -l  "ramp Attrs" -cc ("buildParticleEntry "+ $particle + " " + $parent + " " + $color) $particleRampCheckbox;
         checkBox  -l "supressed" -cc ("buildParticleEntry "+ $particle + " " + $parent+ " " + $color) $particleSupressedCheckbox;
         setParent $parent;
     }
+
     frameLayout -p $parent  -ebg true -bgc $uiColor $uiColor $uiColor -label $particle -collapsable true  -collapse $open -w 492 -borderStyle "etchedIn"
     -labelAlign "center" $framelayoutName;
 
@@ -280,9 +283,10 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
                 string $cmd;
                 string $filePath;
 
+			string $particleOverrideName = `textFieldGrp -q -text ($particle+"overrideNameText")`;
 		// fix windows paths with escape characters
-		
-			
+
+
                 $cmd = ("partioExport -mnf "+$start+" -mxf "+$end+ " -f "+$partioExportFormat+" -atr position -atr id ");
                 $filePath = `encodeString($cacheDir)`;
 
@@ -305,6 +309,10 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 						}
                     }
                 }
+                if (`size($particleOverrideName)` > 0 &&  $particleOverrideName != $particle )
+				{
+					$cmd += (" -fp \""+$particleOverrideName+"\"");
+				}
                 $cmd += (" -p \""+$filePath +"\" "+$particle);
                 evalEcho $cmd;
             }
