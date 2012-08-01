@@ -114,15 +114,12 @@ MObject partioInstancer::aUpdateCache;
 MObject partioInstancer::aSize;         // The size of the logo
 MObject partioInstancer::aFlipYZ;
 MObject partioInstancer::aCacheDir;
-MObject partioInstancer::aCachePrefix;
+MObject partioInstancer::aCacheFile;
 MObject partioInstancer::aUseTransform;
 MObject partioInstancer::aCacheActive;
 MObject partioInstancer::aCacheOffset;
 MObject partioInstancer::aCacheStatic;
 MObject partioInstancer::aCacheFormat;
-MObject partioInstancer::aCachePadding;
-MObject partioInstancer::aCachePreDelim;
-MObject partioInstancer::aCachePostDelim;
 MObject partioInstancer::aPartioAttributes;
 MObject partioInstancer::aPointSize;
 MObject partioInstancer::aDrawStyle;
@@ -156,7 +153,7 @@ partioInstReaderCache::partioInstReaderCache():
 partioInstancer::partioInstancer()
 :   mLastFileLoaded(""),
 	mLastPath(""),
-	mLastPrefix(""),
+	mLastFile(""),
 	mLastExt(""),
 	mLastRotationFromIndex(-1),
 	mLastScaleFromIndex(-1),
@@ -222,7 +219,7 @@ void partioInstancer::initCallback()
     mLastExt = partio4Maya::setExt(extENum);
 
     MPlug(tmo,aCacheDir).getValue(mLastPath);
-    MPlug(tmo,aCachePrefix).getValue(mLastPrefix);
+    MPlug(tmo,aCacheFile).getValue(mLastFile);
 	MPlug(tmo,aSize).getValue(multiplier);
 	cacheChanged = false;
 
@@ -261,7 +258,7 @@ MStatus partioInstancer::initialize()
     tAttr.setConnectable ( true );
     tAttr.setStorable ( true );
 
-    aCachePrefix = tAttr.create ( "cachePrefix", "cachP", MFnStringData::kString );
+    aCacheFile = tAttr.create ( "cachePrefix", "cachP", MFnStringData::kString );
     tAttr.setReadable ( true );
     tAttr.setWritable ( true );
     tAttr.setKeyable ( true );
@@ -276,11 +273,6 @@ MStatus partioInstancer::initialize()
 
     aCacheActive = nAttr.create("cacheActive", "cAct", MFnNumericData::kBoolean, 1, &stat);
     nAttr.setKeyable(true);
-
-    aCachePadding = nAttr.create("cachePadding", "cachPad" , MFnNumericData::kInt, 4, &stat );
-
-	aCachePreDelim = tAttr.create ( "cachePreDelim", "cachPredlm", MFnStringData::kString );
-	aCachePostDelim = tAttr.create ( "cachePostDelim", "cachPstdlm", MFnStringData::kString );
 
     aCacheFormat = eAttr.create( "cacheFormat", "cachFmt");
 	std::map<short,MString> formatExtMap;
@@ -352,13 +344,10 @@ MStatus partioInstancer::initialize()
 	addAttribute ( aSize );
 	addAttribute ( aFlipYZ );
 	addAttribute ( aCacheDir );
-    addAttribute ( aCachePrefix );
+    addAttribute ( aCacheFile );
     addAttribute ( aCacheOffset );
 	addAttribute ( aCacheStatic );
     addAttribute ( aCacheActive );
-    addAttribute ( aCachePadding );
-	addAttribute ( aCachePreDelim );
-	addAttribute ( aCachePostDelim );
     addAttribute ( aCacheFormat );
     addAttribute ( aPartioAttributes );
 	addAttribute ( aPointSize );
@@ -376,12 +365,9 @@ MStatus partioInstancer::initialize()
     attributeAffects ( aCacheDir, aUpdateCache );
 	attributeAffects ( aSize, aUpdateCache );
 	attributeAffects ( aFlipYZ, aUpdateCache );
-    attributeAffects ( aCachePrefix, aUpdateCache );
+    attributeAffects ( aCacheFile, aUpdateCache );
     attributeAffects ( aCacheOffset, aUpdateCache );
 	attributeAffects ( aCacheStatic, aUpdateCache );
-    attributeAffects ( aCachePadding, aUpdateCache );
-	attributeAffects ( aCachePreDelim, aUpdateCache );
-	attributeAffects ( aCachePostDelim, aUpdateCache );
     attributeAffects ( aCacheFormat, aUpdateCache );
 	attributeAffects ( aPointSize, aUpdateCache );
 	attributeAffects ( aDrawStyle, aUpdateCache );
@@ -433,19 +419,17 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 	{
 
 		MString cacheDir 	= block.inputValue(aCacheDir).asString();
-		MString cachePrefix = block.inputValue(aCachePrefix).asString();
+		MString cacheFile = block.inputValue(aCacheFile).asString();
 
-		if (cacheDir  == "" || cachePrefix == "" )
+		if (cacheDir  == "" || cacheFile == "" )
 		{
-			MGlobal::displayError("PartioEmitter->Error: Please specify cache file!");
+			// too much noise!
+			//MGlobal::displayError("PartioEmitter->Error: Please specify cache file!");
 			return ( MS::kFailure );
 		}
 
 		bool cacheStatic	= block.inputValue( aCacheStatic ).asBool();
 		int cacheOffset 	= block.inputValue( aCacheOffset ).asInt();
-		int cachePadding	= block.inputValue( aCachePadding ).asInt();
-		MString preDelim 	= block.inputValue( aCachePreDelim ).asString();
-		MString postDelim   = block.inputValue( aCachePostDelim).asString();
 		short cacheFormat	= block.inputValue( aCacheFormat ).asShort();
 		bool forceReload 	= block.inputValue( aForceReload ).asBool();
 		MTime inputTime		= block.inputValue(time).asTime();
@@ -463,17 +447,20 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 		{
 			motionBlurStep = true;
 		}
-		MString formatExt;
+
+		MString formatExt = "";
+		int cachePadding = 0;
 
 		MString newCacheFile = "";
 		MString renderCacheFile = "";
 
-		partio4Maya::updateFileName( cachePrefix,  cacheDir,
+		partio4Maya::updateFileName( cacheFile,  cacheDir,
 									 cacheStatic,  cacheOffset,
 									 cacheFormat,  integerTime,
 									 cachePadding, formatExt,
 									 newCacheFile, renderCacheFile
 									);
+
 
 		if (renderCachePath != newCacheFile || renderCachePath != mLastFileLoaded )
 		{
@@ -483,14 +470,14 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
 //////////////////////////////////////////////
 /// Cache can change manually by changing one of the parts of the cache input...
-		if (mLastExt != formatExt || mLastPath != cacheDir || mLastPrefix != cachePrefix ||  mLastFlipStatus  != flipYZ || forceReload )
+		if (mLastExt != formatExt || mLastPath != cacheDir || mLastFile != cacheFile ||  mLastFlipStatus  != flipYZ || forceReload )
 		{
 			cacheChanged = true;
 			mFlipped = false;
 			mLastFlipStatus = flipYZ;
 			mLastExt = formatExt;
 			mLastPath = cacheDir;
-			mLastPrefix = cachePrefix;
+			mLastFile = cacheFile;
 			block.outputValue(aForceReload).setBool(false);
 		}
 

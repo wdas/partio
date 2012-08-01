@@ -456,8 +456,6 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 									 newCacheFile, renderCacheFile
 									);
 
-		cout << newCacheFile << endl;
-
 		if (renderCachePath != renderCacheFile || forceReload )
 		{
 			block.outputValue(aRenderCachePath).setString(renderCacheFile);

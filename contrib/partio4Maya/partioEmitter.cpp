@@ -63,13 +63,10 @@ MTypeId partioEmitter::id ( ID_PARTIOEMITTER );
 
 //// OBJECT Attributes
 MObject partioEmitter::aCacheDir;
-MObject partioEmitter::aCachePrefix;
+MObject partioEmitter::aCacheFile;
 MObject partioEmitter::aCacheOffset;
 MObject partioEmitter::aCacheActive;
 MObject partioEmitter::aCacheFormat;
-MObject partioEmitter::aCachePadding;
-MObject partioEmitter::aCachePreDelim;
-MObject partioEmitter::aCachePostDelim;
 MObject partioEmitter::aCacheStatic;
 MObject partioEmitter::aUseEmitterTransform;
 MObject partioEmitter::aSize;
@@ -89,7 +86,7 @@ partioEmitter::partioEmitter()
         :lastWorldPoint ( 0, 0, 0, 1 ),
         mLastFileLoaded(""),
         mLastPath(""),
-		mLastPrefix(""),
+		mLastFile(""),
 		mLastExt(""),
 		cacheChanged(false)
 {
@@ -132,7 +129,7 @@ void partioEmitter::initCallback()
 	mLastExt = partio4Maya::setExt(extEnum);
 
     MPlug(tmo, aCacheDir).getValue(mLastPath);
-    MPlug(tmo, aCachePrefix).getValue(mLastPrefix);
+    MPlug(tmo, aCacheFile).getValue(mLastFile);
     cacheChanged = false;
 }
 
@@ -181,7 +178,7 @@ MStatus partioEmitter::initialize()
     tAttr.setConnectable ( true );
     tAttr.setStorable ( true );
 
-    aCachePrefix = tAttr.create ( "cachePrefix", "cachP", MFnStringData::kString );
+    aCacheFile = tAttr.create ( "cachePrefix", "cachP", MFnStringData::kString );
     tAttr.setReadable ( true );
     tAttr.setWritable ( true );
     tAttr.setKeyable ( false );
@@ -193,11 +190,6 @@ MStatus partioEmitter::initialize()
 
     aCacheActive = nAttr.create("cacheActive", "cAct", MFnNumericData::kBoolean, 1, &status);
     nAttr.setKeyable(true);
-
-    aCachePadding = nAttr.create("cachePadding", "cachPad" , MFnNumericData::kInt, 4, &status );
-
-	aCachePreDelim = tAttr.create ( "cachePreDelim", "cachPredlm", MFnStringData::kString );
-	aCachePostDelim = tAttr.create ( "cachePostDelim", "cachPstdlm", MFnStringData::kString );
 
 	aCacheStatic = nAttr.create("staticCache", "statC", MFnNumericData::kBoolean, 0, &status);
 	nAttr.setKeyable(true);
@@ -244,12 +236,9 @@ MStatus partioEmitter::initialize()
 
 
     status = addAttribute ( aCacheDir );
-    status = addAttribute ( aCachePrefix );
+    status = addAttribute ( aCacheFile );
     status = addAttribute ( aCacheOffset );
     status = addAttribute ( aCacheActive );
-    status = addAttribute ( aCachePadding );
-	status = addAttribute ( aCachePreDelim );
-	status = addAttribute ( aCachePostDelim );
 	status = addAttribute ( aCacheStatic );
     status = addAttribute ( aCacheFormat );
     status = addAttribute ( aUseEmitterTransform );
@@ -260,11 +249,8 @@ MStatus partioEmitter::initialize()
     status = addAttribute ( aPartioAttributes );
     status = addAttribute ( aMayaPPAttributes );
     status = attributeAffects ( aCacheDir, mOutput );
-    status = attributeAffects ( aCachePrefix, mOutput );
+    status = attributeAffects ( aCacheFile, mOutput );
     status = attributeAffects ( aCacheOffset, mOutput );
-    status = attributeAffects ( aCachePadding, mOutput );
-	status = attributeAffects ( aCachePreDelim, mOutput );
-	status = attributeAffects ( aCachePostDelim, mOutput );
 	status = attributeAffects ( aCacheStatic, mOutput );
     status = attributeAffects ( aCacheFormat, mOutput );
     status = attributeAffects ( aUseEmitterTransform, mOutput );
@@ -286,17 +272,14 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     }
 
     int cacheOffset 	= block.inputValue( aCacheOffset ).asInt();
-    int cachePadding	= block.inputValue( aCachePadding ).asInt();
-	MString preDelim 	= block.inputValue( aCachePreDelim ).asString();
-	MString postDelim   = block.inputValue( aCachePostDelim).asString();
     short cacheFormat	= block.inputValue( aCacheFormat ).asShort();
     float jitterPos		= block.inputValue( aJitterPos ).asFloat();
     float jitterFreq	= block.inputValue( aJitterFreq ).asFloat();
     bool useEmitterTxfm	= block.inputValue( aUseEmitterTransform ).asBool();
 	bool cacheStatic    = block.inputValue( aCacheStatic ).asBool();
 	MString cacheDir = block.inputValue(aCacheDir).asString();
-    MString cachePrefix = block.inputValue(aCachePrefix).asString();
-    MString formatExt;
+    MString cacheFile = block.inputValue(aCacheFile).asString();
+
 
     // Determine if we are requesting the output plug for this emitter node.
     //
@@ -320,9 +303,10 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 		return ( MS::kFailure );
 	}
 
-    if (cacheDir  == "" || cachePrefix == "" )
+    if (cacheDir  == "" || cacheFile == "" )
     {
-        MGlobal::displayError("PartioEmitter->Error: Please specify cache file!");
+		// Too Much noise!
+        //MGlobal::displayError("PartioEmitter->Error: Please specify cache file!");
         return ( MS::kFailure );
     }
 
@@ -396,16 +380,18 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     int integerTime = (int)floor(cT.value()+.52);
 
 	// parse and get the new file name
+	MString formatExt = "";
+	int cachePadding = 0;
+
 	MString newCacheFile = "";
 	MString renderCacheFile = "";
 
-	partio4Maya::updateFileName( cachePrefix,  cacheDir,
-								cacheStatic,  cacheOffset,
-								cacheFormat,  integerTime,
-								cachePadding, formatExt,
-								newCacheFile, renderCacheFile
+	partio4Maya::updateFileName( cacheFile,  cacheDir,
+									cacheStatic,  cacheOffset,
+									cacheFormat,  integerTime,
+									cachePadding, formatExt,
+									newCacheFile, renderCacheFile
 								);
-
 
     float deltaTime  = float(cT.value() - integerTime);
 
@@ -427,12 +413,12 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 
     cacheChanged = false;
 
-    if (mLastExt != formatExt || mLastPath != cacheDir || mLastPrefix != cachePrefix)
+    if (mLastExt != formatExt || mLastPath != cacheDir || mLastFile != cacheFile)
     {
         cacheChanged = true;
         mLastExt = formatExt;
         mLastPath = cacheDir;
-        mLastPrefix = cachePrefix;
+        mLastFile = cacheFile;
     }
 
     // check if a Partio cache filepath exists and is not the same as last frame
@@ -792,7 +778,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     }
     else
     {
-        MGlobal::displayError("PartioEmitter->Error loading the Cache file, it does not exist on disk, check path/prefix.");
+        MGlobal::displayError("PartioEmitter->Error loading the Cache file, it does not exist on disk, check path/file.");
         //cout << "partioEmitter->No File at: " << newCacheFile << endl;
     }
 

@@ -34,7 +34,7 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 	editorTemplate -addControl "cacheActive";
 	editorTemplate -addControl "staticCache";
 	//editorTemplate -addControl "flipYZ";
-	editorTemplate -callCustom pioVizAEoutpathNew pioVizAEoutpathReplace cacheDir;
+	editorTemplate -callCustom pioAEoutpathNew pioAEoutpathReplace cacheDir;
 	editorTemplate -addControl "cachePrefix";
 	editorTemplate -addControl "cacheOffset";
 	editorTemplate -addControl "cacheFormat";
@@ -97,165 +97,10 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 }
 
 
-global proc int pioVizAEassignCacheFileCB( string $fileAttribute,
-									 string $fileName,
-									 string $fileType )
-{
-	string $components[];
-  	tokenize $fileAttribute "." $components;
-  	string $nodeName = $components[0];
-
-  	string $fileNameComp[];
-
-	string $baseFileName = basename($fileName,"");
-	print $baseFileName;
-
-	string $fileParts[] = `partioGetBaseFileName($baseFileName)`;
-	string $fileBaseName = $fileParts[0];
-	int $pad = $fileParts[4];
-	string $ext = $fileParts[3];
-
-	setAttr ($nodeName + ".cachePrefix") -type "string" $baseFileName;
-
-
-	int $extIndex = 0;
-
-	switch ($ext)
-	{
-		case "bgeo":
-			$extIndex = 0;
-			break;
-		case "geo":
-			$extIndex = 1;
-			break;
-		case "pda":
-			$extIndex = 2;
-			break;
-		case "pdb":
-			$extIndex = 3;
-			break;
-		case "pdc":
-			$extIndex = 4;
-			break;
-		case "mc":
-			$extIndex = 5;
-			break;
-		case "bin":
-			$extIndex = 6;
-			break;
-		case "prt":
-			$extIndex = 7;
-			break;
-		case "ptc":
-			$extIndex = 8;
-			break;
-		case "pts":
-			$extIndex = 9;
-			break;
-		case "xyz":
-			$extIndex = 10;
-			break;
-		case "rib":
-			$extIndex = 11;
-			break;
-		case "ass":
-			$extIndex = 12;
-			break;
-		default:
-			$extIndex = 4;
-			break;
-
-	}
-
-// if padding is not -1 we have a number in the file name otherwise we want to use static cache
-	if ($pad >=0)
-	{
-		setAttr ($nodeName + ".staticCache") 0;
-	}
-	else
-	{
-		setAttr ($nodeName + ".staticCache") 1;
-	}
-
-	if ($ext == "pdc")
-	{
-		$pad = 0;
-	}
-
-	else if ($ext == "mc")
-	{
-		$pad = 0;
-	}
-	else if ($ext == "pts" || $ext == "xyz")
-	{
-		$pad = 0;
-	}
-
-	setAttr ($nodeName + ".cacheFormat") $extIndex;
-
-	$fileName = substituteAllString($fileName, basename($fileName, ""), "");
-  	setAttr $fileAttribute -type "string" $fileName;
-
-	// This will force an update to display the effects
-	// of the new cachefile.
-	//
-	currentTime `currentTime -q`;
-
-  string $currentDir = `workspace -q -dir`;
-  retainWorkingDirectory ($currentDir);
-
-  return true;
-}
-
-global proc pioVizAEcacheFileBrowser( string $cmd, string $cacheName )
-{
-    string  $workspace = `workspace -q -fn`;
-    setWorkingDirectory $workspace "diskCache" "data";
-
-    fileBrowser ($cmd, "Partio Cache Directory", "", 0);
-}
-
-global proc pioVizAEoutpathNew(string $cacheName)
-{
-	setUITemplate -pst attributeEditorTemplate;
-		columnLayout -adj true;
-			rowLayout -nc 3 outpathLayout;
-        		text -label "Particle Path" outpathText;
-		        textField diskNameField;
-		            symbolButton -image "navButtonBrowse.png" browser;
-				setParent ..;
-
-		setParent ..;
-
-	setUITemplate -ppt;
-	setParent ..;
-
-	pioVizAEoutpathReplace( $cacheName );
-}
-
-global proc pioVizAEoutpathReplace(string $cacheName)
-{
-	string $fileName = `getAttr $cacheName`;
-	string	$buffer[];
-	tokenize($cacheName, ".", $buffer);
-	string	$nodeName = $buffer[0];
-
-	// Filename Attribute
-  connectControl diskNameField $cacheName;
-  string $command = "pioVizAEassignCacheFileCB " + " " + $cacheName;
-  button -e -c ("pioVizAEcacheFileBrowser \"" + $command + "\" " + $nodeName ) browser;
-}
-
-
-global proc string pioVizStripNodeName (string $nodeName) {
-	string $buffer[];
-	tokenize $nodeName "." $buffer;
-	return $buffer[0];
-}
 
 global proc pioVizCustomAttrsManage (string $nodeName)
 {
-    $nodeName = pioVizStripNodeName ($nodeName);
+    $nodeName = pioStripNodeName ($nodeName);
     if (`columnLayout -q -exists "foobar"`)
     { deleteUI "foobar"; }
 
@@ -331,7 +176,7 @@ global proc pioVizSwitchAttributeFrom(string $nodeName, int $attr, string $menu)
 
 global proc pioVizForceUpdate(string $nodeName)
 {
-	$nodeName = pioVizStripNodeName ($nodeName);
+	$nodeName = pioStripNodeName ($nodeName);
 	if (!`button -q -exists  pioVizReloadButton`)
 	{	rowLayout -nc 1 ;
 		button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioVizReloadButton;

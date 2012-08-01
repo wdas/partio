@@ -120,15 +120,12 @@ public:
 	static MObject  aFlipYZ;
 	static MObject 	aUpdateCache;
 	static MObject 	aCacheDir;
-	static MObject 	aCachePrefix;
+	static MObject 	aCacheFile;
 	static MObject 	aUseTransform;
 	static MObject 	aCacheActive;
 	static MObject 	aCacheOffset;
 	static MObject  aCacheStatic;
 	static MObject 	aCacheFormat;
-	static MObject 	aCachePadding;
-	static MObject  aCachePreDelim;
-	static MObject  aCachePostDelim;
 	static MObject 	aJitterPos;
 	static MObject 	aJitterFreq;
 	static MObject 	aPartioAttributes;
@@ -156,7 +153,7 @@ private:
 
 	MString mLastFileLoaded;
 	MString mLastPath;
-	MString mLastPrefix;
+	MString mLastFile;
 	MString mLastExt;
 	bool mLastFlipStatus;
 	bool mFlipped;

@@ -35,10 +35,9 @@ global proc AEpartioInstancerTemplate( string $nodeName )
 	editorTemplate -addControl "staticCache";
 	//editorTemplate -addControl "flipYZ";
 	editorTemplate -addControl "computeVeloPos";
-	editorTemplate -callCustom pioInstAEoutpathNew pioInstAEoutpathReplace cacheDir;
+	editorTemplate -callCustom pioAEoutpathNew pioAEoutpathReplace cacheDir;
 	editorTemplate -addControl "cachePrefix";
 	editorTemplate -addControl "cacheOffset";
-	editorTemplate -addControl "cachePadding";
 	editorTemplate -addControl "cacheFormat";
 	editorTemplate -addControl "iconSize";
 	editorTemplate -callCustom pioInstForceUpdate pioInstForceUpdate $nodeName;
@@ -51,10 +50,6 @@ global proc AEpartioInstancerTemplate( string $nodeName )
 		editorTemplate -beginLayout "General Parameters" -collapse 0;
 			editorTemplate -addControl "pointSize";
 			editorTemplate -addControl "drawStyle";
-			editorTemplate -addControl "drawSkip";
-			editorTemplate -addControl "defaultPointColor";
-			editorTemplate -addControl "defaultAlpha";
-			editorTemplate -addControl "invertAlpha";
 		    //editorTemplate -addControl "useEmitterTransform";
 		    //editorTemplate -addControl -l "Jitter Position Magnitude" "jitterPos" ;
 		    //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
@@ -99,158 +94,9 @@ global proc AEpartioInstancerTemplate( string $nodeName )
 }
 
 
-global proc int pioInstAEassignCacheFileCB( string $fileAttribute,
-									 string $fileName,
-									 string $fileType )
-{
-	string $components[];
-  	tokenize $fileAttribute "." $components;
-  	string $nodeName = $components[0];
-
-  	string $fileNameComp[];
-
-	string $baseFileName = basename($fileName,"");
-
-	string $fileParts[] = `partioGetBaseFileName($baseFileName)`;
-	string $fileBaseName = $fileParts[0];
-	int $pad = $fileParts[4];
-	string $ext = $fileParts[3];
-
-	setAttr ($nodeName + ".cachePrefix") -type "string" $fileBaseName;
-
-	int $extIndex = 0;
-
-	switch ($ext)
-	{
-		case "bgeo":
-			$extIndex = 0;
-			break;
-		case "geo":
-			$extIndex = 1;
-			break;
-		case "pda":
-			$extIndex = 2;
-			break;
-		case "pdb":
-			$extIndex = 3;
-			break;
-		case "pdc":
-			$extIndex = 4;
-			break;
-		case "mc":
-			$extIndex = 5;
-			break;
-		case "bin":
-			$extIndex = 6;
-			break;
-		case "prt":
-			$extIndex = 7;
-			break;
-		case "ptc":
-			$extIndex = 8;
-			break;
-		case "pts":
-			$extIndex = 9;
-			break;
-		case "xyz":
-			$extIndex = 10;
-			break;
-		case "rib":
-			$extIndex = 11;
-			break;
-		case "ass":
-			$extIndex = 12;
-			break;
-		default:
-			$extIndex = 4;
-			break;
-
-	}
-
-	setAttr ($nodeName + ".staticCache") 0;
-	if ($ext == "pdc")
-	{
-		$pad = 0;
-	}
-
-	else if ($ext == "mc")
-	{
-		$pad = 0;
-	}
-	else if ($ext == "pts" || $ext == "xyz")
-	{
-		setAttr ($nodeName + ".staticCache") 1;
-		$pad = 0;
-	}
-
-	setAttr ($nodeName + ".cachePadding") $pad;
-	setAttr ($nodeName + ".cacheFormat") $extIndex;
-	setAttr ($nodeName + ".cachePreDelim") -type "string" $fileParts[1];
-	setAttr ($nodeName + ".cachePostDelim") -type "string" $fileParts[2];
-
-	$fileName = substituteAllString($fileName, basename($fileName, ""), "");
-  	setAttr $fileAttribute -type "string" $fileName;
-
-	// This will force an update to display the effects
-	// of the new cachefile.
-	//
-	currentTime `currentTime -q`;
-
-  string $currentDir = `workspace -q -dir`;
-  retainWorkingDirectory ($currentDir);
-
-  return true;
-}
-
-global proc pioInstAEcacheFileBrowser( string $cmd, string $cacheName )
-{
-    string  $workspace = `workspace -q -fn`;
-    setWorkingDirectory $workspace "diskCache" "data";
-
-    fileBrowser ($cmd, "Partio Cache Directory", "", 0);
-}
-
-global proc pioInstAEoutpathNew(string $cacheName)
-{
-	setUITemplate -pst attributeEditorTemplate;
-		columnLayout -adj true;
-			rowLayout -nc 3 outpathLayout;
-        		text -label "Particle Path" outpathText;
-		        textField diskNameField;
-		            symbolButton -image "navButtonBrowse.png" browser;
-				setParent ..;
-
-		setParent ..;
-
-	setUITemplate -ppt;
-	setParent ..;
-
-	pioInstAEoutpathReplace( $cacheName );
-}
-
-global proc pioInstAEoutpathReplace(string $cacheName)
-{
-	string $fileName = `getAttr $cacheName`;
-	string	$buffer[];
-	tokenize($cacheName, ".", $buffer);
-	string	$nodeName = $buffer[0];
-
-	// Filename Attribute
-  connectControl diskNameField $cacheName;
-  string $command = "pioInstAEassignCacheFileCB " + " " + $cacheName;
-  button -e -c ("pioInstAEcacheFileBrowser \"" + $command + "\" " + $nodeName ) browser;
-}
-
-
-global proc string pioInstStripNodeName (string $nodeName) {
-	string $buffer[];
-	tokenize $nodeName "." $buffer;
-	return $buffer[0];
-}
-
 global proc pioInstCustomAttrsManage (string $nodeName)
 {
-    $nodeName = pioInstStripNodeName ($nodeName);
+    $nodeName = pioStripNodeName ($nodeName);
     if (`columnLayout -q -exists "foobar"`)
     { deleteUI "foobar"; }
 
@@ -342,7 +188,7 @@ global proc pioInstSwitchAttributeFrom(string $nodeName, int $attr, string $menu
 
 global proc pioInstForceUpdate(string $nodeName)
 {
-	$nodeName = pioInstStripNodeName ($nodeName);
+	$nodeName = pioStripNodeName ($nodeName);
 	if (!`button -q -exists  pioInstReloadButton`)
 	{	rowLayout -nc 1 ;
 		button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioInstReloadButton;

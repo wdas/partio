@@ -65,16 +65,13 @@ class partioEmitter: public MPxEmitterNode
 		virtual void postConstructor();
 		static MTypeId	id;
 		static MObject 	aCacheDir;
-		static MObject 	aCachePrefix;
+		static MObject 	aCacheFile;
 		static MObject 	aUseEmitterTransform;
 		static MObject  aSize;
 		static MObject  aFlipYZ;
 		static MObject 	aCacheActive;
 		static MObject 	aCacheOffset;
 		static MObject 	aCacheFormat;
-		static MObject 	aCachePadding;
-		static MObject  aCachePreDelim;
-		static MObject  aCachePostDelim;
 		static MObject  aCacheStatic;
 		static MObject 	aJitterPos;
 		static MObject 	aJitterFreq;
@@ -110,7 +107,7 @@ class partioEmitter: public MPxEmitterNode
 		MPoint	lastWorldPoint;
 		MString mLastFileLoaded;
 		MString mLastPath;
-		MString mLastPrefix;
+		MString mLastFile;
 		MString mLastExt;
 		bool cacheChanged;
 
