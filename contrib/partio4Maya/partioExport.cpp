@@ -68,6 +68,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #define  kFlipFlagL			"-flip"
 #define  kFormatFlagS		"-f"
 #define  kFormatFlagL		"-format"
+#define  kFilePrefixFlagS	"-fp"
+#define  kFilePrefixFlagL	"-filePrefix"
 
 
 using namespace std;
@@ -94,6 +96,7 @@ MSyntax PartioExport::createSyntax()
     syntax.addFlag(kFormatFlagS, kFormatFlagL, MSyntax::kString);
 	syntax.addFlag(kMinFrameFlagS,kMinFrameFlagL, MSyntax::kLong);
 	syntax.addFlag(kMaxFrameFlagS, kMaxFrameFlagL, MSyntax::kLong);
+	syntax.addFlag(kFilePrefixFlagS,kFilePrefixFlagL, MSyntax::kString);
 	syntax.addArg(MSyntax::kString);
 
 	syntax.enableQuery(false);
@@ -101,7 +104,6 @@ MSyntax PartioExport::createSyntax()
 
 	return syntax;
 }
-
 
 
 void* PartioExport::creator()
@@ -132,6 +134,10 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
 	MString Path;   // directory path
 	MString Format;
+	MString fileNamePrefix;
+	bool hasFilePrefix = false;
+
+
 	if (argData.isFlagSet(kPathFlagL))
 	{
 		argData.getFlagArgument(kPathFlagL, 0, Path);
@@ -139,6 +145,14 @@ MStatus PartioExport::doIt(const MArgList& Args)
 	if (argData.isFlagSet(kFormatFlagL))
 	{
 		argData.getFlagArgument(kFormatFlagL, 0, Format);
+	}
+	if (argData.isFlagSet(kFilePrefixFlagL))
+	{
+		argData.getFlagArgument(kFilePrefixFlagL, 0, fileNamePrefix);
+		if (fileNamePrefix.length() > 0)
+		{
+			hasFilePrefix = true;
+		}
 	}
 
 	Format = Format.toLowerCase();
@@ -271,7 +285,16 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
 		MString  outputPath =  Path;
 		outputPath += "/";
-		outputPath += PSName;
+
+		// if we have supplied a fileName prefix, then use it instead of the particle shape name
+		if (hasFilePrefix)
+		{
+			outputPath += fileNamePrefix;
+		}
+		else
+		{
+			outputPath += PSName;
+		}
 		outputPath += ".";
 		outputPath += padNum;
 		outputPath += ".";
@@ -480,11 +503,12 @@ void PartioExport::printUsage()
 	usage += "\t\t-atr/attribute (multi use)  <PP attribute name>\n";
 	usage += "\t\t     (position/velocity/id) are always exported \n";
 	usage += "\t\t-p/path	 <directory file path> \n";
+	usage += "\t\t-fp/filePrefix <fileNamePrefix>  \n";
 	usage += "\t\t-flp/flip  (flip y->z axis to go to Z up packages) \n";
 	usage += "\n";
 	usage += "\tExample:\n";
 	usage += "\n";
-	usage += "partioExport  -mnf 1 -mxf 10 -f prt -atr position -atr rgbPP -at opacityPP  -p \"/file/path/to/output/directory\"  particleShape1 \n\n";
+	usage += "partioExport  -mnf 1 -mxf 10 -f prt -atr position -atr rgbPP -at opacityPP -fp \"SmokeShapepart1of20\" -p \"/file/path/to/output/directory\"  particleShape1 \n\n";
 
 	MGlobal::displayInfo(usage);
 

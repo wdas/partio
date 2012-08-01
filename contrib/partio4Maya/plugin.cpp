@@ -47,7 +47,7 @@ MStatus initializePlugin ( MObject obj )
 	MGlobal::executeCommand("source partioUtils.mel");
 
 	MStatus status;
-	MFnPlugin plugin ( obj, "Luma Pictures,RedpawFX,WDAS", "0.9.2a", "Any" );
+	MFnPlugin plugin ( obj, "Luma Pictures,RedpawFX,WDAS", "0.9.3a(sigg)", "Any" );
 
 	status = plugin.registerShape( "partioVisualizer", partioVisualizer::id,
 									&partioVisualizer::creator,
