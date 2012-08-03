@@ -64,6 +64,7 @@ readers()
         data["bin"]=readBIN;
         data["pts"]=readPTS;
 		data["xyz"]=readXYZ;
+		data["pcd"]=readPCD;
     }
     return data;
 }
@@ -85,6 +86,7 @@ writers()
         data["pdc"]=writePDC;
         data["prt"]=writePRT;
         data["bin"]=writeBIN;
+		data["pcd"]=writePCD;
     }
     return data;
 }
