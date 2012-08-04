@@ -27,6 +27,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
+#include <vector>
+#include <math.h>
+
 #include <maya/MFloatArray.h>
 #include <maya/MVectorArray.h>
 #include <maya/MPointArray.h>
@@ -48,7 +51,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MDrawData.h>
 #include <maya/MSelectionList.h>
 #include <maya/MDagPath.h>
-#include <vector>
 
 #include <Partio.h>
 #include <PartioAttribute.h>
@@ -65,8 +67,10 @@ public:
 	Partio::ParticleAttribute positionAttr;
 	Partio::ParticleAttribute colorAttr;
 	Partio::ParticleAttribute opacityAttr;
+	Partio::ParticleAttribute radiusAttr;
 	float* rgb;
 	float* rgba;
+	MFloatArray radius;
 	float* flipPos;
 
 };
@@ -81,6 +85,7 @@ public:
 	virtual void draw(const MDrawRequest & request, M3dView & view) const;
 	virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
 	void 	drawBoundingBox() const;
+	void    drawBillboardCircleAtPoint(MVector position, float radius, int num_segments, int drawType) const;
 	void 	drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
 	static void * creator();
 	virtual bool	select( MSelectInfo &selectInfo,
@@ -128,6 +133,7 @@ public:
 	static MObject  aPointSize;
 	static MObject  aDefaultPointColor;
 	static MObject  aDefaultAlpha;
+	static MObject  aDefaultRadius;
 	static MObject  aInvertAlpha;
 	static MObject  aDrawStyle;
 	static MObject  aForceReload;
@@ -153,6 +159,7 @@ private:
 	MFloatVector mLastColor;
 	float mLastAlpha;
 	bool mLastInvertAlpha;
+	float mLastRadius;
 	bool mLastFlipStatus;
 	bool mFlipped;
 	bool  frameChanged;

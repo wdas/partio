@@ -53,6 +53,7 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 			editorTemplate -addControl "defaultPointColor";
 			editorTemplate -addControl "defaultAlpha";
 			editorTemplate -addControl "invertAlpha";
+			editorTemplate -addControl "defaultRadius";
 		    //editorTemplate -addControl "useEmitterTransform";
 		    //editorTemplate -addControl -l "Jitter Position Magnitude" "jitterPos" ;
 		    //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
@@ -141,7 +142,7 @@ global proc pioVizCustomAttrsManage (string $nodeName)
     }
     optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $opacMenu)  $opacMenu;
 
-	/*
+
 	string $radiusMenu = `optionMenuGrp -label "Radius from->"`;
 	menuItem -l "None";
     for ($multi in $multiList)
@@ -154,13 +155,13 @@ global proc pioVizCustomAttrsManage (string $nodeName)
        	 menuItem -label $attr;
     }
 	optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $radiusMenu)  $radiusMenu;
-	*/
+
 
 	if (`size($multiList)`)
 	{
 		optionMenuGrp -e -sl $colorFrom  $colorMenu;
 		optionMenuGrp -e -sl $opacityFrom $opacMenu;
-		//optionMenuGrp -e -sl $radiusFrom $radiusMenu;
+		optionMenuGrp -e -sl $radiusFrom $radiusMenu;
 	}
 
 }
