@@ -12,21 +12,21 @@ global proc shelf_Partio4Maya () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "partioVisualizer;" 
+        -annotation "partioVisualizer;"
         -enableBackground 0
-        -align "center" 
-        -label "partioVisualizer" 
+        -align "center"
+        -label "partioVisualizer"
         -labelOffset 0
-        -font "plainLabelFont" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.2 
-        -image "partioVisualizer_shelf.png" 
-        -image1 "partioVisualizer_shelf.png" 
-        -style "iconOnly" 
+        -font "plainLabelFont"
+        -overlayLabelColor 0.8 0.8 0.8
+        -overlayLabelBackColor 0 0 0 0.2
+        -image "partioVisualizer_shelf.png"
+        -image1 "partioVisualizer_shelf.png"
+        -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "catch(`loadPlugin \"partio4Maya\"`); \nstring $node = `createNode -n \"partioVizShape1\" partioVisualizer`;\nconnectAttr  \"time1.outTime\"  ($node+\".time\");\n\n\n" 
-        -sourceType "mel" 
+        -command "catch(`loadPlugin \"partio4Maya\"`); \nstring $node = `createNode -n \"partioVizShape1\" partioVisualizer`;\nconnectAttr  \"time1.outTime\"  ($node+\".time\");\n\n\n"
+        -sourceType "mel"
         -commandRepeatable 1
     ;
     shelfButton
@@ -37,21 +37,21 @@ global proc shelf_Partio4Maya () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "partioEmitter" 
+        -annotation "partioEmitter"
         -enableBackground 0
-        -align "center" 
-        -label "partioEmitter" 
+        -align "center"
+        -label "partioEmitter"
         -labelOffset 0
-        -font "plainLabelFont" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.2 
-        -image "partioEmitter_shelf.png" 
-        -image1 "partioEmitter_shelf.png" 
-        -style "iconOnly" 
+        -font "plainLabelFont"
+        -overlayLabelColor 0.8 0.8 0.8
+        -overlayLabelBackColor 0 0 0 0.2
+        -image "partioEmitter_shelf.png"
+        -image1 "partioEmitter_shelf.png"
+        -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "catch(`loadPlugin \"partio4Maya\"`);\nstring $node = `createNode -n \"partioEmitter1\" partioEmitter`;" 
-        -sourceType "mel" 
+        -command "catch(`loadPlugin \"partio4Maya\"`);\nstring $node = `createNode -n \"partioEmitter1\" partioEmitter`;"
+        -sourceType "mel"
         -commandRepeatable 1
     ;
     shelfButton
@@ -62,21 +62,49 @@ global proc shelf_Partio4Maya () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "partioInstancer;" 
+        -annotation "partioInstancer;"
         -enableBackground 0
-        -align "center" 
-        -label "partioInstancer;" 
+        -align "center"
+        -label "partioInstancer;"
         -labelOffset 0
-        -font "plainLabelFont" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.2 
-        -image "partioInstancer_shelf.png" 
-        -image1 "partioInstancer_shelf.png" 
-        -style "iconOnly" 
+        -font "plainLabelFont"
+        -overlayLabelColor 0.8 0.8 0.8
+        -overlayLabelBackColor 0 0 0 0.2
+        -image "partioInstancer_shelf.png"
+        -image1 "partioInstancer_shelf.png"
+        -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "catch(`loadPlugin \"partio4Maya\"`); \nstring $node = `createNode -n \"partioInstShape1\" partioInstancer`;\nconnectAttr  \"time1.outTime\"  ($node+\".time\");" 
-        -sourceType "mel" 
+        -command "catch(`loadPlugin \"partio4Maya\"`); \nstring $sel[] = `ls -sl`;\nstring $node = `createNode -n \"partio_InstancerShape1\" partioInstancer`;\nconnectAttr time1.outTime ($node+\".time\");\nselect -cl;\nselect $node;\nselect -add $sel;\nattachPartioInstancerToInstancer();"
+        -sourceType "mel"
+        -commandRepeatable 1
+        -mi "create with instancer " ( "loadPlugin \"partio4Maya.so\";\nstring $node = `createNode -n \"partio_InstancerShape1\" partioInstancer`;\nconnectAttr time1.outTime ($node+\".time\");\nstring $instancer = `createNode instancer`;\nconnectAttr -f ($node + \".instanceData\") ($instancer+\".inputPoints\");\n" )
+        -mi "attach to instancer" ( "attachPartioInstancerToInstancer();" )
+
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -enable 1
+        -width 35
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "partioExportGui"
+        -enableBackground 0
+        -align "center"
+        -label "partioExportGui"
+        -labelOffset 0
+        -font "plainLabelFont"
+        -overlayLabelColor 0.8 0.8 0.8
+        -overlayLabelBackColor 0 0 0 0.2
+        -image "partioExport_shelf.png"
+        -image1 "partioExport_shelf.png"
+        -style "iconOnly"
+        -marginWidth 1
+        -marginHeight 1
+        -command "catch(`loadPlugin \"partio4Maya\"`);\nsource partioExportGui.mel;\npartioExportGui;"
+        -sourceType "mel"
         -commandRepeatable 1
     ;
     shelfButton
@@ -87,47 +115,22 @@ global proc shelf_Partio4Maya () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "partioExportGui" 
+        -annotation "partioImport"
         -enableBackground 0
-        -align "center" 
-        -label "partioExportGui" 
+        -align "center"
+        -label "partioImport"
         -labelOffset 0
-        -font "plainLabelFont" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.2 
-        -image "partioExport_shelf.png" 
-        -image1 "partioExport_shelf.png" 
-        -style "iconOnly" 
+        -font "plainLabelFont"
+        -overlayLabelColor 0.8 0.8 0.8
+        -overlayLabelBackColor 0 0 0 0
+        -image "partioImport_shelf.png"
+        -image1 "partioImport_shelf.png"
+        -style "iconOnly"
         -marginWidth 1
         -marginHeight 1
-        -command "catch(`loadPlugin \"partio4Maya\"`);\nsource partioExportGui.mel;\npartioExportGui;" 
-        -sourceType "mel" 
-        -commandRepeatable 1
-    ;
-    shelfButton
-        -enableCommandRepeat 1
-        -enable 1
-        -width 35
-        -height 35
-        -manage 1
-        -visible 1
-        -preventOverride 0
-        -annotation "partioImport" 
-        -enableBackground 0
-        -align "center" 
-        -label "partioImport" 
-        -labelOffset 0
-        -font "plainLabelFont" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0 
-        -image "partioImport_shelf.png" 
-        -image1 "partioImport_shelf.png" 
-        -style "iconOnly" 
-        -marginWidth 1
-        -marginHeight 1
-        -command "catch(`loadPlugin \"partio4Maya\"`);\npartioImport -p \"partioImportShape\" -atr \"pointColor\" \"rgbPP\" \"/your/cache/path/goes/here.pts\";" 
-        -sourceType "mel" 
+        -command "catch(`loadPlugin \"partio4Maya\"`);\npartioImport -p \"partioImportShape\" -atr \"pointColor\" \"rgbPP\" \"/your/cache/path/goes/here.pts\";"
+        -sourceType "mel"
         -commandRepeatable 1
     ;
 
-} 
+}

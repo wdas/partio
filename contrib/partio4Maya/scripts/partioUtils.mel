@@ -283,3 +283,32 @@ global proc pioAEoutpathNew(string $cacheName)
 
 	pioAEoutpathReplace( $cacheName );
 }
+
+global proc attachPartioInstancerToInstancer()
+{
+	string $sel[] =`ls -sl`;
+	string $inst;
+	string $partio;
+
+	for ($s in $sel)
+	{
+		if (`nodeType $s` == "transform")
+		{
+			string $shape[] = `listRelatives -s $s`;
+			$s = $shape[0];
+		}
+		if (`nodeType $s` == "instancer")
+		{
+			$inst = $s;
+		}
+		else if (`nodeType $s` == "partioInstancer")
+		{
+			$partio = $s;
+		}
+	}
+
+	if (`size $inst` && `size $partio`)
+	{
+		connectAttr -f ($partio + ".instanceData") ($inst+".inputPoints");
+	}
+}

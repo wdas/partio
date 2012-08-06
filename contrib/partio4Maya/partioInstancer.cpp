@@ -184,9 +184,9 @@ partioInstancer::~partioInstancer()
 	}
 	free(pvCache.flipPos);
 
-	MSceneMessage::removeCallback( partioInstancerOpenCallback);
-    MSceneMessage::removeCallback( partioInstancerImportCallback);
-    MSceneMessage::removeCallback( partioInstancerReferenceCallback);
+	MSceneMessage::removeCallback( partioInstancerOpenCallback );
+    MSceneMessage::removeCallback( partioInstancerImportCallback );
+    MSceneMessage::removeCallback( partioInstancerReferenceCallback );
 
 }
 
@@ -287,7 +287,7 @@ MStatus partioInstancer::initialize()
 
 	aDrawStyle = eAttr.create( "drawStyle", "drwStyl");
     eAttr.addField("points",	0);
-    eAttr.addField("index#",	1);
+    //eAttr.addField("index#",	1);
     //eAttr.addField("spheres",	2);
 	eAttr.addField("boundingBox", 3);
 	eAttr.setDefault(0);
@@ -1027,8 +1027,13 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
 
 			for (int i=0;i<pvCache->particles->numParticles();i++)
 			{
-					const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
-					glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
+				const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
+				glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
+				if (drawStyle == 1)
+				{
+					/// TODO: draw text label per particle here
+				}
+
 			}
 
 		glEnd( );
