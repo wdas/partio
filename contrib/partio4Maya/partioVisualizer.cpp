@@ -761,9 +761,9 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 					{
 						for (int i=0;i<pvCache.particles->numParticles();i++)
 						{
-							const float * attrVal = pvCache.particles->data<float>(pvCache.opacityAttr,i);
+							const float * attrVal = pvCache.particles->data<float>(pvCache.radiusAttr,i);
 							float lum = float((attrVal[0]*0.2126)+(attrVal[1]*0.7152)+(attrVal[2]*.0722));
-							pvCache.radius[i] =  lum;
+							pvCache.radius[i] =  lum * defaultRadius;
 						}
 
 					}
