@@ -326,6 +326,7 @@ void partio4Maya::buildSupportedExtensionList(std::map<short,MString> &formatExt
 	formatExtMap[8] = "ptc";
 	formatExtMap[9] = "pts";
 	formatExtMap[10] = "xyz";
+	formatExtMap[11] = "pcd";
 	if(write)
 	{
 		formatExtMap[11] = "rib";

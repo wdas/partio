@@ -163,10 +163,15 @@ MStatus PartioExport::doIt(const MArgList& Args)
 		Format != "pdc" &&
 		Format != "prt" &&
 		Format != "bin" &&
-		Format != "rib" &&
 		Format != "bgeo" &&
 		Format != "geo" &&
-		Format != "ptc" )
+		Format != "ptc" &&
+		Format != "mc" &&
+		Format != "rib" &&
+		Format != "pts" &&
+		Format != "xyz" &&
+		Format != "pcd" &&
+		Format != "rib" )
 	{
 		MGlobal::displayError("PartioExport-> format is one of: pda,pdb,pdc,prt,bin,bgeo,geo,ptc,mc,rib,ass");
 		return MStatus::kFailure;
@@ -499,7 +504,7 @@ void PartioExport::printUsage()
 	usage += "\t[Options]\n";
 	usage += "\t\t-mnf/minFrame <int> \n";
 	usage += "\t\t-mxf/maxFrame <int> \n";
-	usage += "\t\t-f/format <string> (format is one of: pda,pdb,pdc,prt,bin,bgeo,geo,ptc,mc,rib,ass)\n";
+	usage += "\t\t-f/format <string> (format is one of: pda,pdb,pdc,prt,bin,bgeo,geo,ptc,mc,pts,xyz,pcd,rib,ass)\n";
 	usage += "\t\t-atr/attribute (multi use)  <PP attribute name>\n";
 	usage += "\t\t     (position/velocity/id) are always exported \n";
 	usage += "\t\t-p/path	 <directory file path> \n";

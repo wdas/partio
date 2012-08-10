@@ -74,7 +74,10 @@ global proc partioExportGui  ()
     menuItem -label "BIN";
     menuItem -label "PRT";
     menuItem -label "PTC";
-    menuItem -label "RIB";
+	menuItem -label "PTS";
+	menuItem -label "XYZ";
+	menuItem -label "PCD";
+	menuItem -label "RIB";
 //	menuItem -label "ASS";
 
     optionMenuGrp -e -sl 5 $partioExportFormatOptionMenu;
