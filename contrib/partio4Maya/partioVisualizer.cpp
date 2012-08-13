@@ -585,6 +585,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 		if (pvCache.particles)
 		{
+			/*
 			/// TODO:  this does not work when scrubbing yet.. really need to put the  resort of channels into the  partio side as a filter
 			/// this is only a temporary hack until we start adding  filter functions to partio
 
@@ -612,6 +613,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 				}
 				mFlipped = true;
 			}
+			*/
 
 			// something changed..
 			if  (cacheChanged || mLastColorFromIndex != colorFromIndex || mLastColor != defaultColor)
@@ -1083,14 +1085,14 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
 				const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,0);
 
-				if(flipYZVal)
-				{
-					glVertexPointer( 3, GL_FLOAT, stride, pvCache->flipPos );
-				}
-				else
-				{
+				//if(flipYZVal)
+				//{
+				//	glVertexPointer( 3, GL_FLOAT, stride, pvCache->flipPos );
+				//}
+				//else
+				//{
 					glVertexPointer( 3, GL_FLOAT, stride, partioPositions );
-				}
+				//}
 
 				if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
 				{
@@ -1118,7 +1120,7 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 				glBegin(GL_POINTS);
 			}
 
-			for (int i=0;i<pvCache->particles->numParticles();i++)
+			for (int i=0;i<pvCache->particles->numParticles();i+=(drawSkipVal+1))
 			{
 				if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
 				{

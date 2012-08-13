@@ -152,6 +152,8 @@ global proc pioInstCustomAttrsManage (string $nodeName)
     optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $indexMenu)  $indexMenu;
 
 
+	// disable this for now
+	/*
 
 	string $shaderIndexMenu = `optionMenuGrp -label "shaderIndex from->"`;
 	menuItem -l "None";
@@ -165,6 +167,7 @@ global proc pioInstCustomAttrsManage (string $nodeName)
        	 menuItem -label $attr;
     }
 	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 3 + " " + $shaderIndexMenu)  $shaderIndexMenu;
+	*/
 
 
 	if (`size($multiList)`)
@@ -172,7 +175,7 @@ global proc pioInstCustomAttrsManage (string $nodeName)
 		optionMenuGrp -e -sl $rotationFrom  $rotationMenu;
 		optionMenuGrp -e -sl $scaleFrom $scaleMenu;
 		optionMenuGrp -e -sl $indexFrom  $indexMenu;
-		optionMenuGrp -e -sl $shadIndexFrom $shaderIndexMenu;
+		//optionMenuGrp -e -sl $shadIndexFrom $shaderIndexMenu;
 	}
 
 }

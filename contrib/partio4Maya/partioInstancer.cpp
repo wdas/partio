@@ -525,7 +525,8 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 			if(computeMotionBlur)
 			{
 				if ((pvCache.particles->attributeInfo("velocity",pvCache.velocityAttr) ||
-					pvCache.particles->attributeInfo("Velocity",pvCache.velocityAttr)) )
+					pvCache.particles->attributeInfo("Velocity",pvCache.velocityAttr)) ||
+					pvCache.particles->attributeInfo("V", pvCache.velocityAttr))
 				{
 					canMotionBlur = true;
 				}
@@ -571,7 +572,8 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 						MVector velo(vel[0],vel[1],vel[2]);
 						if (motionBlurStep)
 						{
-							pos += (velo/24)*deltaTime; // TODO: get frame rate here
+							int mFps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
+							pos += (velo/mFps)*deltaTime;
 						}
 					}
 
@@ -1003,9 +1005,9 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
 	partioInstancer* shapeNode = (partioInstancer*) surfaceShape();
 
 	MObject thisNode = shapeNode->thisMObject();
-	MPlug flipYZPlug( thisNode, shapeNode->aFlipYZ );
-	bool flipYZVal;
-	flipYZPlug.getValue( flipYZVal );
+//	MPlug flipYZPlug( thisNode, shapeNode->aFlipYZ );
+//	bool flipYZVal;
+//	flipYZPlug.getValue( flipYZVal );
 
 	MPlug pointSizePlug( thisNode, shapeNode->aPointSize );
 	float pointSizeVal;
