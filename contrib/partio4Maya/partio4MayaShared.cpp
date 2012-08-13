@@ -295,7 +295,7 @@ void partio4Maya::updateFileName (MString cacheFile, MString cacheDir,
 	formatString =  "%s%s%s%s%s%s";
 	char rfileName[512] = "";
 	const char* rfmt = formatString.asChar();
-	sprintf(rfileName, rfmt, cacheDir.asChar(), cacheFile.asChar(), preDelim.asChar(), frameString.asChar(), postDelim.asChar(), formatExt.asChar());
+	sprintf(rfileName, rfmt, cacheDir.asChar(), cachePrefix.asChar(), preDelim.asChar(), frameString.asChar(), postDelim.asChar(), formatExt.asChar());
 	renderCacheFile = rfileName;
 
 
