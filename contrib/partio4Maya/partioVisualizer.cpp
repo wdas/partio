@@ -805,21 +805,6 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
 		if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache
 		{
-			MString command = "";
-			MString zPlugName = zPlug.name();
-			for (unsigned int x = 0; x<zPlug.numElements(); x++)
-			{
-				command += "removeMultiInstance -b true ";
-				command += zPlugName;
-				command += "[";
-				command += x;
-				command += "]";
-				command += ";";
-			}
-
-			MGlobal::executeCommand(command);
-			zPlug.setNumElements(0);
-
 			//cout << "partioVisualizer->refreshing AE controls" << endl;
 
 			attributeList.clear();
@@ -842,6 +827,24 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 				attributeList.append(mStringAttrName);
 
 				delete [] temp;
+			}
+
+			// after overwriting the string array with new attrs, delete any extra entries not needed
+			MPlug yPlug (thisMObject(), aPartioAttributes);
+			if (yPlug.numElements() != numAttr)
+			{
+				MString command = "";
+				MString yPlugName = yPlug.name();
+				for (unsigned int x = attributeList.length(); x<yPlug.numElements(); x++)
+				{
+					command += "removeMultiInstance -b true ";
+					command += yPlugName;
+					command += "[";
+					command += x;
+					command += "]";
+					command += ";";
+				}
+				MGlobal::executeCommandOnIdle(command);   // now that we're not clearing the entire list, we can do this at maya's leisure
 			}
 		}
 	}
@@ -1073,7 +1076,8 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 		// pointer copy  way  after everything is settled down a bit for main interaction.   It is a significant  improvement on large
 		// datasets in user interactivity speed to use pointers
 
-		if(!shapeNode->cacheChanged && drawStyle == 0)
+		//if(!shapeNode->cacheChanged && drawStyle == 0)  might not need to switch this for cache change any more, only draw style
+		if( drawStyle == 0 )
 		{
 			glEnableClientState( GL_VERTEX_ARRAY );
 			glEnableClientState( GL_COLOR_ARRAY );
