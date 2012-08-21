@@ -135,10 +135,6 @@ MObject	partioInstancer::aInstanceData;
 MObject partioInstancer::aComputeVeloPos;
 
 
-MCallbackId partioInstancerOpenCallback;
-MCallbackId partioInstancerImportCallback;
-MCallbackId partioInstancerReferenceCallback;
-
 partioInstReaderCache::partioInstReaderCache():
 	token(0),
 	bbox(MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0))),

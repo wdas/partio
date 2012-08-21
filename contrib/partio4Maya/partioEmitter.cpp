@@ -76,11 +76,6 @@ MObject partioEmitter::aJitterFreq;
 MObject partioEmitter::aPartioAttributes;
 MObject partioEmitter::aMayaPPAttributes;
 
-MCallbackId partioEmitterOpenCallback;
-MCallbackId partioEmitterImportCallback;
-MCallbackId partioEmitterReferenceCallback;
-MCallbackId partioEmitterConnectionMade;
-
 
 partioEmitter::partioEmitter()
         :lastWorldPoint ( 0, 0, 0, 1 ),

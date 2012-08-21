@@ -115,6 +115,11 @@ public:
 	partioInstReaderCache* updateParticleCache();
 
 
+	MCallbackId partioInstancerOpenCallback;
+	MCallbackId partioInstancerImportCallback;
+	MCallbackId partioInstancerReferenceCallback;
+
+
 	static MObject  time;
 	static MObject  aSize;         // The size of the logo
 	static MObject  aFlipYZ;

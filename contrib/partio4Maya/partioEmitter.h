@@ -83,6 +83,11 @@ class partioEmitter: public MPxEmitterNode
 		void 			initCallback();
 		static void 	connectionMadeCallbk(MPlug &srcPlug, MPlug &destPlug, bool made, void *clientData);
 
+		MCallbackId partioEmitterOpenCallback;
+		MCallbackId partioEmitterImportCallback;
+		MCallbackId partioEmitterReferenceCallback;
+		MCallbackId partioEmitterConnectionMade;
+
 	private:
 
 		long 		seedValue( int  plugIndex, MDataBlock& block );

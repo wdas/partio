@@ -118,10 +118,6 @@ MObject partioVisualizer::aForceReload;
 MObject partioVisualizer::aRenderCachePath;
 
 
-MCallbackId partioVisualizerOpenCallback;
-MCallbackId partioVisualizerImportCallback;
-MCallbackId partioVisualizerReferenceCallback;
-
 partioVizReaderCache::partioVizReaderCache():
 	token(0),
 	bbox(MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0))),
@@ -306,6 +302,7 @@ MStatus partioVisualizer::initialize()
 
     aPartioAttributes = tAttr.create ("partioCacheAttributes", "pioCAts", MFnStringData::kString);
     tAttr.setArray(true);
+	tAttr.setUsesArrayDataBuilder( true );
 
 	aColorFrom = nAttr.create("colorFrom", "cfrm", MFnNumericData::kInt, -1, &stat);
 	nAttr.setDefault(-1);
@@ -829,6 +826,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 				delete [] temp;
 			}
 
+			/* mel way may be borked
 			// after overwriting the string array with new attrs, delete any extra entries not needed
 			MPlug yPlug (thisMObject(), aPartioAttributes);
 			if (yPlug.numElements() != numAttr)
@@ -845,6 +843,19 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 					command += ";";
 				}
 				MGlobal::executeCommandOnIdle(command);   // now that we're not clearing the entire list, we can do this at maya's leisure
+			}
+			*/
+			MArrayDataHandle hPartioAttrs = block.inputArrayValue(aPartioAttributes);
+			MArrayDataBuilder bPartioAttrs = hPartioAttrs.builder();
+			// do we need to clean up some attributes from our array?
+			if (bPartioAttrs.elementCount() > numAttr)
+			{
+				unsigned int current = bPartioAttrs.elementCount();
+				unsigned int attrArraySize = current - 1;
+				for (unsigned int x = 0; x < current - numAttr; x++)
+				{ // remove excess elements from the end of our attribute array
+					bPartioAttrs.removeElement(current--);
+				}
 			}
 		}
 	}
@@ -1119,10 +1130,10 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
 			glPointSize(pointSizeVal);
 
-			if (drawStyle == 0)
-			{
-				glBegin(GL_POINTS);
-			}
+			//if (drawStyle == 0)
+			//{
+			//	glBegin(GL_POINTS);
+			//}
 
 			for (int i=0;i<pvCache->particles->numParticles();i+=(drawSkipVal+1))
 			{
@@ -1154,7 +1165,7 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 				//}
 			}
 
-			glEnd( );
+			//glEnd( );
 		}
 		glDisable(GL_POINT_SMOOTH);
 		glPopAttrib();

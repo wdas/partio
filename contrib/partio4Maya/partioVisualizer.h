@@ -112,6 +112,10 @@ public:
 	bool GetPlugData();
 	partioVizReaderCache* updateParticleCache();
 
+	MCallbackId partioVisualizerOpenCallback;
+	MCallbackId partioVisualizerImportCallback;
+	MCallbackId partioVisualizerReferenceCallback;
+
 	static MObject  time;
 	static MObject  aSize;         // The size of the logo
 	static MObject  aDrawSkip;
