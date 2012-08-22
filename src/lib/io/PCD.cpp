@@ -319,6 +319,10 @@ bool writePCD(const char* filename,const ParticlesData& p,const bool compressed)
 		{
 			*output<< " x y z";
 		}
+		else if (attrs[aIndex].name == "normal")
+		{
+			*output<< " normal_x normal_y normal_z";
+		}
 		else
 		{
         *output<<" "<<attrs[aIndex].name;
@@ -330,7 +334,7 @@ bool writePCD(const char* filename,const ParticlesData& p,const bool compressed)
 	for (int aIndex=0;aIndex<p.numAttributes();aIndex++)
 	{
 
-		if(attrs[aIndex].name == "position")
+		if(attrs[aIndex].name == "position" || attrs[aIndex].name == "normal")
 		{
 			*output<< " 4 4 4";
 		}
@@ -353,7 +357,7 @@ bool writePCD(const char* filename,const ParticlesData& p,const bool compressed)
     *output<<"TYPE ";
     for (int aIndex=0;aIndex<p.numAttributes();aIndex++)
 	{
-		if(attrs[aIndex].name == "position")
+		if(attrs[aIndex].name == "position" || attrs[aIndex].name == "normal")
 		{
 			*output<< " F F F";
 		}
@@ -373,7 +377,7 @@ bool writePCD(const char* filename,const ParticlesData& p,const bool compressed)
 	*output<<"COUNT ";
 	for (int aIndex=0;aIndex<p.numAttributes();aIndex++)
 	{
-		if(attrs[aIndex].name == "position")
+		if(attrs[aIndex].name == "position" || attrs[aIndex].name == "normal")
 		{
 			*output<< " 1 1 1";
 		}
