@@ -806,7 +806,12 @@ MBoundingBox partioInstancer::boundingBox() const
 	// Returns the bounding box for the shape.
     partioInstancer* nonConstThis = const_cast<partioInstancer*>(this);
     partioInstReaderCache* geom = nonConstThis->updateParticleCache();
-
+#ifdef min
+	#undef min
+#endif
+#ifdef max
+	#undef max
+#endif
 	MPoint corner1 = geom->bbox.min();
 	MPoint corner2 = geom->bbox.max();
 	return MBoundingBox( corner1, corner2 );

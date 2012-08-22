@@ -842,8 +842,12 @@ MBoundingBox partioVisualizer::boundingBox() const
 	// Returns the bounding box for the shape.
     partioVisualizer* nonConstThis = const_cast<partioVisualizer*>(this);
     partioVizReaderCache* geom = nonConstThis->updateParticleCache();
-
-
+#ifdef min
+	#undef min
+#endif
+#ifdef max
+	#undef max
+#endif
 	MPoint corner1 = geom->bbox.min();
 	MPoint corner2 = geom->bbox.max();
 	return MBoundingBox( corner1, corner2 );
