@@ -479,8 +479,9 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 
 			if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache
 			{
-				MGlobal::displayInfo("partioEmitter->refreshing AE controls");
+				//MGlobal::displayInfo("partioEmitter->refreshing AE controls");
 
+				/*
 				MString command = "";
 				MString zPlugName = zPlug.name();
 				MString yPlugName = yPlug.name();
@@ -503,6 +504,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 				MGlobal::executeCommand(command);
 				zPlug.setNumElements(0);
 				yPlug.setNumElements(0);
+				*/
 
 
 				for (unsigned int i=0;i<numAttr;i++)
@@ -525,8 +527,49 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 					yPlug.setValue(MString(""));
 
 					delete [] temp;
-					MGlobal::executeCommand("refreshAE;");
 				}
+				/* this crashes
+				MArrayDataHandle hPartioAttrs = block.inputArrayValue(aPartioAttributes);
+				MArrayDataBuilder bPartioAttrs = hPartioAttrs.builder();
+				MArrayDataHandle hMayaAttrs = block.inputArrayValue(aMayaPPAttributes);
+				MArrayDataBuilder bMayaAttrs = hMayaAttrs.builder();
+				// do we need to clean up some attributes from our array?
+				// going to assume for now, that they are both equal
+				if (bPartioAttrs.elementCount() > numAttr)
+				{
+					unsigned int current = bPartioAttrs.elementCount();
+					//unsigned int attrArraySize = current - 1;
+
+					// remove excess elements from the end of our attribute array
+					for (unsigned int x = numAttr; x < current; x++)
+					{
+						bPartioAttrs.removeElement(x);
+						bMayaAttrs.removeElement(x);
+					}
+				}
+				*/
+
+				// after overwriting the string array with new attrs, delete any extra entries not needed
+				MString command = "";
+				MString zPlugName = zPlug.name();
+				MString yPlugName = yPlug.name();
+				for (unsigned int x = numAttr; x<zPlug.numElements(); x++)
+				{
+					command += "removeMultiInstance -b true ";
+					command += zPlugName;
+					command += "[";
+					command += x;
+					command += "]";
+					command += ";removeMultiInstance -b true ";
+					command += yPlugName;
+					command += "[";
+					command += x;
+					command += "]";
+					command += "; ";
+
+				}
+				MGlobal::executeCommandOnIdle(command);
+				MGlobal::executeCommand("refreshAE;");
 			} // end cache changed
 
 			std::map<std::string,  MVectorArray  > vectorAttrArrays;

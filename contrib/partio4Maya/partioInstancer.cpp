@@ -295,6 +295,7 @@ MStatus partioInstancer::initialize()
 
     aPartioAttributes = tAttr.create ("partioCacheAttributes", "pioCAts", MFnStringData::kString);
     tAttr.setArray(true);
+	tAttr.setUsesArrayDataBuilder( true );
 
 	aPointSize = nAttr.create("pointSize", "ptsz", MFnNumericData::kInt, 2, &stat);
 	nAttr.setDefault(2);
@@ -790,21 +791,6 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
 		if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache
 		{
-			MString command = "";
-			MString zPlugName = zPlug.name();
-			for (unsigned int x = 0; x<zPlug.numElements(); x++)
-			{
-				command += "removeMultiInstance -b true ";
-				command += zPlugName;
-				command += "[";
-				command += x;
-				command += "]";
-				command += ";";
-			}
-
-			MGlobal::executeCommand(command);
-			zPlug.setNumElements(0);
-
 			//cout << "partioInstancer->refreshing AE controls" << endl;
 
 			attributeList.clear();
@@ -827,6 +813,21 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 				attributeList.append(mStringAttrName);
 
 				delete [] temp;
+			}
+
+			MArrayDataHandle hPartioAttrs = block.inputArrayValue(aPartioAttributes);
+			MArrayDataBuilder bPartioAttrs = hPartioAttrs.builder();
+			// do we need to clean up some attributes from our array?
+			if (bPartioAttrs.elementCount() > numAttr)
+			{
+				unsigned int current = bPartioAttrs.elementCount();
+				//unsigned int attrArraySize = current - 1;
+
+				// remove excess elements from the end of our attribute array
+				for (unsigned int x = numAttr; x < current; x++)
+				{
+					bPartioAttrs.removeElement(x);
+				}
 			}
 		}
 	}

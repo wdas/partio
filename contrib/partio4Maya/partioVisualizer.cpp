@@ -851,10 +851,12 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 			if (bPartioAttrs.elementCount() > numAttr)
 			{
 				unsigned int current = bPartioAttrs.elementCount();
-				unsigned int attrArraySize = current - 1;
-				for (unsigned int x = 0; x < current - numAttr; x++)
-				{ // remove excess elements from the end of our attribute array
-					bPartioAttrs.removeElement(current--);
+				//unsigned int attrArraySize = current - 1;
+
+				// remove excess elements from the end of our attribute array
+				for (unsigned int x = numAttr; x < current; x++)
+				{
+					bPartioAttrs.removeElement(x);
 				}
 			}
 		}
