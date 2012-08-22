@@ -73,7 +73,6 @@ MSyntax PartioExport::createSyntax()
 	syntax.addFlag(kMaxFrameFlagS, kMaxFrameFlagL, MSyntax::kLong);
 	syntax.addFlag(kFilePrefixFlagS,kFilePrefixFlagL, MSyntax::kString);
 	syntax.addArg(MSyntax::kString);
-
 	syntax.enableQuery(false);
 	syntax.enableEdit(false);
 
@@ -91,7 +90,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 {
 
 	MStatus status;
-	MArgParser argData(createSyntax(), Args, &status);
+	MArgDatabase argData(syntax(), Args, &status);
 
 	if( argData.isFlagSet(kHelpFlagL))
 	{

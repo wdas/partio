@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <sys/stat.h>
 
 #include <maya/MArgList.h>
-#include <maya/MArgParser.h>
+#include <maya/MArgDatabase.h>
 #include <maya/MAnimControl.h>
 #include <maya/MDoubleArray.h>
 #include <maya/MGlobal.h>
