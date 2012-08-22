@@ -27,32 +27,51 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#include <maya/MIOStream.h>
-#include <maya/MTime.h>
-#include <maya/MVector.h>
-#include <maya/MObject.h>
-#include <maya/MPlug.h>
-#include <maya/MDataBlock.h>
-#include <maya/MPxEmitterNode.h>
-#include <maya/MPlugArray.h>
-#include <maya/MFnParticleSystem.h>
-#include <maya/MIntArray.h>
-#include <maya/MStringArray.h>
-#include <maya/MSceneMessage.h>
-#include <maya/MDGMessage.h>
-#include <maya/MMessage.h>
+#ifndef Partio4MayaEmitter_H
+#define Partio4MayaEmitter_H
+
 #include <vector>
 #include <map>
 
+#include <maya/MArrayDataHandle.h>
+#include <maya/MArrayDataBuilder.h>
+#include <maya/MDataBlock.h>
+#include <maya/MDoubleArray.h>
+#include <maya/MDistance.h>
+#include <maya/MDGMessage.h>
+#include <maya/MGlobal.h>
+#include <maya/MIOStream.h>
+#include <maya/MIntArray.h>
+#include <maya/MMessage.h>
+#include <maya/MMatrix.h>
+#include <maya/MObject.h>
+#include <maya/MPlug.h>
+#include <maya/MPlugArray.h>
+#include <maya/MStringArray.h>
+#include <maya/MSceneMessage.h>
+#include <maya/MTime.h>
+#include <maya/MVector.h>
+#include <maya/MVectorArray.h>
+
+#include <maya/MPxEmitterNode.h>
+
+#include <maya/MFnParticleSystem.h>
+#include <maya/MFnDependencyNode.h>
+#include <maya/MFnNumericAttribute.h>
+#include <maya/MFnTypedAttribute.h>
+#include <maya/MFnUnitAttribute.h>
+#include <maya/MFnEnumAttribute.h>
+#include <maya/MFnVectorArrayData.h>
+#include <maya/MFnDoubleArrayData.h>
+#include <maya/MFnArrayAttrsData.h>
+#include <maya/MFnMatrixData.h>
+#include <maya/MFnStringData.h>
+
 #include "Partio.h"
+#include "partio4MayaShared.h"
+#include "iconArrays.h"
 
 
-#define McheckErr(stat, msg)\
-	if ( MS::kSuccess != stat )\
-	{\
-		cerr << msg;\
-		return MS::kFailure;\
-	}
 
 class partioEmitter: public MPxEmitterNode
 {
@@ -95,7 +114,6 @@ class partioEmitter: public MPxEmitterNode
 		MStatus	getWorldPosition ( MPoint &p );
 
 		// methods to get attribute value.
-		//
 		double	rateValue ( MDataBlock& block );
 		double	speedValue ( MDataBlock& block );
 		MVector	directionVector ( MDataBlock& block );
@@ -106,26 +124,20 @@ class partioEmitter: public MPxEmitterNode
 		MTime	currentTimeValue ( MDataBlock& block );
 		MTime	startTimeValue ( int plugIndex, MDataBlock& block );
 		MTime	deltaTimeValue ( int plugIndex, MDataBlock& block );
+		virtual void 	draw( M3dView  & view, const  MDagPath  & path,  M3dView::DisplayStyle  style, M3dView:: DisplayStatus );
+		static MStatus createPPAttr( MFnParticleSystem  &part, MString attrName, MString shortName, int type);
 
 		// the previous position in the world space.
-		//
 		MPoint	lastWorldPoint;
 		MString mLastFileLoaded;
 		MString mLastPath;
 		MString mLastFile;
 		MString mLastExt;
 		bool cacheChanged;
-
-		virtual void 	draw ( M3dView  & view, const  MDagPath  & path,  M3dView::DisplayStyle  style, M3dView:: DisplayStatus );
-		static MStatus createPPAttr( MFnParticleSystem  &part, MString attrName, MString shortName, int type);
 };
 
-//////////////////////////////////////////////
-// inlines
-//
-
-
-
+/// inlines
+/// these inlines retrieve the stated value from the datablack, at the index if specified
 inline long partioEmitter::seedValue( int plugIndex, MDataBlock& block )
 {
 	MStatus status;
@@ -139,10 +151,11 @@ inline long partioEmitter::seedValue( int plugIndex, MDataBlock& block )
 		{
 			MDataHandle hValue = mhValue.inputValue( &status );
 			if( status == MS::kSuccess )
+			{
 				seed = hValue.asInt();
 		}
 	}
-
+	}
 	return( seed );
 }
 
@@ -155,8 +168,9 @@ inline double partioEmitter::rateValue ( MDataBlock& block )
 
 	double value = 0.0;
 	if ( status == MS::kSuccess )
+	{
 		value = hValue.asDouble();
-
+	}
 	return ( value );
 }
 
@@ -168,8 +182,9 @@ inline double partioEmitter::speedValue ( MDataBlock& block )
 
 	double value = 0.0;
 	if ( status == MS::kSuccess )
+	{
 		value = hValue.asDouble();
-
+	}
 	return ( value );
 }
 
@@ -205,10 +220,11 @@ inline bool partioEmitter::isFullValue ( int plugIndex, MDataBlock& block )
 		{
 			MDataHandle hValue = mhValue.inputValue ( &status );
 			if ( status == MS::kSuccess )
+			{
 				value = hValue.asBool();
 		}
 	}
-
+	}
 	return ( value );
 }
 
@@ -225,10 +241,11 @@ inline double partioEmitter::inheritFactorValue ( int plugIndex,MDataBlock& bloc
 		{
 			MDataHandle hValue = mhValue.inputValue ( &status );
 			if ( status == MS::kSuccess )
+			{
 				value = hValue.asDouble();
 		}
 	}
-
+	}
 	return ( value );
 }
 
@@ -240,8 +257,9 @@ inline MTime partioEmitter::currentTimeValue ( MDataBlock& block )
 
 	MTime value ( 0.0 );
 	if ( status == MS::kSuccess )
+	{
 		value = hValue.asTime();
-
+	}
 	return ( value );
 }
 
@@ -258,10 +276,11 @@ inline MTime partioEmitter::startTimeValue ( int plugIndex, MDataBlock& block )
 		{
 			MDataHandle hValue = mhValue.inputValue ( &status );
 			if ( status == MS::kSuccess )
+			{
 				value = hValue.asTime();
 		}
 	}
-
+	}
 	return ( value );
 }
 
@@ -278,10 +297,12 @@ inline MTime partioEmitter::deltaTimeValue ( int plugIndex, MDataBlock& block )
 		{
 			MDataHandle hValue = mhValue.inputValue ( &status );
 			if ( status == MS::kSuccess )
+			{
 				value = hValue.asTime();
 		}
 	}
-
+	}
 	return ( value );
 }
 
+#endif

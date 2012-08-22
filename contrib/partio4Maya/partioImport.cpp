@@ -29,32 +29,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include "partioImport.h"
 
-#include <maya/MStatus.h>
-#include <maya/MPxCommand.h>
-#include <maya/MArgList.h>
-#include <maya/MArgParser.h>
-#include <maya/MArgDatabase.h>
-#include <maya/MSyntax.h>
-#include <maya/MGlobal.h>
-#include <maya/MString.h>
-#include <maya/MItDag.h>
-#include <maya/MObject.h>
-#include <maya/MFnParticleSystem.h>
-#include <maya/MDoubleArray.h>
-#include <maya/MVectorArray.h>
-#include <maya/MIntArray.h>
-
-#include <iostream>
-#include <memory>
-#include <string>
-#include <fstream>
-#include <sstream>
-
-#ifdef WIN32
-#include <zlib.h>
-#include <shlobj.h>
-#endif
-
 static const char *kAttributeFlagS	= "-atr";
 static const char *kAttributeFlagL  = "-attribute";
 static const char *kFlipFlagS		= "-flp";

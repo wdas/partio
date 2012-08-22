@@ -27,23 +27,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#include <maya/MStatus.h>
-#include <maya/MPxCommand.h>
-#include <maya/MArgList.h>
-#include <maya/MSyntax.h>
-#include <maya/MGlobal.h>
-#include <maya/MAnimControl.h>
-#include <maya/MString.h>
-#include <maya/MItDag.h>
-#include <maya/MObject.h>
-#include <maya/MFnParticleSystem.h>
-#include <maya/MDoubleArray.h>
-#include <maya/MVectorArray.h>
-#include <maya/MPointArray.h>
-#include <maya/MIntArray.h>
-#include <maya/MSelectionList.h>
-#include <maya/MPoint.h>
-#include <maya/MTime.h>
+#ifndef Partio4MayaImport_H
+#define Partio4MayaImport_H
+
+#ifdef WIN32
+	#include <shlobj.h>
+#endif
 
 #include <iostream>
 #include <memory>
@@ -53,30 +42,47 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <zlib.h>
 #include <sys/stat.h>
 
+#include <maya/MArgList.h>
+#include <maya/MArgParser.h>
+#include <maya/MArgDatabase.h>
+#include <maya/MAnimControl.h>
+#include <maya/MDoubleArray.h>
+#include <maya/MGlobal.h>
+#include <maya/MIntArray.h>
+#include <maya/MItDag.h>
+#include <maya/MObject.h>
+#include <maya/MPointArray.h>
+#include <maya/MPoint.h>
+#include <maya/MSelectionList.h>
+#include <maya/MString.h>
+#include <maya/MSyntax.h>
+#include <maya/MStatus.h>
+#include <maya/MTime.h>
+#include <maya/MVectorArray.h>
+
+#include <maya/MPxCommand.h>
+
+#include <maya/MFnParticleSystem.h>
+
 #include "Partio.h"
 #include "partio4MayaShared.h"
 
-class PartioImport : public MPxCommand
+class PartioImport : public MPxCommand 
 {
-public:
-			PartioImport(){};
-	virtual 	~PartioImport(){};
-
-	static void* creator();
-
-	// Syntax methods
-
-	virtual bool		hasSyntax();
-	static  MSyntax		createSyntax();
-
-	MStatus doIt(const MArgList&);
-	void printUsage();
-
+	public:
+		PartioImport(){};
+		virtual ~PartioImport(){};
+		
+		static void* creator();
+		
+		virtual bool hasSyntax();
+		static  MSyntax createSyntax();
+		
+		MStatus doIt(const MArgList&);
+		void printUsage();
 };
 
-
-
-
+#endif
 
 
 

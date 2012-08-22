@@ -27,33 +27,66 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#include <maya/MFloatArray.h>
-#include <maya/MVectorArray.h>
-#include <maya/MPointArray.h>
-#include <maya/MVector.h>
-#include <maya/MFloatVector.h>
-#include <maya/MIntArray.h>
-#include <maya/MStringArray.h>
+#ifndef Partio4MayaInstancer_H
+#define Partio4MayaInstancer_H
+
+#define _USE_MGL_FT_
+
+#include <math.h>
+#include <stdlib.h>
+#include <vector>
+#include <set>
+
 #include <maya/MBoundingBox.h>
+#include <maya/MColor.h>
+#include <maya/MDagPath.h>
+#include <maya/MDrawData.h>
+#include <maya/MDataBlock.h>
+#include <maya/MDataHandle.h>
+#include <maya/MDoubleArray.h>
+#include <maya/MDistance.h>
+#include <maya/MFloatArray.h>
+#include <maya/MFloatVector.h>
+#include <maya/MGLFunctionTable.h>
+#include <maya/MGlobal.h>
+#include <maya/MIntArray.h>
+#include <maya/MIOStream.h>
+#include <maya/MMatrix.h>
 #include <maya/MObject.h>
 #include <maya/MPlug.h>
-#include <maya/MDataBlock.h>
-#include <maya/MTypeId.h>
+#include <maya/MPointArray.h>
+#include <maya/MStringArray.h>
+#include <maya/MString.h>
 #include <maya/MStatus.h>
+#include <maya/MSceneMessage.h>
+#include <maya/MSelectionList.h>
+#include <maya/MTypeId.h>
+#include <maya/MTypes.h>
+#include <maya/MTime.h>
+#include <maya/MVectorArray.h>
 #include <maya/MVector.h>
+#include <maya/M3dView.h>
+
+#include <maya/MFnUnitAttribute.h>
+#include <maya/MFnTypedAttribute.h>
+#include <maya/MFnStringData.h>
+#include <maya/MFnNumericData.h>
+#include <maya/MFnEnumAttribute.h>
+#include <maya/MFnUnitAttribute.h>
+#include <maya/MFnArrayAttrsData.h>
+#include <maya/MFnNumericAttribute.h>
+
+#include <maya/MPxSurfaceShape.h>
+#include <maya/MPxNode.h>
 #include <maya/MPxSurfaceShape.h>
 #include <maya/MPxSurfaceShapeUI.h>
-#include <maya/M3dView.h>
-#include <maya/MSceneMessage.h>
-#include <maya/MDrawData.h>
-#include <maya/MFnArrayAttrsData.h>
-#include <maya/MSelectionList.h>
-#include <maya/MDagPath.h>
-#include <vector>
 
 #include <Partio.h>
 #include <PartioAttribute.h>
 #include <PartioIterator.h>
+
+#include "partio4MayaShared.h"
+#include "iconArrays.h"
 
 class partioInstReaderCache
 {
@@ -176,4 +209,6 @@ protected:
 	GLuint dList;
 
 };
+
+#endif
 

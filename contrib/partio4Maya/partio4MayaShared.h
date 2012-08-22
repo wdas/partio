@@ -37,19 +37,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <windows.h>
 #endif
 
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <ctype.h>
-#include <map>
-#include <sstream>
-#include <maya/MString.h>
-#include <maya/MDataBlock.h>
-#include <maya/MVector.h>
-#include <maya/MGlobal.h>
-#include <maya/MStringArray.h>
-
-
 #ifdef OSMac_MachO_
 #include <OpenGL/gl.h>
 #include <OpenGL/glu.h>
@@ -64,14 +51,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <GL/glx.h>
 #endif
 
-#define LEAD_COLOR				18	// green
-#define ACTIVE_COLOR			15	// white
-#define ACTIVE_AFFECTED_COLOR	8	// purple
-#define DORMANT_COLOR			4	// blue
-#define HILITE_COLOR			17	// pale blue
+#include <sys/stat.h>
+#include <stdlib.h>
+#include <math.h>
+#include <stdio.h>
+#include <ctype.h>
+#include <map>
+#include <sstream>
 
+#include <maya/MString.h>
+#include <maya/MDataBlock.h>
+#include <maya/MVector.h>
+#include <maya/MGlobal.h>
+#include <maya/MStringArray.h>
 
-#define TABLE_SIZE 256
+#include "iconArrays.h"
+#include "Partio.h"
 
 extern const int kTableMask;
 #define MODPERM(x) permtable[(x)&kTableMask]
@@ -106,9 +101,10 @@ public:
 	static float  	value( int x, float table[] = valueTable1 );
 };
 
-
-//// INLINES
-inline float partio4Maya::value( int x, float table[] ) {
+/// INLINES
+/// gets the value of the permtable at x and &'s it with the provided table mask
+inline float partio4Maya::value( int x, float table[] ) 
+{
 	return table[MODPERM( x )];
 }
 

@@ -27,61 +27,25 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#include <maya/MIOStream.h>
-#include <math.h>
-#include <stdlib.h>
-#include <vector>
-
-#include <maya/MVectorArray.h>
-#include <maya/MDoubleArray.h>
-#include <maya/MFloatArray.h>
-#include <maya/MPointArray.h>
-#include <maya/MVector.h>
-#include <maya/MFloatVector.h>
-#include <maya/MIntArray.h>
-#include <maya/MMatrix.h>
-#include <maya/MString.h>
-#include <maya/MTypes.h>
-
-#include <maya/MPxSurfaceShape.h>
-#include <maya/MPxNode.h>
-#include <maya/MTypeId.h>
-#include <maya/MPlug.h>
-#include <maya/MVector.h>
-#include <maya/MDataBlock.h>
-#include <maya/MDataHandle.h>
-#include <maya/MColor.h>
-#include <maya/M3dView.h>
-#include <maya/MDistance.h>
-#include <maya/MFnUnitAttribute.h>
-#include <maya/MFnTypedAttribute.h>
-#include <maya/MFnStringData.h>
-#include <maya/MFnNumericData.h>
-#include <maya/MFnEnumAttribute.h>
-#include <maya/MFnUnitAttribute.h>
-#include <maya/MFnNumericAttribute.h>
-#include <maya/MTime.h>
-#include <maya/MGlobal.h>
-
 #include "partioInstancer.h"
-#include "partio4MayaShared.h"
-#include "iconArrays.h"
-#include <set>
 
-#define _USE_MGL_FT_
-#include <maya/MGLFunctionTable.h>
 static MGLFunctionTable *gGLFT = NULL;
 
-
-// id is registered with autodesk no need to change
-#define ID_PARTIOVISUALIZER  0x00116ED5
-
+#define ID_PARTIOINSTANCER  0x00116ED5 // id is registered with autodesk no need to change
 #define LEAD_COLOR				18	// green
 #define ACTIVE_COLOR			15	// white
 #define ACTIVE_AFFECTED_COLOR	8	// purple
 #define DORMANT_COLOR			4	// blue
 #define HILITE_COLOR			17	// pale blue
 
+#define DRAW_STYLE_POINTS 0
+#define DRAW_STYLE_LABEL 1
+#define DRAW_STYLE_BOUNDING_BOX 3
+
+using namespace Partio;
+using namespace std;
+
+/// PARTIO INSTANCER
 /*
 Names and types of all array attributes  the maya instancer looks for
 used by the geometry instancer nodes:  ( * = currently implemented)
@@ -101,13 +65,7 @@ age (doubleArray)
 id (doubleArray)
 */
 
-using namespace Partio;
-using namespace std;
-
-/// ///////////////////////////////////////////////////
-/// PARTIO VISUALIZER
-
-MTypeId partioInstancer::id( ID_PARTIOVISUALIZER );
+MTypeId partioInstancer::id( ID_PARTIOINSTANCER );
 
 MObject partioInstancer::time;
 MObject partioInstancer::aUpdateCache;

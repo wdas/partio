@@ -27,21 +27,12 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
+#ifndef Partio4MayaExport_H
+#define Partio4MayaExport_H
 
-#include <maya/MStatus.h>
-#include <maya/MPxCommand.h>
-#include <maya/MArgList.h>
-#include <maya/MSyntax.h>
-#include <maya/MGlobal.h>
-#include <maya/MAnimControl.h>
-#include <maya/MString.h>
-#include <maya/MItDag.h>
-#include <maya/MObject.h>
-#include <maya/MFnParticleSystem.h>
-#include <maya/MDoubleArray.h>
-#include <maya/MVectorArray.h>
-#include <maya/MIntArray.h>
-#include <maya/MSelectionList.h>
+#ifdef WIN32
+	#include <shlobj.h>
+#endif
 
 #include <iostream>
 #include <memory>
@@ -50,6 +41,24 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <sstream>
 #include <zlib.h>
 #include <sys/stat.h>
+
+#include <maya/MArgList.h>
+#include <maya/MArgParser.h>
+#include <maya/MAnimControl.h>
+#include <maya/MDoubleArray.h>
+#include <maya/MGlobal.h>
+#include <maya/MItDag.h>
+#include <maya/MIntArray.h>
+#include <maya/MObject.h>
+#include <maya/MStatus.h>
+#include <maya/MSyntax.h>
+#include <maya/MString.h>
+#include <maya/MSelectionList.h>
+#include <maya/MVectorArray.h>
+
+#include <maya/MPxCommand.h>
+
+#include <maya/MFnParticleSystem.h>
 
 #include "Partio.h"
 #include "partio4MayaShared.h"
@@ -72,5 +81,6 @@ public:
 
 };
 
+#endif
 
 

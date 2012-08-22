@@ -27,33 +27,20 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#include <maya/MIOStream.h>
-
-#include <maya/MGlobal.h>
-#include <maya/MVectorArray.h>
-#include <maya/MDoubleArray.h>
-#include <maya/MIntArray.h>
-#include <maya/MMatrix.h>
-#include <maya/MDistance.h>
-#include <maya/MFnDependencyNode.h>
-#include <maya/MFnNumericAttribute.h>
-#include <maya/MFnTypedAttribute.h>
-#include <maya/MFnUnitAttribute.h>
-#include <maya/MFnEnumAttribute.h>
-#include <maya/MFnVectorArrayData.h>
-#include <maya/MFnDoubleArrayData.h>
-#include <maya/MFnArrayAttrsData.h>
-#include <maya/MFnMatrixData.h>
-#include <maya/MFnStringData.h>
-#include <maya/MArrayDataHandle.h>
-#include <maya/MArrayDataBuilder.h>
-
 #include "partioEmitter.h"
-#include "partio4MayaShared.h"
-#include "iconArrays.h"
 
-// id is registered with autodesk no need to change
-#define ID_PARTIOEMITTER  0x00116ED0
+#define ID_PARTIOEMITTER  0x00116ED0 // id is registered with autodesk no need to change
+
+#define McheckErr(stat, msg)\
+	if ( MS::kSuccess != stat )\
+	{\
+		cerr << msg;\
+		return MS::kFailure;\
+	}
+
+#define ATTR_TYPE_INT 0
+#define ATTR_TYPE_DOUBLE 1
+#define ATTR_TYPE_VECTOR 2
 
 using namespace Partio;
 using namespace std;
@@ -76,9 +63,8 @@ MObject partioEmitter::aJitterFreq;
 MObject partioEmitter::aPartioAttributes;
 MObject partioEmitter::aMayaPPAttributes;
 
-
-partioEmitter::partioEmitter()
-        :lastWorldPoint ( 0, 0, 0, 1 ),
+partioEmitter::partioEmitter():
+		lastWorldPoint ( 0, 0, 0, 1 ),
         mLastFileLoaded(""),
         mLastPath(""),
 		mLastFile(""),
@@ -308,37 +294,31 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
    // Get the logical index of the element this plug refers to,
     // because the node can be emitting particles into more
     // than one particle shape.
-    //
     int multiIndex = plug.logicalIndex ( &status );
     McheckErr ( status, "ERROR in plug.logicalIndex.\n" );
 
     // Get output data arrays (position, velocity, or parentId)
     // that the particle shape is holding from the previous frame.
-    //
     MArrayDataHandle hOutArray = block.outputArrayValue ( mOutput, &status );
     McheckErr ( status, "ERROR in hOutArray = block.outputArrayValue.\n" );
 
     // Create a builder to aid in the array construction efficiently.
-    //
     MArrayDataBuilder bOutArray = hOutArray.builder ( &status );
     McheckErr ( status, "ERROR in bOutArray = hOutArray.builder.\n" );
 
     // Get the appropriate data array that is being currently evaluated.
-    //
     MDataHandle hOut = bOutArray.addElement ( multiIndex, &status );
     McheckErr ( status, "ERROR in hOut = bOutArray.addElement.\n" );
 
     // Create the data and apply the function set,
     // particle array initialized to length zero,
     // fnOutput.clear()
-    //
     MFnArrayAttrsData fnOutput;
     MObject dOutput = fnOutput.create ( &status );
     McheckErr ( status, "ERROR in fnOutput.create.\n" );
 
     // Check if the particle object has reached it's maximum,
     // hence is full. If it is full then just return with zero particles.
-    //
     bool beenFull = isFullValue ( multiIndex, block );
     if ( beenFull )
     {
@@ -348,8 +328,6 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     // Get deltaTime, currentTime and startTime.
     // If deltaTime <= 0.0, or currentTime <= startTime,
     // do not emit new pariticles and return.
-    //
-
     MTime cT = currentTimeValue ( block );
     MTime sT = startTimeValue ( multiIndex, block );
     MTime dT = deltaTimeValue ( multiIndex, block );
@@ -357,13 +335,10 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     {
         // We do not emit particles before the start time,
         // we do support emitting / killing of particles if we scroll backward in time.
-        //
-
         // This code is necessary primarily the first time to
         // establish the new data arrays allocated, and since we have
         // already set the data array to length zero it does
         // not generate any new particles.
-        //
         hOut.set ( dOutput );
         block.setClean ( plug );
 
@@ -821,7 +796,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     }
 
     // Update the data block with new dOutput and set plug clean.
-    //
+
 
     hOut.set ( dOutput );
     block.setClean ( plug );
@@ -843,17 +818,14 @@ MStatus partioEmitter::getWorldPosition ( MPoint &point )
     MFnDependencyNode fnThisNode ( thisNode );
 
     // get worldMatrix attribute.
-    //
     MObject worldMatrixAttr = fnThisNode.attribute ( "worldMatrix" );
 
     // build worldMatrix plug, and specify which element the plug refers to.
     // We use the first element(the first dagPath of this emitter).
-    //
     MPlug matrixPlug ( thisNode, worldMatrixAttr );
     matrixPlug = matrixPlug.elementByLogicalIndex ( 0 );
 
     // Get the value of the 'worldMatrix' attribute
-    //
     MObject matrixObject;
     status = matrixPlug.getValue ( matrixObject );
     if ( !status )
@@ -877,7 +849,6 @@ MStatus partioEmitter::getWorldPosition ( MPoint &point )
     }
 
     // assign the translate to the given vector.
-    //
     point[0] = worldMatrix ( 3, 0 );
     point[1] = worldMatrix ( 3, 1 );
     point[2] = worldMatrix ( 3, 2 );

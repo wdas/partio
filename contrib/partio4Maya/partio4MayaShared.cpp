@@ -27,12 +27,10 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#include <map>
-#include <math.h>
-#include <stdlib.h>
 #include "partio4MayaShared.h"
-#include "iconArrays.h"
-#include "Partio.h"
+
+#define TABLE_SIZE 256
+
 
 using namespace Partio;
 using namespace std;
@@ -479,7 +477,8 @@ float partio4Maya::noiseAtValue( float x )
     int ix;
     float fx;
 
-    if ( !isInitialized ) {
+	if ( !isInitialized ) 
+	{
         initTable( 23479015 );
         isInitialized = 1;
     }
@@ -511,7 +510,8 @@ void  partio4Maya::initTable( long seed )
 	srand48( seed );
 #endif
 
-    for ( int i = 0; i < TABLE_SIZE; i++ ) {
+	for ( int i = 0; i < TABLE_SIZE; i++ ) 
+	{
         valueTable1[i] = (float)drand48();
         valueTable2[i] = (float)drand48();
         valueTable3[i] = (float)drand48();
@@ -545,7 +545,8 @@ float partio4Maya::spline( float x, float knot0, float knot1, float knot2, float
 
 int partio4Maya::isInitialized = 0;
 
-int partio4Maya::permtable[256] = {
+int partio4Maya::permtable[256] = 
+{
     254,    91,     242,    186,    90,     204,    85,     133,    233,
     50,     187,    49,     182,    224,    144,    166,    7,      51,
     20,     179,    36,     203,    114,    156,    195,    40,     24,
