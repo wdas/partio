@@ -1,0 +1,90 @@
+# vim: filetype=python
+
+import system, os
+from build_tools import find_files_recursive
+
+### PARTIO LIBRARY IS STATIC 
+STATIC_PARTIO = File('/Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio/lib/libpartio.a')
+
+####################################################
+## NODE TRANSLATORS
+
+# import build env
+Import('ext_env')
+local_env = ext_env.Clone()
+
+
+# Automatically add all source and include files found in the source path
+src_base_dir  = os.path.join(local_env['ROOT_DIR'], 'contrib', 'extensions', 'partio', 'plugin')
+
+source_files  = [os.path.join('plugin', x) for x in find_files_recursive(src_base_dir, ['.c', '.cpp'])]
+include_files = [os.path.join('plugin', x) for x in find_files_recursive(src_base_dir, ['.h'])]
+
+EXT = local_env.SharedLibrary('partio', source_files, LIBPREFIX='')
+
+# If a PARTIO_HOME path is passed, use that. Otherwise assume it's on the path.
+if local_env.has_key("PARTIO_HOME"):
+   local_env.Append(CPPPATH = [os.path.join(local_env["PARTIO_HOME"], 'include')])
+   
+else:
+   local_env.Append(CPPPATH = '/Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio/include')
+   
+local_env.Append(CPPPATH = ['.'])
+local_env.Append(LIBPATH = ['.'])
+
+######################################################
+## PROCEDURALS 
+
+Import('env')
+proc_env = env.Clone()
+
+# Automatically add all source and include files found in the source path
+src_base_dir  = os.path.join(proc_env['ROOT_DIR'], 'contrib', 'extensions', 'partio', 'procedurals')
+
+source_files  = [os.path.join('procedurals', x) for x in find_files_recursive(src_base_dir, ['.c', '.cpp'])]
+include_files = [os.path.join('procedurals', x) for x in find_files_recursive(src_base_dir, ['.h'])]
+
+PROC = proc_env.SharedLibrary('partioGenerator', source_files, LIBPREFIX='')
+
+# If a PARTIO_HOME path is passed, use that. Otherwise assume it's on the path.
+if proc_env.has_key("PARTIO_HOME"):
+   proc_env.Append(CPPPATH = [os.path.join(local_env["PARTIO_HOME"], 'include')])
+   
+else:
+   proc_env.Append(CPPPATH = '/Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio/include')
+   
+proc_env.Append(CPPPATH = ['.'])
+proc_env.Append(LIBPATH = ['.'])
+proc_env.Append(LIBS = ['ai', STATIC_PARTIO])
+
+###############################################3
+## SHADERS
+
+Import('env')
+shad_env = env.Clone()
+
+# Automatically add all source and include files found in the source path
+src_base_dir  = os.path.join(proc_env['ROOT_DIR'], 'contrib', 'extensions', 'partio', 'shaders')
+
+source_files  = [os.path.join('shaders', x) for x in find_files_recursive(src_base_dir, ['.c', '.cpp'])]
+include_files = [os.path.join('shaders', x) for x in find_files_recursive(src_base_dir, ['.h'])]
+
+SHADER = shad_env.SharedLibrary('partioShaders', source_files, LIBPREFIX='')
+
+# If a PARTIO_HOME path is passed, use that. Otherwise assume it's on the path.
+if shad_env.has_key("PARTIO_HOME"):
+   shad_env.Append(CPPPATH = [os.path.join(local_env["PARTIO_HOME"], 'include')])
+else:
+   shad_env.Append(CPPPATH = '/Volumes/sv-dev01/devRepo/johnc/3rdParty/github/redpawFX/partio/include')
+   
+shad_env.Append(CPPPATH = ['.'])
+shad_env.Append(LIBPATH = ['.'])
+
+shad_env.Append(LIBS = ['ai', STATIC_PARTIO])
+
+
+if system.os() == 'windows':
+   Return('EXT SHADER PROC ')
+else:
+   Return('EXT SHADER PROC ')
+   
