@@ -241,7 +241,7 @@ MStatus partioInstancer::initialize()
 
 	aDrawStyle = eAttr.create( "drawStyle", "drwStyl");
     eAttr.addField("points",	0);
-    //eAttr.addField("index#",	1);
+    eAttr.addField("index#",	1);
     //eAttr.addField("spheres",	2);
 	eAttr.addField("boundingBox", 3);
 	eAttr.setDefault(0);
@@ -880,7 +880,7 @@ void partioInstancerUI::draw( const MDrawRequest& request, M3dView& view ) const
 
 	if (drawStyle < 3 && view.displayStyle() != M3dView::kBoundingBox )
 	{
-		drawPartio(cache,drawStyle);
+		drawPartio(cache,drawStyle,view);
 	}
 	else
 	{
@@ -960,7 +960,7 @@ void  partioInstancerUI::drawBoundingBox() const
 ////////////////////////////////////////////
 /// DRAW PARTIO
 
-void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle) const
+void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle, M3dView &view) const
 {
 	partioInstancer* shapeNode = (partioInstancer*) surfaceShape();
 
@@ -991,19 +991,24 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
 			{
 				const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
 				glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
-				if (drawStyle == 1)
-				{
-					/// TODO: draw text label per particle here
-				}
-
 			}
 
 		glEnd( );
-
 		glDisable(GL_POINT_SMOOTH);
+
+		if (drawStyle == 1)
+		{
+			glColor3f(0.0,0.0,0.0);
+			for (int i=0;i<pvCache->particles->numParticles();i++)
+			{
+				const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
+				/// TODO: draw text label per particle here
+				view.drawText("id", MPoint(partioPositions[0], partioPositions[1], partioPositions[2]), M3dView::kLeft);
+			}
+		}
+
 		glPopAttrib();
 	} // if (particles)
-
 
 }
 

@@ -120,7 +120,7 @@ public:
 	virtual void draw(const MDrawRequest & request, M3dView & view) const;
 	virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
 	void 	drawBoundingBox() const;
-	void 	drawPartio(partioInstReaderCache* pvCache, int drawStyle) const;
+	void 	drawPartio(partioInstReaderCache* pvCache, int drawStyle, M3dView &view) const;
 	static void * creator();
 	virtual bool	select( MSelectInfo &selectInfo,
 							MSelectionList &selectionList,
