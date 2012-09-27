@@ -75,37 +75,37 @@ class partio4Maya
 {
 public:
 
-	static bool 	partioCacheExists(const char* fileName);
-	static MStringArray partioGetBaseFileName(MString inFileName);
-	static void 	updateFileName (MString cacheFile, MString cacheDir,
-									 bool cacheStatic, int cacheOffset,
-									 short cacheFormat, int integerTime,
-									 int &cachePadding, MString &formatExt,
-									 MString &outputFramePath, MString &outputRenderPath);
+    static bool 	partioCacheExists(const char* fileName);
+    static MStringArray partioGetBaseFileName(MString inFileName);
+    static void 	updateFileName (MString cacheFile, MString cacheDir,
+                                 bool cacheStatic, int cacheOffset,
+                                 short cacheFormat, int integerTime,
+                                 int &cachePadding, MString &formatExt,
+                                 MString &outputFramePath, MString &outputRenderPath);
 
-	static MString 	setExt(short extNum);
-	static void 	buildSupportedExtensionList(std::map<short,MString> &formatExtMap,bool write);
-	static void 	drawPartioLogo(float multiplier);
-	static MVector 	jitterPoint(int id, float freq, float offset, float jitterMag);
-	static float  	noiseAtValue( float x);
-	static void   	initTable( long seed );
+    static MString 	setExt(short extNum);
+    static void 	buildSupportedExtensionList(std::map<short,MString> &formatExtMap,bool write);
+    static void 	drawPartioLogo(float multiplier);
+    static MVector 	jitterPoint(int id, float freq, float offset, float jitterMag);
+    static float  	noiseAtValue( float x);
+    static void   	initTable( long seed );
 
-	private:
+private:
 
-	static int    	permtable   [256];
-	static float  	valueTable1 [256];
-	static float  	valueTable2 [256];
-	static float  	valueTable3 [256];
-	static int    	isInitialized;
-	static float  	spline( float x, float knot0, float knot1, float knot2, float knot3 );
-	static float  	value( int x, float table[] = valueTable1 );
+    static int    	permtable   [256];
+    static float  	valueTable1 [256];
+    static float  	valueTable2 [256];
+    static float  	valueTable3 [256];
+    static int    	isInitialized;
+    static float  	spline( float x, float knot0, float knot1, float knot2, float knot3 );
+    static float  	value( int x, float table[] = valueTable1 );
 };
 
 /// INLINES
 /// gets the value of the permtable at x and &'s it with the provided table mask
-inline float partio4Maya::value( int x, float table[] ) 
+inline float partio4Maya::value( int x, float table[] )
 {
-	return table[MODPERM( x )];
+    return table[MODPERM( x )];
 }
 
 #endif

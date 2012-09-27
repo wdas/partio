@@ -91,21 +91,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 class partioInstReaderCache
 {
 public:
-	partioInstReaderCache();
-	int token;
-	MBoundingBox bbox;
-	int dList;
-	Partio::ParticlesDataMutable* particles;
-	Partio::ParticleAttribute positionAttr;
-	Partio::ParticleAttribute idAttr;
-	Partio::ParticleAttribute velocityAttr;
-	Partio::ParticleAttribute rotationAttr;
-	Partio::ParticleAttribute scaleAttr;
-	Partio::ParticleAttribute indexAttr;
-	Partio::ParticleAttribute shaderIndexAttr;
-	float* flipPos;
-	MFnArrayAttrsData instanceData;
-	MObject instanceDataObj;
+    partioInstReaderCache();
+    int token;
+    MBoundingBox bbox;
+    int dList;
+    Partio::ParticlesDataMutable* particles;
+    Partio::ParticleAttribute positionAttr;
+    Partio::ParticleAttribute idAttr;
+    Partio::ParticleAttribute velocityAttr;
+    Partio::ParticleAttribute rotationAttr;
+    Partio::ParticleAttribute scaleAttr;
+    Partio::ParticleAttribute indexAttr;
+    Partio::ParticleAttribute shaderIndexAttr;
+    float* flipPos;
+    MFnArrayAttrsData instanceData;
+    MObject instanceDataObj;
 
 
 };
@@ -117,96 +117,96 @@ public:
 
     partioInstancerUI();
     virtual ~partioInstancerUI();
-	virtual void draw(const MDrawRequest & request, M3dView & view) const;
-	virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
-	void 	drawBoundingBox() const;
-	void 	drawPartio(partioInstReaderCache* pvCache, int drawStyle, M3dView &view) const;
-	static void * creator();
-	virtual bool	select( MSelectInfo &selectInfo,
-							MSelectionList &selectionList,
-							MPointArray &worldSpaceSelectPts ) const;
+    virtual void draw(const MDrawRequest & request, M3dView & view) const;
+    virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
+    void 	drawBoundingBox() const;
+    void 	drawPartio(partioInstReaderCache* pvCache, int drawStyle, M3dView &view) const;
+    static void * creator();
+    virtual bool	select( MSelectInfo &selectInfo,
+                         MSelectionList &selectionList,
+                         MPointArray &worldSpaceSelectPts ) const;
 
 };
 
 class partioInstancer : public MPxSurfaceShape
 {
 public:
-	partioInstancer();
-	virtual ~partioInstancer();
+    partioInstancer();
+    virtual ~partioInstancer();
 
     virtual MStatus   		compute( const MPlug& plug, MDataBlock& block );
-	virtual bool            isBounded() const;
-	virtual MBoundingBox    boundingBox() const;
-	static  void *          creator();
-	static  MStatus         initialize();
-	static void 			reInit(void *data);
-	void 					initCallback();
-	virtual void 			postConstructor();
+    virtual bool            isBounded() const;
+    virtual MBoundingBox    boundingBox() const;
+    static  void *          creator();
+    static  MStatus         initialize();
+    static void 			reInit(void *data);
+    void 					initCallback();
+    virtual void 			postConstructor();
 
-	bool GetPlugData();
-	void addParticleAttr(int attrIndex, MString attrName );
-	partioInstReaderCache* updateParticleCache();
-
-
-	MCallbackId partioInstancerOpenCallback;
-	MCallbackId partioInstancerImportCallback;
-	MCallbackId partioInstancerReferenceCallback;
+    bool GetPlugData();
+    void addParticleAttr(int attrIndex, MString attrName );
+    partioInstReaderCache* updateParticleCache();
 
 
-	static MObject  time;
-	static MObject  aSize;         // The size of the logo
-	static MObject  aFlipYZ;
-	static MObject 	aUpdateCache;
-	static MObject 	aCacheDir;
-	static MObject 	aCacheFile;
-	static MObject 	aUseTransform;
-	static MObject 	aCacheActive;
-	static MObject 	aCacheOffset;
-	static MObject  aCacheStatic;
-	static MObject 	aCacheFormat;
-	static MObject 	aJitterPos;
-	static MObject 	aJitterFreq;
-	static MObject 	aPartioAttributes;
-	static MObject  aPointSize;
-	static MObject  aDrawStyle;
-	static MObject  aForceReload;
-	static MObject  aRenderCachePath;
-	static MObject	aRotationFrom;
-	static MObject	aScaleFrom;
-	static MObject	aIndexFrom;
-	static MObject	aShaderIndexFrom;
-	static MObject	aInMeshInstances;
-	static MObject	aOutMesh;
-	static MObject	aInstanceData;
-	static MObject  aComputeVeloPos;
+    MCallbackId partioInstancerOpenCallback;
+    MCallbackId partioInstancerImportCallback;
+    MCallbackId partioInstancerReferenceCallback;
 
 
-	static	MTypeId			id;
-	float 					multiplier;
-	bool 					cacheChanged;
-	partioInstReaderCache  	pvCache;
+    static MObject  time;
+    static MObject  aSize;         // The size of the logo
+    static MObject  aFlipYZ;
+    static MObject 	aUpdateCache;
+    static MObject 	aCacheDir;
+    static MObject 	aCacheFile;
+    static MObject 	aUseTransform;
+    static MObject 	aCacheActive;
+    static MObject 	aCacheOffset;
+    static MObject  aCacheStatic;
+    static MObject 	aCacheFormat;
+    static MObject 	aJitterPos;
+    static MObject 	aJitterFreq;
+    static MObject 	aPartioAttributes;
+    static MObject  aPointSize;
+    static MObject  aDrawStyle;
+    static MObject  aForceReload;
+    static MObject  aRenderCachePath;
+    static MObject	aRotationFrom;
+    static MObject	aScaleFrom;
+    static MObject	aIndexFrom;
+    static MObject	aShaderIndexFrom;
+    static MObject	aInMeshInstances;
+    static MObject	aOutMesh;
+    static MObject	aInstanceData;
+    static MObject  aComputeVeloPos;
+
+
+    static	MTypeId			id;
+    float 					multiplier;
+    bool 					cacheChanged;
+    partioInstReaderCache  	pvCache;
 
 
 private:
 
-	MString mLastFileLoaded;
-	MString mLastPath;
-	MString mLastFile;
-	MString mLastExt;
-	bool mLastFlipStatus;
-	bool mFlipped;
-	bool  frameChanged;
-	MStringArray attributeList;
-	int mLastRotationFromIndex;
-	int mLastScaleFromIndex;
-	int mLastIndexFromIndex;
-	int mLastShaderIndexFromIndex;
-	bool canMotionBlur;
+    MString mLastFileLoaded;
+    MString mLastPath;
+    MString mLastFile;
+    MString mLastExt;
+    bool mLastFlipStatus;
+    bool mFlipped;
+    bool  frameChanged;
+    MStringArray attributeList;
+    int mLastRotationFromIndex;
+    int mLastScaleFromIndex;
+    int mLastIndexFromIndex;
+    int mLastShaderIndexFromIndex;
+    bool canMotionBlur;
 
 protected:
 
-	int dUpdate;
-	GLuint dList;
+    int dUpdate;
+    GLuint dList;
 
 };
 

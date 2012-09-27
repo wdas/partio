@@ -89,19 +89,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 class partioVizReaderCache
 {
 public:
-	partioVizReaderCache();
-	int token;
-	MBoundingBox bbox;
-	int dList;
-	Partio::ParticlesDataMutable* particles;
-	Partio::ParticleAttribute positionAttr;
-	Partio::ParticleAttribute colorAttr;
-	Partio::ParticleAttribute opacityAttr;
-	Partio::ParticleAttribute radiusAttr;
-	float* rgb;
-	float* rgba;
-	MFloatArray radius;
-	float* flipPos;
+    partioVizReaderCache();
+    int token;
+    MBoundingBox bbox;
+    int dList;
+    Partio::ParticlesDataMutable* particles;
+    Partio::ParticleAttribute positionAttr;
+    Partio::ParticleAttribute colorAttr;
+    Partio::ParticleAttribute opacityAttr;
+    Partio::ParticleAttribute radiusAttr;
+    float* rgb;
+    float* rgba;
+    MFloatArray radius;
+    float* flipPos;
 
 };
 
@@ -112,99 +112,99 @@ public:
 
     partioVisualizerUI();
     virtual ~partioVisualizerUI();
-	virtual void draw(const MDrawRequest & request, M3dView & view) const;
-	virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
-	void 	drawBoundingBox() const;
-	void    drawBillboardCircleAtPoint(MVector position, float radius, int num_segments, int drawType) const;
-	void 	drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
-	static void * creator();
-	virtual bool	select( MSelectInfo &selectInfo,
-							MSelectionList &selectionList,
-							MPointArray &worldSpaceSelectPts ) const;
+    virtual void draw(const MDrawRequest & request, M3dView & view) const;
+    virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
+    void 	drawBoundingBox() const;
+    void    drawBillboardCircleAtPoint(MVector position, float radius, int num_segments, int drawType) const;
+    void 	drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
+    static void * creator();
+    virtual bool	select( MSelectInfo &selectInfo,
+                         MSelectionList &selectionList,
+                         MPointArray &worldSpaceSelectPts ) const;
 
 };
 
 class partioVisualizer : public MPxSurfaceShape
 {
 public:
-	partioVisualizer();
-	virtual ~partioVisualizer();
+    partioVisualizer();
+    virtual ~partioVisualizer();
 
     virtual MStatus   		compute( const MPlug& plug, MDataBlock& block );
-	virtual bool            isBounded() const;
-	virtual MBoundingBox    boundingBox() const;
-	static  void *          creator();
-	static  MStatus         initialize();
-	static void 			reInit(void *data);
-	void 					initCallback();
-	virtual void 			postConstructor();
+    virtual bool            isBounded() const;
+    virtual MBoundingBox    boundingBox() const;
+    static  void *          creator();
+    static  MStatus         initialize();
+    static void 			reInit(void *data);
+    void 					initCallback();
+    virtual void 			postConstructor();
 
-	bool GetPlugData();
-	partioVizReaderCache* updateParticleCache();
+    bool GetPlugData();
+    partioVizReaderCache* updateParticleCache();
 
-	MCallbackId partioVisualizerOpenCallback;
-	MCallbackId partioVisualizerImportCallback;
-	MCallbackId partioVisualizerReferenceCallback;
+    MCallbackId partioVisualizerOpenCallback;
+    MCallbackId partioVisualizerImportCallback;
+    MCallbackId partioVisualizerReferenceCallback;
 
-	static MObject  time;
-	static MObject  aSize;         // The size of the logo
-	static MObject  aDrawSkip;
-	static MObject  aFlipYZ;
-	static MObject 	aUpdateCache;
-	static MObject 	aCacheDir;
-	static MObject 	aCacheFile;
-	static MObject 	aUseTransform;
-	static MObject 	aCacheActive;
-	static MObject 	aCacheOffset;
-	static MObject  aCacheStatic;
-	static MObject 	aCacheFormat;
-	static MObject 	aJitterPos;
-	static MObject 	aJitterFreq;
-	static MObject 	aPartioAttributes;
-	static MObject  aColorFrom;
-	static MObject  aAlphaFrom;
-	static MObject  aRadiusFrom;
-	static MObject  aPointSize;
-	static MObject  aDefaultPointColor;
-	static MObject  aDefaultAlpha;
-	static MObject  aDefaultRadius;
-	static MObject  aInvertAlpha;
-	static MObject  aDrawStyle;
-	static MObject  aForceReload;
-	static MObject  aRenderCachePath;
+    static MObject  time;
+    static MObject  aSize;         // The size of the logo
+    static MObject  aDrawSkip;
+    static MObject  aFlipYZ;
+    static MObject 	aUpdateCache;
+    static MObject 	aCacheDir;
+    static MObject 	aCacheFile;
+    static MObject 	aUseTransform;
+    static MObject 	aCacheActive;
+    static MObject 	aCacheOffset;
+    static MObject  aCacheStatic;
+    static MObject 	aCacheFormat;
+    static MObject 	aJitterPos;
+    static MObject 	aJitterFreq;
+    static MObject 	aPartioAttributes;
+    static MObject  aColorFrom;
+    static MObject  aAlphaFrom;
+    static MObject  aRadiusFrom;
+    static MObject  aPointSize;
+    static MObject  aDefaultPointColor;
+    static MObject  aDefaultAlpha;
+    static MObject  aDefaultRadius;
+    static MObject  aInvertAlpha;
+    static MObject  aDrawStyle;
+    static MObject  aForceReload;
+    static MObject  aRenderCachePath;
 
 
-	static	MTypeId			id;
-	float 					multiplier;
-	bool 					cacheChanged;
-	partioVizReaderCache  	pvCache;
+    static	MTypeId			id;
+    float 					multiplier;
+    bool 					cacheChanged;
+    partioVizReaderCache  	pvCache;
 
 
 private:
 
-	MString mLastFileLoaded;
-	MString mLastPath;
-	MString mLastFile;
-	MString mLastExt;
-	bool mLastStatic;
-	int mLastColorFromIndex;
-	int mLastAlphaFromIndex;
-	int mLastRadiusFromIndex;
-	MFloatVector mLastColor;
-	float mLastAlpha;
-	bool mLastInvertAlpha;
-	float mLastRadius;
-	bool mLastFlipStatus;
-	bool mFlipped;
-	bool  frameChanged;
-	MStringArray attributeList;
-	bool drawError;
+    MString mLastFileLoaded;
+    MString mLastPath;
+    MString mLastFile;
+    MString mLastExt;
+    bool mLastStatic;
+    int mLastColorFromIndex;
+    int mLastAlphaFromIndex;
+    int mLastRadiusFromIndex;
+    MFloatVector mLastColor;
+    float mLastAlpha;
+    bool mLastInvertAlpha;
+    float mLastRadius;
+    bool mLastFlipStatus;
+    bool mFlipped;
+    bool  frameChanged;
+    MStringArray attributeList;
+    bool drawError;
 
 
 protected:
 
-	int dUpdate;
-	GLuint dList;
+    int dUpdate;
+    GLuint dList;
 
 };
 

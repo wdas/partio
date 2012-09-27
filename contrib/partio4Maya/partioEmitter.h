@@ -75,234 +75,234 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 class partioEmitter: public MPxEmitterNode
 {
-	public:
-		partioEmitter();
-		virtual ~partioEmitter();
+public:
+    partioEmitter();
+    virtual ~partioEmitter();
 
-		static void	*creator();
-		static MStatus	initialize();
-		virtual void postConstructor();
-		static MTypeId	id;
-		static MObject 	aCacheDir;
-		static MObject 	aCacheFile;
-		static MObject 	aUseEmitterTransform;
-		static MObject  aSize;
-		static MObject  aFlipYZ;
-		static MObject 	aCacheActive;
-		static MObject 	aCacheOffset;
-		static MObject 	aCacheFormat;
-		static MObject  aCacheStatic;
-		static MObject 	aJitterPos;
-		static MObject 	aJitterFreq;
-		static MObject 	aPartioAttributes;
-		static MObject  aMayaPPAttributes;
+    static void	*creator();
+    static MStatus	initialize();
+    virtual void postConstructor();
+    static MTypeId	id;
+    static MObject 	aCacheDir;
+    static MObject 	aCacheFile;
+    static MObject 	aUseEmitterTransform;
+    static MObject  aSize;
+    static MObject  aFlipYZ;
+    static MObject 	aCacheActive;
+    static MObject 	aCacheOffset;
+    static MObject 	aCacheFormat;
+    static MObject  aCacheStatic;
+    static MObject 	aJitterPos;
+    static MObject 	aJitterFreq;
+    static MObject 	aPartioAttributes;
+    static MObject  aMayaPPAttributes;
 
-		virtual MStatus	compute ( const MPlug& plug, MDataBlock& block );
-		static void 	reInit(void *data);
-		void 			initCallback();
-		static void 	connectionMadeCallbk(MPlug &srcPlug, MPlug &destPlug, bool made, void *clientData);
+    virtual MStatus	compute ( const MPlug& plug, MDataBlock& block );
+    static void 	reInit(void *data);
+    void 			initCallback();
+    static void 	connectionMadeCallbk(MPlug &srcPlug, MPlug &destPlug, bool made, void *clientData);
 
-		MCallbackId partioEmitterOpenCallback;
-		MCallbackId partioEmitterImportCallback;
-		MCallbackId partioEmitterReferenceCallback;
-		MCallbackId partioEmitterConnectionMade;
+    MCallbackId partioEmitterOpenCallback;
+    MCallbackId partioEmitterImportCallback;
+    MCallbackId partioEmitterReferenceCallback;
+    MCallbackId partioEmitterConnectionMade;
 
-	private:
+private:
 
-		long 		seedValue( int  plugIndex, MDataBlock& block );
+    long 		seedValue( int  plugIndex, MDataBlock& block );
 
-		MStatus	getWorldPosition ( MPoint &p );
+    MStatus	getWorldPosition ( MPoint &p );
 
-		// methods to get attribute value.
-		double	rateValue ( MDataBlock& block );
-		double	speedValue ( MDataBlock& block );
-		MVector	directionVector ( MDataBlock& block );
+    // methods to get attribute value.
+    double	rateValue ( MDataBlock& block );
+    double	speedValue ( MDataBlock& block );
+    MVector	directionVector ( MDataBlock& block );
 
-		bool	isFullValue ( int plugIndex, MDataBlock& block );
-		double	inheritFactorValue ( int plugIndex, MDataBlock& block );
+    bool	isFullValue ( int plugIndex, MDataBlock& block );
+    double	inheritFactorValue ( int plugIndex, MDataBlock& block );
 
-		MTime	currentTimeValue ( MDataBlock& block );
-		MTime	startTimeValue ( int plugIndex, MDataBlock& block );
-		MTime	deltaTimeValue ( int plugIndex, MDataBlock& block );
-		virtual void 	draw( M3dView  & view, const  MDagPath  & path,  M3dView::DisplayStyle  style, M3dView:: DisplayStatus );
-		static MStatus createPPAttr( MFnParticleSystem  &part, MString attrName, MString shortName, int type);
+    MTime	currentTimeValue ( MDataBlock& block );
+    MTime	startTimeValue ( int plugIndex, MDataBlock& block );
+    MTime	deltaTimeValue ( int plugIndex, MDataBlock& block );
+    virtual void 	draw( M3dView  & view, const  MDagPath  & path,  M3dView::DisplayStyle  style, M3dView:: DisplayStatus );
+    static MStatus createPPAttr( MFnParticleSystem  &part, MString attrName, MString shortName, int type);
 
-		// the previous position in the world space.
-		MPoint	lastWorldPoint;
-		MString mLastFileLoaded;
-		MString mLastPath;
-		MString mLastFile;
-		MString mLastExt;
-		bool cacheChanged;
+    // the previous position in the world space.
+    MPoint	lastWorldPoint;
+    MString mLastFileLoaded;
+    MString mLastPath;
+    MString mLastFile;
+    MString mLastExt;
+    bool cacheChanged;
 };
 
 /// inlines
 /// these inlines retrieve the stated value from the datablack, at the index if specified
 inline long partioEmitter::seedValue( int plugIndex, MDataBlock& block )
 {
-	MStatus status;
-	long seed = 0;
+    MStatus status;
+    long seed = 0;
 
-	MArrayDataHandle mhValue = block.inputArrayValue( mSeed, &status );
-	if( status == MS::kSuccess )
-	{
-		status = mhValue.jumpToElement( plugIndex );
-		if( status == MS::kSuccess )
-		{
-			MDataHandle hValue = mhValue.inputValue( &status );
-			if( status == MS::kSuccess )
-			{
-				seed = hValue.asInt();
-		}
-	}
-	}
-	return( seed );
+    MArrayDataHandle mhValue = block.inputArrayValue( mSeed, &status );
+    if ( status == MS::kSuccess )
+    {
+        status = mhValue.jumpToElement( plugIndex );
+        if ( status == MS::kSuccess )
+        {
+            MDataHandle hValue = mhValue.inputValue( &status );
+            if ( status == MS::kSuccess )
+            {
+                seed = hValue.asInt();
+            }
+        }
+    }
+    return( seed );
 }
 
 
 inline double partioEmitter::rateValue ( MDataBlock& block )
 {//mLastFileLoaded = "";
-	MStatus status;
+    MStatus status;
 
-	MDataHandle hValue = block.inputValue ( mRate, &status );
+    MDataHandle hValue = block.inputValue ( mRate, &status );
 
-	double value = 0.0;
-	if ( status == MS::kSuccess )
-	{
-		value = hValue.asDouble();
-	}
-	return ( value );
+    double value = 0.0;
+    if ( status == MS::kSuccess )
+    {
+        value = hValue.asDouble();
+    }
+    return ( value );
 }
 
 inline double partioEmitter::speedValue ( MDataBlock& block )
 {
-	MStatus status;
+    MStatus status;
 
-	MDataHandle hValue = block.inputValue ( mSpeed, &status );
+    MDataHandle hValue = block.inputValue ( mSpeed, &status );
 
-	double value = 0.0;
-	if ( status == MS::kSuccess )
-	{
-		value = hValue.asDouble();
-	}
-	return ( value );
+    double value = 0.0;
+    if ( status == MS::kSuccess )
+    {
+        value = hValue.asDouble();
+    }
+    return ( value );
 }
 
 inline MVector partioEmitter::directionVector ( MDataBlock& block )
 {
-	MStatus status;
-	MVector dirV ( 0.0, 0.0, 0.0 );
+    MStatus status;
+    MVector dirV ( 0.0, 0.0, 0.0 );
 
-	MDataHandle hValue = block.inputValue ( mDirection, &status );
+    MDataHandle hValue = block.inputValue ( mDirection, &status );
 
-	if ( status == MS::kSuccess )
-	{
-		double3 &value = hValue.asDouble3();
+    if ( status == MS::kSuccess )
+    {
+        double3 &value = hValue.asDouble3();
 
-		dirV[0] = value[0];
-		dirV[1] = value[1];
-		dirV[2] = value[2];
-	}
+        dirV[0] = value[0];
+        dirV[1] = value[1];
+        dirV[2] = value[2];
+    }
 
-	return ( dirV );
+    return ( dirV );
 }
 
 inline bool partioEmitter::isFullValue ( int plugIndex, MDataBlock& block )
 {
-	MStatus status;
-	bool value = true;
+    MStatus status;
+    bool value = true;
 
-	MArrayDataHandle mhValue = block.inputArrayValue ( mIsFull, &status );
-	if ( status == MS::kSuccess )
-	{
-		status = mhValue.jumpToElement ( plugIndex );
-		if ( status == MS::kSuccess )
-		{
-			MDataHandle hValue = mhValue.inputValue ( &status );
-			if ( status == MS::kSuccess )
-			{
-				value = hValue.asBool();
-		}
-	}
-	}
-	return ( value );
+    MArrayDataHandle mhValue = block.inputArrayValue ( mIsFull, &status );
+    if ( status == MS::kSuccess )
+    {
+        status = mhValue.jumpToElement ( plugIndex );
+        if ( status == MS::kSuccess )
+        {
+            MDataHandle hValue = mhValue.inputValue ( &status );
+            if ( status == MS::kSuccess )
+            {
+                value = hValue.asBool();
+            }
+        }
+    }
+    return ( value );
 }
 
 inline double partioEmitter::inheritFactorValue ( int plugIndex,MDataBlock& block )
 {
-	MStatus status;
-	double value = 0.0;
+    MStatus status;
+    double value = 0.0;
 
-	MArrayDataHandle mhValue = block.inputArrayValue ( mInheritFactor, &status );
-	if ( status == MS::kSuccess )
-	{
-		status = mhValue.jumpToElement ( plugIndex );
-		if ( status == MS::kSuccess )
-		{
-			MDataHandle hValue = mhValue.inputValue ( &status );
-			if ( status == MS::kSuccess )
-			{
-				value = hValue.asDouble();
-		}
-	}
-	}
-	return ( value );
+    MArrayDataHandle mhValue = block.inputArrayValue ( mInheritFactor, &status );
+    if ( status == MS::kSuccess )
+    {
+        status = mhValue.jumpToElement ( plugIndex );
+        if ( status == MS::kSuccess )
+        {
+            MDataHandle hValue = mhValue.inputValue ( &status );
+            if ( status == MS::kSuccess )
+            {
+                value = hValue.asDouble();
+            }
+        }
+    }
+    return ( value );
 }
 
 inline MTime partioEmitter::currentTimeValue ( MDataBlock& block )
 {
-	MStatus status;
+    MStatus status;
 
-	MDataHandle hValue = block.inputValue ( mCurrentTime, &status );
+    MDataHandle hValue = block.inputValue ( mCurrentTime, &status );
 
-	MTime value ( 0.0 );
-	if ( status == MS::kSuccess )
-	{
-		value = hValue.asTime();
-	}
-	return ( value );
+    MTime value ( 0.0 );
+    if ( status == MS::kSuccess )
+    {
+        value = hValue.asTime();
+    }
+    return ( value );
 }
 
 inline MTime partioEmitter::startTimeValue ( int plugIndex, MDataBlock& block )
 {
-	MStatus status;
-	MTime value ( 0.0 );
+    MStatus status;
+    MTime value ( 0.0 );
 
-	MArrayDataHandle mhValue = block.inputArrayValue ( mStartTime, &status );
-	if ( status == MS::kSuccess )
-	{
-		status = mhValue.jumpToElement ( plugIndex );
-		if ( status == MS::kSuccess )
-		{
-			MDataHandle hValue = mhValue.inputValue ( &status );
-			if ( status == MS::kSuccess )
-			{
-				value = hValue.asTime();
-		}
-	}
-	}
-	return ( value );
+    MArrayDataHandle mhValue = block.inputArrayValue ( mStartTime, &status );
+    if ( status == MS::kSuccess )
+    {
+        status = mhValue.jumpToElement ( plugIndex );
+        if ( status == MS::kSuccess )
+        {
+            MDataHandle hValue = mhValue.inputValue ( &status );
+            if ( status == MS::kSuccess )
+            {
+                value = hValue.asTime();
+            }
+        }
+    }
+    return ( value );
 }
 
 inline MTime partioEmitter::deltaTimeValue ( int plugIndex, MDataBlock& block )
 {
-	MStatus status;
-	MTime value ( 0.0 );
+    MStatus status;
+    MTime value ( 0.0 );
 
-	MArrayDataHandle mhValue = block.inputArrayValue ( mDeltaTime, &status );
-	if ( status == MS::kSuccess )
-	{
-		status = mhValue.jumpToElement ( plugIndex );
-		if ( status == MS::kSuccess )
-		{
-			MDataHandle hValue = mhValue.inputValue ( &status );
-			if ( status == MS::kSuccess )
-			{
-				value = hValue.asTime();
-		}
-	}
-	}
-	return ( value );
+    MArrayDataHandle mhValue = block.inputArrayValue ( mDeltaTime, &status );
+    if ( status == MS::kSuccess )
+    {
+        status = mhValue.jumpToElement ( plugIndex );
+        if ( status == MS::kSuccess )
+        {
+            MDataHandle hValue = mhValue.inputValue ( &status );
+            if ( status == MS::kSuccess )
+            {
+                value = hValue.asTime();
+            }
+        }
+    }
+    return ( value );
 }
 
 #endif

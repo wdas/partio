@@ -31,7 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #define Partio4MayaExport_H
 
 #ifdef WIN32
-	#include <shlobj.h>
+#include <shlobj.h>
 #endif
 
 #include <iostream>
@@ -66,18 +66,18 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 class PartioExport : public MPxCommand
 {
 public:
-			PartioExport(){};
-	virtual 	~PartioExport(){};
+    PartioExport() {};
+    virtual 	~PartioExport() {};
 
-	static void* creator();
+    static void* creator();
 
-	// Syntax methods
+    // Syntax methods
 
-	virtual bool		hasSyntax();
-	static MSyntax		createSyntax();
+    virtual bool		hasSyntax();
+    static MSyntax		createSyntax();
 
-	MStatus doIt(const MArgList&);
-	void printUsage();
+    MStatus doIt(const MArgList&);
+    void printUsage();
 
 };
 
