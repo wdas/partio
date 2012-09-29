@@ -9,7 +9,6 @@ class PartioVisualizerTemplate(templates.ShapeTranslatorTemplate):
         self.addSeparator()
         self.addControl("aiRenderPointsAs", label="Render Points As")
         self.addControl("aiOverrideRadiusPP", label="Override RadiusPP")
-        self.addControl("aiRadius", label="Radius")
         self.addControl("aiRadiusMultiplier", label="Radius Multiplier")
         self.addControl("aiMaxParticleRadius", label= "Clamp Max Radius")
         self.addSeparator()

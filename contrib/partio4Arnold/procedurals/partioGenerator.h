@@ -25,6 +25,7 @@ int arg_renderType;
 bool arg_overrideRadiusPP;
 const char* arg_rgbFrom;
 const char* arg_opacFrom;
+const char* arg_radFrom;
 AtRGB arg_defaultColor;
 AtFloat arg_defaultOpac;
 

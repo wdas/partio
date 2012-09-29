@@ -55,8 +55,9 @@ static int MyInit(AtNode *mynode, void **user_ptr)
     arg_renderType 			= 0; // 0 = points, 1 = sphere, 2 = plane
     arg_motionBlurMult 		= 1;
     arg_overrideRadiusPP 	= false;
-    arg_rgbFrom				= "rgbPP";
-    arg_opacFrom			= "opacityPP";
+    arg_rgbFrom				= "";
+    arg_opacFrom			= "";
+	arg_radFrom             = "";
     arg_defaultColor 		= AI_RGB_WHITE;
     arg_defaultOpac			= 1.0f;
     global_motionBlurSteps 	= 1;
@@ -101,6 +102,10 @@ static int MyInit(AtNode *mynode, void **user_ptr)
     {
         arg_opacFrom			= AiNodeGetStr(mynode, "arg_opacFrom");
     }
+    if (AiNodeLookUpUserParameter(mynode, "arg_radFrom") != NULL)
+    {
+        arg_radFrom			= AiNodeGetStr(mynode, "arg_radFrom");
+    }
     if (AiNodeLookUpUserParameter(mynode, "arg_defaultColor") != NULL)
     {
         arg_defaultColor		= AiNodeGetRGB(mynode, "arg_defaultColor");
@@ -133,6 +138,11 @@ static int MyInit(AtNode *mynode, void **user_ptr)
             pointCount =(int)points->numParticles();
             AiMsgInfo("[luma.partioGenerator] loaded %d points", pointCount);
         }
+        else
+		{
+			AiMsgInfo("[luma.partioGenerator] skipping, no points");
+			return  FALSE;
+		}
     }
     return TRUE;
 }
@@ -197,11 +207,17 @@ static AtNode *MyGetNode(void *user_ptr, int i)
             AiNodeDeclare(currentInstance, "opacityPP", "uniform Float");
             opacityArr = AiArrayAllocate(pointCount,global_motionBlurSteps,AI_TYPE_FLOAT);
 
-            if (points->attributeInfo("radiusPP",radiusAttr) || points->attributeInfo("radius",radiusAttr))
+			/// RADIUS by default  if "none" is defined it will look for  radiusPP or  radius
+			if (arg_radFrom != "" && points->attributeInfo(arg_radFrom,radiusAttr))
             {
-                AiMsgInfo("[luma.partioGenerator] found radius attr...");
+                AiMsgInfo("[luma.partioGenerator] found radius attr...%s", arg_radFrom);
                 hasRadiusPP = true;
             }
+            else if ( points->attributeInfo("radiusPP",radiusAttr) || points->attributeInfo("radius",radiusAttr))
+			{
+				AiMsgInfo("[luma.partioGenerator] found radius attr...");
+                hasRadiusPP = true;
+			}
 
             for (int i = 0; i< pointCount; i++)
             {
@@ -331,10 +347,22 @@ static AtNode *MyGetNode(void *user_ptr, int i)
 						}
 					}
 				}
+				/// User Defined or default  RadiusAttr
 				if (hasRadiusPP && !arg_overrideRadiusPP)
 				{
 					const float * partioRadius = points->data<float>(radiusAttr,i);
-					AtFloat rad = partioRadius[0]*arg_radiusMult;
+					AtFloat rad;
+					if (radiusAttr.count == 1)
+					{
+						rad = partioRadius[0];
+					}
+					else
+					{
+						rad = abs(float((partioRadius[0]*0.2126)+(partioRadius[1]*0.7152)+(partioRadius[2]*.0722)));
+					}
+
+					rad *= arg_radiusMult;
+					rad *= arg_radius;
 					// clamp the radius to maxParticleRadius just in case we have rogue particles
 					if (rad > arg_maxParticleRadius)
 					{

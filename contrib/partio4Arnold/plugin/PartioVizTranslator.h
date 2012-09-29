@@ -32,6 +32,7 @@ protected:
 
    AtNode* ExportInstance(AtNode *instance, const MDagPath& masterInstance);
    AtNode* ExportProcedural(AtNode* procedural, bool update);
+   bool fileCacheExists( const char* fileName);
 
 
    MFnDagNode m_DagNode;

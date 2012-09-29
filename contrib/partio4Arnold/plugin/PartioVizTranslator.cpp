@@ -242,7 +242,7 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
       /// TODO:  this is only temporary
       /// need to make the node actually update itself properly
       MString formatExt = formattedName.substring((formattedName.length()-3),(formattedName.length()-1));
-      cout << formatExt << endl;
+      //cout << formatExt << endl;
       int cachePadding = 4;
 
       MString formatString =  "%0";
@@ -278,6 +278,11 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
 		   newFoo = foo[0];
 	  }
 
+      if (!fileCacheExists(newFoo.asChar()))
+	  {
+          AiMsgWarning("[mtoa] PartioVisualizer %s being skipped, can't find cache file.", m_DagNode.name().asChar());
+		  return NULL;
+	  }
 
       AiNodeSetStr(procedural, "dso", dso.asChar());
       AiNodeSetBool(procedural, "load_at_init", true);
@@ -286,7 +291,7 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
       AiNodeSetStr(procedural, "arg_file", newFoo.asChar());
 
       AiNodeDeclare(procedural, "arg_radius", "constant FLOAT");
-      AiNodeSetFlt(procedural, "arg_radius", m_DagNode.findPlug("aiRadius").asFloat());
+      AiNodeSetFlt(procedural, "arg_radius", m_DagNode.findPlug("defaultRadius").asFloat());
 
       AiNodeDeclare(procedural, "arg_maxParticleRadius", "constant FLOAT");
       AiNodeSetFlt(procedural, "arg_maxParticleRadius", m_DagNode.findPlug("aiMaxParticleRadius").asFloat());
@@ -316,14 +321,17 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
 
       AiNodeDeclare(procedural, "arg_rgbFrom", "constant STRING");
       AiNodeDeclare(procedural, "arg_opacFrom", "constant STRING");
+	  AiNodeDeclare(procedural, "arg_radFrom", "constant STRING");
 
       MPlug partioAttrs = m_DagNode.findPlug("partioCacheAttributes");
 
       int colorIndex = m_DagNode.findPlug("colorFrom").asInt();
       int opacIndex = m_DagNode.findPlug("opacityFrom").asInt();
+	  int radiusIndex =  m_DagNode.findPlug("radiusFrom").asInt();
 
       MString rgbFrom = "";
       MString opacFrom = "";
+	  MString radFrom = "";
       if (colorIndex >=0)
       {
          MPlug rgbArrayEntry = partioAttrs.elementByLogicalIndex(colorIndex);
@@ -334,9 +342,15 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
          MPlug opacArrayEntry =partioAttrs.elementByLogicalIndex(opacIndex);
          opacArrayEntry.getValue(opacFrom);
       }
+      if (radiusIndex >=0)
+	  {
+         MPlug radiusArrayEntry =partioAttrs.elementByLogicalIndex(radiusIndex);
+         radiusArrayEntry.getValue(radFrom);
+	  }
 
       AiNodeSetStr(procedural, "arg_rgbFrom", rgbFrom.asChar() );
       AiNodeSetStr(procedural, "arg_opacFrom", opacFrom.asChar() );
+	  AiNodeSetStr(procedural, "arg_radFrom", radFrom.asChar() );
 
       MFloatVector defaultColor;
 
@@ -362,4 +376,24 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
 
    }
    return procedural;
+}
+
+
+bool CPartioVizTranslator::fileCacheExists( const char* fileName)
+{
+	struct stat fileInfo;
+	bool statReturn;
+	int intStat;
+
+	intStat = stat( fileName, &fileInfo);
+	if (intStat == 0)
+	{
+		statReturn = true;
+	}
+	else
+	{
+		statReturn = false;
+	}
+
+	return (statReturn);
 }
