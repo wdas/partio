@@ -501,6 +501,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
             }
             else
             {
+				// this creates or  gets an existing handle to the instanceData and then clears it to be ready to fill
                 MVectorArray  positionArray;
                 if (pvCache.instanceData.checkArrayExist("position",vectorType))
                 {
@@ -548,6 +549,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                 return ( MS::kFailure );
             }
 
+			// this creates or  gets an existing handle to the instanceData and then clears it to be ready to fill
             MDoubleArray  idArray;
             if (pvCache.instanceData.checkArrayExist("id",doubleType))
             {
@@ -594,9 +596,9 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
 
             if  ( cacheChanged || rotationFromIndex != mLastRotationFromIndex ||
-                    scaleFromIndex != mLastScaleFromIndex ||
-                    indexFromIndex != mLastIndexFromIndex ||
-                    shaderIndexFromIndex != mLastShaderIndexFromIndex	)
+								  scaleFromIndex 	!= mLastScaleFromIndex ||
+								  indexFromIndex 	!= mLastIndexFromIndex ||
+								  shaderIndexFromIndex != mLastShaderIndexFromIndex	)
             {
                 ////////////////////////////////
                 // ROTATION
@@ -692,25 +694,34 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                     indexArray.clear();
 
                     pvCache.particles->attributeInfo(indexFromIndex,pvCache.indexAttr);
-                    if (pvCache.indexAttr.count == 1)  // single float value for index
-                    {
-                        for (int i=0;i<pvCache.particles->numParticles();i++)
-                        {
-                            const float * attrVal = pvCache.particles->data<float>(pvCache.indexAttr,i);
-                            indexArray.append((double)(int)attrVal[0]);
-                        }
-                    }
-                    else
-                    {
-                        if (pvCache.indexAttr.count >= 3)   // we have a 4 float attribute ?
-                        {
-                            for (int i=0;i<pvCache.particles->numParticles();i++)
-                            {
-                                const float * attrVal = pvCache.particles->data<float>(pvCache.indexAttr,i);
-                                indexArray.append((double)(int)attrVal[0]);
-                            }
-                        }
-                    }
+					if (pvCache.indexAttr.count == 1)  // single float value for index
+					{
+						for (int i=0;i<pvCache.particles->numParticles();i++)
+						{
+							if (pvCache.indexAttr.type == FLOAT)
+							{
+								const float * attrVal = pvCache.particles->data<float>(pvCache.indexAttr,i);
+								indexArray.append((double)(int)attrVal[0]);
+							}
+							else if (pvCache.indexAttr.type == INT)
+							{
+								const int * attrVal = pvCache.particles->data<int>(pvCache.indexAttr,i);
+								indexArray.append((double)attrVal[0]);
+							}
+						}
+					}
+					else
+					{
+						if (pvCache.indexAttr.count >= 3)   // we have a 3or4 float attribute
+						{
+							for (int i=0;i<pvCache.particles->numParticles();i++)
+							{
+								const float * attrVal = pvCache.particles->data<float>(pvCache.indexAttr,i);
+								indexArray.append((double)(int)attrVal[0]);
+							}
+						}
+					}
+
                 }
 
                 mLastRotationFromIndex = rotationFromIndex;
@@ -982,8 +993,7 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
         };
         glPushAttrib(GL_CURRENT_BIT);
 
-
-        /// looping thru particles one by one...
+		/// looping thru particles one by one...
 
         glPointSize(pointSizeVal);
         glColor3f(1.0,1.0,1.0);
@@ -1004,8 +1014,25 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
             for (int i=0;i<pvCache->particles->numParticles();i++)
             {
                 const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
+
+				MString idVal;
+				if (pvCache->indexAttr.type == FLOAT)
+				{
+					const float * attrVal = pvCache->particles->data<float>(pvCache->indexAttr,i);
+					idVal = (double)(int)attrVal[0];
+				}
+				else if (pvCache->indexAttr.type == INT)
+				{
+					const int * attrVal = pvCache->particles->data<int>(pvCache->indexAttr,i);
+					idVal = (double)attrVal[0];
+				}
+				else if (pvCache->indexAttr.type == VECTOR)
+				{
+					const float * attrVal = pvCache->particles->data<float>(pvCache->indexAttr,i);
+					idVal = (double)attrVal[0];
+				}
                 /// TODO: draw text label per particle here
-                view.drawText("id", MPoint(partioPositions[0], partioPositions[1], partioPositions[2]), M3dView::kLeft);
+                view.drawText(idVal, MPoint(partioPositions[0], partioPositions[1], partioPositions[2]), M3dView::kLeft);
             }
         }
 
