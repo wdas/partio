@@ -105,7 +105,9 @@ global proc pioInstCustomAttrsManage (string $nodeName)
     string $multiList[] = `listAttr -multi ($nodeName+".partioCacheAttributes")`;
 
 	int $rotationFrom = `getAttr ($nodeName+".rotationFrom")` + 2;
+	int $lastRotationFrom = `getAttr ($nodeName+".lastRotationFrom")` + 2;
 	int $scaleFrom = `getAttr ($nodeName+".scaleFrom")` + 2;
+	int $lastScaleFrom = `getAttr ($nodeName+".lastScaleFrom")` + 2;
 	int $indexFrom  = `getAttr ($nodeName+".indexFrom")` + 2;
 	int $shadIndexFrom  = `getAttr ($nodeName+".shaderIndexFrom")` + 2;
 
@@ -124,6 +126,20 @@ global proc pioInstCustomAttrsManage (string $nodeName)
     }
 	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 0 + " " + $rotationMenu)  $rotationMenu;
 
+	string $lastRotationMenu = `optionMenuGrp -label "Last Rotation from->"`;
+	menuItem -l "None";
+
+    for ($multi in $multiList)
+    {
+		string $tok[];
+		tokenize $multi "[" $tok;
+		string $index = $tok[1];
+		$index = substituteAllString($index, "]", "");
+		string $attr = `getAttr ($nodeName+"."+$multi)`;
+       	 menuItem -label $attr;
+    }
+	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $lastRotationMenu)  $lastRotationMenu;
+
 
     string $scaleMenu = `optionMenuGrp -label "Scale from->"`;
 	menuItem -l "None";
@@ -136,7 +152,20 @@ global proc pioInstCustomAttrsManage (string $nodeName)
 		string $attr = `getAttr ($nodeName+"."+$multi)`;
        	 menuItem -label $attr;
     }
-    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $scaleMenu)  $scaleMenu;
+    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $scaleMenu)  $scaleMenu;
+
+	string $lastScaleMenu = `optionMenuGrp -label "Last Scale from->"`;
+	menuItem -l "None";
+    for ($multi in $multiList)
+    {
+		string $tok[];
+		tokenize $multi "[" $tok;
+		string $index = $tok[1];
+		$index = substituteAllString($index, "]", "");
+		string $attr = `getAttr ($nodeName+"."+$multi)`;
+       	 menuItem -label $attr;
+    }
+    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 3 + " " + $lastScaleMenu)  $lastScaleMenu;
 
 	string $indexMenu = `optionMenuGrp -label "index from->"`;
 	menuItem -l "None";
@@ -149,7 +178,7 @@ global proc pioInstCustomAttrsManage (string $nodeName)
 		string $attr = `getAttr ($nodeName+"."+$multi)`;
        	 menuItem -label $attr;
     }
-    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $indexMenu)  $indexMenu;
+    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 4 + " " + $indexMenu)  $indexMenu;
 
 
 	// disable this for now
@@ -166,14 +195,16 @@ global proc pioInstCustomAttrsManage (string $nodeName)
 		string $attr = `getAttr ($nodeName+"."+$multi)`;
        	 menuItem -label $attr;
     }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 3 + " " + $shaderIndexMenu)  $shaderIndexMenu;
+	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 5 + " " + $shaderIndexMenu)  $shaderIndexMenu;
 	*/
 
 
 	if (`size($multiList)`)
 	{
 		optionMenuGrp -e -sl $rotationFrom  $rotationMenu;
+		optionMenuGrp -e -sl $lastRotationFrom  $lastRotationMenu;
 		optionMenuGrp -e -sl $scaleFrom $scaleMenu;
+		optionMenuGrp -e -sl $lastScaleFrom $lastScaleMenu;
 		optionMenuGrp -e -sl $indexFrom  $indexMenu;
 		//optionMenuGrp -e -sl $shadIndexFrom $shaderIndexMenu;
 	}
@@ -182,7 +213,7 @@ global proc pioInstCustomAttrsManage (string $nodeName)
 
 global proc pioInstSwitchAttributeFrom(string $nodeName, int $attr, string $menu)
 {
-	string $attrList[] = {"rotationFrom", "scaleFrom", "indexFrom", "shaderIndexFrom"};
+	string $attrList[] = {"rotationFrom", "lastRotationFrom", "scaleFrom", "lastScaleFrom", "indexFrom", "shaderIndexFrom"};
 	int $sel = `optionMenuGrp -q -sl $menu`;
 
 	setAttr ($nodeName+"."+$attrList[$attr]) ($sel-2);

@@ -100,7 +100,9 @@ public:
     Partio::ParticleAttribute idAttr;
     Partio::ParticleAttribute velocityAttr;
     Partio::ParticleAttribute rotationAttr;
+	Partio::ParticleAttribute lastRotationAttr;
     Partio::ParticleAttribute scaleAttr;
+	Partio::ParticleAttribute lastScaleAttr;
     Partio::ParticleAttribute indexAttr;
     Partio::ParticleAttribute shaderIndexAttr;
     float* flipPos;
@@ -172,7 +174,9 @@ public:
     static MObject  aForceReload;
     static MObject  aRenderCachePath;
     static MObject	aRotationFrom;
+	static MObject	aLastRotationFrom;
     static MObject	aScaleFrom;
+	static MObject	aLastScaleFrom;
     static MObject	aIndexFrom;
     static MObject	aShaderIndexFrom;
     static MObject	aInMeshInstances;

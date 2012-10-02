@@ -84,7 +84,9 @@ MObject partioInstancer::aDrawStyle;
 MObject partioInstancer::aForceReload;
 MObject partioInstancer::aRenderCachePath;
 MObject	partioInstancer::aRotationFrom;
+MObject partioInstancer::aLastRotationFrom;
 MObject	partioInstancer::aScaleFrom;
+MObject partioInstancer::aLastScaleFrom;
 MObject	partioInstancer::aIndexFrom;
 MObject	partioInstancer::aShaderIndexFrom;
 MObject	partioInstancer::aInMeshInstances;
@@ -273,7 +275,15 @@ MStatus partioInstancer::initialize()
     nAttr.setDefault(-1);
     nAttr.setKeyable(true);
 
+	aLastRotationFrom = nAttr.create("lastRotationFrom", "lrfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
     aScaleFrom = nAttr.create("scaleFrom", "sfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
+	aLastScaleFrom = nAttr.create("lastScaleFrom", "lsfrm", MFnNumericData::kInt, -1, &stat);
     nAttr.setDefault(-1);
     nAttr.setKeyable(true);
 
@@ -310,7 +320,9 @@ MStatus partioInstancer::initialize()
     addAttribute ( aForceReload );
     addAttribute ( aRenderCachePath );
     addAttribute ( aRotationFrom );
+	addAttribute ( aLastRotationFrom );
     addAttribute ( aScaleFrom );
+	addAttribute ( aLastScaleFrom );
     addAttribute ( aIndexFrom );
     addAttribute ( aShaderIndexFrom );
     addAttribute ( aInstanceData );
@@ -329,7 +341,9 @@ MStatus partioInstancer::initialize()
     attributeAffects ( aForceReload, aUpdateCache );
     attributeAffects ( aInstanceData, aUpdateCache );
     attributeAffects ( aRotationFrom, aUpdateCache );
+	attributeAffects ( aLastRotationFrom, aUpdateCache );
     attributeAffects ( aScaleFrom, aUpdateCache );
+	attributeAffects ( aLastScaleFrom, aUpdateCache );
     attributeAffects ( aIndexFrom, aUpdateCache );
     attributeAffects ( aShaderIndexFrom, aUpdateCache );
     attributeAffects ( aComputeVeloPos, aUpdateCache );
@@ -352,7 +366,9 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 {
     MStatus stat;
     int rotationFromIndex  		= block.inputValue( aRotationFrom ).asInt();
+	int lastRotFromIndex		= block.inputValue( aLastRotationFrom ).asInt();
     int scaleFromIndex			= block.inputValue( aScaleFrom ).asInt();
+	int lastScaleFromIndex		= block.inputValue( aLastScaleFrom ).asInt();
     int indexFromIndex 			= block.inputValue( aIndexFrom ).asInt();
     int shaderIndexFromIndex	= block.inputValue( aShaderIndexFrom).asInt();
 
@@ -387,10 +403,10 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         int cacheOffset 	= block.inputValue( aCacheOffset ).asInt();
         short cacheFormat	= block.inputValue( aCacheFormat ).asShort();
         bool forceReload 	= block.inputValue( aForceReload ).asBool();
-        MTime inputTime		= block.inputValue(time).asTime();
+        MTime inputTime		= block.inputValue( time ).asTime();
         bool flipYZ 		= block.inputValue( aFlipYZ ).asBool();
         MString renderCachePath = block.inputValue( aRenderCachePath ).asString();
-        bool computeMotionBlur =block.inputValue( aComputeVeloPos).asBool();
+        bool computeMotionBlur =block.inputValue( aComputeVeloPos ).asBool();
 
         int fps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
         int integerTime = (int)floor((inputTime.value())+.52);
@@ -595,14 +611,14 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
             */
 
 
-            if  ( cacheChanged || rotationFromIndex != mLastRotationFromIndex ||
+            if  ( motionBlurStep || cacheChanged || rotationFromIndex != mLastRotationFromIndex ||
 								  scaleFromIndex 	!= mLastScaleFromIndex ||
 								  indexFromIndex 	!= mLastIndexFromIndex ||
 								  shaderIndexFromIndex != mLastShaderIndexFromIndex	)
             {
                 ////////////////////////////////
                 // ROTATION
-                if (rotationFromIndex >=0)
+                if (rotationFromIndex >= 0)
                 {
                     MVectorArray  rotationArray;
                     if (pvCache.instanceData.checkArrayExist("rotation",vectorType))
@@ -618,12 +634,22 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                     rotationArray.clear();
 
                     pvCache.particles->attributeInfo(rotationFromIndex,pvCache.rotationAttr);
+					pvCache.particles->attributeInfo(lastRotFromIndex,pvCache.lastRotationAttr);
                     if (pvCache.rotationAttr.count == 1)  // single float value for rotation
                     {
                         for (int i=0;i<pvCache.particles->numParticles();i++)
                         {
-                            const float * attrVal = pvCache.particles->data<float>(pvCache.rotationAttr,i);
-                            rotationArray.append(MVector(attrVal[0],attrVal[0],attrVal[0]));
+							const float * attrVal = pvCache.particles->data<float>(pvCache.rotationAttr,i);
+							float rot = attrVal[0];
+							if (canMotionBlur && lastRotFromIndex >= 0)
+							{
+								if (pvCache.lastRotationAttr.count == 1)
+								{
+									const float * lastAttrVal = pvCache.particles->data<float>(pvCache.lastRotationAttr,i);
+									rot += (attrVal[0] - lastAttrVal[0])*deltaTime;
+								}
+							}
+							rotationArray.append(MVector(rot,rot,rot));
                         }
                     }
                     else
@@ -632,8 +658,19 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                         {
                             for (int i=0;i<pvCache.particles->numParticles();i++)
                             {
-                                const float * attrVal = pvCache.particles->data<float>(pvCache.rotationAttr,i);
-                                rotationArray.append(MVector(attrVal[0],attrVal[1],attrVal[2]));
+								const float * attrVal = pvCache.particles->data<float>(pvCache.rotationAttr,i);
+								MVector rot = MVector(attrVal[0],attrVal[1],attrVal[2]);
+								if (canMotionBlur && lastRotFromIndex >= 0)
+								{
+									if (pvCache.lastRotationAttr.count >=3 )
+									{
+										const float * lastAttrVal = pvCache.particles->data<float>(pvCache.lastRotationAttr,i);
+										rot.x += (attrVal[0] - lastAttrVal[0])*deltaTime;
+										rot.y += (attrVal[1] - lastAttrVal[1])*deltaTime;
+										rot.z += (attrVal[2] - lastAttrVal[2])*deltaTime;
+									}
+								}
+                                rotationArray.append(rot);
                             }
                         }
                     }
@@ -656,12 +693,22 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                     scaleArray.clear();
 
                     pvCache.particles->attributeInfo(scaleFromIndex,pvCache.scaleAttr);
+					pvCache.particles->attributeInfo(lastScaleFromIndex,pvCache.lastScaleAttr);
                     if (pvCache.scaleAttr.count == 1)  // single float value for scale
                     {
                         for (int i=0;i<pvCache.particles->numParticles();i++)
                         {
-                            const float * attrVal = pvCache.particles->data<float>(pvCache.scaleAttr,i);
-                            scaleArray.append(MVector(attrVal[0],attrVal[0],attrVal[0]));
+							const float * attrVal = pvCache.particles->data<float>(pvCache.scaleAttr,i);
+							float scale = attrVal[0];
+							if (canMotionBlur)
+							{
+								if (pvCache.lastScaleAttr.count == 1)
+								{
+									const float * lastAttrVal = pvCache.particles->data<float>(pvCache.lastScaleAttr,i);
+									scale += (attrVal[0] - lastAttrVal[0])*deltaTime;
+								}
+							}
+							scaleArray.append(MVector(scale,scale,scale));
                         }
                     }
                     else
@@ -671,7 +718,18 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                             for (int i=0;i<pvCache.particles->numParticles();i++)
                             {
                                 const float * attrVal = pvCache.particles->data<float>(pvCache.scaleAttr,i);
-                                scaleArray.append(MVector(attrVal[0],attrVal[1],attrVal[2]));
+								MVector scale = MVector(attrVal[0],attrVal[1],attrVal[2]);
+								if (canMotionBlur)
+								{
+									if (pvCache.lastScaleAttr.count >=3 )
+									{
+										const float * lastAttrVal = pvCache.particles->data<float>(pvCache.lastScaleAttr,i);
+										scale.x += (attrVal[0] - lastAttrVal[0])*deltaTime;
+										scale.y += (attrVal[1] - lastAttrVal[1])*deltaTime;
+										scale.z += (attrVal[2] - lastAttrVal[2])*deltaTime;
+									}
+								}
+                                scaleArray.append(scale);
                             }
                         }
                     }
@@ -748,6 +806,14 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         if ((scaleFromIndex+1) > zPlug.numElements())
         {
             block.outputValue(aScaleFrom).setInt(-1);
+        }
+        if ((lastRotFromIndex+1) > zPlug.numElements())
+        {
+            block.outputValue(aLastRotationFrom).setInt(-1);
+        }
+        if ((lastScaleFromIndex+1) > zPlug.numElements())
+        {
+            block.outputValue(aLastScaleFrom).setInt(-1);
         }
         if ((indexFromIndex+1) > zPlug.numElements())
         {
