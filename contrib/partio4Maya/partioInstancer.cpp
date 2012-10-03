@@ -756,12 +756,12 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 					{
 						for (int i=0;i<pvCache.particles->numParticles();i++)
 						{
-							if (pvCache.indexAttr.type == FLOAT)
+							if (pvCache.indexAttr.type == Partio::FLOAT)
 							{
 								const float * attrVal = pvCache.particles->data<float>(pvCache.indexAttr,i);
 								indexArray.append((double)(int)attrVal[0]);
 							}
-							else if (pvCache.indexAttr.type == INT)
+							else if (pvCache.indexAttr.type == Partio::INT)
 							{
 								const int * attrVal = pvCache.particles->data<int>(pvCache.indexAttr,i);
 								indexArray.append((double)attrVal[0]);
@@ -1082,17 +1082,17 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
                 const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
 
 				MString idVal;
-				if (pvCache->indexAttr.type == FLOAT)
+				if (pvCache->indexAttr.type == Partio::FLOAT)
 				{
 					const float * attrVal = pvCache->particles->data<float>(pvCache->indexAttr,i);
 					idVal = (double)(int)attrVal[0];
 				}
-				else if (pvCache->indexAttr.type == INT)
+				else if (pvCache->indexAttr.type == Partio::INT)
 				{
 					const int * attrVal = pvCache->particles->data<int>(pvCache->indexAttr,i);
 					idVal = (double)attrVal[0];
 				}
-				else if (pvCache->indexAttr.type == VECTOR)
+				else if (pvCache->indexAttr.type == Partio::VECTOR)
 				{
 					const float * attrVal = pvCache->particles->data<float>(pvCache->indexAttr,i);
 					idVal = (double)attrVal[0];
