@@ -205,6 +205,18 @@ FIND_PATH(MAYA_INCLUDE_DIR maya/MFn.h
   DOC "Maya's include path"
 )
 
+LIST(APPEND MAYA_INCLUDE_DIRS ${MAYA_INCLUDE_DIR})
+
+FIND_PATH(MAYA_DEVKIT_INC_DIR GL/glext.h
+  HINTS
+    ${MAYA_LOCATION}
+  PATH_SUFFIXES
+	devkit/plug-ins/
+  DOC "Maya's devkit headers path"
+)
+LIST(APPEND MAYA_INCLUDE_DIRS ${MAYA_DEVKIT_INC_DIR})
+
+
 FIND_PATH(MAYA_LIBRARY_DIR libOpenMaya.dylib libOpenMaya.so OpenMaya.lib
   HINTS
     ${MAYA_LOCATION}

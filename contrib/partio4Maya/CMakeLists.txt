@@ -48,7 +48,7 @@ if (UNIX)
 	set (CMAKE_SHARED_LIBRARY_SUFFIX ".so")
 	set (SUFFIX ".so")
 ENDIF()
-	
+
 find_package(Maya)
 
 ## if building from the default partio contrib dir you can leave this alone
@@ -58,7 +58,7 @@ SET (PARTIO_LIBDIR   "../../lib")
 set (STD_INCLUDES "." ".." "/usr/X11R6/include" "/usr/include" "/usr/include/CC")
 set (STD_LIB "/usr/lib/")
 
-include_directories (${STD_INCLUDES} ${partio4MayaINCLUDES} ${MAYA_INCLUDE_DIR} ${PARTIO_INCLUDE})
+include_directories (${STD_INCLUDES} ${partio4MayaINCLUDES} ${MAYA_INCLUDE_DIRS} ${PARTIO_INCLUDE})
 link_directories  ( ${STD_LIB} ${MAYA_LIBRARY_DIR} ${PARTIO_LIBDIR} ${ZLIB_LIBRARY_DIR})
 
 add_definitions(-D_BOOL)
