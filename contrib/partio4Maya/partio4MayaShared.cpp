@@ -219,6 +219,7 @@ void partio4Maya::updateFileName (MString cacheFile, MString cacheDir,
                                  )
 {
     formatExt = setExt(cacheFormat);
+	int fps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
 
     MStringArray fileParts = partioGetBaseFileName(cacheFile);
 
@@ -244,7 +245,7 @@ void partio4Maya::updateFileName (MString cacheFile, MString cacheDir,
     // special case for PDCs and maya nCache files because of the funky naming convention  TODO: support substepped/retiming  caches
     if (formatExt == "pdc")
     {
-        cacheFrame *= (int)(6000 / 24);
+        cacheFrame *= (int)(6000 / fps);
         cachePadding = 1;
     }
 
