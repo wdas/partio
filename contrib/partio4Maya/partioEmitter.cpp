@@ -436,10 +436,13 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
                 std::cerr<<"Failed to find position attribute "<<std::endl;
                 return ( MS::kFailure );
             }
+
+            bool hasVelo = true;
             if (!particles->attributeInfo("velocity",velAttribute) && !particles->attributeInfo("Velocity",velAttribute))
             {
-                std::cerr<<"Failed to find velocity attribute "<<std::endl;
-                return ( MS::kFailure );
+				hasVelo = false;
+                //std::cerr<<"Failed to find velocity attribute "<<std::endl;
+                //return ( MS::kFailure );
             }
 
             map <int, int>::iterator it;
@@ -657,15 +660,18 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
                 if (it != particleIDMap.end())   // move the existing particles
                 {
                     const float* pos=particles->data<float>(posAttribute,it->second);
-                    const float* vel=particles->data<float>(velAttribute,it->second);
-
                     MVector jitter = partio4Maya::jitterPoint(it->second, jitterFreq, float(seed), jitterPos);
 
                     positions[x] = MVector(pos[0],pos[1],pos[2])+(jitter);
                     if (useEmitterTxfm) {
                         positions[x] += emitterOffset;
                     }
-                    MVector velo(vel[0],vel[1],vel[2]);
+                    MVector velo(0,0,0);
+                    if(hasVelo)
+					{
+						const float* vel=particles->data<float>(velAttribute,it->second);
+						velo = MVector(vel[0],vel[1],vel[2]);
+					}
                     if (motionBlurStep)
                     {
                         positions[x] += (velo/24)*deltaTime;
@@ -723,7 +729,6 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 
                 //cout << "partioEmitterDebug->emitting new particles" << endl;
                 const float* pos=particles->data<float>(posAttribute,it->second);
-                const float* vel=particles->data<float>(velAttribute,it->second);
 
                 /// TODO: this will break if we're dealing with a format type that has no "id" attribute or one is not found using the
                 ///       standard  nomenclature "id" or  "particleId"
@@ -736,9 +741,14 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
                     temp += emitterOffset;
                 }
 
-                MVector velo(vel[0],vel[1],vel[2]);
-
-                inPosArray.append(temp+(jitter));
+				MVector velo(0,0,0);
+				if (hasVelo)
+				{
+					const float* vel=particles->data<float>(velAttribute,it->second);
+					velo = MVector(vel[0],vel[1],vel[2]);
+				}
+				
+				inPosArray.append(temp+(jitter));
                 inVelArray.append(velo*inheritFactor);
                 partioIDs.append(id[0]);
 
