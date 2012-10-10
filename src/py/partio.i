@@ -236,6 +236,27 @@ public:
     }
 
     %feature("autodoc");
+    %feature("docstring","Gets a single flattened tuple, containing attribute data for all particles");
+    PyObject* getArray(const ParticleAttribute& attr)
+    {    
+        unsigned int numparticles = $self->numParticles();
+        PyObject* tuple=PyTuple_New(numparticles * attr.count);
+        
+        if(attr.type==Partio::INT){
+            for(unsigned int i=0;i<numparticles;i++) {
+                const int* p=$self->data<int>(attr,i);
+                for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple, i*attr.count+k, PyInt_FromLong(p[k]));
+            }
+        }else{
+            for(unsigned int i=0;i<numparticles;i++) {
+                const float* p=$self->data<float>(attr,i);
+                for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple, i*attr.count+k, PyFloat_FromDouble(p[k]));
+            }
+        }
+        return tuple;
+    }
+
+    %feature("autodoc");
     %feature("docstring","Gets attribute data for particleIndex'th particle");
     PyObject* get(const ParticleAttribute& attr,const ParticleIndex particleIndex)
     {
