@@ -253,6 +253,37 @@ public:
             return NULL;
         }
 
+
+        /*
+        PyArrayIterObject *iter;
+        iter = (PyArrayIterObject *)PyArray_IterNew(array);
+        //if (iter == NULL) goto fail;   // Assume fail has clean-up code 
+
+        const float* p=$self->data<float>(attr,i);
+        while (iter->index < iter->size) {
+            // do something with the data at it->dataptr
+
+            PyArray_ITER_NEXT(it);
+        }
+        */
+
+        
+        npy_intp size;
+        unsigned int i=0;
+        float *dptr;  // could make this any variable type
+        size = PyArray_SIZE(array);
+        dptr = (float *)PyArray_DATA(array);
+        //while(size--) {
+        for (int j=0;j<size;j+=3) {
+            // do something with the data at dptr
+            const float* p=$self->data<float>(attr,i);
+            for(int k=0;k<attr.count;k++) {
+                dptr[0] = p[k];
+                dptr++;
+            }
+            i++;
+        }
+ 
         return PyArray_Return((PyArrayObject *)array);
     }
 
