@@ -37,8 +37,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 %module partio
 %include "std_string.i"
 
-
 %{
+#include <numpy/arrayobject.h> 
 #include <Partio.h>
 namespace Partio{
 typedef uint64_t ParticleIndex;
@@ -57,7 +57,10 @@ struct fixedFloatArray
         int i[16];
     };
 };
+%}
 
+%init %{ 
+import_array();
 %}
 
 // Particle Types
@@ -233,6 +236,24 @@ public:
             PyList_SetItem(list,i,PyInt_FromLong(points[i])); // tuple reference is stolen, so no decref needed
         }
         return list;
+    }
+
+    %feature("autodoc");
+    %feature("docstring","Get");
+    PyObject* getNDArray(const ParticleAttribute& attr)
+    {    
+        unsigned int numparticles = $self->numParticles();
+        
+        // 1 dimensional for now
+        npy_intp dims[1] = { numparticles*attr.count };
+        PyObject *array = PyArray_SimpleNew(1, dims, NPY_CFLOAT);
+
+        if (!array) {
+            PyErr_SetString(PyExc_TypeError,"Unable to create array");
+            return NULL;
+        }
+
+        return PyArray_Return((PyArrayObject *)array);
     }
 
     %feature("autodoc");
