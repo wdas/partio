@@ -246,36 +246,20 @@ public:
         
         // 1 dimensional for now
         npy_intp dims[1] = { numparticles*attr.count };
-        PyObject *array = PyArray_SimpleNew(1, dims, NPY_CFLOAT);
+        PyObject *array = PyArray_SimpleNew(1, dims, NPY_FLOAT);
 
         if (!array) {
             PyErr_SetString(PyExc_TypeError,"Unable to create array");
             return NULL;
         }
 
-
-        /*
-        PyArrayIterObject *iter;
-        iter = (PyArrayIterObject *)PyArray_IterNew(array);
-        //if (iter == NULL) goto fail;   // Assume fail has clean-up code 
-
-        const float* p=$self->data<float>(attr,i);
-        while (iter->index < iter->size) {
-            // do something with the data at it->dataptr
-
-            PyArray_ITER_NEXT(it);
-        }
-        */
-
-        
         npy_intp size;
         unsigned int i=0;
-        float *dptr;  // could make this any variable type
+        float *dptr;
         size = PyArray_SIZE(array);
         dptr = (float *)PyArray_DATA(array);
-        //while(size--) {
+
         for (int j=0;j<size;j+=3) {
-            // do something with the data at dptr
             const float* p=$self->data<float>(attr,i);
             for(int k=0;k<attr.count;k++) {
                 dptr[0] = p[k];
