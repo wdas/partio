@@ -331,7 +331,7 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
 
     for (int particles = 0; particles < p.numParticles(); particles++)
     {
-        cout <<  particles << endl;
+        //cout <<  particles << endl;
         // set defaults for stuff that is not exported...
         float position[3] = {0.0,0.0,0.0};
         float velocity[3] = {0.0,0.0,0.0};
@@ -357,7 +357,7 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
             ParticleAttribute attr;
             p.attributeInfo(attrIndex,attr);
 
-            cout << attr.name << endl;
+            //cout << attr.name << endl;
             if (attr.name ==  "position")
             {
                 const float* data = p.data<float>(attr, particles);
