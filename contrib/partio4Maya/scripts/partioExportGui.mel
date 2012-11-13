@@ -157,17 +157,21 @@ global proc buildParticleScrollList()
 
     for ($particle in $particles)
     {
-        string $parent = `columnLayout -p $columnMain` ;
-        buildParticleEntry $particle $parent $color;
+		// filters out ncloth crap because for whatever reason  ls -type particle returns all ncloth stuff too
+		if (`nodeType $particle` == "particle" || `nodeType $particle` == "nParticle")
+		{
+			string $parent = `columnLayout -p $columnMain` ;
+			buildParticleEntry $particle $parent $color;
 
-        if ($color == 0)
-        {
-            $color = 1;
-        }
-        else
-        {
-            $color = 0;
-        }
+			if ($color == 0)
+			{
+				$color = 1;
+			}
+			else
+			{
+				$color = 0;
+			}
+		}
     }
 }
 
