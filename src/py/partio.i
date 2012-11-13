@@ -37,8 +37,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 %module partio
 %include "std_string.i"
 
-
 %{
+#include <numpy/arrayobject.h> 
 #include <Partio.h>
 namespace Partio{
 typedef uint64_t ParticleIndex;
@@ -57,7 +57,10 @@ struct fixedFloatArray
         int i[16];
     };
 };
+%}
 
+%init %{ 
+import_array();
 %}
 
 // Particle Types
@@ -233,6 +236,60 @@ public:
             PyList_SetItem(list,i,PyInt_FromLong(points[i])); // tuple reference is stolen, so no decref needed
         }
         return list;
+    }
+
+    %feature("autodoc");
+    %feature("docstring","Get");
+    PyObject* getNDArray(const ParticleAttribute& attr)
+    {    
+        unsigned int numparticles = $self->numParticles();
+        
+        // 1 dimensional for now
+        npy_intp dims[1] = { numparticles*attr.count };
+        PyObject *array = PyArray_SimpleNew(1, dims, NPY_FLOAT);
+
+        if (!array) {
+            PyErr_SetString(PyExc_TypeError,"Unable to create array");
+            return NULL;
+        }
+
+        npy_intp size;
+        unsigned int i=0;
+        float *dptr;
+        size = PyArray_SIZE(array);
+        dptr = (float *)PyArray_DATA(array);
+
+        for (int j=0;j<size;j+=3) {
+            const float* p=$self->data<float>(attr,i);
+            for(int k=0;k<attr.count;k++) {
+                dptr[0] = p[k];
+                dptr++;
+            }
+            i++;
+        }
+ 
+        return PyArray_Return((PyArrayObject *)array);
+    }
+
+    %feature("autodoc");
+    %feature("docstring","Gets a single flattened tuple, containing attribute data for all particles");
+    PyObject* getArray(const ParticleAttribute& attr)
+    {    
+        unsigned int numparticles = $self->numParticles();
+        PyObject* tuple=PyTuple_New(numparticles * attr.count);
+        
+        if(attr.type==Partio::INT){
+            for(unsigned int i=0;i<numparticles;i++) {
+                const int* p=$self->data<int>(attr,i);
+                for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple, i*attr.count+k, PyInt_FromLong(p[k]));
+            }
+        }else{
+            for(unsigned int i=0;i<numparticles;i++) {
+                const float* p=$self->data<float>(attr,i);
+                for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple, i*attr.count+k, PyFloat_FromDouble(p[k]));
+            }
+        }
+        return tuple;
     }
 
     %feature("autodoc");
