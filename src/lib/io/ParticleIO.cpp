@@ -65,6 +65,7 @@ readers()
         data["pts"]=readPTS;
 		data["xyz"]=readXYZ;
 		data["pcd"]=readPCD;
+		data["icecache"]=readICECACHE;
     }
     return data;
 }
@@ -87,6 +88,7 @@ writers()
         data["prt"]=writePRT;
         data["bin"]=writeBIN;
 		data["pcd"]=writePCD;
+		data["icecache"]=writeICECACHE;
     }
     return data;
 }
