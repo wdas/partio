@@ -183,6 +183,7 @@ public:
     static MObject	aOutMesh;
     static MObject	aInstanceData;
     static MObject  aComputeVeloPos;
+	static MObject  aVeloMult;
 
 
     static	MTypeId			id;

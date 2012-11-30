@@ -93,6 +93,7 @@ MObject	partioInstancer::aInMeshInstances;
 MObject	partioInstancer::aOutMesh;
 MObject	partioInstancer::aInstanceData;
 MObject partioInstancer::aComputeVeloPos;
+MObject partioInstancer::aVeloMult;
 
 
 partioInstReaderCache::partioInstReaderCache():
@@ -302,7 +303,13 @@ MStatus partioInstancer::initialize()
     tAttr.setReadable(true);
 
     aComputeVeloPos = nAttr.create("computeVeloPos", "cvp", MFnNumericData::kBoolean, false, &stat);
-    tAttr.setKeyable(false);
+    nAttr.setKeyable(false);
+
+	aVeloMult = nAttr.create("veloMult", "vmul", MFnNumericData::kFloat, 1.0, &stat);
+    nAttr.setKeyable(true);
+	nAttr.setStorable(true);
+    nAttr.setHidden(false);
+    nAttr.setReadable(true);
 
 
     addAttribute ( aUpdateCache );
@@ -327,6 +334,7 @@ MStatus partioInstancer::initialize()
     addAttribute ( aShaderIndexFrom );
     addAttribute ( aInstanceData );
     addAttribute ( aComputeVeloPos );
+	addAttribute ( aVeloMult );
     addAttribute ( time );
 
     attributeAffects ( aCacheDir, aUpdateCache );
@@ -347,6 +355,7 @@ MStatus partioInstancer::initialize()
     attributeAffects ( aIndexFrom, aUpdateCache );
     attributeAffects ( aShaderIndexFrom, aUpdateCache );
     attributeAffects ( aComputeVeloPos, aUpdateCache );
+	attributeAffects ( aVeloMult, aUpdateCache );
     attributeAffects (time, aUpdateCache);
     attributeAffects (time, aInstanceData);
 
@@ -407,6 +416,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         bool flipYZ 		= block.inputValue( aFlipYZ ).asBool();
         MString renderCachePath = block.inputValue( aRenderCachePath ).asString();
         bool computeMotionBlur =block.inputValue( aComputeVeloPos ).asBool();
+		float veloMult 		= block.inputValue ( aVeloMult ).asFloat();
 
         int fps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
         int integerTime = (int)floor((inputTime.value())+.52);
@@ -545,7 +555,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                         if (motionBlurStep)
                         {
                             int mFps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
-                            pos += (velo/mFps)*deltaTime;
+                            pos += ((velo*veloMult)/mFps)*deltaTime;
                         }
                     }
 
