@@ -450,7 +450,10 @@ MStatus PartioExport::doIt(const MArgList& Args)
                 const SECURITY_ATTRIBUTES *psa = NULL;
                 SHCreateDirectoryEx(hwnd, Path.asChar(), psa);
 #else
-                mkdir (Path.asChar(),0755);
+				mode_t userMask = umask(0);
+				umask(userMask);
+				mode_t DIR_MODE = ((0777) ^ userMask);
+                mkdir (Path.asChar(), DIR_MODE );
 #endif
             }
 
