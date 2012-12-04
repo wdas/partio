@@ -281,52 +281,56 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 
         for ($particle in $particles)
         {
-            $particleExportCheckbox = ($particle+"exportCheckBox");
+			// filters out ncloth crap because for whatever reason  ls -type particle returns all ncloth stuff too
+			if (`nodeType $particle` == "particle" || `nodeType $particle` == "nParticle")
+			{
+				$particleExportCheckbox = ($particle+"exportCheckBox");
 
-            int $selected  = `checkBox -q -v  $particleExportCheckbox`;
+				int $selected  = `checkBox -q -v  $particleExportCheckbox`;
 
-            if ($selected  >= 1)
-            {
-                string $cmd;
-                string $filePath;
+				if ($selected  >= 1)
+				{
+					string $cmd;
+					string $filePath;
 
-			string $particleOverrideName = `textFieldGrp -q -text ($particle+"overrideNameText")`;
-		// fix windows paths with escape characters
+				string $particleOverrideName = `textFieldGrp -q -text ($particle+"overrideNameText")`;
+			// fix windows paths with escape characters
 
 
-                $cmd = ("partioExport -mnf "+$start+" -mxf "+$end+ " -f "+$partioExportFormat+" -atr position -atr id ");
-                $filePath = `encodeString($cacheDir)`;
+					$cmd = ("partioExport -mnf "+$start+" -mxf "+$end+ " -f "+$partioExportFormat+" -atr position -atr id ");
+					$filePath = `encodeString($cacheDir)`;
 
-                string $attrs[] = `partioExportGuiListParticleAttrs $particle allPP 0 1`;
+					string $attrs[] = `partioExportGuiListParticleAttrs $particle allPP 0 1`;
 
-                for ($attr in $attrs)
-                {
-                    if ($attr == "particleId" || $attr == "position")
-                    {}
-                    else
-                    {
-                        $attrCheckbox =  ($particle+$attr+"checkBox");
-						if (`checkBox -exists $attrCheckbox`)
+					for ($attr in $attrs)
+					{
+						if ($attr == "particleId" || $attr == "position")
+						{}
+						else
 						{
-							$val = `checkBox -q -v  $attrCheckbox`;
-							if ( $val >= 1)
+							$attrCheckbox =  ($particle+$attr+"checkBox");
+							if (`checkBox -exists $attrCheckbox`)
 							{
-								$cmd += (" -atr "+$attr);
+								$val = `checkBox -q -v  $attrCheckbox`;
+								if ( $val >= 1)
+								{
+									$cmd += (" -atr "+$attr);
+								}
 							}
 						}
-                    }
-                }
-                if (`size($particleOverrideName)` > 0 &&  $particleOverrideName != $particle )
-				{
-					$cmd += (" -fp \""+$particleOverrideName+"\"");
+					}
+					if (`size($particleOverrideName)` > 0 &&  $particleOverrideName != $particle )
+					{
+						$cmd += (" -fp \""+$particleOverrideName+"\"");
+					}
+					$cmd += (" -p \""+$filePath +"\" "+$particle);
+					evalEcho $cmd;
 				}
-                $cmd += (" -p \""+$filePath +"\" "+$particle);
-                evalEcho $cmd;
-            }
-            else
-			{
-                continue;
-            }
+				else
+				{
+					continue;
+				}
+			}
         }
     }// end frame loop
 }
