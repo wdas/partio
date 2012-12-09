@@ -55,6 +55,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MString.h>
 #include <maya/MSelectionList.h>
 #include <maya/MVectorArray.h>
+#include <maya/MTime.h>
 
 #include <maya/MPxCommand.h>
 

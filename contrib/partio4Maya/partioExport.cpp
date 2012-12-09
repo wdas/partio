@@ -233,10 +233,22 @@ MStatus PartioExport::doIt(const MArgList& Args)
     }
     /// ARGS PARSED
 
+    MFnParticleSystem PS(objNode);
+
     int outFrame= -123456;
 
     for  (int frame = startFrame; frame<=endFrame; frame++)
     {
+		MTime dynTime;
+		dynTime.setValue(frame);
+		if (frame == startFrame && startFrame < endFrame)
+		{
+			PS.evaluateDynamics(dynTime,true);
+		}
+		else
+		{
+			PS.evaluateDynamics(dynTime,false);
+		}
         if (startFrameSet && endFrameSet && startFrame < endFrame)
         {
             MGlobal::viewFrame(frame);
@@ -281,7 +293,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
         MGlobal::displayInfo("PartioExport-> exporting: "+ outputPath);
 
-        MFnParticleSystem PS(objNode);
+
         unsigned int particleCount = PS.count();
 
         Partio::ParticlesDataMutable* p = Partio::createInterleave();
