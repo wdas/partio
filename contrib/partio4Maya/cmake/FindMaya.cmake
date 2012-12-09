@@ -149,13 +149,13 @@ IF(MAYA_EXECUTABLE)
   # TODO: use GET_FILENAME_COMPONENT here
   STRING(REGEX REPLACE "/bin/maya.*" "" MAYA_LOCATION "${MAYA_EXECUTABLE}")
 
-  STRING(REGEX MATCH "20[0-9][0-9]" MAYA_VERSION "${MAYA_LOCATION}")
+  STRING(REGEX MATCH "20[0-9][0-9]" MAYA_VERSION "$ENV{MAYA_LOCATION}")
 
   IF(Maya_FIND_VERSION)
     # test that we've found a valid version
-    LIST(FIND _maya_TEST_VERSIONS ${MAYA_VERSION} _maya_FOUND_INDEX)
+    LIST(FIND _maya_TEST_VERSIONS $ENV{MAYA_VERSION} _maya_FOUND_INDEX)
     IF(${_maya_FOUND_INDEX} EQUAL -1)
-      MESSAGE(STATUS "Found Maya version ${MAYA_VERSION}, but requested at least ${Maya_FIND_VERSION}. Re-searching without environment variables...")
+      MESSAGE(STATUS "Found Maya version $ENV{MAYA_VERSION}, but requested at least ${Maya_FIND_VERSION}. Re-searching without environment variables...")
       SET(MAYA_LOCATION NOTFOUND)
       # search again, but don't use environment variables
       # (these should be only paths we constructed based on requested version)
@@ -166,21 +166,23 @@ IF(MAYA_EXECUTABLE)
         DOC "Maya's Base Directory"
         NO_SYSTEM_ENVIRONMENT_PATH
       )
-      SET(MAYA_EXECUTABLE "${MAYA_LOCATION}/bin/maya" CACHE PATH "Maya's executable path")
-      STRING(REGEX MATCH "20[0-9][0-9]" MAYA_VERSION "${MAYA_LOCATION}")
+      SET(MAYA_EXECUTABLE "$ENV{MAYA_LOCATION}/bin/maya" CACHE PATH "Maya's executable path")
+      STRING(REGEX MATCH "20[0-9][0-9]" MAYA_VERSION "$ENV{MAYA_LOCATION}")
     #ELSE: error?
     ENDIF(${_maya_FOUND_INDEX} EQUAL -1)
   ENDIF(Maya_FIND_VERSION)
 ENDIF(MAYA_EXECUTABLE)
 
+MESSAGE(STATUS "Maya location: $ENV{MAYA_LOCATION}")
+MESSAGE(STATUS "Maya VERSION: $ENV{MAYA_VERSION}")
 # Qt Versions
-IF(${MAYA_VERSION} STREQUAL "2011")
+IF($ENV{MAYA_VERSION} STREQUAL "2011")
   SET(MAYA_QT_VERSION_SHORT CACHE STRING "4.5")
   SET(MAYA_QT_VERSION_LONG  CACHE STRING "4.5.3")
-ELSEIF(${MAYA_VERSION} STREQUAL "2012")
+ELSEIF($ENV{MAYA_VERSION} STREQUAL "2012")
   SET(MAYA_QT_VERSION_SHORT CACHE STRING "4.7")
   SET(MAYA_QT_VERSION_LONG  CACHE STRING "4.7.1")
-ELSEIF(${MAYA_VERSION} STREQUAL "2013")
+ELSEIF($ENV{MAYA_VERSION} STREQUAL "2013")
   SET(MAYA_QT_VERSION_SHORT CACHE STRING "4.7")
   SET(MAYA_QT_VERSION_LONG  CACHE STRING "4.7.1")
 ENDIF()
@@ -194,11 +196,11 @@ ENDIF()
 # - If the maya executable is found in a standard location, or in $MAYA_LOCATION/bin or $PATH, and the
 #   includes and libs are in standard locations relative to the binary, they will be found
 
-MESSAGE(STATUS "Maya location: ${MAYA_LOCATION}")
+MESSAGE(STATUS "Maya location: $ENV{MAYA_LOCATION}")
 
 FIND_PATH(MAYA_INCLUDE_DIR maya/MFn.h
   HINTS
-    ${MAYA_LOCATION}
+    $ENV{MAYA_LOCATION}
   PATH_SUFFIXES
     include               # linux and windows
     ../../devkit/include  # osx
@@ -209,7 +211,7 @@ LIST(APPEND MAYA_INCLUDE_DIRS ${MAYA_INCLUDE_DIR})
 
 FIND_PATH(MAYA_DEVKIT_INC_DIR GL/glext.h
   HINTS
-    ${MAYA_LOCATION}
+    $ENV{MAYA_LOCATION}
   PATH_SUFFIXES
 	devkit/plug-ins/
   DOC "Maya's devkit headers path"
@@ -219,7 +221,7 @@ LIST(APPEND MAYA_INCLUDE_DIRS ${MAYA_DEVKIT_INC_DIR})
 
 FIND_PATH(MAYA_LIBRARY_DIR libOpenMaya.dylib libOpenMaya.so OpenMaya.lib
   HINTS
-    ${MAYA_LOCATION}
+    $ENV{MAYA_LOCATION}
   PATH_SUFFIXES
     lib    # linux and windows
     MacOS  # osx
@@ -243,7 +245,7 @@ FOREACH(_maya_lib
   IF(APPLE)
     FIND_LIBRARY(MAYA_${_maya_lib}_LIBRARY ${_maya_lib}
       HINTS
-        ${MAYA_LOCATION}
+        $ENV{MAYA_LOCATION}
       PATHS
         ${_maya_TEST_PATHS}
       PATH_SUFFIXES
@@ -254,7 +256,7 @@ FOREACH(_maya_lib
   ELSE(APPLE)
     FIND_LIBRARY(MAYA_${_maya_lib}_LIBRARY ${_maya_lib}
       HINTS
-        ${MAYA_LOCATION}
+        $ENV{MAYA_LOCATION}
       PATHS
         ${_maya_TEST_PATHS}
       PATH_SUFFIXES
@@ -268,7 +270,7 @@ ENDFOREACH(_maya_lib)
 
 FIND_PATH(MAYA_USER_DIR
   NAMES
-    ${MAYA_VERSION}-x64 ${MAYA_VERSION}
+    $ENV{MAYA_VERSION}-x64 $ENV{MAYA_VERSION}
   PATHS
     $ENV{HOME}/Library/Preferences/Autodesk/maya  # osx
     $ENV{USERPROFILE}/Documents/maya              # windows
