@@ -39,11 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 
 %{
+#ifdef PARTIO_USE_NUMPY
+#include <numpy/arrayobject.h> 
+#endif
+
 #include <Partio.h>
 namespace Partio{
 typedef uint64_t ParticleIndex;
 }
-
 using namespace Partio;
 
 
@@ -234,6 +237,41 @@ public:
         }
         return list;
     }
+
+#ifdef PARTIO_USE_NUMPY
+    %feature("autodoc");
+    %feature("docstring","Get");
+    PyObject* getNDArray(const ParticleAttribute& attr)
+    {    
+        unsigned int numparticles = $self->numParticles();
+        
+        // 1 dimensional for now
+        npy_intp dims[1] = { numparticles*attr.count };
+        PyObject *array = PyArray_SimpleNew(1, dims, NPY_FLOAT);
+
+        if (!array) {
+            PyErr_SetString(PyExc_TypeError,"Unable to create array");
+            return NULL;
+        }
+
+        npy_intp size;
+        unsigned int i=0;
+        float *dptr;
+        size = PyArray_SIZE(array);
+        dptr = (float *)PyArray_DATA(array);
+
+        for (int j=0;j<size;j+=attr.count) {
+            const float* p=$self->data<float>(attr,i);
+            for(int k=0;k<attr.count;k++) {
+                dptr[0] = p[k];
+                dptr++;
+            }
+            i++;
+        }
+ 
+        return PyArray_Return((PyArrayObject *)array);
+    }
+#endif
 
     %feature("autodoc");
     %feature("docstring","Gets attribute data for particleIndex'th particle");
