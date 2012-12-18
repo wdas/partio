@@ -80,6 +80,7 @@ EXECUTE_PROCESS(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m
 SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}")
 
 ## Search for useful libraries
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 find_package(GLUT REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(ZLIB)
@@ -88,6 +89,7 @@ IF(ZLIB_FOUND)
 ELSE(ZLIB_FOUND)
     SET (ZLIB_LIBRARY "")
 ENDIF(ZLIB_FOUND)
+find_package(NumPy)
 
 ## Make modules able to see partio library
 # Setup environment variable to link partio
