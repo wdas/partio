@@ -37,7 +37,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 %module partio
 %include "std_string.i"
 
-
 %{
 #ifdef PARTIO_USE_NUMPY
 #include <numpy/arrayobject.h> 
@@ -47,6 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 namespace Partio{
 typedef uint64_t ParticleIndex;
 }
+
 using namespace Partio;
 
 
@@ -60,7 +60,10 @@ struct fixedFloatArray
         int i[16];
     };
 };
+%}
 
+%init %{ 
+import_array();
 %}
 
 // Particle Types
@@ -240,8 +243,8 @@ public:
 
 #ifdef PARTIO_USE_NUMPY
     %feature("autodoc");
-    %feature("docstring","Get");
-    PyObject* getNDArray(const ParticleAttribute& attr)
+    %feature("docstring","Get particle data as a 1 dimensional NumPy array");
+    PyObject* getArray(const ParticleAttribute& attr)
     {    
         unsigned int numparticles = $self->numParticles();
         
@@ -254,24 +257,62 @@ public:
             return NULL;
         }
 
-        npy_intp size;
-        unsigned int i=0;
-        float *dptr;
-        size = PyArray_SIZE(array);
-        dptr = (float *)PyArray_DATA(array);
+        float *dptr = (float *)PyArray_DATA(array);
+        Partio::ParticlesDataMutable::const_iterator it = $self->begin();
+        Partio::ParticleAccessor acc(attr);
+        it.addAccessor(acc);
 
-        for (int j=0;j<size;j+=attr.count) {
-            const float* p=$self->data<float>(attr,i);
-            for(int k=0;k<attr.count;k++) {
-                dptr[0] = p[k];
-                dptr++;
-            }
-            i++;
+        switch(attr.count) {
+            case 3:
+                for(;it!=$self->end();++it){
+                    const Partio::Data<float,3>& v = acc.data<Partio::Data<float,3> >(it);
+                    dptr[0] = v[0];
+                    dptr[1] = v[1];
+                    dptr[2] = v[2];
+                    dptr += 3;
+                }
+                break;
+            case 2:
+                for(;it!=$self->end();++it){
+                    const Partio::Data<float,2>& v = acc.data<Partio::Data<float,2> >(it);
+                    dptr[0] = v[0];
+                    dptr[1] = v[1];
+                    dptr += 2;
+                }
+                break;
+            case 1:
+                for(;it!=$self->end();++it){
+                    const Partio::Data<float,1>& v = acc.data<Partio::Data<float,1> >(it);
+                    dptr[0] = v[0];
+                    dptr++;
+                }
+                break;
         }
- 
+
         return PyArray_Return((PyArrayObject *)array);
     }
 #endif
+
+    %feature("autodoc");
+    %feature("docstring","Gets a single flattened tuple, containing attribute data for all particles");
+    PyObject* getTuple(const ParticleAttribute& attr)
+    {    
+        unsigned int numparticles = $self->numParticles();
+        PyObject* tuple=PyTuple_New(numparticles * attr.count);
+        
+        if(attr.type==Partio::INT){
+            for(unsigned int i=0;i<numparticles;i++) {
+                const int* p=$self->data<int>(attr,i);
+                for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple, i*attr.count+k, PyInt_FromLong(p[k]));
+            }
+        }else{
+            for(unsigned int i=0;i<numparticles;i++) {
+                const float* p=$self->data<float>(attr,i);
+                for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple, i*attr.count+k, PyFloat_FromDouble(p[k]));
+            }
+        }
+        return tuple;
+    }
 
     %feature("autodoc");
     %feature("docstring","Gets attribute data for particleIndex'th particle");
@@ -351,6 +392,38 @@ public:
         Py_INCREF(Py_None);
         return Py_None;
     }
+
+#ifdef PARTIO_USE_NUMPY
+    %feature("autodoc");
+    %feature("docstring","Set particle data from a NumPy array");
+    PyObject* setArray(const ParticleAttribute& attr, PyObject *input_array)
+    {   
+        PyObject *array;
+
+        if (!PyArray_Check(input_array)) {
+            PyErr_SetString(PyExc_TypeError,"Invalid input array");
+            return NULL;
+        }
+
+        //array = PyArray_FROM_OT(input_array, NPY_FLOAT)
+        array =  PyArray_FromAny(input_array, PyArray_DescrFromType(NPY_FLOAT), 2, 2, NPY_C_CONTIGUOUS, NULL);
+
+        unsigned int numparticles = $self->numParticles();
+        unsigned int i;
+
+        for(i=0;i<numparticles;i++){
+            float* v=$self->dataWrite<float>(attr,i);
+            
+            v[0] = *(float *)PyArray_GETPTR2(array, (npy_intp)i, 0);
+            v[1] = *(float *)PyArray_GETPTR2(array, (npy_intp)i, 1);
+            v[2] = *(float *)PyArray_GETPTR2(array, (npy_intp)i, 2);
+            //v[0]=i;
+
+        }
+
+        return Py_None;
+    }
+#endif
 
 
 }
