@@ -243,14 +243,14 @@ public:
 
 #ifdef PARTIO_USE_NUMPY
     %feature("autodoc");
-    %feature("docstring","Get particle data as a 1 dimensional NumPy array");
+    %feature("docstring","Get particle data as a NumPy array");
     PyObject* getArray(const ParticleAttribute& attr)
     {    
         unsigned int numparticles = $self->numParticles();
         
         // 1 dimensional for now
-        npy_intp dims[1] = { numparticles*attr.count };
-        PyObject *array = PyArray_SimpleNew(1, dims, NPY_FLOAT);
+        npy_intp dims[2] = { numparticles, attr.count };
+        PyObject *array = PyArray_SimpleNew(2, dims, NPY_FLOAT32);
 
         if (!array) {
             PyErr_SetString(PyExc_TypeError,"Unable to create array");
@@ -266,17 +266,14 @@ public:
             case 3:
                 for(;it!=$self->end();++it){
                     const Partio::Data<float,3>& v = acc.data<Partio::Data<float,3> >(it);
-                    dptr[0] = v[0];
-                    dptr[1] = v[1];
-                    dptr[2] = v[2];
+                    dptr[0] = v[0]; dptr[1] = v[1]; dptr[2] = v[2];
                     dptr += 3;
                 }
                 break;
             case 2:
                 for(;it!=$self->end();++it){
                     const Partio::Data<float,2>& v = acc.data<Partio::Data<float,2> >(it);
-                    dptr[0] = v[0];
-                    dptr[1] = v[1];
+                    dptr[0] = v[0]; dptr[1] = v[1];
                     dptr += 2;
                 }
                 break;
