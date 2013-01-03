@@ -405,7 +405,7 @@ public:
             return NULL;
         }
         else if (PyArray_TYPE(input_array) != NPY_FLOAT32) {
-            /* convert to float32 data type */
+            // convert to float32 data type
             PyObject *numpy = PyImport_ImportModule("numpy");
             PyObject *f32 = PyObject_GetAttrString(numpy, "float32");
             input_array = PyObject_CallMethod(input_array, "astype", "O", f32);
@@ -413,19 +413,19 @@ public:
             Py_DECREF(f32);
         }
 
-        /* reshape to 2d array, rows of attribute size */
+        // reshape to 2d array, rows of attribute size
         PyObject *array = PyObject_CallMethod(input_array, "reshape", "(ii)", -1, attr.count);
         if (!array || !PyArray_Check(array)) {
             PyErr_Format(PyExc_ValueError, "Unable to reshape array to row size: %d. Total size of new array must be unchanged", attr.count);
             return NULL;
         }
 
-        /* iterate over the minimum of available particles and the number of array items / attr count */
+        // iterate over the minimum of available particles and the number of array items / attr count
         unsigned int array_rows = (unsigned int)PyArray_DIM(array, 2);
         unsigned int i=0, numparticles=$self->numParticles();
         unsigned int numcopies = array_rows<numparticles? array_rows:numparticles;
         
-        /* copy data from the array to the particle attribute */
+        // copy data from the array to the particle attribute
         for(i=0; i<numcopies; i++){
             float* v=$self->dataWrite<float>(attr,i);
             for (int j=0;j<attr.count;j++) {
