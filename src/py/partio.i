@@ -246,44 +246,58 @@ public:
     %feature("docstring","Get particle data as a NumPy array");
     PyObject* getArray(const ParticleAttribute& attr)
     {    
-        unsigned int numparticles = $self->numParticles();
+        npy_intp dims[2] = { $self->numParticles(), attr.count };
         
-        // 1 dimensional for now
-        npy_intp dims[2] = { numparticles, attr.count };
-        PyObject *array = PyArray_SimpleNew(2, dims, NPY_FLOAT32);
+        int npy_type;
+        switch (attr.type) {
+            case Partio::NONE:
+            case Partio::INDEXEDSTR:
+                Py_INCREF(Py_None);
+                return Py_None;
+                break;
+            case Partio::FLOAT:
+            case Partio::VECTOR:
+                npy_type = NPY_FLOAT32;
+                break;
+            case Partio::INT:
+                npy_type = NPY_INT32;
+                break;
+        }
 
+        PyObject *array = PyArray_SimpleNew(2, dims, npy_type);
+        
         if (!array) {
             PyErr_SetString(PyExc_TypeError,"Unable to create array");
             return NULL;
         }
 
-        float *dptr = (float *)PyArray_DATA(array);
         Partio::ParticlesDataMutable::const_iterator it = $self->begin();
         Partio::ParticleAccessor acc(attr);
         it.addAccessor(acc);
 
-        switch(attr.count) {
-            case 3:
+        switch (attr.type) {
+            case Partio::NONE:
+            case Partio::INDEXEDSTR:
+                break;
+            case Partio::FLOAT:
+            case Partio::VECTOR:
+            {
+                float *dptr = (float *)PyArray_DATA(array);
                 for(;it!=$self->end();++it){
-                    const Partio::Data<float,3>& v = acc.data<Partio::Data<float,3> >(it);
-                    dptr[0] = v[0]; dptr[1] = v[1]; dptr[2] = v[2];
-                    dptr += 3;
+                    for(int c=0;c<attr.count;c++) dptr[c] = acc.raw<float>(it)[c];
+                    dptr += attr.count;
                 }
                 break;
-            case 2:
+            }
+            case Partio::INT:
+            {
+                int *dptr = (int *)PyArray_DATA(array);
                 for(;it!=$self->end();++it){
-                    const Partio::Data<float,2>& v = acc.data<Partio::Data<float,2> >(it);
-                    dptr[0] = v[0]; dptr[1] = v[1];
-                    dptr += 2;
+                    for(int c=0;c<attr.count;c++) dptr[c] = acc.raw<int>(it)[c];
+                    dptr += attr.count;
                 }
                 break;
-            case 1:
-                for(;it!=$self->end();++it){
-                    const Partio::Data<float,1>& v = acc.data<Partio::Data<float,1> >(it);
-                    dptr[0] = v[0];
-                    dptr++;
-                }
-                break;
+            }
         }
 
         return PyArray_Return((PyArrayObject *)array);
@@ -393,21 +407,39 @@ public:
 #ifdef PARTIO_USE_NUMPY
     %feature("autodoc");
     %feature("docstring","Set particle data from a NumPy array. \n"
-        "Input array will be converted to data type numpy.float32 if not already, \n"
-        "and should able to be reshaped to the size of the given attribute");
+        "Input array will be converted to data type numpy.float32 or numpy.int32 \n"
+        "depending on attribute type. Input array length will also need to be divisible \n"
+        "by the attribute size, so it can be reshaped to fit. \n");
     PyObject* setArray(const ParticleAttribute& attr, PyObject *input_array)
     {   
         if (!PyArray_Check(input_array)) {
             PyErr_SetString(PyExc_TypeError,"Invalid input array");
             return NULL;
         }
-        else if (PyArray_TYPE(input_array) != NPY_FLOAT32) {
-            // convert to float32 data type
-            PyObject *numpy = PyImport_ImportModule("numpy");
-            PyObject *f32 = PyObject_GetAttrString(numpy, "float32");
-            input_array = PyObject_CallMethod(input_array, "astype", "O", f32);
-            Py_DECREF(numpy);
-            Py_DECREF(f32);
+
+        switch (attr.type) {
+            case Partio::NONE:
+            case Partio::INDEXEDSTR:
+                break;
+            case Partio::FLOAT:
+            case Partio::VECTOR:
+                if (PyArray_TYPE(input_array) != NPY_FLOAT32) {     // cast to float32 data type
+                    PyObject *numpy = PyImport_ImportModule("numpy");
+                    PyObject *f32 = PyObject_GetAttrString(numpy, "float32");
+                    input_array = PyObject_CallMethod(input_array, "astype", "O", f32);
+                    Py_DECREF(numpy);
+                    Py_DECREF(f32);
+                }
+                break;
+            case Partio::INT:
+                if (PyArray_TYPE(input_array) != NPY_INT32) {   // cast to int32 data type
+                    PyObject *numpy = PyImport_ImportModule("numpy");
+                    PyObject *i32 = PyObject_GetAttrString(numpy, "int32");
+                    input_array = PyObject_CallMethod(input_array, "astype", "O", i32);
+                    Py_DECREF(numpy);
+                    Py_DECREF(i32);
+                }
+                break;
         }
 
         // reshape to 2d array, rows of attribute size
@@ -423,13 +455,28 @@ public:
         unsigned int numcopies = array_rows<numparticles? array_rows:numparticles;
         
         // copy data from the array to the particle attribute
-        for(i=0; i<numcopies; i++){
-            float* v=$self->dataWrite<float>(attr,i);
-            for (int j=0;j<attr.count;j++) {
-                v[j] = *(float *)PyArray_GETPTR2(array, (npy_intp)i, j);
-            }
+        switch (attr.type) {
+            case Partio::NONE:
+            case Partio::INDEXEDSTR:
+                break;
+            case Partio::FLOAT:
+            case Partio::VECTOR:
+                for(i=0; i<numcopies; i++){
+                    float* v=$self->dataWrite<float>(attr,i);
+                    for (int j=0;j<attr.count;j++) {
+                        v[j] = *(float *)PyArray_GETPTR2(array, (npy_intp)i, j);
+                    }
+                }
+                break;
+            case Partio::INT:
+                for(i=0; i<numcopies; i++){
+                    int* v=$self->dataWrite<int>(attr,i);
+                    for (int j=0;j<attr.count;j++) {
+                        v[j] = *(int *)PyArray_GETPTR2(array, (npy_intp)i, j);
+                    }
+                }
+                break;
         }
-
         Py_DECREF(array);
 
         return Py_None;
