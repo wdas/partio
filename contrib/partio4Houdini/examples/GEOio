@@ -1,0 +1,80 @@
+# Geometry library table for handling external file conversion.
+#
+#   Each line must contain 3 strings seperated by white space:
+#	file_extension read_command write_command
+#   The read_command must be able to read from a named file and write
+#	houdini format to stdout
+#   The write_command must be able to read houdini format on stdin and write
+#	to a named file
+#   Use %s in the command strings to designate the named file.
+#
+#   When converting from an internal geometry format, the application must
+#	be able to read .bgeo format (since that's what is sent down to it)
+#
+#   It is very easy to write a converter which will convert any format to
+#	.geo/.bgeo (please see source in houdini/public).  This converter
+#	can be placed in the GeoIO table so that any Houdini program can
+#	read the format.  For example, gdxf reads a .dxf file and creates
+#	a .bgeo on output.  This is then read into the geometry library.
+#	Files with the given extension should then appear in the requesters
+#	for geometry files (e.g. gplay)
+#
+#   When converting from a source format to a target format using
+#	.geo/.bgeo you can use a shell script to help with the conversion.
+#	For example, to convert from a .lwo file to a .dxf file, simply
+#	convert stdin.lwo to a temp file /tmp/xxxxx.bgeo.  Then do
+#	the conversion of the file to the target format.  For example
+#
+#		#!/bin/csh -f
+#		#  First, convert from .lwo to .bgeo
+#		glightwave stdin.lwo /tmp/__dxf__.bgeo
+#		#  Now, use gdxf to convert from .bgeo to .dxf
+#		gdxf /tmp/__dxf__.bgeo $1
+#		#  Clean up by removing tmp file
+#		rm /tmp/__dxf__.bgeo
+#
+
+#
+#  Internal formats supported
+#	Format		Magic Number	Default Extension
+#	------		------------	-----------------
+#	Binary Geo	0x4267656f	.bgeo
+#	Ascii Geo	"PGEOMETRY"	.geo
+#	Binary Poly	0x62706f6c	.bpoly
+#	Ascii Poly	"POINTS"	.poly
+#	Ascii Draw	- none -	.d
+#
+
+.dxf "gdxf %s stdout.bgeo" "gdxf stdin.bgeo %s"
+.eps "geps -h %s stdout.bgeo" ""
+.ai "geps -h %s stdout.bgeo" ""
+.iv  "ginventor %s stdout.bgeo" "ginventor stdin.bgeo %s"
+.lw  "glightwave %s stdout.bgeo" ""
+.lwo "glightwave %s stdout.bgeo" ""
+.med "gmed %s stdout.bgeo" ""
+# For OBJ input/output handling that explicitly use the name 'default'
+# as the default group, uncomment the next line and comment the one
+# following it. This fixes .obj files for certain applications which
+# cannot handle it.
+#.obj "gwavefront -d %s stdout.bgeo" "gwavefront -d stdin.bgeo %s"
+.obj "gwavefront %s stdout.bgeo" "gwavefront stdin.bgeo %s"
+.sdl "gsdl %s stdout.bgeo" ""
+.igs "giges -c %s stdout.bgeo" "giges -c stdin.bgeo %s"
+.iges "giges -c %s stdout.bgeo" "giges -c stdin.bgeo %s"
+.ply "gply %s stdout.bgeo" "gply stdin.bgeo %s"
+.pc "i3dconvert -g %s stdout.bgeo" "i3dconvert -c stdin.bgeo %s"
+.pmap "i3dconvert -g %s stdout.bgeo" "i3dconvert -c stdin.bgeo %s"
+.bgeo.bz2 "bzip2 -d -c %s" "bzip2 > %s"
+.geo.bz2 "bzip2 -d -c %s" "bzip2 > %s"
+.bgeo.lzma "lzma -d -c %s" "lzma > %s"
+.geo.lzma "lzma -d -c %s" "lzma > %s"
+
+
+#Example partIO formats below
+.ptc "partioConvertCmd %s stdout.bgeo" "partioConvertCmd stdin.bgeo %s"
+.pdb "partioConvertCmd %s stdout.bgeo" "partioConvertCmd stdin.bgeo %s"
+.pdc "partioConvertCmd %s stdout.bgeo" "partioConvertCmd stdin.bgeo %s"
+.rib "partioConvertCmd %s stdout.bgeo" "partioConvertCmd stdin.bgeo %s"
+.mc "partioConvertCmd %s stdout.bgeo" "partioConvertCmd stdin.bgeo %s"
+.bin "partioConvertCmd %s stdout.bgeo" "partioConvertCmd stdin.bgeo %s"
+

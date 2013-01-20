@@ -1,0 +1,30 @@
+	# Installation directory.
+    INSTDIR = $(HOME)/houdini$(HOUDINI_MAJOR_RELEASE).$(HOUDINI_MINOR_RELEASE)
+
+    # List of C++ source files to build.
+    # SOP_Main.C registers the operators and handles the DSO-specifics.
+    SOURCES = \
+    	./src/partio_houdini.C \
+        ./src/partioConvertCmd.C
+
+    # Use the highest optimization level.
+    OPTIMIZER = -O3
+
+    # Additional include directories.
+    INCDIRS = \
+        -I../../src/lib \
+        -I./include
+
+  # Additional library directories.
+    LIBDIRS = \
+        -L../../lib
+
+    # Additional libraries.
+    LIBS = \
+        -lpartio
+
+    # Set the cmd name.   
+    APPNAME = partioConvertCmd
+
+    # Include the GNU Makefile.
+    include $(HFS)/toolkit/makefiles/Makefile.gnu
