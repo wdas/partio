@@ -229,6 +229,8 @@ ROP_ToPartio::partio_fileSave(const GU_Detail *gdp, const char *fname, float t)
             tupleSize = attr->getTupleSize();
         } else if (attr->getStorageClass() == GA_STORECLASS_INT) {
             type = Partio::INT;
+        } else if (attr->getStorageClass() == GA_STORECLASS_STRING) {
+            type = Partio::INDEXEDSTR;
         } else {
             std::cerr << "Attribute " << attr->getName() << " type " << attr->getType().getTypeName() << " not supported." << std::endl;
             continue;
@@ -256,6 +258,7 @@ ROP_ToPartio::partio_fileSave(const GU_Detail *gdp, const char *fname, float t)
             type = Partio::VECTOR;
             size = sizeof(float);
             break;
+        //TODO: add string support
         case GB_ATTRIB_MIXED:
             continue;
         default:
@@ -307,8 +310,20 @@ ROP_ToPartio::partio_fileSave(const GU_Detail *gdp, const char *fname, float t)
                     }
                 }
                 break;
-            case Partio::NONE:
             case Partio::INDEXEDSTR:
+                {
+#if UT_MAJOR_VERSION_INT >= 12
+                    int index = ppt->getValue<int>(reftoattr[i].first,0);
+                    const char *str = ppt->getString(reftoattr[i].first, index);
+                    int token = data->registerIndexedStr(reftoattr[i].second, str);
+                    int *pv = data->dataWrite<int>((reftoattr[i]).second, 0);
+                    pv[0] = token;
+#else
+                    //TODO: add string support
+#endif
+                }
+                break;
+            case Partio::NONE:
             default:
                 break;
             }

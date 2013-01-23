@@ -144,8 +144,13 @@ SOP_FromPartio::cookMySop(OP_Context &context)
                 attrtoref.push_back(std::make_pair(attr, ref));
             }
             break;
-        case Partio::NONE:
         case Partio::INDEXEDSTR:
+            {
+                GA_RWAttributeRef ref = gdp->addStringTuple(GA_ATTRIB_POINT, attr.name.c_str(), attr.count);
+                attrtoref.push_back(std::make_pair(attr, ref));
+            }
+            break;
+        case Partio::NONE:
         default:
             break;
         }
@@ -181,8 +186,9 @@ SOP_FromPartio::cookMySop(OP_Context &context)
                 attrtoref.push_back(std::make_pair(attr, ref));
             }
             break;
-        case Partio::NONE:
         case Partio::INDEXEDSTR:
+            //TODO: add string support
+        case Partio::NONE:
         default:
             break;
         }
@@ -229,8 +235,20 @@ SOP_FromPartio::cookMySop(OP_Context &context)
                     ppt->set<int>((attrtoref[j]).second, pv, attrtoref[j].first.count);
                 }
                 break;
-            case Partio::NONE:
             case Partio::INDEXEDSTR:
+                {
+                    const std::vector<std::string> indexedStrs = data->indexedStrs(attrtoref[j].first);
+                    if (!indexedStrs.empty()) {
+                        int index=data->data<int>(attrtoref[j].first,i)[0];
+#if UT_MAJOR_VERSION_INT >= 12
+                        ppt->setString((attrtoref[j]).second, indexedStrs[index].c_str(), j);
+#else
+                        //TODO: add string support
+#endif
+                    }
+                }
+                break;
+            case Partio::NONE:
             default:
                 break;
             }
