@@ -7,8 +7,8 @@
 *~
 *.o
 /*.kdev*
-*.cmake
 *.txt
+cmake_install.*
 *.make
 *.marks
 *.includecache

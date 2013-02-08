@@ -400,6 +400,8 @@ static AtNode *MyGetNode(void *user_ptr, int i)
     AiNodeSetArray(currentInstance, "radius", radarr);
     AiNodeSetInt(currentInstance, "mode", arg_renderType);
 
+	AiNodeSetBool(currentInstance, "opaque", false);
+
     return currentInstance;
 }
 
