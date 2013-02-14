@@ -55,7 +55,7 @@ else:
    
 proc_env.Append(CPPPATH = ['.'])
 proc_env.Append(LIBPATH = ['.'])
-proc_env.Append(LIBS = ['ai', STATIC_PARTIO])
+proc_env.Append(LIBS = ['ai','z', STATIC_PARTIO])
 
 ###############################################3
 ## SHADERS
