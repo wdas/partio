@@ -35,7 +35,7 @@ Import('env variant_build_abs variant_install_abs GetInstallPath')
 
 
 
-docTarget=variant_install_abs+'/share/doc/Partio'
+docTarget=variant_install_abs+'/share/doc/partio'
 headers=['#src/lib/Partio.h']
 foo=env.Command("#src/doc/Doxyfile",
                 ["#src/doc/Doxyfile.in"]+headers,

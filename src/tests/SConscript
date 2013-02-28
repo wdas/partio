@@ -49,7 +49,7 @@ for i in range(len(files)):
     file=files[i]
     target=targets[i]
     prog=envtests.Program(target,[file])
-    envtests.Install("../../share/tests",prog)
-    test_targets.append(envtests.Install(variant_install_abs+"/tests",prog))
+    envtests.Install("../../share/tests/partio",prog)
+    test_targets.append(envtests.Install(variant_install_abs+"/tests/partio",prog))
 
 envtests.Alias('test', test_targets)
