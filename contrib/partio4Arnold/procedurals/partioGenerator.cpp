@@ -60,6 +60,7 @@ static int MyInit(AtNode *mynode, void **user_ptr)
    arg_radFrom             = "";
     arg_defaultColor 		= AI_RGB_WHITE;
     arg_defaultOpac			= 1.0f;
+	arg_stepSize			= 0.0f;
     global_motionBlurSteps 	= 1;
     global_fps 				= 24;
     global_motionByFrame 	= 0.5f;
@@ -125,6 +126,10 @@ static int MyInit(AtNode *mynode, void **user_ptr)
     if (AiNodeLookUpUserParameter(mynode, "global_motionByFrame") != NULL)
     {
         global_motionByFrame	= AiNodeGetFlt(mynode, "global_motionByFrame");
+    }
+    if (AiNodeLookUpUserParameter(mynode, "arg_stepSize") != NULL)
+    {
+        arg_stepSize			= AiNodeGetFlt(mynode, "arg_stepSize");
     }
 
     AiMsgInfo("[luma.partioGenerator] loading cache  %s", arg_file);
@@ -425,6 +430,10 @@ static AtNode *MyGetNode(void *user_ptr, int i)
     AiNodeSetInt(currentInstance, "mode", arg_renderType);
 
    AiNodeSetBool(currentInstance, "opaque", false);
+   if (arg_stepSize > 0.0f)
+   {
+	AiNodeSetFlt( currentInstance, "step_size", arg_stepSize);
+   }
 
     return currentInstance;
 }

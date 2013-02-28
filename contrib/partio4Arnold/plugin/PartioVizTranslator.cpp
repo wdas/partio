@@ -64,6 +64,15 @@ void CPartioVizTranslator::NodeInitializer(CAbTranslator context)
    data.shortName = "ai_motion_blur_multiplier";
    helper.MakeInputFloat(data);
 
+   data.defaultValue.FLT = 0.f;
+   data.name = "aiStepSize";
+   data.shortName = "ai_step_size";
+   data.hasMin = true;
+   data.min.FLT = 0.f;
+   data.hasSoftMax = true;
+   data.softMax.FLT = 2.f;
+   helper.MakeInputFloat(data);
+
 }
 
 AtNode* CPartioVizTranslator::CreateArnoldNodes()
@@ -370,6 +379,14 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
       AiNodeSetRGB(procedural, "arg_defaultColor", defaultColor.x, defaultColor.y, defaultColor.z );
       AiNodeSetFlt(procedural, "arg_defaultOpac", defaultOpac );
 
+	  /////////////////////////////////////////
+	  // support  exporting volume step size
+	  float stepSize = m_DagNode.findPlug("aiStepSize").asFloat();
+	  if (stepSize > 0)
+	  {
+		AiNodeDeclare(procedural, "arg_stepSize", "constant FLOAT");
+		AiNodeSetFlt(procedural, "arg_stepSize", stepSize );
+	  }
 
       /// right now because we're using  load at init, we don't need to export the bounding box
       //ExportBoundingBox(procedural);

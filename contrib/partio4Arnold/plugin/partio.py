@@ -12,6 +12,8 @@ class PartioVisualizerTemplate(templates.ShapeTranslatorTemplate):
         self.addControl("aiRadiusMultiplier", label="Radius Multiplier")
         self.addControl("aiMaxParticleRadius", label= "Clamp Max Radius")
         self.addSeparator()
+        self.addControl("aiStepSize",label="Volume Step Size")
+        self.addSeparator()
         self.addControl("aiMotionBlurMultiplier",label="Motion Blur Mult")
 
 templates.registerTranslatorUI(PartioVisualizerTemplate, "partioVisualizer", "partio")
