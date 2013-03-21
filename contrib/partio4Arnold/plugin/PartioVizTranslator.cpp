@@ -237,10 +237,12 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
    if (!update)
    {
       /// TODO: figure out how to  use a  env variable to path just the .so name correctly
-      MFileObject envProcFilePath;
-      envProcFilePath.setRawPath("${MTOA_PROCEDURALS_PATH}");
-      MString envProcPath =envProcFilePath.resolvedPath();
-      MString dso = envProcPath+(MString("/partioGenerator.so"));
+      //MFileObject envProcFilePath;
+      //envProcFilePath.setRawPath("${MTOA_PROCEDURALS_PATH}");
+      //MString envProcPath =envProcFilePath.resolvedPath();
+      //MString dso = envProcPath+(MString("/partioGenerator.so"));
+
+      MString dso = ("partioGenerator.so");
 
       MString formattedName = m_DagNode.findPlug("renderCachePath").asString();
       int frameNum = m_DagNode.findPlug("time").asInt();
