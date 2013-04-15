@@ -331,7 +331,6 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
 
     for (int particles = 0; particles < p.numParticles(); particles++)
     {
-        cout <<  particles << endl;
         // set defaults for stuff that is not exported...
         float position[3] = {0.0,0.0,0.0};
         float velocity[3] = {0.0,0.0,0.0};
@@ -357,7 +356,6 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
             ParticleAttribute attr;
             p.attributeInfo(attrIndex,attr);
 
-            cout << attr.name << endl;
             if (attr.name ==  "position")
             {
                 const float* data = p.data<float>(attr, particles);
@@ -396,8 +394,8 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
             }
             else if (attr.name == "neighbors")
             {
-                const float* data = p.data<float>(attr, particles);
-                neighbors= (int)data[0];
+                const int* data = p.data<int>(attr, particles);
+                neighbors= data[0];
             }
             else if (attr.name == "uvw")
             {
@@ -443,8 +441,8 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
             }
             else if (attr.name == "id")
             {
-                const float* data = p.data<float>(attr, particles);
-                pid= (int)data[0];
+                const int* data = p.data<int>(attr, particles);
+                pid= data[0];
             }
 
             else
