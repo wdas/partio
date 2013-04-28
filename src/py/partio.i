@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 %{
 #include <Partio.h>
+#include <PartioSe.h>
 namespace Partio{
 typedef uint64_t ParticleIndex;
 }
@@ -368,3 +369,10 @@ void write(const char* filename,const ParticlesData&,const bool=false);
 %feature("autodoc");
 %feature("docstring","Print a summary of particle file");
 void print(const ParticlesData* particles);
+
+class PartioSe{
+  public:
+    PartioSe(ParticlesDataMutable* parts,const char* expr);
+    bool runAll();
+    bool runRange(int istart,int iend);
+};
