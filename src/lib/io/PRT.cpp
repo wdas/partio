@@ -38,6 +38,7 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 
 
 */
+#ifdef PARTIO_USE_ZLIB
 #include "../Partio.h"
 #include "PartioEndian.h"
 #include "../core/ParticleHeaders.h"
@@ -56,7 +57,7 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 #include <string>
 #include <memory>
 #include <zlib.h>
-
+#endif
 namespace Partio{
 
 #define OUT_BUFSIZE		(4096)
@@ -419,4 +420,5 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
 }
 
 }
+#endif
 
