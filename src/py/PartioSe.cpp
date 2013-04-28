@@ -114,7 +114,11 @@ bool PartioSe::runRange(int istart,int iend)
         std::cerr<<parseError()<<std::endl;
         return false;
     }
-    for(int i=0,n=parts->numParticles();i<n;i++){
+    if(istart < 0  || iend > parts->numParticles() || iend < istart){
+        std::cerr<<"Invalid range ["<<istart<<","<<iend<<") specified. Max valid range is [0,"<<parts->numParticles()<<")"<<std::endl;
+        return false;
+    }
+    for(int i=istart;i<iend;i++){
         currentIndex=i;
         indexVar.val=currentIndex;
         SeVec3d value=evaluate();
