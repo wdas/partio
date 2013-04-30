@@ -57,10 +57,16 @@ using namespace std;
 
 // global vars
 ParticlesData* particles;
+ParticlesData* connectivity;
+
+
 Camera camera;
 ParticleAttribute positionAttr;
 ParticleAttribute colorAttr;
 ParticleAttribute alphaAttr;
+
+ParticleAttribute attr1;
+ParticleAttribute attr2;
 
 int numPoints;
 int frameNumberOGL;
@@ -85,6 +91,8 @@ bool alphaMissing;
 string loadError;
 string particleFile;
 string lastParticleFile;
+string connectivityFile;
+string lastConnectivityFile;
 
 void restorePerspectiveProjection();
 void setOrthographicProjection();

@@ -67,7 +67,7 @@ public:
 
 struct SimpleVar:public SeExprVarRef{
     double val;
-
+    SimpleVar():val(0){}
     bool isVec(){return false;}
     void eval(const SeExprVarNode* node,SeVec3d& result){
         result[0]=result[1]=result[2]=val;
@@ -78,8 +78,12 @@ struct SimpleVar:public SeExprVarRef{
 template<class T> class VarToPartio;
 
 class PartioSe:public SeExpression{
+    bool isPaired;
     int currentIndex;
+    Partio::ParticleAttribute pairH1,pairH2;
+    int pairIndex1,pairIndex2;
     Partio::ParticlesDataMutable* parts;
+    Partio::ParticlesDataMutable* partsPairing;
     typedef std::map<std::string,AttribVar<int>*> IntVarMap;
     mutable IntVarMap intVars;
     typedef std::map<std::string,AttribVar<float>*> FloatVarMap;
@@ -90,14 +94,21 @@ class PartioSe:public SeExpression{
     IntVarToPartio intVarToPartio;
     FloatVarToPartio floatVarToPartio;
 
-    mutable SimpleVar indexVar,countVar;
+    mutable SimpleVar indexVar,countVar,timeVar;
 
 public:
+    typedef  SeExpression::LocalVarTable::const_iterator LocalVarTableIterator;
+    
     PartioSe(Partio::ParticlesDataMutable* parts,const char* expr);
+    PartioSe(Partio::ParticlesDataMutable* partsPairing,Partio::ParticlesDataMutable* parts,const char* expr);
+    void addSet(const char* prefix,Partio::ParticlesDataMutable* parts,int& setIndex);
+    void addExport(const std::string& name,LocalVarTableIterator it,Partio::ParticlesDataMutable* parts,int& setIndex);
     virtual ~PartioSe();
     bool runAll();
+    bool runRandom();
+    void run(int i);
     bool runRange(int istart,int iend);
-
+    void setTime(float val);
     SeExprVarRef*  resolveVar(const std::string& s) const;
 private:
     PartioSe(const PartioSe&);
