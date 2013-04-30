@@ -552,6 +552,9 @@ void print(const ParticlesData* particles);
 class PartioSe{
   public:
     PartioSe(ParticlesDataMutable* parts,const char* expr);
+    PartioSe(ParticlesDataMutable* partsPairing,ParticlesDataMutable* parts,const char* expr);
     bool runAll();
+    bool runRandom();
     bool runRange(int istart,int iend);
+    void setTime(float val);
 };
