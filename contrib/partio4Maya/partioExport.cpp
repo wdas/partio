@@ -45,6 +45,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #define  kFormatFlagL		"-format"
 #define  kFilePrefixFlagS	"-fp"
 #define  kFilePrefixFlagL	"-filePrefix"
+#define  kPerFrameFlagS     "-pf"
+#define  kPerFrameFlagL   	"-perFrame"
 
 
 using namespace std;
@@ -72,6 +74,7 @@ MSyntax PartioExport::createSyntax()
     syntax.addFlag(kMinFrameFlagS,kMinFrameFlagL, MSyntax::kLong);
     syntax.addFlag(kMaxFrameFlagS, kMaxFrameFlagL, MSyntax::kLong);
     syntax.addFlag(kFilePrefixFlagS,kFilePrefixFlagL, MSyntax::kString);
+	syntax.addFlag(kPerFrameFlagS,kPerFrameFlagL, MSyntax::kString);
     syntax.addArg(MSyntax::kString);
     syntax.enableQuery(false);
     syntax.enableEdit(false);
@@ -110,6 +113,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
     MString Format;
     MString fileNamePrefix;
     bool hasFilePrefix = false;
+	bool perFrame = false;
 
 
     if (argData.isFlagSet(kPathFlagL))
@@ -130,7 +134,6 @@ MStatus PartioExport::doIt(const MArgList& Args)
     }
 
     Format = Format.toLowerCase();
-
 
     if (Format != "pda" &&
             Format != "pdb" &&
@@ -183,6 +186,11 @@ MStatus PartioExport::doIt(const MArgList& Args)
         swapUP = true;
     }
 
+    if (argData.isFlagSet(kPerFrameFlagL))
+	{
+		perFrame = true;
+	}
+
     MString PSName; // particle shape name
     argData.getCommandArgument(0, PSName);
     MSelectionList list;
@@ -197,7 +205,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
         return MStatus::kFailure;
     }
 
-    /// parse attribute  flags
+    /// parse attribute flags
     unsigned int numUses = argData.numberOfFlagUses( kAttributeFlagL );
 
     /// loop thru the rest of the attributes given
@@ -249,6 +257,8 @@ MStatus PartioExport::doIt(const MArgList& Args)
 		{
 			PS.evaluateDynamics(dynTime,false);
 		}
+
+		/// why is this being done AFTER the evaluate dynamics stuff?
         if (startFrameSet && endFrameSet && startFrame < endFrame)
         {
             MGlobal::viewFrame(frame);
