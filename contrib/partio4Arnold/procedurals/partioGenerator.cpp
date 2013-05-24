@@ -13,6 +13,23 @@
 using namespace std;
 using namespace Partio;
 
+//
+/*
+inline bool lsHandleCudaErrorFunc(const char* fl, int ln)
+{
+ cudaError_t cet = cudaGetLastError();
+ if(cet != cudaSuccess)
+ {
+  std::cout << "[" << fl << " : " << ln << "] : " << cudaGetErrorString(cet) << "\n";
+  return true;
+ }
+ else return false;
+}
+
+#define lsHandleCudaError() lsHandleCudaErrorFunc(__FILE__, __LINE__)
+*/
+
+
 
 bool partioCacheExists ( const char* fileName )
 {
@@ -204,10 +221,6 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
                 hasRgbPP = true;
 				rgbArr = AiArrayAllocate ( pointCount,1,AI_TYPE_RGB );
             }
-			else
-			{
-				rgbArr = AiArrayAllocate ( 1, 1, AI_TYPE_RBG );
-			}
 
             /// OPACITY
             AiNodeDeclare ( currentInstance, "opacityPP", "uniform Float" );
@@ -217,10 +230,6 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
                 hasOpacPP = true;
 				opacityArr = AiArrayAllocate ( pointCount,1,AI_TYPE_FLOAT );
             }
-            else
-			{
-				opacityArr = AiArrayAllocate ( 1, 1, AI_TYPE_FLOAT );
-			}
 
             /// RADIUS by default  if "none" is defined it will look for  radiusPP or  radius
             if ( (arg_radFrom != "" && points->attributeInfo ( arg_radFrom,radiusAttr )) && !arg_overrideRadiusPP )
@@ -235,10 +244,6 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
                 hasRadiusPP = true;
 				radarr     = AiArrayAllocate ( pointCount,1,AI_TYPE_FLOAT );
             }
-            else
-			{
-				radarr     = AiArrayAllocate ( 1, 1, AI_TYPE_FLOAT );
-			}
 
             for ( int i = 0; i< pointCount; i++ )
             {
@@ -399,29 +404,35 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
 
     if (!hasRgbPP)
 	{
-		AiNodeSetRGB ( currentInstance, arg_defaultColor );
+		cout << " setting  rgbPP " << endl;
+		AiNodeSetRGB ( currentInstance, "rgbPP", arg_defaultColor.r, arg_defaultColor.g, arg_defaultColor.b );
 	}
 	else
 	{
+		cout << " settign rgbPP array" << endl;
 		AiNodeSetArray ( currentInstance, "rgbPP", rgbArr );
 	}
 
 	if (!hasOpacPP)
 	{
-		AiNodeSetFlt ( currentInstance, arg_defaultOpac );
+		cout << " setting  opacityPP " << endl;
+		//AiNodeSetFlt ( currentInstance, "opacityPP", arg_defaultOpac );
 	}
 	else
 	{
-		AiNodeSetArray ( currentInstance, "opacityPP", opacityArr );
+		cout << " setting  opacityPP array " << endl;
+		//AiNodeSetArray ( currentInstance, "opacityPP", opacityArr );
 	}
 
 	if (!hasRadiusPP || arg_overrideRadiusPP)
 	{
-		AiNodeSetFlt ( currentInstance, arg_radius*arg_radiusMult );
+		cout << " setting  radius " << endl;
+		//AiNodeSetFlt ( currentInstance, "radius", arg_radius*arg_radiusMult );
 	}
 	else
 	{
-		AiNodeSetArray ( currentInstance, "radius", radarr );
+		cout << " setting  radius array " << endl;
+		//AiNodeSetArray ( currentInstance, "radius", radarr );
 	}
 
 
