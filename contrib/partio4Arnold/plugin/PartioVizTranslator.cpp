@@ -19,74 +19,74 @@
 
 void* CPartioVizTranslator::creator()
 {
-      return new CPartioVizTranslator();
+    return new CPartioVizTranslator();
 }
 
-void CPartioVizTranslator::NodeInitializer(CAbTranslator context)
+void CPartioVizTranslator::NodeInitializer ( CAbTranslator context )
 {
-   CExtensionAttrHelper helper(context.maya, "procedural");
-   CShapeTranslator::MakeCommonAttributes(helper);
+    CExtensionAttrHelper helper ( context.maya, "procedural" );
+    CShapeTranslator::MakeCommonAttributes ( helper );
 
-   CAttrData data;
+    CAttrData data;
 
-   MStringArray  enumNames;
-   enumNames.append("points");
-   enumNames.append("spheres");
-   enumNames.append("quads");
-   data.defaultValue.INT = 0;
-   data.name = "aiRenderPointsAs";
-   data.shortName = "ai_render_points_as";
-   data.enums= enumNames;
-   helper.MakeInputEnum(data);
+    MStringArray  enumNames;
+    enumNames.append ( "points" );
+    enumNames.append ( "spheres" );
+    enumNames.append ( "quads" );
+    data.defaultValue.INT = 0;
+    data.name = "aiRenderPointsAs";
+    data.shortName = "ai_render_points_as";
+    data.enums= enumNames;
+    helper.MakeInputEnum ( data );
 
-   data.defaultValue.BOOL = FALSE;
-   data.name = "aiOverrideRadiusPP";
-   data.shortName = "ai_override_radiusPP";
-   helper.MakeInputBoolean(data);
+    data.defaultValue.BOOL = FALSE;
+    data.name = "aiOverrideRadiusPP";
+    data.shortName = "ai_override_radiusPP";
+    helper.MakeInputBoolean ( data );
 
-   data.defaultValue.FLT = 1000000;
-   data.name = "aiMaxParticleRadius";
-   data.shortName = "ai_max_particle_radius";
-   helper.MakeInputFloat(data);
+    data.defaultValue.FLT = 1000000;
+    data.name = "aiMaxParticleRadius";
+    data.shortName = "ai_max_particle_radius";
+    helper.MakeInputFloat ( data );
 
-   data.defaultValue.FLT = 0.2;
-   data.name = "aiRadius";
-   data.shortName = "ai_radius";
-   helper.MakeInputFloat(data);
+    data.defaultValue.FLT = 0.2;
+    data.name = "aiRadius";
+    data.shortName = "ai_radius";
+    helper.MakeInputFloat ( data );
 
-   data.defaultValue.FLT = 1.0;
-   data.name = "aiRadiusMultiplier";
-   data.shortName = "ai_radius_multiplier";
-   helper.MakeInputFloat(data);
+    data.defaultValue.FLT = 1.0;
+    data.name = "aiRadiusMultiplier";
+    data.shortName = "ai_radius_multiplier";
+    helper.MakeInputFloat ( data );
 
-   data.defaultValue.FLT = 1.0;
-   data.name = "aiMotionBlurMultiplier";
-   data.shortName = "ai_motion_blur_multiplier";
-   helper.MakeInputFloat(data);
+    data.defaultValue.FLT = 1.0;
+    data.name = "aiMotionBlurMultiplier";
+    data.shortName = "ai_motion_blur_multiplier";
+    helper.MakeInputFloat ( data );
 
-   data.defaultValue.FLT = 0.f;
-   data.name = "aiStepSize";
-   data.shortName = "ai_step_size";
-   data.hasMin = true;
-   data.min.FLT = 0.f;
-   data.hasSoftMax = true;
-   data.softMax.FLT = 2.f;
-   helper.MakeInputFloat(data);
+    data.defaultValue.FLT = 0.f;
+    data.name = "aiStepSize";
+    data.shortName = "ai_step_size";
+    data.hasMin = true;
+    data.min.FLT = 0.f;
+    data.hasSoftMax = true;
+    data.softMax.FLT = 2.f;
+    helper.MakeInputFloat ( data );
 
 }
 
 AtNode* CPartioVizTranslator::CreateArnoldNodes()
 {
-   if (IsMasterInstance())
-   {
-      AtNode * tmpRes = AddArnoldNode("procedural");
-      return  tmpRes;
-   }
-   else
-   {
-      AtNode * tmpRes = AddArnoldNode("ginstance");
-      return  tmpRes;
-   }
+    if ( IsMasterInstance() )
+    {
+        AtNode * tmpRes = AddArnoldNode ( "procedural" );
+        return  tmpRes;
+    }
+    else
+    {
+        AtNode * tmpRes = AddArnoldNode ( "ginstance" );
+        return  tmpRes;
+    }
 }
 
 /*
@@ -112,307 +112,307 @@ void CPartioVizTranslator::ProcessRenderFlags(AtNode* node)
 }
 */
 
-void CPartioVizTranslator::Export(AtNode* anode)
+void CPartioVizTranslator::Export ( AtNode* anode )
 {
-   const char* nodeType = AiNodeEntryGetName(AiNodeGetNodeEntry(anode));
-   if (strcmp(nodeType, "ginstance") == 0)
-   {
-      ExportInstance(anode, GetMasterInstance());
-   }
-   else
-   {
-      ExportProcedural(anode, false);
-   }
+    const char* nodeType = AiNodeEntryGetName ( AiNodeGetNodeEntry ( anode ) );
+    if ( strcmp ( nodeType, "ginstance" ) == 0 )
+    {
+        ExportInstance ( anode, GetMasterInstance() );
+    }
+    else
+    {
+        ExportProcedural ( anode, false );
+    }
 }
 
-void CPartioVizTranslator::ExportMotion(AtNode* anode, unsigned int step)
+void CPartioVizTranslator::ExportMotion ( AtNode* anode, unsigned int step )
 {
-   ExportMatrix(anode, step);
+    ExportMatrix ( anode, step );
 }
 
-void CPartioVizTranslator::Update(AtNode* anode)
+void CPartioVizTranslator::Update ( AtNode* anode )
 {
-   const char* nodeType = AiNodeEntryGetName(AiNodeGetNodeEntry(anode));
-   if (strcmp(nodeType, "ginstance") == 0)
-   {
-      ExportInstance(anode, GetMasterInstance());
-   }
-   else
-   {
-      ExportProcedural(anode, true);
-   }
+    const char* nodeType = AiNodeEntryGetName ( AiNodeGetNodeEntry ( anode ) );
+    if ( strcmp ( nodeType, "ginstance" ) == 0 )
+    {
+        ExportInstance ( anode, GetMasterInstance() );
+    }
+    else
+    {
+        ExportProcedural ( anode, true );
+    }
 }
 
-void CPartioVizTranslator::UpdateMotion(AtNode* anode, unsigned int step)
+void CPartioVizTranslator::UpdateMotion ( AtNode* anode, unsigned int step )
 {
-   ExportMatrix(anode, step);
+    ExportMatrix ( anode, step );
 }
 
 // Deprecated : Arnold support procedural instance, but it's not safe.
 //
-AtNode* CPartioVizTranslator::ExportInstance(AtNode *instance, const MDagPath& masterInstance)
+AtNode* CPartioVizTranslator::ExportInstance ( AtNode *instance, const MDagPath& masterInstance )
 {
-   AtNode* masterNode = AiNodeLookUpByName(masterInstance.partialPathName().asChar());
+    AtNode* masterNode = AiNodeLookUpByName ( masterInstance.partialPathName().asChar() );
 
-   AiNodeSetStr(instance, "name", m_dagPath.partialPathName().asChar());
+    AiNodeSetStr ( instance, "name", m_dagPath.partialPathName().asChar() );
 
-   ExportMatrix(instance, 0);
+    ExportMatrix ( instance, 0 );
 
-   AiNodeSetPtr(instance, "node", masterNode);
-   AiNodeSetBool(instance, "inherit_xform", false);
+    AiNodeSetPtr ( instance, "node", masterNode );
+    AiNodeSetBool ( instance, "inherit_xform", false );
 
-   int visibility = AiNodeGetInt(masterNode, "visibility");
-   AiNodeSetInt(instance, "visibility", visibility);
+    int visibility = AiNodeGetInt ( masterNode, "visibility" );
+    AiNodeSetInt ( instance, "visibility", visibility );
 
-   m_DagNode.setObject(masterInstance);
+    m_DagNode.setObject ( masterInstance );
 
-   ExportPartioVizShaders(instance);
+    ExportPartioVizShaders ( instance );
 
-   return instance;
+    return instance;
 }
 
 void CPartioVizTranslator::ExportShaders()
 {
-   AiMsgWarning( "[mtoa] Shaders untested with new multitranslator and standin code.");
-   /// TODO: Test shaders with standins.
-   ExportPartioVizShaders(GetArnoldRootNode());
+    AiMsgWarning ( "[mtoa] Shaders untested with new multitranslator and standin code." );
+    /// TODO: Test shaders with standins.
+    ExportPartioVizShaders ( GetArnoldRootNode() );
 }
 
-void CPartioVizTranslator::ExportPartioVizShaders(AtNode* procedural)
+void CPartioVizTranslator::ExportPartioVizShaders ( AtNode* procedural )
 {
-   int instanceNum = m_dagPath.isInstanced() ? m_dagPath.instanceNumber() : 0;
+    int instanceNum = m_dagPath.isInstanced() ? m_dagPath.instanceNumber() : 0;
 
-   std::vector<AtNode*> meshShaders;
+    std::vector<AtNode*> meshShaders;
 
-   MPlug shadingGroupPlug = GetNodeShadingGroup(m_dagPath.node(), instanceNum);
-   if (!shadingGroupPlug.isNull())
-   {
-      AtNode *shader = ExportNode(shadingGroupPlug);
-      if (shader != NULL)
-      {
-         AiNodeSetPtr(procedural, "shader", shader);
-         meshShaders.push_back(shader);
-      }
-      else
-      {
-         AiMsgWarning("[mtoa] [translator %s] ShadingGroup %s has no surfaceShader input",
-               GetTranslatorName().asChar(), MFnDependencyNode(shadingGroupPlug.node()).name().asChar());
-         /*AiMsgWarning("[mtoa] ShadingGroup %s has no surfaceShader input.",
-               fnDGNode.name().asChar());*/
-         AiNodeSetPtr(procedural, "shader", NULL);
-      }
-   }
+    MPlug shadingGroupPlug = GetNodeShadingGroup ( m_dagPath.node(), instanceNum );
+    if ( !shadingGroupPlug.isNull() )
+    {
+        AtNode *shader = ExportNode ( shadingGroupPlug );
+        if ( shader != NULL )
+        {
+            AiNodeSetPtr ( procedural, "shader", shader );
+            meshShaders.push_back ( shader );
+        }
+        else
+        {
+            AiMsgWarning ( "[mtoa] [translator %s] ShadingGroup %s has no surfaceShader input",
+                           GetTranslatorName().asChar(), MFnDependencyNode ( shadingGroupPlug.node() ).name().asChar() );
+            /*AiMsgWarning("[mtoa] ShadingGroup %s has no surfaceShader input.",
+                  fnDGNode.name().asChar());*/
+            AiNodeSetPtr ( procedural, "shader", NULL );
+        }
+    }
 }
 
 // THIS MAY NOT REALLY BE NEEDED ANYMORE BUT LEAVING IT FOR NOW
-void CPartioVizTranslator::ExportBoundingBox(AtNode* procedural)
+void CPartioVizTranslator::ExportBoundingBox ( AtNode* procedural )
 {
-   MBoundingBox boundingBox = m_DagNode.boundingBox();
-   MPoint bbMin = boundingBox.min();
-   MPoint bbMax = boundingBox.max();
+    MBoundingBox boundingBox = m_DagNode.boundingBox();
+    MPoint bbMin = boundingBox.min();
+    MPoint bbMax = boundingBox.max();
 
-   float minCoords[4];
-   float maxCoords[4];
+    float minCoords[4];
+    float maxCoords[4];
 
-   bbMin.get(minCoords);
-   bbMax.get(maxCoords);
+    bbMin.get ( minCoords );
+    bbMax.get ( maxCoords );
 
-   AiNodeSetPnt(procedural, "min", minCoords[0], minCoords[1], minCoords[2]);
-   AiNodeSetPnt(procedural, "max", maxCoords[0], maxCoords[1], maxCoords[2]);
+    AiNodeSetPnt ( procedural, "min", minCoords[0], minCoords[1], minCoords[2] );
+    AiNodeSetPnt ( procedural, "max", maxCoords[0], maxCoords[1], maxCoords[2] );
 
 }
 
 
-AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
+AtNode* CPartioVizTranslator::ExportProcedural ( AtNode* procedural, bool update )
 {
-   m_DagNode.setObject(m_dagPath.node());
+    m_DagNode.setObject ( m_dagPath.node() );
 
-   AiNodeSetStr(procedural, "name", m_dagPath.partialPathName().asChar());
+    AiNodeSetStr ( procedural, "name", m_dagPath.partialPathName().asChar() );
 
-   ExportMatrix(procedural, 0);
-   ProcessRenderFlags(procedural);
+    ExportMatrix ( procedural, 0 );
+    ProcessRenderFlags ( procedural );
 
-   ExportPartioVizShaders(procedural);
+    ExportPartioVizShaders ( procedural );
 
-   if (!update)
-   {
-      /// TODO: figure out how to  use a  env variable to path just the .so name correctly
-      //MFileObject envProcFilePath;
-      //envProcFilePath.setRawPath("${MTOA_PROCEDURALS_PATH}");
-      //MString envProcPath =envProcFilePath.resolvedPath();
-      //MString dso = envProcPath+(MString("/partioGenerator.so"));
+    if ( !update )
+    {
+        /// TODO: figure out how to  use a  env variable to path just the .so name correctly
+        //MFileObject envProcFilePath;
+        //envProcFilePath.setRawPath("${MTOA_PROCEDURALS_PATH}");
+        //MString envProcPath =envProcFilePath.resolvedPath();
+        //MString dso = envProcPath+(MString("/partioGenerator.so"));
 
-      MString dso = ("partioGenerator.so");
+        MString dso = ( "partioGenerator.so" );
 
-      MString formattedName = m_DagNode.findPlug("renderCachePath").asString();
-      int frameNum = m_DagNode.findPlug("time").asInt();
-     int frameOffset = m_DagNode.findPlug("cacheOffset").asInt();
+        MString formattedName = m_DagNode.findPlug ( "renderCachePath" ).asString();
+        int frameNum = m_DagNode.findPlug ( "time" ).asInt();
+        int frameOffset = m_DagNode.findPlug ( "cacheOffset" ).asInt();
 
-     int finalFrame = frameNum + frameOffset;
+        int finalFrame = frameNum + frameOffset;
 
-      /// TODO:  this is only temporary
-      /// need to make the node actually update itself properly
-      MString formatExt = formattedName.substring((formattedName.length()-3),(formattedName.length()-1));
-      //cout << formatExt << endl;
-      int cachePadding = 4;
+        /// TODO:  this is only temporary
+        /// need to make the node actually update itself properly
+        MString formatExt = formattedName.substring ( ( formattedName.length()-3 ), ( formattedName.length()-1 ) );
+        //cout << formatExt << endl;
+        int cachePadding = 4;
 
-      MString formatString =  "%0";
-      // special case for PDCs and maya nCache files because of the funky naming convention  TODO: support substepped/retiming  caches
-      if (formatExt == "pdc")
-      {
-         finalFrame *= (int)(6000 / 24);
-         cachePadding = 1;
-      }
+        MString formatString =  "%0";
+        // special case for PDCs and maya nCache files because of the funky naming convention  TODO: support substepped/retiming  caches
+        if ( formatExt == "pdc" )
+        {
+            finalFrame *= ( int ) ( 6000 / 24 );
+            cachePadding = 1;
+        }
 
-      char frameString[10] = "";
+        char frameString[10] = "";
 
-      formatString += cachePadding;
-      formatString += "d";
+        formatString += cachePadding;
+        formatString += "d";
 
-      const char* fmt = formatString.asChar();
+        const char* fmt = formatString.asChar();
 
-      sprintf(frameString, fmt,  finalFrame);
+        sprintf ( frameString, fmt,  finalFrame );
 
-      MString frameNumFormattedName;
+        MString frameNumFormattedName;
 
-      MStringArray foo;
+        MStringArray foo;
 
-      formattedName.split('<',foo);
-     MString newFoo;
-     if (foo.length() > 1)
-     {
-        foo[1] = foo[1].substring(6,foo[1].length()-1);
-         newFoo = foo[0]+MString(frameString)+foo[1];
-     }
-     else
-     {
-         newFoo = foo[0];
-     }
+        formattedName.split ( '<',foo );
+        MString newFoo;
+        if ( foo.length() > 1 )
+        {
+            foo[1] = foo[1].substring ( 6,foo[1].length()-1 );
+            newFoo = foo[0]+MString ( frameString ) +foo[1];
+        }
+        else
+        {
+            newFoo = foo[0];
+        }
 
-      if (!fileCacheExists(newFoo.asChar()))
-     {
-          AiMsgWarning("[mtoa] PartioVisualizer %s being skipped, can't find cache file.", m_DagNode.name().asChar());
-        return NULL;
-     }
+        if ( !fileCacheExists ( newFoo.asChar() ) )
+        {
+            AiMsgWarning ( "[mtoa] PartioVisualizer %s being skipped, can't find cache file.", m_DagNode.name().asChar() );
+            return NULL;
+        }
 
-      AiNodeSetStr(procedural, "dso", dso.asChar());
-      AiNodeSetBool(procedural, "load_at_init", true);
+        AiNodeSetStr ( procedural, "dso", dso.asChar() );
+        AiNodeSetBool ( procedural, "load_at_init", true );
 
-      AiNodeDeclare(procedural, "arg_file", "constant STRING");
-      AiNodeSetStr(procedural, "arg_file", newFoo.asChar());
+        AiNodeDeclare ( procedural, "arg_file", "constant STRING" );
+        AiNodeSetStr ( procedural, "arg_file", newFoo.asChar() );
 
-      AiNodeDeclare(procedural, "arg_radius", "constant FLOAT");
-      AiNodeSetFlt(procedural, "arg_radius", m_DagNode.findPlug("defaultRadius").asFloat());
+        AiNodeDeclare ( procedural, "arg_radius", "constant FLOAT" );
+        AiNodeSetFlt ( procedural, "arg_radius", m_DagNode.findPlug ( "defaultRadius" ).asFloat() );
 
-      AiNodeDeclare(procedural, "arg_maxParticleRadius", "constant FLOAT");
-      AiNodeSetFlt(procedural, "arg_maxParticleRadius", m_DagNode.findPlug("aiMaxParticleRadius").asFloat());
+        AiNodeDeclare ( procedural, "arg_maxParticleRadius", "constant FLOAT" );
+        AiNodeSetFlt ( procedural, "arg_maxParticleRadius", m_DagNode.findPlug ( "aiMaxParticleRadius" ).asFloat() );
 
-      AiNodeDeclare(procedural, "overrideRadiusPP", "constant BOOL");
-      AiNodeSetBool(procedural, "overrideRadiusPP", m_DagNode.findPlug("aiOverrideRadiusPP").asBool());
+        AiNodeDeclare ( procedural, "overrideRadiusPP", "constant BOOL" );
+        AiNodeSetBool ( procedural, "overrideRadiusPP", m_DagNode.findPlug ( "aiOverrideRadiusPP" ).asBool() );
 
-      AiNodeDeclare(procedural, "global_motionBlurSteps", "constant INT");
-      AiNodeSetInt(procedural, "global_motionBlurSteps", (int)GetNumMotionSteps());
+        AiNodeDeclare ( procedural, "global_motionBlurSteps", "constant INT" );
+        AiNodeSetInt ( procedural, "global_motionBlurSteps", ( int ) GetNumMotionSteps() );
 
-      AiNodeDeclare(procedural, "global_motionByFrame", "constant FLOAT");
-      AiNodeSetFlt(procedural, "global_motionByFrame", (float)GetMotionByFrame());
+        AiNodeDeclare ( procedural, "global_motionByFrame", "constant FLOAT" );
+        AiNodeSetFlt ( procedural, "global_motionByFrame", ( float ) GetMotionByFrame() );
 
-      MTime oneSec(1.0, MTime::kSeconds);
-      float fps =  (float)oneSec.asUnits(MTime::uiUnit());
-      AiNodeDeclare(procedural, "global_fps", "constant FLOAT");
-      AiNodeSetFlt(procedural, "global_fps", fps);
+        MTime oneSec ( 1.0, MTime::kSeconds );
+        float fps = ( float ) oneSec.asUnits ( MTime::uiUnit() );
+        AiNodeDeclare ( procedural, "global_fps", "constant FLOAT" );
+        AiNodeSetFlt ( procedural, "global_fps", fps );
 
-      AiNodeDeclare(procedural, "arg_motionBlurMult", "constant FLOAT");
-      AiNodeSetFlt(procedural, "arg_motionBlurMult", m_DagNode.findPlug("aiMotionBlurMultiplier").asFloat());
+        AiNodeDeclare ( procedural, "arg_motionBlurMult", "constant FLOAT" );
+        AiNodeSetFlt ( procedural, "arg_motionBlurMult", m_DagNode.findPlug ( "aiMotionBlurMultiplier" ).asFloat() );
 
-      AiNodeDeclare(procedural, "arg_renderType", "constant INT");
-      AiNodeSetInt(procedural, "arg_renderType", m_DagNode.findPlug("aiRenderPointsAs").asInt());
+        AiNodeDeclare ( procedural, "arg_renderType", "constant INT" );
+        AiNodeSetInt ( procedural, "arg_renderType", m_DagNode.findPlug ( "aiRenderPointsAs" ).asInt() );
 
-      AiNodeDeclare(procedural, "arg_radiusMult", "constant FLOAT");
-      AiNodeSetFlt(procedural, "arg_radiusMult", m_DagNode.findPlug("aiRadiusMultiplier").asFloat());
+        AiNodeDeclare ( procedural, "arg_radiusMult", "constant FLOAT" );
+        AiNodeSetFlt ( procedural, "arg_radiusMult", m_DagNode.findPlug ( "aiRadiusMultiplier" ).asFloat() );
 
-      AiNodeDeclare(procedural, "arg_rgbFrom", "constant STRING");
-      AiNodeDeclare(procedural, "arg_opacFrom", "constant STRING");
-     AiNodeDeclare(procedural, "arg_radFrom", "constant STRING");
+        AiNodeDeclare ( procedural, "arg_rgbFrom", "constant STRING" );
+        AiNodeDeclare ( procedural, "arg_opacFrom", "constant STRING" );
+        AiNodeDeclare ( procedural, "arg_radFrom", "constant STRING" );
 
-      MPlug partioAttrs = m_DagNode.findPlug("partioCacheAttributes");
+        MPlug partioAttrs = m_DagNode.findPlug ( "partioCacheAttributes" );
 
-      int colorIndex = m_DagNode.findPlug("colorFrom").asInt();
-      int opacIndex = m_DagNode.findPlug("opacityFrom").asInt();
-     int radiusIndex =  m_DagNode.findPlug("radiusFrom").asInt();
+        int colorIndex = m_DagNode.findPlug ( "colorFrom" ).asInt();
+        int opacIndex = m_DagNode.findPlug ( "opacityFrom" ).asInt();
+        int radiusIndex =  m_DagNode.findPlug ( "radiusFrom" ).asInt();
 
-      MString rgbFrom = "";
-      MString opacFrom = "";
-     MString radFrom = "";
-      if (colorIndex >=0)
-      {
-         MPlug rgbArrayEntry = partioAttrs.elementByLogicalIndex(colorIndex);
-         rgbArrayEntry.getValue(rgbFrom);
-      }
-      if (opacIndex >=0)
-      {
-         MPlug opacArrayEntry =partioAttrs.elementByLogicalIndex(opacIndex);
-         opacArrayEntry.getValue(opacFrom);
-      }
-      if (radiusIndex >=0)
-     {
-         MPlug radiusArrayEntry =partioAttrs.elementByLogicalIndex(radiusIndex);
-         radiusArrayEntry.getValue(radFrom);
-     }
+        MString rgbFrom = "";
+        MString opacFrom = "";
+        MString radFrom = "";
+        if ( colorIndex >=0 )
+        {
+            MPlug rgbArrayEntry = partioAttrs.elementByLogicalIndex ( colorIndex );
+            rgbArrayEntry.getValue ( rgbFrom );
+        }
+        if ( opacIndex >=0 )
+        {
+            MPlug opacArrayEntry =partioAttrs.elementByLogicalIndex ( opacIndex );
+            opacArrayEntry.getValue ( opacFrom );
+        }
+        if ( radiusIndex >=0 )
+        {
+            MPlug radiusArrayEntry =partioAttrs.elementByLogicalIndex ( radiusIndex );
+            radiusArrayEntry.getValue ( radFrom );
+        }
 
-      AiNodeSetStr(procedural, "arg_rgbFrom", rgbFrom.asChar() );
-      AiNodeSetStr(procedural, "arg_opacFrom", opacFrom.asChar() );
-     AiNodeSetStr(procedural, "arg_radFrom", radFrom.asChar() );
+        AiNodeSetStr ( procedural, "arg_rgbFrom", rgbFrom.asChar() );
+        AiNodeSetStr ( procedural, "arg_opacFrom", opacFrom.asChar() );
+        AiNodeSetStr ( procedural, "arg_radFrom", radFrom.asChar() );
 
-      MFloatVector defaultColor;
+        MFloatVector defaultColor;
 
-      MPlug   defaultColorPlug   = m_DagNode.findPlug("defaultPointColor");
+        MPlug   defaultColorPlug   = m_DagNode.findPlug ( "defaultPointColor" );
 
-      MPlug defaultColorComp = defaultColorPlug.child(0);
-      defaultColorComp.getValue(defaultColor.x);
-      defaultColorComp = defaultColorPlug.child(1);
-      defaultColorComp.getValue(defaultColor.y);
-      defaultColorComp = defaultColorPlug.child(2);
-      defaultColorComp.getValue(defaultColor.z);
+        MPlug defaultColorComp = defaultColorPlug.child ( 0 );
+        defaultColorComp.getValue ( defaultColor.x );
+        defaultColorComp = defaultColorPlug.child ( 1 );
+        defaultColorComp.getValue ( defaultColor.y );
+        defaultColorComp = defaultColorPlug.child ( 2 );
+        defaultColorComp.getValue ( defaultColor.z );
 
-      float defaultOpac    = m_DagNode.findPlug("defaultAlpha").asFloat();
-      AiNodeDeclare(procedural, "arg_defaultColor", "constant RGB");
-      AiNodeDeclare(procedural, "arg_defaultOpac", "constant FLOAT");
+        float defaultOpac    = m_DagNode.findPlug ( "defaultAlpha" ).asFloat();
+        AiNodeDeclare ( procedural, "arg_defaultColor", "constant RGB" );
+        AiNodeDeclare ( procedural, "arg_defaultOpac", "constant FLOAT" );
 
-      AiNodeSetRGB(procedural, "arg_defaultColor", defaultColor.x, defaultColor.y, defaultColor.z );
-      AiNodeSetFlt(procedural, "arg_defaultOpac", defaultOpac );
+        AiNodeSetRGB ( procedural, "arg_defaultColor", defaultColor.x, defaultColor.y, defaultColor.z );
+        AiNodeSetFlt ( procedural, "arg_defaultOpac", defaultOpac );
 
-	  /////////////////////////////////////////
-	  // support  exporting volume step size
-	  float stepSize = m_DagNode.findPlug("aiStepSize").asFloat();
-	  if (stepSize > 0)
-	  {
-		AiNodeDeclare(procedural, "arg_stepSize", "constant FLOAT");
-		AiNodeSetFlt(procedural, "arg_stepSize", stepSize );
-	  }
+        /////////////////////////////////////////
+        // support  exporting volume step size
+        float stepSize = m_DagNode.findPlug ( "aiStepSize" ).asFloat();
+        if ( stepSize > 0 )
+        {
+            AiNodeDeclare ( procedural, "arg_stepSize", "constant FLOAT" );
+            AiNodeSetFlt ( procedural, "arg_stepSize", stepSize );
+        }
 
-      /// right now because we're using  load at init, we don't need to export the bounding box
-      //ExportBoundingBox(procedural);
+        /// right now because we're using  load at init, we don't need to export the bounding box
+        //ExportBoundingBox(procedural);
 
-   }
-   return procedural;
+    }
+    return procedural;
 }
 
 
-bool CPartioVizTranslator::fileCacheExists( const char* fileName)
+bool CPartioVizTranslator::fileCacheExists ( const char* fileName )
 {
-   struct stat fileInfo;
-   bool statReturn;
-   int intStat;
+    struct stat fileInfo;
+    bool statReturn;
+    int intStat;
 
-   intStat = stat( fileName, &fileInfo);
-   if (intStat == 0)
-   {
-      statReturn = true;
-   }
-   else
-   {
-      statReturn = false;
-   }
+    intStat = stat ( fileName, &fileInfo );
+    if ( intStat == 0 )
+    {
+        statReturn = true;
+    }
+    else
+    {
+        statReturn = false;
+    }
 
-   return (statReturn);
+    return ( statReturn );
 }
