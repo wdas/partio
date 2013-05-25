@@ -338,6 +338,7 @@ MStatus partioVisualizer::initialize()
     addAttribute ( aRenderCachePath );
     addAttribute ( time );
 
+	attributeAffects ( aCacheActive, aUpdateCache);
     attributeAffects ( aCacheDir, aUpdateCache );
     attributeAffects ( aSize, aUpdateCache );
     attributeAffects ( aFlipYZ, aUpdateCache );
@@ -380,10 +381,6 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
     int radiusFromIndex = block.inputValue( aRadiusFrom ).asInt();
     bool cacheActive = block.inputValue(aCacheActive).asBool();
 
-    if (!cacheActive)
-    {
-        return ( MS::kSuccess );
-    }
 
     // Determine if we are requesting the output plug for this node.
     //
@@ -467,6 +464,16 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
             pvCache.particles=0; // resets the particles
             pvCache.bbox.clear();
         }
+
+        //  after updating all the file path stuff,  exit here if we don't want to actually load any new data
+		if (!cacheActive)
+		{
+			forceReload = true;
+			pvCache.particles=0; // resets the particles
+            pvCache.bbox.clear();
+			mLastFileLoaded = "";
+			return ( MS::kSuccess );
+		}
 
         if ( newCacheFile != "" &&
                 partio4Maya::partioCacheExists(newCacheFile.asChar()) &&
