@@ -47,7 +47,8 @@ Contact: fredrik(a)madcrew.se
 #include <string>
 #include <vector>
 #include <math.h>
-namespace Partio {
+namespace Partio
+{
 
 typedef unsigned int ULONG;
 typedef unsigned short WCHAR;
@@ -133,12 +134,12 @@ typedef struct icecache_attribute
 
 
 // Return true if this is a valid icecache
-bool isIcecache(std::istream& input)
+bool isIcecache ( std::istream& input )
 {
     char magic[8];
-    input.read((char*)&magic, 8);
+    input.read ( ( char* ) &magic, 8 );
     char icecache_magic[8] = {'I','C','E','C','A','C','H','E'};
-    if (*magic==*icecache_magic)
+    if ( *magic==*icecache_magic )
         return true;
     else
         return false;
@@ -146,56 +147,57 @@ bool isIcecache(std::istream& input)
 
 // Read one value from the cache file
 template<class T>
-T read(std::istream& input)
+T read ( std::istream& input )
 {
     T value;
-    input.read((char*)&value,sizeof(T));
+    input.read ( ( char* ) &value,sizeof ( T ) );
     return value;
     //E::swap(d);
 }
 
 // Write one value from the cache file
 template<class T>
-void write(std::ostream& output,const T& value)
+void write ( std::ostream& output,const T& value )
 {
-    output.write((char*)&value,sizeof(T));
+    output.write ( ( char* ) &value,sizeof ( T ) );
 }
 
 // Read a name from cache file
-std::string iceReadName(std::istream& input)
+std::string iceReadName ( std::istream& input )
 {
-    ULONG length = read<ULONG>(input);
+    ULONG length = read<ULONG> ( input );
     ULONG orig_length = length;
-    if ((length % 4) > 0) length += 4-(length%4);
+    if ( ( length % 4 ) > 0 ) length += 4- ( length%4 );
     char *tmpStr = new char[length];
-    input.read (tmpStr, length);
-    std::string name(tmpStr, orig_length);
+    input.read ( tmpStr, length );
+    std::string name ( tmpStr, orig_length );
     delete[] tmpStr;
     return name;
 }
 
 // Write a name to cache file
-void writeName(std::ostream& output, std::string name)
+void writeName ( std::ostream& output, std::string name )
 {
     ULONG length = name.size();
-    write<ULONG>(output, length);
+    write<ULONG> ( output, length );
     ULONG right_fill = length%4;
     ULONG write_length = length;
-    if (right_fill)
-	{
-        write_length += (4 - right_fill);
-        name.append( (4 - right_fill), '_');
+    if ( right_fill )
+    {
+        write_length += ( 4 - right_fill );
+        name.append ( ( 4 - right_fill ), '_' );
     }
     output << name;
     return;
 }
 
 // Read one attribute header and populate an icecache_attribute
-void readAttribute(std::istream& input, icecache_attribute& attribute, ParticlesDataMutable& particles)
+void readAttribute ( std::istream& input, icecache_attribute& attribute, ParticlesDataMutable& particles )
 {
-    attribute.name              = iceReadName(input);
-    attribute.datatype          = read<ULONG>(input);
-    switch (attribute.datatype) {
+    attribute.name              = iceReadName ( input );
+    attribute.datatype          = read<ULONG> ( input );
+    switch ( attribute.datatype )
+    {
     case siICENodeDataLong:
     {
         attribute.type = INT;
@@ -231,57 +233,57 @@ void readAttribute(std::istream& input, icecache_attribute& attribute, Particles
     }
     }
     attribute.ptlocator_size    = 0;
-    attribute.structtype        = read<ULONG>(input);
-    attribute.contexttype       = read<ULONG>(input);
-    attribute.objid             = read<ULONG>(input);
-    attribute.category          = read<ULONG>(input);
-    if (attribute.datatype == 2048)
-	{
-        attribute.ptlocator_size = read<ULONG>(input);
+    attribute.structtype        = read<ULONG> ( input );
+    attribute.contexttype       = read<ULONG> ( input );
+    attribute.objid             = read<ULONG> ( input );
+    attribute.category          = read<ULONG> ( input );
+    if ( attribute.datatype == 2048 )
+    {
+        attribute.ptlocator_size = read<ULONG> ( input );
         char datablock[attribute.ptlocator_size];
-        input.read(datablock, attribute.ptlocator_size);
+        input.read ( datablock, attribute.ptlocator_size );
     }
     return;
 }
 
 // Read one attribute header and populate an icecache_attribute
-icecache_attribute createAttribute(ParticleAttribute& attr)
+icecache_attribute createAttribute ( ParticleAttribute& attr )
 {
     icecache_attribute attribute;
     attribute.name              = attr.name;
-    switch (attr.type)
-	{
-		case FLOAT:
-		{
-			if (attr.count==1) attribute.datatype = siICENodeDataFloat;
-			attribute.attribute_length=attr.count;
-			break;
-			if (attr.count==3) attribute.datatype = siICENodeDataVector3;
-			attribute.attribute_length=attr.count;
-			break;
-			if (attr.count==4) attribute.datatype = siICENodeDataVector4;
-			attribute.attribute_length=attr.count;
-			break;
-		}
-		case INT:
-		{
-			attribute.datatype = siICENodeDataLong;
-			attribute.attribute_length=attr.count;
-			break;
-		}
-		case VECTOR:
-		{
-			attribute.datatype = siICENodeDataVector3;
-			attribute.attribute_length=3;
-			break;
-		}
+    switch ( attr.type )
+    {
+    case FLOAT:
+    {
+        if ( attr.count==1 ) attribute.datatype = siICENodeDataFloat;
+        attribute.attribute_length=attr.count;
+        break;
+        if ( attr.count==3 ) attribute.datatype = siICENodeDataVector3;
+        attribute.attribute_length=attr.count;
+        break;
+        if ( attr.count==4 ) attribute.datatype = siICENodeDataVector4;
+        attribute.attribute_length=attr.count;
+        break;
+    }
+    case INT:
+    {
+        attribute.datatype = siICENodeDataLong;
+        attribute.attribute_length=attr.count;
+        break;
+    }
+    case VECTOR:
+    {
+        attribute.datatype = siICENodeDataVector3;
+        attribute.attribute_length=3;
+        break;
+    }
     }
     attribute.ptlocator_size    = 0;
     attribute.structtype        = siICENodeStructureSingle;
     attribute.contexttype       = siICENodeContextComponent0D;
     attribute.objid             = 0;
     attribute.category          = siICEAttributeCategoryCustom;
-    if (attribute.name == "PointPosition")
+    if ( attribute.name == "PointPosition" )
         attribute.category = siICEAttributeCategoryBuiltin;
     attribute.attr_handle = attr;
     return attribute;

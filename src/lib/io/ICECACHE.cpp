@@ -67,17 +67,21 @@ void readAttrData(std::istream& input, ParticlesDataMutable& particles, icecache
     ULONG isConstant = 0;
     TYPE val[ice_attr.attr_handle.count];
     // Iterate over all points
-    for (ParticlesDataMutable::iterator end=particles.end();iterator!=end;++iterator) {
+    for (ParticlesDataMutable::iterator end=particles.end();iterator!=end;++iterator)
+	{
         // Read the constant attribute every 4000th element
-        if (index%4000==0 && ice_attr.name!="PointPosition") {
+        if (index%4000==0 && ice_attr.name!="PointPosition")
+		{
             isConstant = read<ULONG>(input);
-            if (isConstant&&ice_attr.structtype==2) {
+            if (isConstant&&ice_attr.structtype==2)
+			{
                 val[0] = read<TYPE>(input);
                 break;
             }
         }
         TYPE* data=accessor.raw<TYPE>(iterator);
-        for (int i=0;i<ice_attr.attr_handle.count;i++) {
+        for (int i=0;i<ice_attr.attr_handle.count;i++)
+		{
             if (index==0&&ice_attr.structtype!=2) // Make sure we read first elements values
                 val[i] = read<TYPE>(input);
             if (index&&!isConstant) // Only keep on reading if not Constant
@@ -97,14 +101,17 @@ void writeAttrData(std::ostream& output, const ParticlesData& particles, icecach
     int index = 0;
     T val[ice_attr.attr_handle.count];
     // Iterate over all points
-    for (ParticlesData::const_iterator end=particles.end();iterator!=end;++iterator) {
+    for (ParticlesData::const_iterator end=particles.end();iterator!=end;++iterator)
+	{
         // Write the constant attribute every 4000th element except for PointPosition
-        if (index%4000==0&&ice_attr.name!="PointPosition") {
+        if (index%4000==0&&ice_attr.name!="PointPosition")
+		{
             write<ULONG>(output, (ULONG)0);
         }
 
         T* data=accessor.raw<T>(iterator);
-        for (int i=0;i<ice_attr.attr_handle.count;i++) {
+        for (int i=0;i<ice_attr.attr_handle.count;i++)
+		{
             write<T>(output, data[i]);
         }
         index++;
@@ -115,13 +122,15 @@ void writeAttrData(std::ostream& output, const ParticlesData& particles, icecach
 ParticlesDataMutable* readICECACHE(const char* filename,const bool headersOnly)
 {
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
-    if (!*input) {
+    if (!*input)
+	{
         std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
         return 0;
     }
 
     // Make sure it's actually an icecache file.
-    if (!isIcecache(*input)) {
+    if (!isIcecache(*input))
+	{
         std::cerr << "Partio: Not an icecache file." << std::endl;
         return 0;
     }
@@ -139,7 +148,8 @@ ParticlesDataMutable* readICECACHE(const char* filename,const bool headersOnly)
     ULONG attributecount    = read<ULONG>(*input);
 
     // Make sure the the cache is exactly version 103
-    if (versionnumber!=103) {
+    if (versionnumber!=103)
+	{
         std::cerr<<"Partio: ICECACHE must be version 103" << versionnumber << std::endl;
         return 0;
     }
@@ -155,13 +165,17 @@ ParticlesDataMutable* readICECACHE(const char* filename,const bool headersOnly)
     std::vector<ParticleAttribute> attrs;
 
     // Loop over the attributes in the
-    for (ULONG attribute_index = 0; attribute_index < attributecount; attribute_index++) {
+    for (ULONG attribute_index = 0; attribute_index < attributecount; attribute_index++)
+	{
         icecache_attribute ice_attr;
         readAttribute(*input, ice_attr, *simple);
-        if (ice_attr.name == "PointPosition") {
+        if (ice_attr.name == "PointPosition")
+		{
             ParticleAttribute partio_attr=simple->addAttribute("position",VECTOR,3);
             ice_attr.attr_handle = partio_attr;
-        } else {
+        }
+        else
+		{
             ParticleAttribute partio_attr=simple->addAttribute(ice_attr.name.c_str(),ice_attr.type,ice_attr.attribute_length);
             ice_attr.attr_handle = partio_attr;
         }
@@ -169,9 +183,11 @@ ParticlesDataMutable* readICECACHE(const char* filename,const bool headersOnly)
     }
 
     std::vector<icecache_attribute>::const_iterator attribute_it;
-    for ( attribute_it=ice_attrs.begin() ; attribute_it < ice_attrs.end(); attribute_it++ ) {
+    for ( attribute_it=ice_attrs.begin() ; attribute_it < ice_attrs.end(); attribute_it++ )
+	{
         icecache_attribute ice_attr = (*attribute_it);
-        switch (ice_attr.type) {
+        switch (ice_attr.type)
+		{
         case INT:
             readAttrData<INT>(*input, *simple, ice_attr);
             break;
@@ -193,7 +209,8 @@ bool writeICECACHE(const char* filename,const ParticlesData& p,const bool compre
         Gzip_Out(filename,std::ios::out|std::ios::binary)
         :new std::ofstream(filename,std::ios::out|std::ios::binary));
 
-    if (!*output) {
+    if (!*output)
+	{
         std::cerr<<"Partio Unable to open file "<<filename<<std::endl;
         return false;
     }
@@ -203,7 +220,8 @@ bool writeICECACHE(const char* filename,const ParticlesData& p,const bool compre
 
     std::vector<std::string> attribute_keys;
     std::map<std::string, icecache_attribute> attributes;
-    for (int i=0;i<p.numAttributes();i++) {
+    for (int i=0;i<p.numAttributes();i++)
+	{
         ParticleAttribute attr;
         p.attributeInfo(i,attr);
         if (attr.name=="position")
@@ -216,12 +234,14 @@ bool writeICECACHE(const char* filename,const ParticlesData& p,const bool compre
     std::sort(attribute_keys.begin(),attribute_keys.end());
 
     // header values
-    write<ULONG>(*output, (ULONG)100);                 // versionnumber
+    write<ULONG>(*output, (ULONG)103);                 // versionnumber
     write<ULONG>(*output, (ULONG)0);                   // objecttype
     write<ULONG>(*output, (ULONG)p.numParticles());    // pointcount
     write<ULONG>(*output, (ULONG)0);                   // edgecount
     write<ULONG>(*output, (ULONG)0);                   // polygoncount
     write<ULONG>(*output, (ULONG)0);                   // samplecount
+	write<ULONG>(*output, (ULONG)1);				   // substep
+    write<ULONG>(*output, (ULONG)0);				   // userdatablobcount
     write<ULONG>(*output, (ULONG)attribute_keys.size());// attributecount
 
     std::vector<std::string>::const_iterator attribute_it;
@@ -237,7 +257,8 @@ bool writeICECACHE(const char* filename,const ParticlesData& p,const bool compre
 
     for ( attribute_it=attribute_keys.begin() ; attribute_it < attribute_keys.end(); attribute_it++ )
     {
-        switch (attributes[*attribute_it].attr_handle.type) {
+        switch (attributes[*attribute_it].attr_handle.type)
+		{
         case NONE:
             assert(false);
             break;

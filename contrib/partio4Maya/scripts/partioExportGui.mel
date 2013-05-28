@@ -77,6 +77,7 @@ global proc partioExportGui  ()
 	menuItem -label "PTS";
 	menuItem -label "XYZ";
 	menuItem -label "PCD";
+	menuItem -label "ICEcache";
 	menuItem -label "RIB";
 //	menuItem -label "ASS";
 
@@ -258,7 +259,6 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 
     int $start = `intFieldGrp -q -v1 $startFrame`;
     int $end  = `intFieldGrp  -q -v1 $endFrame`;
-    int $pdabc = `optionMenuGrp -q -sl $partioExportOptionMenu`;
     string $partioExportFormat = `optionMenuGrp -q -v  $partioExportOptionMenu`;
     string $cacheDir = `textFieldButtonGrp -q -text  $cacheDirCtrl`;
 
