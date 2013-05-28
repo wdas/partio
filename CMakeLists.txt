@@ -104,6 +104,8 @@ ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
 ## Search for needed  libraries
 find_package(SWIG REQUIRED)
 
+## Search for useful libraries
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
 find_package(GLUT REQUIRED)
 IF(GLUT_FOUND)
 ELSE(GLUT_FOUND)
@@ -124,6 +126,7 @@ ELSE(ZLIB_FOUND)
     LINK_DIRECTORIES ( ${ZLIB_LIBRARY_DIR} )
     SET (ZLIB_LIBRARY "${ZLIB_LIBRARY_DIR}/zlib.lib")
 ENDIF(ZLIB_FOUND)
+find_package(NumPy)
 
 ## Make modules able to see partio library
 # Setup environment variable to link partio
