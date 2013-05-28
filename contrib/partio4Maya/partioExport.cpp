@@ -241,6 +241,9 @@ MStatus PartioExport::doIt(const MArgList& Args)
     }
     /// ARGS PARSED
 
+    MComputation computation;
+    computation.beginComputation();
+
     MFnParticleSystem PS(objNode);
 
     int outFrame= -123456;
@@ -489,7 +492,13 @@ MStatus PartioExport::doIt(const MArgList& Args)
             //cout << "released  memory" << endl;
         } /// if particle count > 0
 
-    } /// loop frames
+        // support escaping early  in export command
+        if  (computation.isInterruptRequested())
+		{	MGlobal::displayWarning("PartioExport detected escape being pressed, ending export early!" ) ;
+			break;
+		}
+
+	} /// loop frames
 
     return MStatus::kSuccess;
 }
