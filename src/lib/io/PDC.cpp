@@ -2,9 +2,6 @@
 PARTIO SOFTWARE
 Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
 
-Format Contributed by github user: Jinkuen
-Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -34,6 +31,9 @@ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+Format Contributed by github user: Jinkuen
+Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
 
 */
 
@@ -73,7 +73,7 @@ string readName(istream& input){
     return result;
 }
 
-ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly, char** attributes, int percentage){
+ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly){
 
     auto_ptr<istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){

@@ -71,7 +71,7 @@ void writeString(std::ostream& output,const char* s){
     output<<"\"";
 }
 
-std::string scanString(std::istream& input)
+string scanString(istream& input)
 {
     // TODO: this code does not check for buf overrun
     // TODO: this code doesn't properly check for FEOF condition
@@ -107,7 +107,7 @@ std::string scanString(std::istream& input)
     return string(buf);
 }
 
-ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly,char** attributes, int percentage)
+ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in));
     if(!*input){
@@ -157,7 +157,7 @@ ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly,char**
                 //std::cerr<<"Partio:    index "<<j<<" is "<<indexName<<std::endl;
                 int id=simple->registerIndexedStr(attribute,indexName.c_str());
                 if(id != j){
-                    std::cerr<<"Partio: error on read, expected registeerIndexStr to return index "<<j<<" but got "<<id<<" for string "<<indexName<<std::endl;
+                    cerr<<"Partio: error on read, expected registeerIndexStr to return index "<<j<<" but got "<<id<<" for string "<<indexName<<endl;
                 }
             }
             accessors.push_back(ParticleAccessor(attrs.back()));
@@ -262,7 +262,7 @@ bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
         }else{
             handles.push_back(attrib);
             accessors.push_back(ParticleAccessor(handles.back()));
-            std::string typestring;
+            string typestring;
             if(attrib.type!=INDEXEDSTR){
                 switch(attrib.type){
                     case NONE: assert(false);typestring="int";break;
@@ -275,7 +275,7 @@ bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
                 for(int k=0;k<attrib.count;k++) *output<<" "<<0;
             }else{
                 typestring="index";
-                const std::vector<std::string>& indexes=p.indexedStrs(attrib);
+                const vector<string>& indexes=p.indexedStrs(attrib);
                 *output<<attrib.name<<" "<<attrib.count<<" "<<typestring<<" "<<indexes.size();
                 for(size_t k=0;k<indexes.size();k++){
                     *output<<" ";

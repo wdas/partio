@@ -2,10 +2,6 @@
 PARTIO SOFTWARE
 Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
 
-Format Contributed by github user: Jinkuen
-Some code for this format  was helped along  by referring to an implementation by  Digital Cinema Arts THANKS!
-Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -35,6 +31,10 @@ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+Format Contributed by github user: Jinkuen
+Some code for this format  was helped along  by referring to an implementation by  Digital Cinema Arts THANKS!
+Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
 
 */
 
@@ -74,7 +74,7 @@ typedef struct{
 } BIN_HEADER;
 
 
-ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly, char** attributes, int percentage){
+ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly){
 
     auto_ptr<istream> input(new ifstream(filename,ios::in|ios::binary));
 
@@ -86,6 +86,8 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly, char
     BIN_HEADER header;
     input->read((char*)&header, sizeof(header));
 
+	/*
+	// DEBUG HEADER INFO
     cout << "header.verify_code = " << hex << header.verificationCode << endl;
     cout << "header.fluid_name = " << dec << header.fluidName << endl;
     cout << "header.version = " << header.version << endl;
@@ -108,7 +110,7 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly, char
     << header.emitterRotation[1] << "\t" << header.emitterRotation[2] << endl;
     cout << "header.emitter_scale = " << header.emitterScale[0] << "\t"
     << header.emitterScale[1] << "\t" << header.emitterScale[2] << endl;
-
+	*/
 
     if(BIN_MAGIC != header.verificationCode){
         cerr << "Partio: Magic number '" << hex<<  header.verificationCode << "' of '" << filename << "' doesn't match BIN magic '" << BIN_MAGIC << "'" << endl;

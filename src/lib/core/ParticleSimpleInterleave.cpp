@@ -80,6 +80,7 @@ numAttributes() const
     return attributes.size();
 }
 
+
 bool ParticlesSimpleInterleave::
 attributeInfo(const int attributeIndex,ParticleAttribute& attribute) const
 {

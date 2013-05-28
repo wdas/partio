@@ -2,9 +2,6 @@
 PARTIO SOFTWARE
 Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
 
-Format Contributed by github user: Jinkuen
-Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -34,6 +31,9 @@ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+Format Contributed by github user: Jinkuen
+Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
 
 */
 
@@ -129,7 +129,7 @@ bool IsStringInCharArray(std::string target, char** list){
 static const int MC_MAGIC = ((((('F'<<8)|'O')<<8)|'R')<<8)|'4';
 static const int HEADER_SIZE = 56;
 
-ParticlesDataMutable* readMC(const char* filename, const bool headersOnly, char** attributes, int percentage){
+ParticlesDataMutable* readMC(const char* filename, const bool headersOnly){
 
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){
@@ -182,20 +182,28 @@ ParticlesDataMutable* readMC(const char* filename, const bool headersOnly, char*
             input->seekg((int)input->tellg() + attrHeader.blocksize);
             continue;
         }
+#if 0 // TODO: if we ever put back attributes re-enable this
         if(attributes && (IsStringInCharArray(attrHeader.name, attributes)==false)){
             input->seekg((int)input->tellg() + attrHeader.blocksize);
             continue;
         }
+#endif
 
         if(attrHeader.type == std::string("FVCA")){
             input->seekg((int)input->tellg() + attrHeader.blocksize);
             simple->addAttribute(attrHeader.name.c_str(), VECTOR, 3);
         }
         else if(attrHeader.type == std::string("DBLA")){
-            input->seekg((int)input->tellg() + attrHeader.blocksize);
-            simple->addAttribute(attrHeader.name.c_str(), FLOAT, 1);
+			input->seekg((int)input->tellg() + attrHeader.blocksize);
+			if(attrHeader.name == "id"){
+				simple->addAttribute(attrHeader.name.c_str(), INT, 1);
+			}
+            else{
+				simple->addAttribute(attrHeader.name.c_str(), FLOAT, 1);
+			}
         }
-        else{
+        else
+		{
             input->seekg((int)input->tellg() + attrHeader.blocksize);
             std::cerr << "Partio: Attribute '" << attrHeader.name << " " << attrHeader.type << "' cannot map type" << std::endl;
         }
@@ -228,13 +236,26 @@ ParticlesDataMutable* readMC(const char* filename, const bool headersOnly, char*
         Partio::ParticleAccessor accessor(attrHandle);
         it.addAccessor(accessor);
 
-        if(attrHeader.type == std::string("DBLA")){
-            for(int i = 0; i < simple->numParticles(); i++){
+		//std::cout << attrHeader.name << std::endl;
+        if (attrHeader.type == std::string("DBLA")){
+			if  (attrHeader.name == "id")
+			{
+				for (int i = 0; i < simple->numParticles(); i++)
+				{
                 double tmp;
                 read<BIGEND>(*input, tmp);
-                float* data = simple->dataWrite<float>(attrHandle, i);
-                data[0] = (float)tmp;
-            }
+                int* data = simple->dataWrite<int>(attrHandle, i);
+                data[0] = (int)tmp;
+				}
+			}
+			else{
+				for (int i = 0; i < simple->numParticles(); i++){
+					double tmp;
+					read<BIGEND>(*input, tmp);
+					float* data = simple->dataWrite<float>(attrHandle, i);
+					data[0] = (float)tmp;
+				}
+			}
         }
         else if(attrHeader.type == std::string("FVCA")){
             for(Partio::ParticlesDataMutable::iterator end = simple->end(); it != end; ++it){

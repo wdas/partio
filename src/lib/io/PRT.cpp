@@ -2,10 +2,6 @@
 PARTIO SOFTWARE
 Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
 
-Format Contributed by github user: K240
-Some Code for this format  was helped along  by referring to an implementation by  Bo Schwartzstein and ThinkBox Software   THANKS!
-Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
-
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -35,6 +31,11 @@ PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+Format Contributed by github user: K240
+Some Code for this format  was helped along  by referring to an implementation by  Bo Schwartzstein and ThinkBox Software   THANKS!
+Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
+
 
 */
 #include "../Partio.h"
@@ -137,7 +138,7 @@ static bool write_buffer(std::ostream& os, z_stream& z, char* out_buf, void* p, 
 
 
 
-ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char** attributes, int percentage)
+ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
 {
     std::auto_ptr<std::istream> input(new std::ifstream(filename,std::ios::in|std::ios::binary));
     if (!*input) {
@@ -216,7 +217,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char*
     z.zalloc = Z_NULL;z.zfree = Z_NULL;z.opaque = Z_NULL;
     if (inflateInit( &z ) != Z_OK) {
         std::cerr<<"Zlib inflateInit error"<<std::endl;
-        return false;
+        return 0;
     }
 
     char in_buf[OUT_BUFSIZE];
@@ -325,7 +326,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly, char*
 	}
     if (inflateEnd( &z ) != Z_OK) {
         std::cerr<<"Zlib inflateEnd error"<<std::endl;
-        return false;
+        return 0;
     }
 
     // success

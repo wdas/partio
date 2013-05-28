@@ -33,34 +33,79 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-// Original contributor drakeguan on github
-#include <Partio.h>
+
 #include <iostream>
-#include <iomanip>
+#include <cmath>
+#include <string>
+#include <sstream>
+#include <vector>
 #include <stdlib.h>
+#include <sys/stat.h>
+#if defined(__DARWIN__) || defined(__APPLE__)
+#include <GLUT/glut.h>
+#else
+#include <GL/glut.h>
+#endif
+#include <float.h>
 
-int main(int argc,char *argv[])
-{
-    if(argc != 3){
-        std::cerr<<"Usage is: "<<argv[0]<<" <filename> <attrname> { particle attribute to print info } "<<std::endl;
-        return 1;
-    }
-    Partio::ParticlesDataMutable* p=Partio::read(argv[1]);
-    if(p){
-        Partio::ParticleAttribute attrhandle;
-        p->attributeInfo(argv[2], attrhandle);
+#include <Partio.h>
+#include "Camera.h"
 
-        for(int i = 0; i < std::min(10, p->numParticles()); i++){
-            const float* data = p->data<float>(attrhandle,i);
-            std::cout << argv[2] << i << " ";
-            for(int j = 0; j < attrhandle.count; j++){
-                std::cout << data[j] << " "; 
-            }
-            std::cout << std::endl;
-        }
+using namespace Partio;
+using namespace std;
 
-        p->release();
-    }
-    
-    return 0;
-}
+
+// global vars
+ParticlesData* particles;
+Camera camera;
+ParticleAttribute positionAttr;
+ParticleAttribute colorAttr;
+ParticleAttribute alphaAttr;
+
+int numPoints;
+int frameNumberOGL;
+GLuint PreviousClock;
+double fov;
+double pointSize;
+double brightness;
+
+bool useColor;
+bool useAlpha;
+bool sourceChanged;
+bool frameForwardPressed;
+bool frameBackwardPressed;
+bool brightnessUpPressed;
+bool brightnessDownPressed;
+bool* keyStates;
+bool frameMissing;
+bool anyKeyPressed;
+bool colorMissing;
+bool alphaMissing;
+
+string loadError;
+string particleFile;
+string lastParticleFile;
+
+void restorePerspectiveProjection();
+void setOrthographicProjection();
+void renderBitmapString( float x,float y,float z,void *font,char *string);
+static void render();
+void  reloadParticleFile(int direction);
+static void mouseFunc(int button,int state,int x,int y);
+static void motionFunc(int x,int y);
+static void processNormalKeys(unsigned char key, int x, int y);
+static void processNormalUpKeys(unsigned char key, int x, int y);
+static void processSpecialKeys(int key, int x, int y);
+static void processSpecialUpKeys(int key, int x, int y);
+void timer();
+
+int main(int argc,char *argv[]);
+
+
+
+
+
+
+
+
+
