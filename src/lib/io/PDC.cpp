@@ -2,7 +2,6 @@
 PARTIO SOFTWARE
 Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
 
- keypress events  also added the PTS file format  (all need cleanup)
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
