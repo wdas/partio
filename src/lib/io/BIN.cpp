@@ -86,32 +86,6 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly){
     BIN_HEADER header;
     input->read((char*)&header, sizeof(header));
 
-	/*
-	// DEBUG HEADER INFO
-    cout << "header.verify_code = " << hex << header.verificationCode << endl;
-    cout << "header.fluid_name = " << dec << header.fluidName << endl;
-    cout << "header.version = " << header.version << endl;
-    cout << "header.scene_scale = " << header.scaleScene << endl;
-    cout << "header.fluid_type = " << header.fluidType << endl;
-    cout << "header.elapsed_time = " << header.elapsedSimulationTime << endl;
-    cout << "header.frame_number = " << header.frameNumber << endl;
-    cout << "header.fps = " << header.framePerSecond << endl;
-    cout << "header.num_particles = " << header.numParticles << endl;
-    cout << "header.radius = " << header.radius << endl;
-    cout << "header.pressure = " << header.pressure[0] << "\t"
-        << header.pressure[1] << "\t"  << header.pressure[2] << endl;
-    cout << "header.speed = " << header.speed[0] << "\t"
-        << header.speed[1] << "\t" << header.speed[2] << endl;
-    cout << "header.temperature = " << header.temperature[0] << "\t"
-        << header.temperature[1] << "\t" << header.temperature[2] << endl;
-    cout << "header.emitter_pos = " << header.emitterPosition[0] << "\t"
-        << header.emitterPosition[1] << "\t" << header.emitterPosition[2] << endl;
-    cout << "header.emitter_rot = " << header.emitterRotation[0] << "\t"
-    << header.emitterRotation[1] << "\t" << header.emitterRotation[2] << endl;
-    cout << "header.emitter_scale = " << header.emitterScale[0] << "\t"
-    << header.emitterScale[1] << "\t" << header.emitterScale[2] << endl;
-	*/
-
     if(BIN_MAGIC != header.verificationCode){
         cerr << "Partio: Magic number '" << hex<<  header.verificationCode << "' of '" << filename << "' doesn't match BIN magic '" << BIN_MAGIC << "'" << endl;
         return 0;
@@ -132,7 +106,7 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly){
     ParticleAttribute normAttr;
     normAttr = simple->addAttribute("normal", VECTOR, 3);
     ParticleAttribute neighborsAttr;
-    neighborsAttr = simple->addAttribute("neighbors", FLOAT, 1);
+    neighborsAttr = simple->addAttribute("neighbors", INT, 1);
     ParticleAttribute uvwAttr;
     uvwAttr = simple->addAttribute("uvw", VECTOR, 3);
     ParticleAttribute ageAttr;
@@ -152,14 +126,8 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly){
     ParticleAttribute pidAttr;
     pidAttr = simple->addAttribute("id", INT, 1);
 
-    // if headersOnly, skip
-    //if(headersOnly)
-    //{
-     //   input->seekg((int)input->tellg() + header.numParticles*sizeof(double)*attr.count);
-    //    continue;
-    //}
-    //else
-    //{
+    if (!headersOnly)
+	{
         for(int partIndex = 0; partIndex < simple->numParticles(); partIndex++)
         {
 
@@ -218,14 +186,14 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly){
 
 
             input->read ((char *) &neighbors, sizeof (int));
-                simple->dataWrite<float>(neighborsAttr, partIndex)[0] = (float)neighbors;
+                simple->dataWrite<int>(neighborsAttr, partIndex)[0] = (int)neighbors;
 
             input->read ((char *) &uvw[0], sizeof(float));
-                simple->dataWrite<float>(uvwAttr, partIndex)[0] = (float)position[0];
+                simple->dataWrite<float>(uvwAttr, partIndex)[0] = (float)uvw[0];
             input->read ((char *) &uvw[1], sizeof(float));
-                simple->dataWrite<float>(uvwAttr, partIndex)[1] = (float)position[1];
+                simple->dataWrite<float>(uvwAttr, partIndex)[1] = (float)uvw[1];
             input->read ((char *) &uvw[2], sizeof(float));
-                simple->dataWrite<float>(uvwAttr, partIndex)[2] = (float)position[2];
+                simple->dataWrite<float>(uvwAttr, partIndex)[2] = (float)uvw[2];
 
             input->read ((char *) &infoBits, sizeof(infoBits));
             // don't  do anything with this..
@@ -245,12 +213,7 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly){
                 simple->dataWrite<float>(tempAttr, partIndex)[0] = (float)temperature;
             input->read ((char *) &pid, sizeof(pid));
                 simple->dataWrite<int>(pidAttr, partIndex)[0] = (int)pid;
-
-
-        //}
-
-
-
+        }
     }
 
     return simple;
@@ -272,7 +235,7 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
     header.verificationCode =  BIN_MAGIC;
     for(int i = 0; i < 250; i++)
     {header.fluidName[i] = 0;}
-    string str = "partioExport_01";
+    string str = "partioExport";
     str.copy(header.fluidName,15,0);  //  fluid name
     header.framePerSecond = 24; // frames per second
     header.scaleScene = 1.0; // scene scale
@@ -285,23 +248,21 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
     header.pressure[0] = 1.0; // max, min, and avg pressure
     header.pressure[1] = 1.0;
     header.pressure[2] = 1.0;
-    header.speed[0] = 3.0;
-    header.speed[1] = 2.0;
+    header.speed[0] = 1.0;
+    header.speed[1] = 1.0;
     header.speed[2] = 1.0; // max, min, and avg speed
-    header.temperature[0] = 3.0;
-    header.temperature[1] = 2.0;
+    header.temperature[0] = 1.0;
+    header.temperature[1] = 1.0;
     header.temperature[2] = 1.0; // max, min, and avg temperature
     header.emitterPosition[0] = 0.0;
     header.emitterPosition[1] = 0.0;
     header.emitterPosition[2] = 0.0; //emitter position
     header.emitterRotation[0] = 0.0;
     header.emitterRotation[1] = 0.0;
-    header.emitterRotation[2] = 0.0; //emitter position
-    header.emitterScale[0] = 0.0;
-    header.emitterScale[1] = 0.0;
-    header.emitterScale[2] = 0.0; //emitter position
-
-
+    header.emitterRotation[2] = 0.0; //emitter rotation
+    header.emitterScale[0] = 1.0;
+    header.emitterScale[1] = 1.0;
+    header.emitterScale[2] = 1.0; //emitter scale
 
     // write .bin header
     output->write ((const char *) &header.verificationCode, sizeof (int));
@@ -316,22 +277,21 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
     output->write ((const char *) &header.radius, sizeof (float));
 
     for(int i=0; i <=2; i++)
-                output->write ((const char *) &header.pressure[i], sizeof(float));
+		output->write ((const char *) &header.pressure[i], sizeof(float));
     for(int i=0; i<= 2; i++)
-                output->write ((const char *) &header.speed[i], sizeof(float));
+        output->write ((const char *) &header.speed[i], sizeof(float));
     for(int i=0; i<= 2; i++)
-                output->write ((const char *) &header.temperature[i], sizeof(float));
+        output->write ((const char *) &header.temperature[i], sizeof(float));
 
     for(int i=0; i<= 2; i++)
-                output->write ((const char *) &header.emitterPosition[i], sizeof(float));
+        output->write ((const char *) &header.emitterPosition[i], sizeof(float));
     for(int i=0; i <= 2; i++)
-                output->write ((const char *) &header.emitterRotation[i], sizeof(float));
+        output->write ((const char *) &header.emitterRotation[i], sizeof(float));
     for(int i=0; i <= 2; i++)
-                output->write ((const char *) &header.emitterScale[i], sizeof(float));
+        output->write ((const char *) &header.emitterScale[i], sizeof(float));
 
     for (int particles = 0; particles < p.numParticles(); particles++)
     {
-        //cout <<  particles << endl;
         // set defaults for stuff that is not exported...
         float position[3] = {0.0,0.0,0.0};
         float velocity[3] = {0.0,0.0,0.0};
@@ -361,90 +321,90 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
             if (attr.name ==  "position")
             {
                 const float* data = p.data<float>(attr, particles);
-                position[0] = (double)data[0];
-                position[1] = (double)data[1];
-                position[2] = (double)data[2];
+                position[0] = data[0];
+                position[1] = data[1];
+                position[2] = data[2];
             }
 
             else if (attr.name == "velocity")
             {
                 const float* data = p.data<float>(attr, particles);
-                velocity[0] = (double)data[0];
-                velocity[1] = (double)data[1];
-                velocity[2] = (double)data[2];
+                velocity[0] = data[0];
+                velocity[1] = data[1];
+                velocity[2] = data[2];
             }
             else if (attr.name == "force")
             {
                 const float* data = p.data<float>(attr, particles);
-                force[0] = (double)data[0];
-                force[1] = (double)data[1];
-                force[2] = (double)data[2];
+                force[0] = data[0];
+                force[1] = data[1];
+                force[2] = data[2];
             }
             else if (attr.name == "vorticity")
             {
                 const float* data = p.data<float>(attr, particles);
-                vorticity[0] = (double)data[0];
-                vorticity[1] = (double)data[1];
-                vorticity[2] = (double)data[2];
+                vorticity[0] = data[0];
+                vorticity[1] = data[1];
+                vorticity[2] = data[2];
             }
             else if (attr.name == "normal")
             {
                 const float* data = p.data<float>(attr, particles);
-                normal[0] = (double)data[0];
-                normal[1] = (double)data[1];
-                normal[2] = (double)data[2];
+                normal[0] = data[0];
+                normal[1] = data[1];
+                normal[2] = data[2];
             }
             else if (attr.name == "neighbors")
             {
-                const float* data = p.data<float>(attr, particles);
-                neighbors= (int)data[0];
+                const int* data = p.data<int>(attr, particles);
+                neighbors= data[0];
             }
             else if (attr.name == "uvw")
             {
                 const float* data = p.data<float>(attr, particles);
-                uvw[0] = (double)data[0];
-                uvw[1] = (double)data[1];
-                uvw[2] = (double)data[2];
+                uvw[0] = data[0];
+                uvw[1] = data[1];
+                uvw[2] = data[2];
             }
             else if (attr.name == "age")
             {
                 const float* data = p.data<float>(attr, particles);
-                age= (double)data[0];
+                age= data[0];
             }
             else if (attr.name == "isolationTime")
             {
                 const float* data = p.data<float>(attr, particles);
-                isolationTime= (double)data[0];
+                isolationTime= data[0];
             }
             else if (attr.name == "viscosity")
             {
                 const float* data = p.data<float>(attr, particles);
-                viscosity= (double)data[0];
+                viscosity= data[0];
             }
             else if (attr.name == "density")
             {
                 const float* data = p.data<float>(attr, particles);
-                density= (double)data[0];
+                density= data[0];
             }
             else if (attr.name == "pressure")
             {
                 const float* data = p.data<float>(attr, particles);
-                pressure= (double)data[0];
+                pressure= data[0];
             }
             else if (attr.name == "mass")
             {
                 const float* data = p.data<float>(attr, particles);
-                mass= (double)data[0];
+                mass= data[0];
             }
             else if (attr.name == "temperature")
             {
                 const float* data = p.data<float>(attr, particles);
-                temperature= (double)data[0];
+                temperature= data[0];
             }
             else if (attr.name == "id")
             {
-                const float* data = p.data<float>(attr, particles);
-                pid= (int)data[0];
+                const int* data = p.data<int>(attr, particles);
+                pid= data[0];
             }
 
             else
@@ -491,10 +451,13 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
 
     }
 
-    // future proofing, TODO: fully support additional  PP attributes
+	// per the file format spec, we have to atleast write out the fact that we don't support per-particle data and additional real flow internal data
+	int zero = 0;
+	output->write((const char*)&zero, sizeof(int));  // no per particle data
+	output->write((const char*)&zero, sizeof(char)); // no RF 4 data (just 1 byte of 0)
+	output->write((const char*)&zero, sizeof(char)); // no RF 5 data (just 1 byte of 0)
 
     return true;
-
 }
 
 }// end of namespace Partio
