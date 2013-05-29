@@ -367,8 +367,8 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 
 global proc  updatePath (string $cacheDirControl)
 {
-    string $result[] = `fileDialog2 -fileMode 3  -dialogStyle 1`;
-print $result[0];
+    string $result[] = `fileDialog2 -fileMode 3 `;
+
     textFieldButtonGrp -e -text $result[0]  $cacheDirControl;
 	optionVar -sv "partioExportGUICachePath" $result[0];
 }
