@@ -39,7 +39,7 @@ include_directories(
 IF(GLUT_FOUND AND OPENGL_FOUND)
     ADD_EXECUTABLE(partview partview.cpp)
     target_link_libraries(partview ${PARTIO_LIBRARIES} ${GLUT_LIBRARY} ${OPENGL_LIBRARY})
-    install(TARGETS  partview DESTINATION bin)
+    install(TARGETS  partview DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 ENDIF(GLUT_FOUND AND OPENGL_FOUND)
 
 ADD_EXECUTABLE(partinfo partinfo.cpp)
@@ -51,8 +51,5 @@ target_link_libraries(partconv ${PARTIO_LIBRARIES})
 ADD_EXECUTABLE(partattr partattr.cpp)
 target_link_libraries(partattr ${PARTIO_LIBRARIES})
 
-ADD_EXECUTABLE(partview partview.cpp)
-target_link_libraries(partview ${PARTIO_LIBRARIES})
-
-install(TARGETS partattr partconv partinfo partview DESTINATION bin)
+install(TARGETS partattr partconv partinfo DESTINATION ${EXECUTABLE_OUTPUT_PATH})
 

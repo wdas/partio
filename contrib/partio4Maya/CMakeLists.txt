@@ -8,6 +8,11 @@ if(COMMAND cmake_policy)
 	 cmake_policy(SET CMP0015 NEW)  # to supress relative library directory warnings
 endif(COMMAND cmake_policy)
 
+find_package(Maya)
+
+if (MAYA_FOUND)
+
+
 IF ( UNIX AND NOT APPLE )
 	ADD_DEFINITIONS(-DLINUX)
 ENDIF()
@@ -49,11 +54,10 @@ if (UNIX)
 	set (SUFFIX ".so")
 ENDIF()
 
-find_package(Maya)
 
 ## if building from the default partio contrib dir you can leave this alone
-SET (PARTIO_INCLUDE "../../include" )
-SET (PARTIO_LIBDIR   "../../lib")
+SET (PARTIO_INCLUDE ${INCLUDE_OUTPUT_PATH} )
+SET (PARTIO_LIBDIR  ${LIBRARY_OUTPUT_PATH} )
 
 set (STD_INCLUDES "." ".." "/usr/X11R6/include" "/usr/include" "/usr/include/CC")
 set (STD_LIB "/usr/lib/")
@@ -113,5 +117,10 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${ZLIB} ${PARTIO_LIB} ${MAYA_LIBS} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
 
-INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/build/ DESTINATION contrib/partio4Maya )
+SET (PARTIO4MAYA_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/maya/$ENV{MAYA_VERSION}/plugins)
+
+INSTALL( FILES ./build/${PLUGIN_NAME}${SUFFIX}  DESTINATION  ${PARTIO4MAYA_OUTPUT_PATH})
+#TODO put in scripts and icons here... 
+
+ENDIF(MAYA_FOUND)
 

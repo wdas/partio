@@ -31,26 +31,25 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-set (HDK /apps/houdini/hfs_12.1.185)
-if (EXISTS ${HDK})
+if(DEFINED ENV{HOUDINI_VERSION})
+	if (EXISTS ${HFS})
 
-set (HOUDINI_INCS ${HDK}/toolkit/include)
-set (HOUDINI_LIBDIR ${HDK}/dsolib)
-set (HOUDINI_LIBS HoudiniUI HoudiniOPZ HoudiniOP3 HoudiniOP2 HoudiniOP1 HoudiniSIM HoudiniGEO HoudiniPRM HoudiniUT)
-add_definitions (-DHOUDINI_DEFINES -DHOUDINI_API_VERSION=12.1.185 -DDLLEXPORT='' -DLINUX -DAMD64 -D_GNU_SOURCE -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -DMAKING_DSO)
-#add_definitions(${HOUDINI_DEFINES})
+		set (HOUDINI_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build-${CMAKE_INSTALL_PREFIX}/houdini/$ENV{HOUDINI_VERSION})
+		set (HOUDINI_INCS ${HFS}/toolkit/include)
+		set (HOUDINI_LIBDIR ${HFS}/dsolib)
+		set (HOUDINI_LIBS HoudiniUI HoudiniOPZ HoudiniOP3 HoudiniOP2 HoudiniOP1 HoudiniSIM HoudiniGEO HoudiniPRM HoudiniUT)
+		add_definitions (-DHOUDINI_DEFINES -DHOUDINI_API_VERSION=$ENV{HOUDINI_VERSION} -DDLLEXPORT='' -DLINUX -DAMD64 -D_GNU_SOURCE -DSIZEOF_VOID_P=8 -DSESI_LITTLE_ENDIAN -DENABLE_THREADS -DUSE_PTHREADS -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DGCC4 -DGCC3 -DMAKING_DSO)
+		#add_definitions(${HOUDINI_DEFINES})
 
-link_directories(
-  ${HOUDINI_LIBDIR}
-)
-include_directories(
-   ${CMAKE_SOURCE_DIR}/src/lib
-   ${HOUDINI_INCS}
-)
+		link_directories( ${HOUDINI_LIBDIR} )
+		include_directories( ${CMAKE_SOURCE_DIR}/src/lib ${HOUDINI_INCS} )
 
-add_library(houpartio SHARED SOP_FromPartio.cpp ROP_ToPartio.cpp initialize.cpp)
-target_link_libraries(houpartio ${PARTIO_LIBRARIES} ${HOUDINI_LIBS})
-endif (EXISTS ${HDK})
+		add_library(houpartio SHARED SOP_FromPartio.cpp ROP_ToPartio.cpp initialize.cpp)
+		target_link_libraries(houpartio ${PARTIO_LIBRARIES} ${HOUDINI_LIBS})
+		install(TARGETS houpartio DESTINATION ${HOUDINI_OUTPUT_PATH} )
 
-#install(TARGETS houpartio DESTINATION lib)
+	endif (EXISTS ${HDK})
+
+endif (DEFINED ENV{HOUDINI_VERSION})
+
 

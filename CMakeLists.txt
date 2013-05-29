@@ -70,11 +70,6 @@ SET( ${PROJECT_NAME}_PATCH_LEVEL 0 )
 ## CHANGE THIS TO WHERE YOU PUT THE PARTIO MAIN DIRECTORY
 SET( PARTIO_HOME ${CMAKE_SOURCE_DIR} )
 
-# output executable and library path
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
-SET(INCLUDE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/include)
-
 ## Setup platform specific helper defines build variants
 IF(WIN32)
 	ADD_DEFINITIONS (-DPARTIO_WIN32)
@@ -86,26 +81,32 @@ IF(WIN32)
 	SET( GLUT_INCLUDE_DIR "${PARTIO_HOME}/winReqLibs/freeglut-2.8.0-1/include")
 	SET( GLUT_LIBRARY_DIR "${PARTIO_HOME}/winReqLibs/freeglut-2.8.0-1/lib/x64")
 	SET( SWIG_EXECUTABLE "${PARTIO_HOME}/winReqLibs/swigwin-2.0.4/swig.exe")
+	SET( PARTIO_BUILD_PLATFORM "windows")
 
 ELSE(WIN32)
 	ADD_DEFINITIONS (-Wextra -Wno-unused-parameter)
 	SET( CMAKE_CXX_FLAGS "-fPIC")
 ENDIF(WIN32)
 
-# we want to push the partio lib up to the main dir
-	SET( LIBRARY_OUTPUT_PATH "${CMAKE_SOURCE_DIR}/lib")
-
 ## Set install location
-IF (NOT DEFINED CMAKE_INSTALL_PREFIX)
+IF (UNIX)
     EXECUTE_PROCESS(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
-    SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}")
-ENDIF(NOT DEFINED CMAKE_INSTALL_PREFIX)
+	SET(PARTIO_BUILD_PLATFORM "${VARIANT_DIRECTORY}")
+	MESSAGE(STATUS "Build Platform: ${PARTIO_BUILD_PLATFORM}")
+
+ENDIF()
+
+# output executable and library path
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/bin)
+SET(LIBRARY_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/lib)
+SET(INCLUDE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/include)
+
 
 ## Search for needed  libraries
 find_package(SWIG REQUIRED)
 
 ## Search for useful libraries
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR})
+set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
 find_package(GLUT REQUIRED)
 IF(GLUT_FOUND)
 ELSE(GLUT_FOUND)
@@ -126,7 +127,6 @@ ELSE(ZLIB_FOUND)
     LINK_DIRECTORIES ( ${ZLIB_LIBRARY_DIR} )
     SET (ZLIB_LIBRARY "${ZLIB_LIBRARY_DIR}/zlib.lib")
 ENDIF(ZLIB_FOUND)
-find_package(NumPy)
 
 ## Make modules able to see partio library
 # Setup environment variable to link partio
@@ -139,16 +139,6 @@ ELSEIF (UNIX)
 ENDIF()
 # make it so partio can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/lib )
-
-# install partio headers for use by other programs
-install(
-	FILES
-	${CMAKE_SOURCE_DIR}/src/lib/PartioAttribute.h
-	${CMAKE_SOURCE_DIR}/src/lib/Partio.h
-	${CMAKE_SOURCE_DIR}/src/lib/PartioIterator.h
-	DESTINATION ${INCLUDE_OUTPUT_PATH}
-	)
-
 
 ## Traverse subdirectories
 ADD_SUBDIRECTORY (src/lib)
