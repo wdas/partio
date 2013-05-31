@@ -16,4 +16,4 @@ class PartioVisualizerTemplate(templates.ShapeTranslatorTemplate):
         self.addSeparator()
         self.addControl("aiMotionBlurMultiplier",label="Motion Blur Mult")
 
-templates.registerTranslatorUI(PartioVisualizerTemplate, "partioVisualizer", "partio")
+templates.registerTranslatorUI(PartioVisualizerTemplate, "partioVisualizer", "partioTranslator")
