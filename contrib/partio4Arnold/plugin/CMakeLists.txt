@@ -35,7 +35,7 @@ endif(COMMAND cmake_policy)
 
 SET(CMAKE_CXX_WARNING_LEVEL 4)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
 
 
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
@@ -43,6 +43,16 @@ MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
 ## Use verbose make file
 SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
+
+##################################################
+### CUSTOMIZE PATH TO MTOA SOURCE
+# Set this to the main source directory for MTOA
+SET (MTOA_DEVEL_HOME "/redpawFX/dev/mtoa")
+
+SET (MTOA_DEVEL_INCLUDE ${MTOA_DEVEL_HOME}/plugins/mtoa)
+
+### END
+##################################################
 
 set (PLUGIN_NAME "partioTranslator")
 set (CMAKE_PROJECT_NAME "partioVizTranslator")
@@ -75,7 +85,7 @@ SET (PARTIO_LIBDIR  ${LIBRARY_OUTPUT_PATH} )
 set (STD_INCLUDES "." ".." "/usr/X11R6/include" "/usr/include" "/usr/include/CC")
 set (STD_LIB "/usr/lib/")
 
-set (MTOA_DEVEL_INCLUDE "/Volumes/sv-dev01/devRepo/johnc/arnold/mtoa/plugins/mtoa")
+
 
 include_directories (${STD_INCLUDES} ${partio4ArnoldINCLUDES} ${MAYA_INCLUDE_DIR} ${ARNOLD_INCLUDE_DIR} ${MTOA_DEVEL_INCLUDE} ${MTOA_INCLUDE_DIR} ${PARTIO_INCLUDE})
 link_directories  ( ${STD_LIB} ${MAYA_LIBRARY_DIR} ${MtoA_mtoa_api_LIBRARY} ${ARNOLD_LIBRARY}  ${PARTIO_LIBDIR} ${ZLIB_LIBRARY_DIR})

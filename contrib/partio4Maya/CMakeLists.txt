@@ -8,6 +8,8 @@ if(COMMAND cmake_policy)
 	 cmake_policy(SET CMP0015 NEW)  # to supress relative library directory warnings
 endif(COMMAND cmake_policy)
 
+SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+
 find_package(Maya)
 
 if (MAYA_FOUND)
@@ -23,8 +25,6 @@ if( APPLE )
 ENDIF()
 
 SET(CMAKE_CXX_WARNING_LEVEL 4)
-
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
 
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
