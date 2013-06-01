@@ -222,7 +222,7 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
 /// RGB
 
 
-    if ( arg_rgbFrom !="" && points->attributeInfo ( arg_rgbFrom, rgbAttr ) )
+    if ( arg_rgbFrom && arg_rgbFrom[0] !='\0' && points->attributeInfo ( arg_rgbFrom, rgbAttr ) )
     {
         AiNodeDeclare ( currentInstance, "rgbPP", "uniform RGB" );
         AiMsgInfo ( "[partioGenerator] found rgbPP attr..." );
@@ -238,7 +238,7 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
 //////////////
 /// OPACITY
 
-    if ( arg_opacFrom !="" && points->attributeInfo ( arg_opacFrom, opacityAttr ) )
+    if ( arg_opacFrom  && arg_opacFrom[0] !='\0' && points->attributeInfo ( arg_opacFrom, opacityAttr ) )
     {
         AiNodeDeclare ( currentInstance, "opacityPP", "uniform Float" );
         AiMsgInfo ( "[partioGenerator] found opacityPP attr..." );
@@ -253,7 +253,7 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
 
 ///////////////////////////////////////////////////////////////////////////////////
 /// RADIUS by default  if "none" is defined it will look for  radiusPP or  radius
-    if ( ( arg_radFrom != "" && points->attributeInfo ( arg_radFrom,radiusAttr ) ) && !arg_overrideRadiusPP )
+    if ( ( arg_radFrom && arg_radFrom[0] !='\0' && points->attributeInfo ( arg_radFrom,radiusAttr ) ) && !arg_overrideRadiusPP )
     {
         AiMsgInfo ( "[partioGenerator] found radius attr...%s", arg_radFrom );
         hasRadiusPP = true;
