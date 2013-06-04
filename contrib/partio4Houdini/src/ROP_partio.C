@@ -98,7 +98,7 @@ getTemplates()
     theTemplate[ROP_PIO_SOPPATH] = f3dTemplates[0];
     theTemplate[ROP_PIO_SOPOUTPUT] = f3dTemplates[1];
 	theTemplate[ROP_PIO_VERBOSITY] = f3dTemplates[3];
-    theTemplate[ROP_PIO_INITSIM] = theRopTemplates[ROP_IFD_INITSIM_TPLATE];
+    //theTemplate[ROP_PIO_INITSIM] = theRopTemplates[ROP_IFD_INITSIM_TPLATE];
     theTemplate[ROP_PIO_ALFPROGRESS] = f3dTemplates[2];
     theTemplate[ROP_PIO_TPRERENDER] = theRopTemplates[ROP_TPRERENDER_TPLATE];
     theTemplate[ROP_PIO_PRERENDER] = theRopTemplates[ROP_PRERENDER_TPLATE];
