@@ -46,13 +46,13 @@
 #include <Partio.h>
 #include <string>
 #include "partio_houdini.h"
-
+#include <fstream>
 
 
 //helper function to check read file exists 
 bool fexists(const char *filename)
 {
-  ifstream ifile(filename);
+  std::ifstream ifile(filename);
   return ifile;
 }
 
