@@ -74,7 +74,11 @@ global proc partioExportGui  ()
     menuItem -label "BIN";
     menuItem -label "PRT";
     menuItem -label "PTC";
-    menuItem -label "RIB";
+	menuItem -label "PTS";
+	menuItem -label "XYZ";
+	menuItem -label "PCD";
+	menuItem -label "ICEcache";
+	menuItem -label "RIB";
 //	menuItem -label "ASS";
 
     optionMenuGrp -e -sl 5 $partioExportFormatOptionMenu;
@@ -154,17 +158,21 @@ global proc buildParticleScrollList()
 
     for ($particle in $particles)
     {
-        string $parent = `columnLayout -p $columnMain` ;
-        buildParticleEntry $particle $parent $color;
+		// filters out ncloth crap because for whatever reason  ls -type particle returns all ncloth stuff too
+		if (`nodeType $particle` == "particle" || `nodeType $particle` == "nParticle")
+		{
+			string $parent = `columnLayout -p $columnMain` ;
+			buildParticleEntry $particle $parent $color;
 
-        if ($color == 0)
-        {
-            $color = 1;
-        }
-        else
-        {
-            $color = 0;
-        }
+			if ($color == 0)
+			{
+				$color = 1;
+			}
+			else
+			{
+				$color = 0;
+			}
+		}
     }
 }
 
@@ -192,16 +200,19 @@ global proc buildParticleEntry (string $particle, string $parent, int $color )
     $particleExportCheckbox = ($particle+"exportCheckBox");
     $particleRampCheckbox = ($particle+"rampCheckbox");
     $particleSupressedCheckbox = ($particle+"supressedCheckbox");
+	$particleOverrideName = ($particle+"overrideNameText");
 
 
     if (!`rowLayout -exists ($particle+"checkboxRowLayout")`)
     {
-        rowLayout -ebg true -bgc $uiColor $uiColor $uiColor -nc 3 -cw3 335 75 75  ($particle+"checkboxRowLayout");
-        checkBox  -l  ("Check to Export Attributes for "+$particle)  $particleExportCheckbox;
+        rowLayout -ebg true -bgc $uiColor $uiColor $uiColor -nc 4 -cw3 230 75 75  ($particle+"checkboxRowLayout");
+        checkBox  -l  ("Check to Export ")  $particleExportCheckbox;
+		textFieldGrp -text $particle $particleOverrideName;
         checkBox  -l  "ramp Attrs" -cc ("buildParticleEntry "+ $particle + " " + $parent + " " + $color) $particleRampCheckbox;
         checkBox  -l "supressed" -cc ("buildParticleEntry "+ $particle + " " + $parent+ " " + $color) $particleSupressedCheckbox;
         setParent $parent;
     }
+
     frameLayout -p $parent  -ebg true -bgc $uiColor $uiColor $uiColor -label $particle -collapsable true  -collapse $open -w 492 -borderStyle "etchedIn"
     -labelAlign "center" $framelayoutName;
 
@@ -235,10 +246,19 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 										 string $cacheDirCtrl,
 										 string $exportPerFrameCheckbox)
 {
+	global string $gMainProgressBar;  // This is defined on maya startup
+
+	// we have to do this here to clear out the  escape status before using the  gMainProgressBar just in case
+	// it was  holding on to the escape status for some reason so cycling thru it this way seemed to fix it
+	progressBar -edit
+	-beginProgress
+	-isInterruptable true
+	$gMainProgressBar;
+	progressBar -edit -endProgress  $gMainProgressBar;
+
 
     int $start = `intFieldGrp -q -v1 $startFrame`;
     int $end  = `intFieldGrp  -q -v1 $endFrame`;
-    int $pdabc = `optionMenuGrp -q -sl $partioExportOptionMenu`;
     string $partioExportFormat = `optionMenuGrp -q -v  $partioExportOptionMenu`;
     string $cacheDir = `textFieldButtonGrp -q -text  $cacheDirCtrl`;
 
@@ -255,6 +275,16 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
     if ($perframe)
     {
         $loopEndFrame = $end;
+        // we only want to bring up the progresswindow when we're using "perframe mode so we can escape cancel the export
+		progressBar -edit
+		-beginProgress
+		-isInterruptable true
+		-status "PartioExport per frame..."
+		-minValue $loopStartFrame
+		-maxValue $loopEndFrame
+		-step 1
+		$gMainProgressBar;
+
     }
 
     for ($x = $loopStartFrame; $x <= $loopEndFrame; $x++)
@@ -267,53 +297,69 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
         {
             $start = $currentFrame;
             $end = $currentFrame;
+            if(`progressBar -query -isCancelled $gMainProgressBar`)
+			{
+				break;
+			}
+			progressBar -edit -step 1 $gMainProgressBar;
         }
 
         for ($particle in $particles)
         {
-            $particleExportCheckbox = ($particle+"exportCheckBox");
+			// filters out ncloth crap because for whatever reason  ls -type particle returns all ncloth stuff too
+			if (`nodeType $particle` == "particle" || `nodeType $particle` == "nParticle")
+			{
+				$particleExportCheckbox = ($particle+"exportCheckBox");
 
-            int $selected  = `checkBox -q -v  $particleExportCheckbox`;
+				int $selected  = `checkBox -q -v  $particleExportCheckbox`;
 
-            if ($selected  >= 1)
-            {
-                string $cmd;
-                string $filePath;
+				if ($selected  >= 1)
+				{
+					string $cmd;
+					string $filePath;
 
-		// fix windows paths with escape characters
-		
-			
-                $cmd = ("partioExport -mnf "+$start+" -mxf "+$end+ " -f "+$partioExportFormat+" -atr position -atr id ");
-                $filePath = `encodeString($cacheDir)`;
+				string $particleOverrideName = `textFieldGrp -q -text ($particle+"overrideNameText")`;
+			// fix windows paths with escape characters
 
-                string $attrs[] = `partioExportGuiListParticleAttrs $particle allPP 0 1`;
 
-                for ($attr in $attrs)
-                {
-                    if ($attr == "particleId" || $attr == "position")
-                    {}
-                    else
-                    {
-                        $attrCheckbox =  ($particle+$attr+"checkBox");
-						if (`checkBox -exists $attrCheckbox`)
+					$cmd = ("partioExport -mnf "+$start+" -mxf "+$end+ " -f "+$partioExportFormat+" -atr position -atr id ");
+					$filePath = `encodeString($cacheDir)`;
+
+					string $attrs[] = `partioExportGuiListParticleAttrs $particle allPP 0 1`;
+
+					for ($attr in $attrs)
+					{
+						if ($attr == "particleId" || $attr == "position")
+						{}
+						else
 						{
-							$val = `checkBox -q -v  $attrCheckbox`;
-							if ( $val >= 1)
+							$attrCheckbox =  ($particle+$attr+"checkBox");
+							if (`checkBox -exists $attrCheckbox`)
 							{
-								$cmd += (" -atr "+$attr);
+								$val = `checkBox -q -v  $attrCheckbox`;
+								if ( $val >= 1)
+								{
+									$cmd += (" -atr "+$attr);
+								}
 							}
 						}
-                    }
-                }
-                $cmd += (" -p \""+$filePath +"\" "+$particle);
-                evalEcho $cmd;
-            }
-            else
-			{
-                continue;
-            }
+					}
+					if (`size($particleOverrideName)` > 0 &&  $particleOverrideName != $particle )
+					{
+						$cmd += (" -fp \""+$particleOverrideName+"\"");
+					}
+					$cmd += (" -p \""+$filePath +"\" "+$particle);
+					evalEcho $cmd;
+				}
+				else
+				{
+					continue;
+				}
+			}
         }
     }// end frame loop
+
+	progressBar -edit -endProgress  $gMainProgressBar;
 }
 
 /////////////////////////////////////////////
@@ -321,8 +367,8 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 
 global proc  updatePath (string $cacheDirControl)
 {
-    string $result[] = `fileDialog2 -fileMode 3  -dialogStyle 1`;
-print $result[0];
+    string $result[] = `fileDialog2 -fileMode 3 `;
+
     textFieldButtonGrp -e -text $result[0]  $cacheDirControl;
 	optionVar -sv "partioExportGUICachePath" $result[0];
 }

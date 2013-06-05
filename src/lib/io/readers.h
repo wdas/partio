@@ -49,6 +49,8 @@ ParticlesDataMutable* readPRT(	const char* filename,const bool headersOnly);
 ParticlesDataMutable* readBIN(	const char* filename,const bool headersOnly);
 ParticlesDataMutable* readPTS(  const char* filename,const bool headersOnly);
 ParticlesDataMutable* readXYZ(  const char* filename,const bool headersOnly);
+ParticlesDataMutable* readPCD(	const char* filename,const bool headersOnly);
+ParticlesDataMutable* readICECACHE( const char* filename,const bool headersOnly);
 
 bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed);
 bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed);
@@ -61,6 +63,8 @@ bool writeRIB(const char* filename,const ParticlesData& p,const bool compressed)
 bool writePDC(const char* filename,const ParticlesData& p,const bool compressed);
 bool writePRT(const char* filename,const ParticlesData& p,const bool compressed);
 bool writeBIN(const char* filename,const ParticlesData& p,const bool compressed);
+bool writePCD(const char* filename,const ParticlesData& p,const bool compressed);
+bool writeICECACHE(const char* filename,const ParticlesData& p,const bool compressed);
 }
 
 #endif

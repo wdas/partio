@@ -1,6 +1,5 @@
 /.sconsign.dblite
 /kbuild.*
-/src/doc/doc
 /Linux-*
 /Darwin-*
 /build
@@ -9,6 +8,7 @@
 /*.kdev*
 *.cmake
 *.txt
+cmake_install.*
 *.make
 *.marks
 *.includecache
@@ -40,4 +40,5 @@
 CMakeScripts
 CMakeFiles
 partio.build
+/src/doc/*
 

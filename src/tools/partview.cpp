@@ -99,7 +99,6 @@ static void render()
         //cout << "not inited" << endl;
         inited=true;
         colorMissing = false;
-        colorMissing = false;
 
 
         glEnable(GL_DEPTH_TEST);
@@ -151,14 +150,16 @@ static void render()
                         !particles->attributeInfo("alpha", colorAttr) &
                         !particles->attributeInfo("alphaPP", colorAttr) &
                         !particles->attributeInfo("pointOpacity", colorAttr))
-                    glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
                 {
                     alphaMissing = true;
                     //std::cerr<<"Failed to find opacity/alpha attribute "<<std::endl;
                     glDisable(GL_BLEND);
                 }
+                else
+				{
+					glEnable(GL_BLEND);
+					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+				}
             }
         }
         sourceChanged=false;
@@ -251,6 +252,7 @@ static void render()
                     rgba[(i*3)+3] = alpha[i];
                 }
                 glColorPointer(  4, GL_FLOAT, 0, rgba );
+				free(rgba);
             }
             else
             {
@@ -284,6 +286,7 @@ static void render()
                 }
                 glColorPointer(  3, GL_FLOAT, 0, rgba );
             }
+            free(rgba);
         }
 
     }
@@ -296,6 +299,7 @@ static void render()
     glEnd();
 
     glutSwapBuffers();
+
 
 }
 
@@ -423,6 +427,7 @@ void  reloadParticleFile(int direction)
 		int result = stat(particleFile.c_str(),&statinfo);
 		if (result >=0)
 		{
+			particles=0;
 			particles=read(particleFile.c_str());
 			if (!glutGetWindow()) {
 				return;

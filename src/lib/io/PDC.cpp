@@ -2,7 +2,6 @@
 PARTIO SOFTWARE
 Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
 
- keypress events  also added the PTS file format  (all need cleanup)
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
 met:
@@ -127,7 +126,8 @@ ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly){
     return simple;
 }
 
-bool writePDC(const char* filename,const ParticlesData& p,const bool compressed){
+bool writePDC(const char* filename,const ParticlesData& p,const bool compressed)
+{
     auto_ptr<ostream> output(
         compressed ?
         Gzip_Out(filename,ios::out|ios::binary)
@@ -145,9 +145,10 @@ bool writePDC(const char* filename,const ParticlesData& p,const bool compressed)
     write<BIGEND>(*output, (int)0); // tmp1
     write<BIGEND>(*output, (int)0); // tmp2
     write<BIGEND>(*output, (int)p.numParticles());
-    write<BIGEND>(*output, (int)p.numAttributes());
+    write<BIGEND>(*output, (int)p.numAttributes()+1);
 
-    for(int attrIndex = 0; attrIndex < p.numAttributes(); attrIndex++){
+    for(int attrIndex = 0; attrIndex < p.numAttributes(); attrIndex++)
+    {
         ParticleAttribute attr;
         p.attributeInfo(attrIndex,attr);
 
@@ -157,16 +158,27 @@ bool writePDC(const char* filename,const ParticlesData& p,const bool compressed)
 
         // write type
         int count = 1; // FLOAT
-        if(attr.type == VECTOR){
+        if(attr.type == VECTOR || (attr.type == FLOAT && attr.count > 2)){
             count = 3;
         }
+        if(attr.type == INT && attr.count == 1){
+            count = 1;
+        }
+        cout << "Name: " << attr.name.c_str() << " , Type: " << attr.type << endl;
         write<BIGEND>(*output, (int)(count+2));
 
         // write data
         for(int partIndex = 0; partIndex < p.numParticles(); partIndex++){
-            const float* data = p.data<float>(attr, partIndex);
-            for(int dim = 0; dim < count; dim++){
-                write<BIGEND>(*output, (double)data[dim]);
+            if(attr.type == INT){
+                const int* data = p.data<int>(attr, partIndex);
+                for(int dim = 0; dim < count; dim++){
+                    write<BIGEND>(*output, (double)data[dim]);
+                }
+            }else{
+                const float* data = p.data<float>(attr, partIndex);
+                for(int dim = 0; dim < count; dim++){
+                    write<BIGEND>(*output, (double)data[dim]);
+                }
             }
         }
     }

@@ -37,31 +37,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <Partio.h>
 #include <iostream>
 
-Partio::ParticlesDataMutable* makeData()
+#include "testsaveload.h"
+
+// using namespace Partio;
+namespace PartioTests {
+
+Partio::ParticlesDataMutable* makeSaveLoadTestData()
 {
     Partio::ParticlesDataMutable& foo=*Partio::create();
     Partio::ParticleAttribute positionAttr=foo.addAttribute("position",Partio::VECTOR,3);
     Partio::ParticleAttribute lifeAttr=foo.addAttribute("life",Partio::FLOAT,2);
     Partio::ParticleAttribute idAttr=foo.addAttribute("id",Partio::INT,1);
-    
+
     for(int i=0;i<5;i++){
         Partio::ParticleIndex index=foo.addParticle();
         float* pos=foo.dataWrite<float>(positionAttr,index);
         float* life=foo.dataWrite<float>(lifeAttr,index);
         int* id=foo.dataWrite<int>(idAttr,index);
-        
+
         pos[0]=.1*i;
         pos[1]=.1*(i+1);
         pos[2]=.1*(i+2);
         life[0]=-1.2+i;
         life[1]=10.;
         id[0]=index;
-        
+
     }
     return &foo;
 }
 
-void testEmptySaveLoad(const char* filename)
+void testEmptySaveLoadFile(const char* filename)
 {
     Partio::ParticlesDataMutable* p=Partio::create();
     p->addAttribute("position",Partio::VECTOR,3);
@@ -72,7 +77,7 @@ void testEmptySaveLoad(const char* filename)
     pread->release();
 }
 
-void testSaveLoad(Partio::ParticlesData* p,const char* filename)
+void testSaveLoadFile(Partio::ParticlesData* p,const char* filename)
 {
     std::cerr<<"Testing with file '"<<filename<<"'"<<std::endl;
     Partio::write(filename,*p);
@@ -80,26 +85,24 @@ void testSaveLoad(Partio::ParticlesData* p,const char* filename)
     pnew->release();
 }
 
-int main(int argc,char *argv[])
+void test_SaveLoad()
 {
-    {
-        Partio::ParticlesDataMutable* foo=makeData();
-        testSaveLoad(foo,"test.bgeo");
-        testSaveLoad(foo,"test.bgeo.gz");
-        testSaveLoad(foo,"test.geo");
-        testSaveLoad(foo,"test.geo.gz");
-        testSaveLoad(foo,"test.ptc");
-        testSaveLoad(foo,"test.ptc.gz");
-        testSaveLoad(foo,"test.pdb");
-        testSaveLoad(foo,"test.pdb.gz");
-        testEmptySaveLoad("testEmpty.geo");
-        testEmptySaveLoad("testEmpty.bgeo");
-        testEmptySaveLoad("testEmpty.pdb");
-        testEmptySaveLoad("testEmpty.ptc");
+ {
+        Partio::ParticlesDataMutable* foo=makeSaveLoadTestData();
+        testSaveLoadFile(foo,"test.bgeo");
+        testSaveLoadFile(foo,"test.bgeo.gz");
+        testSaveLoadFile(foo,"test.geo");
+        testSaveLoadFile(foo,"test.geo.gz");
+        testSaveLoadFile(foo,"test.ptc");
+        testSaveLoadFile(foo,"test.ptc.gz");
+        testSaveLoadFile(foo,"test.pdb");
+        testSaveLoadFile(foo,"test.pdb.gz");
+        testEmptySaveLoadFile("testEmpty.geo");
+        testEmptySaveLoadFile("testEmpty.bgeo");
+        testEmptySaveLoadFile("testEmpty.pdb");
+        testEmptySaveLoadFile("testEmpty.ptc");
         foo->release();
     }
 
-
-    return 0;
-
+}
 }

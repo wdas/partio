@@ -27,47 +27,81 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#include <maya/MFloatArray.h>
-#include <maya/MVectorArray.h>
-#include <maya/MPointArray.h>
-#include <maya/MVector.h>
-#include <maya/MFloatVector.h>
-#include <maya/MIntArray.h>
-#include <maya/MStringArray.h>
+#ifndef Partio4MayaVisualizer_H
+#define Partio4MayaVisualizer_H
+
+#define _USE_MGL_FT_
+
+#include <stdlib.h>
+#include <vector>
+#include <math.h>
+#include <set>
+
 #include <maya/MBoundingBox.h>
+#include <maya/MColor.h>
+#include <maya/MDagPath.h>
+#include <maya/MDataHandle.h>
+#include <maya/MDataBlock.h>
+#include <maya/MDistance.h>
+#include <maya/MDrawData.h>
+#include <maya/MDoubleArray.h>
+#include <maya/MFloatArray.h>
+#include <maya/MFloatVector.h>
+#include <maya/MGLFunctionTable.h>
+#include <maya/MGlobal.h>
+#include <maya/MIntArray.h>
+#include <maya/MIOStream.h>
+#include <maya/MMatrix.h>
+#include <maya/MPointArray.h>
+#include <maya/MStringArray.h>
+#include <maya/MSceneMessage.h>
+#include <maya/MSelectionList.h>
+#include <maya/MString.h>
+#include <maya/MStatus.h>
+#include <maya/MTypeId.h>
+#include <maya/MTypes.h>
+#include <maya/MTime.h>
+#include <maya/MVectorArray.h>
+#include <maya/MVector.h>
 #include <maya/MObject.h>
 #include <maya/MPlug.h>
-#include <maya/MDataBlock.h>
-#include <maya/MTypeId.h>
-#include <maya/MStatus.h>
-#include <maya/MVector.h>
+#include <maya/M3dView.h>
+
 #include <maya/MPxSurfaceShape.h>
 #include <maya/MPxSurfaceShapeUI.h>
-#include <maya/M3dView.h>
-#include <maya/MSceneMessage.h>
-#include <maya/MDrawData.h>
-#include <maya/MSelectionList.h>
-#include <maya/MDagPath.h>
-#include <vector>
+#include <maya/MPxNode.h>
+
+#include <maya/MFnUnitAttribute.h>
+#include <maya/MFnTypedAttribute.h>
+#include <maya/MFnStringData.h>
+#include <maya/MFnNumericData.h>
+#include <maya/MFnEnumAttribute.h>
+#include <maya/MFnUnitAttribute.h>
+#include <maya/MFnNumericAttribute.h>
 
 #include <Partio.h>
 #include <PartioAttribute.h>
 #include <PartioIterator.h>
 
+#include "partio4MayaShared.h"
+#include "iconArrays.h"
+
 class partioVizReaderCache
 {
 public:
-	partioVizReaderCache();
-	int token;
-	MBoundingBox bbox;
-	int dList;
-	Partio::ParticlesDataMutable* particles;
-	Partio::ParticleAttribute positionAttr;
-	Partio::ParticleAttribute colorAttr;
-	Partio::ParticleAttribute opacityAttr;
-	float* rgb;
-	float* rgba;
-	float* flipPos;
+    partioVizReaderCache();
+    int token;
+    MBoundingBox bbox;
+    int dList;
+    Partio::ParticlesDataMutable* particles;
+    Partio::ParticleAttribute positionAttr;
+    Partio::ParticleAttribute colorAttr;
+    Partio::ParticleAttribute opacityAttr;
+    Partio::ParticleAttribute radiusAttr;
+    float* rgb;
+    float* rgba;
+    MFloatArray radius;
+    float* flipPos;
 
 };
 
@@ -78,92 +112,100 @@ public:
 
     partioVisualizerUI();
     virtual ~partioVisualizerUI();
-	virtual void draw(const MDrawRequest & request, M3dView & view) const;
-	virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
-	void 	drawBoundingBox() const;
-	void 	drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
-	static void * creator();
-	virtual bool	select( MSelectInfo &selectInfo,
-							MSelectionList &selectionList,
-							MPointArray &worldSpaceSelectPts ) const;
+    virtual void draw(const MDrawRequest & request, M3dView & view) const;
+    virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
+    void 	drawBoundingBox() const;
+    void    drawBillboardCircleAtPoint(MVector position, float radius, int num_segments, int drawType) const;
+    void 	drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
+    static void * creator();
+    virtual bool	select( MSelectInfo &selectInfo,
+                         MSelectionList &selectionList,
+                         MPointArray &worldSpaceSelectPts ) const;
 
 };
 
 class partioVisualizer : public MPxSurfaceShape
 {
 public:
-	partioVisualizer();
-	virtual ~partioVisualizer();
+    partioVisualizer();
+    virtual ~partioVisualizer();
 
     virtual MStatus   		compute( const MPlug& plug, MDataBlock& block );
-	virtual bool            isBounded() const;
-	virtual MBoundingBox    boundingBox() const;
-	static  void *          creator();
-	static  MStatus         initialize();
-	static void 			reInit(void *data);
-	void 					initCallback();
-	virtual void 			postConstructor();
+    virtual bool            isBounded() const;
+    virtual MBoundingBox    boundingBox() const;
+    static  void *          creator();
+    static  MStatus         initialize();
+    static void 			reInit(void *data);
+    void 					initCallback();
+    virtual void 			postConstructor();
 
-	bool GetPlugData();
-	partioVizReaderCache* updateParticleCache();
+    bool GetPlugData();
+    partioVizReaderCache* updateParticleCache();
 
-	static MObject  time;
-	static MObject  aSize;         // The size of the logo
-	static MObject  aDrawSkip;
-	static MObject  aFlipYZ;
-	static MObject 	aUpdateCache;
-	static MObject 	aCacheDir;
-	static MObject 	aCachePrefix;
-	static MObject 	aUseTransform;
-	static MObject 	aCacheActive;
-	static MObject 	aCacheOffset;
-	static MObject  aCacheStatic;
-	static MObject 	aCacheFormat;
-	static MObject 	aCachePadding;
-	static MObject  aCachePreDelim;
-	static MObject  aCachePostDelim;
-	static MObject 	aJitterPos;
-	static MObject 	aJitterFreq;
-	static MObject 	aPartioAttributes;
-	static MObject  aColorFrom;
-	static MObject  aAlphaFrom;
-	static MObject  aRadiusFrom;
-	static MObject  aPointSize;
-	static MObject  aDefaultPointColor;
-	static MObject  aDefaultAlpha;
-	static MObject  aInvertAlpha;
-	static MObject  aDrawStyle;
-	static MObject  aForceReload;
-	static MObject  aRenderCachePath;
+    MCallbackId partioVisualizerOpenCallback;
+    MCallbackId partioVisualizerImportCallback;
+    MCallbackId partioVisualizerReferenceCallback;
+
+    static MObject  time;
+    static MObject  aSize;         // The size of the logo
+    static MObject  aDrawSkip;
+    static MObject  aFlipYZ;
+    static MObject 	aUpdateCache;
+    static MObject 	aCacheDir;
+    static MObject 	aCacheFile;
+    static MObject 	aUseTransform;
+    static MObject 	aCacheActive;
+    static MObject 	aCacheOffset;
+    static MObject  aCacheStatic;
+    static MObject 	aCacheFormat;
+    static MObject 	aJitterPos;
+    static MObject 	aJitterFreq;
+    static MObject 	aPartioAttributes;
+    static MObject  aColorFrom;
+    static MObject  aAlphaFrom;
+    static MObject  aRadiusFrom;
+    static MObject  aPointSize;
+    static MObject  aDefaultPointColor;
+    static MObject  aDefaultAlpha;
+    static MObject  aDefaultRadius;
+    static MObject  aInvertAlpha;
+    static MObject  aDrawStyle;
+    static MObject  aForceReload;
+    static MObject  aRenderCachePath;
 
 
-	static	MTypeId			id;
-	float 					multiplier;
-	bool 					cacheChanged;
-	partioVizReaderCache  	pvCache;
+    static	MTypeId			id;
+    float 					multiplier;
+    bool 					cacheChanged;
+    partioVizReaderCache  	pvCache;
 
 
 private:
 
-	MString mLastFileLoaded;
-	MString mLastPath;
-	MString mLastPrefix;
-	MString mLastExt;
-	int mLastColorFromIndex;
-	int mLastAlphaFromIndex;
-	int mLastRadiusFromIndex;
-	MFloatVector mLastColor;
-	float mLastAlpha;
-	bool mLastInvertAlpha;
-	bool mLastFlipStatus;
-	bool mFlipped;
-	bool  frameChanged;
-	MStringArray attributeList;
+    MString mLastFileLoaded;
+    MString mLastPath;
+    MString mLastFile;
+    MString mLastExt;
+    bool mLastStatic;
+    int mLastColorFromIndex;
+    int mLastAlphaFromIndex;
+    int mLastRadiusFromIndex;
+    MFloatVector mLastColor;
+    float mLastAlpha;
+    bool mLastInvertAlpha;
+    float mLastRadius;
+    bool mLastFlipStatus;
+    bool mFlipped;
+    bool  frameChanged;
+    MStringArray attributeList;
+    bool drawError;
+
 
 protected:
 
-	int dUpdate;
-	GLuint dList;
+    int dUpdate;
+    GLuint dList;
 
 };
 
+#endif
