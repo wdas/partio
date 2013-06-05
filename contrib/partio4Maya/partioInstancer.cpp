@@ -86,8 +86,6 @@ MObject partioInstancer::aForceReload;
 MObject partioInstancer::aRenderCachePath;
 
 /// point position / velocity
-MObject partioInstancer::aJitterPos;
-MObject partioInstancer::aJitterFreq;
 MObject partioInstancer::aComputeVeloPos;
 MObject partioInstancer::aVeloMult;
 
@@ -98,6 +96,7 @@ MObject partioInstancer::aRotationType;
 
 MObject partioInstancer::aRotationFrom;
 MObject partioInstancer::aAimDirectionFrom;
+MObject partioInstancer::aAimPositionFrom;
 MObject partioInstancer::aAimAxisFrom;
 MObject partioInstancer::aAimUpAxisFrom;
 MObject partioInstancer::aAimWorldUpFrom;
@@ -105,6 +104,7 @@ MObject partioInstancer::aAimWorldUpFrom;
 MObject partioInstancer::aLastScaleFrom;
 MObject partioInstancer::aLastRotationFrom;
 MObject partioInstancer::aLastAimDirectionFrom;
+MObject partioInstancer::aLastAimPositionFrom;
 
 MObject partioInstancer::aIndexFrom;
 
@@ -135,11 +135,13 @@ partioInstancer::partioInstancer()
         mLastPath(""),
         mLastFile(""),
         mLastExt(""),
-        mLastRotationTypeIndex(0),
+        mLastRotationTypeIndex(-1),
         mLastRotationFromIndex(-1),
         mLastLastRotationFromIndex(-1),
         mLastAimDirectionFromIndex(-1),
 		mLastLastAimDirecitonFromIndex(-1),
+		mLastAimPositionFromIndex(-1),
+		mLastLastAimPositionFromIndex(-1),
 		mLastAimAxisFromIndex(-1),
 		mLastAimUpAxisFromIndex(-1),
 		mLastAimWorldUpFromIndex(-1),
@@ -281,9 +283,6 @@ MStatus partioInstancer::initialize()
     eAttr.setChannelBox(true);
 
 
-    aUseTransform = nAttr.create("useTransform", "utxfm", MFnNumericData::kBoolean, false, &stat);
-    nAttr.setKeyable(true);
-
     aPartioAttributes = tAttr.create ("partioCacheAttributes", "pioCAts", MFnStringData::kString);
     tAttr.setArray(true);
     tAttr.setUsesArrayDataBuilder( true );
@@ -311,10 +310,9 @@ MStatus partioInstancer::initialize()
     nAttr.setKeyable(true);
 
 // ROTATION attrs
-	aRotationType = eAttr.create( "rotationType", "rottyp");
-    eAttr.addField("Rotation",	0);
-    eAttr.addField("Aim Direction",	1);
-//	eAttr.addField("Aim Position", 2);  // TODO : figure out math for this rot type
+	aRotationType = nAttr.create( "rotationType", "rottyp",  MFnNumericData::kInt, -1, &stat);
+	nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
 
     aRotationFrom = nAttr.create("rotationFrom", "rfrm", MFnNumericData::kInt, -1, &stat);
     nAttr.setDefault(-1);
@@ -329,6 +327,14 @@ MStatus partioInstancer::initialize()
     nAttr.setKeyable(true);
 
 	aLastAimDirectionFrom = nAttr.create("lastAimDirectionFrom", "ladfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
+	aAimPositionFrom = nAttr.create("aimPositionFrom", "apfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
+	aLastAimPositionFrom = nAttr.create("lastAimPositionFrom", "lapfrm", MFnNumericData::kInt, -1, &stat);
     nAttr.setDefault(-1);
     nAttr.setKeyable(true);
 
@@ -389,6 +395,7 @@ MStatus partioInstancer::initialize()
 	addAttribute ( aRotationType );
     addAttribute ( aRotationFrom );
 	addAttribute ( aAimDirectionFrom );
+	addAttribute ( aAimPositionFrom );
 	addAttribute ( aAimAxisFrom );
 	addAttribute ( aAimUpAxisFrom );
 	addAttribute ( aAimWorldUpFrom );
@@ -396,6 +403,7 @@ MStatus partioInstancer::initialize()
 	addAttribute ( aLastScaleFrom );
 	addAttribute ( aLastRotationFrom );
 	addAttribute ( aLastAimDirectionFrom );
+	addAttribute ( aLastAimPositionFrom );
 
     addAttribute ( aIndexFrom );
 
@@ -426,6 +434,7 @@ MStatus partioInstancer::initialize()
 
     attributeAffects ( aRotationFrom, aUpdateCache );
 	attributeAffects ( aAimDirectionFrom, aUpdateCache );
+	attributeAffects ( aAimPositionFrom, aUpdateCache );
 	attributeAffects ( aAimAxisFrom, aUpdateCache );
 	attributeAffects ( aAimUpAxisFrom, aUpdateCache );
 	attributeAffects ( aAimWorldUpFrom, aUpdateCache );
@@ -433,6 +442,7 @@ MStatus partioInstancer::initialize()
 	attributeAffects ( aLastScaleFrom, aUpdateCache );
 	attributeAffects ( aLastRotationFrom, aUpdateCache );
 	attributeAffects ( aLastAimDirectionFrom, aUpdateCache );
+	attributeAffects ( aLastAimPositionFrom, aUpdateCache );
 
     attributeAffects ( aIndexFrom, aUpdateCache );
 
@@ -456,13 +466,15 @@ partioInstReaderCache* partioInstancer::updateParticleCache()
 MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 {
     MStatus stat;
-	short rotationType 				= block.inputValue( aRotationType ).asShort();
+	int rotationType 				= block.inputValue( aRotationType ).asInt();
     int rotationFromIndex  			= block.inputValue( aRotationFrom ).asInt();
 	int lastRotFromIndex			= block.inputValue( aLastRotationFrom ).asInt();
     int scaleFromIndex				= block.inputValue( aScaleFrom ).asInt();
 	int lastScaleFromIndex			= block.inputValue( aLastScaleFrom ).asInt();
 	int aimDirectionFromIndex		= block.inputValue( aAimDirectionFrom ).asInt();
 	int lastAimDirectionFromIndex 	= block.inputValue( aLastAimDirectionFrom ).asInt();
+	int aimPositionFromIndex		= block.inputValue( aAimPositionFrom ).asInt();
+	int lastAimPositionFromIndex	= block.inputValue( aLastAimPositionFrom ).asInt();
 	int aimAxisFromIndex			= block.inputValue( aAimAxisFrom ).asInt();
 	int aimUpAxisFromIndex			= block.inputValue( aAimUpAxisFrom ).asInt();
 	int aimWorldUpFromIndex			= block.inputValue( aAimWorldUpFrom ).asInt();
@@ -691,11 +703,13 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 					scaleFromIndex 	!= mLastScaleFromIndex ||
 					indexFromIndex 	!= mLastIndexFromIndex ||
 					aimDirectionFromIndex != mLastAimDirectionFromIndex ||
+					aimPositionFromIndex != mLastAimPositionFromIndex ||
 					aimAxisFromIndex != mLastAimAxisFromIndex ||
 					aimUpAxisFromIndex != mLastAimUpAxisFromIndex ||
 					aimWorldUpFromIndex != mLastAimWorldUpFromIndex
 				)
             {
+
                 ////////////////////////////////
                 // ROTATION
                 if (rotationFromIndex >= 0)
@@ -865,7 +879,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                 mLastRotationFromIndex = rotationFromIndex;
                 mLastScaleFromIndex = scaleFromIndex;
                 mLastIndexFromIndex = indexFromIndex;
-                mLastShaderIndexFromIndex = shaderIndexFromIndex;
+
             }
         }
         //cout << pvCache.instanceData.list()<< endl;
@@ -898,10 +912,6 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         if ((indexFromIndex+1) > zPlug.numElements())
         {
             block.outputValue(aIndexFrom).setInt(-1);
-        }
-        if ((shaderIndexFromIndex+1) > zPlug.numElements())
-        {
-            block.outputValue(aShaderIndexFrom).setInt(-1);
         }
 
         if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache

@@ -187,6 +187,7 @@ public:
 
     static MObject	aRotationFrom;
 	static MObject  aAimDirectionFrom;
+	static MObject  aAimPositionFrom;
 	static MObject  aAimAxisFrom;
 	static MObject  aAimUpAxisFrom;
 	static MObject  aAimWorldUpFrom;
@@ -194,6 +195,7 @@ public:
 	static MObject	aLastScaleFrom;
 	static MObject	aLastRotationFrom;
 	static MObject  aLastAimDirectionFrom;
+	static MObject  aLastAimPositionFrom;
 
     static MObject	aIndexFrom;
 
@@ -230,6 +232,8 @@ private:
 	int mLastLastRotationFromIndex;
 	int mLastAimDirectionFromIndex;
 	int mLastLastAimDirecitonFromIndex;
+	int mLastAimPositionFromIndex;
+	int mLastLastAimPositionFromIndex;
 	int mLastAimAxisFromIndex;
 	int mLastAimUpAxisFromIndex;
 	int mLastAimWorldUpFromIndex;
