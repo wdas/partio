@@ -67,33 +67,56 @@ id (doubleArray)
 
 MTypeId partioInstancer::id( ID_PARTIOINSTANCER );
 
+/// ATTRS
 MObject partioInstancer::time;
-MObject partioInstancer::aUpdateCache;
 MObject partioInstancer::aSize;         // The size of the logo
 MObject partioInstancer::aFlipYZ;
+MObject partioInstancer::aDrawStyle;
+MObject partioInstancer::aPointSize;
+
+/// Cache file related stuff
+MObject partioInstancer::aUpdateCache;
 MObject partioInstancer::aCacheDir;
 MObject partioInstancer::aCacheFile;
-MObject partioInstancer::aUseTransform;
 MObject partioInstancer::aCacheActive;
 MObject partioInstancer::aCacheOffset;
 MObject partioInstancer::aCacheStatic;
 MObject partioInstancer::aCacheFormat;
-MObject partioInstancer::aPartioAttributes;
-MObject partioInstancer::aPointSize;
-MObject partioInstancer::aDrawStyle;
 MObject partioInstancer::aForceReload;
 MObject partioInstancer::aRenderCachePath;
-MObject	partioInstancer::aRotationFrom;
-MObject partioInstancer::aLastRotationFrom;
-MObject	partioInstancer::aScaleFrom;
-MObject partioInstancer::aLastScaleFrom;
-MObject	partioInstancer::aIndexFrom;
-MObject	partioInstancer::aShaderIndexFrom;
-MObject	partioInstancer::aInMeshInstances;
-MObject	partioInstancer::aOutMesh;
-MObject	partioInstancer::aInstanceData;
+
+/// point position / velocity
+MObject partioInstancer::aJitterPos;
+MObject partioInstancer::aJitterFreq;
 MObject partioInstancer::aComputeVeloPos;
 MObject partioInstancer::aVeloMult;
+
+/// attributes
+MObject partioInstancer::aPartioAttributes;
+MObject partioInstancer::aScaleFrom;
+MObject partioInstancer::aRotationType;
+
+MObject partioInstancer::aRotationFrom;
+MObject partioInstancer::aAimDirectionFrom;
+MObject partioInstancer::aAimAxisFrom;
+MObject partioInstancer::aAimUpAxisFrom;
+MObject partioInstancer::aAimWorldUpFrom;
+
+MObject partioInstancer::aLastScaleFrom;
+MObject partioInstancer::aLastRotationFrom;
+MObject partioInstancer::aLastAimDirectionFrom;
+
+MObject partioInstancer::aIndexFrom;
+
+/// not implemented yet
+//	MObject partioInstancer::aAimPositionFrom;
+//	MObject partioInstancer::aShaderIndexFrom;
+//	MObject partioInstancer::aInMeshInstances;
+//	MObject partioInstancer::aOutMesh;
+
+//  output data to instancer
+MObject partioInstancer::aInstanceData;
+
 
 
 partioInstReaderCache::partioInstReaderCache():
@@ -112,10 +135,17 @@ partioInstancer::partioInstancer()
         mLastPath(""),
         mLastFile(""),
         mLastExt(""),
+        mLastRotationTypeIndex(0),
         mLastRotationFromIndex(-1),
+        mLastLastRotationFromIndex(-1),
+        mLastAimDirectionFromIndex(-1),
+		mLastLastAimDirecitonFromIndex(-1),
+		mLastAimAxisFromIndex(-1),
+		mLastAimUpAxisFromIndex(-1),
+		mLastAimWorldUpFromIndex(-1),
         mLastScaleFromIndex(-1),
+        mLastLastScaleFromIndex(-1),
         mLastIndexFromIndex(-1),
-        mLastShaderIndexFromIndex(-1),
         cacheChanged(false),
         frameChanged(false),
         multiplier(1.0),
@@ -272,6 +302,20 @@ MStatus partioInstancer::initialize()
     aRenderCachePath = tAttr.create ( "renderCachePath", "rcp", MFnStringData::kString );
     tAttr.setHidden(true);
 
+	aScaleFrom = nAttr.create("scaleFrom", "sfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
+	aLastScaleFrom = nAttr.create("lastScaleFrom", "lsfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
+// ROTATION attrs
+	aRotationType = eAttr.create( "rotationType", "rottyp");
+    eAttr.addField("Rotation",	0);
+    eAttr.addField("Aim Direction",	1);
+//	eAttr.addField("Aim Position", 2);  // TODO : figure out math for this rot type
+
     aRotationFrom = nAttr.create("rotationFrom", "rfrm", MFnNumericData::kInt, -1, &stat);
     nAttr.setDefault(-1);
     nAttr.setKeyable(true);
@@ -280,19 +324,27 @@ MStatus partioInstancer::initialize()
     nAttr.setDefault(-1);
     nAttr.setKeyable(true);
 
-    aScaleFrom = nAttr.create("scaleFrom", "sfrm", MFnNumericData::kInt, -1, &stat);
+	aAimDirectionFrom = nAttr.create("aimDirectionFrom", "adfrm", MFnNumericData::kInt, -1, &stat);
     nAttr.setDefault(-1);
     nAttr.setKeyable(true);
 
-	aLastScaleFrom = nAttr.create("lastScaleFrom", "lsfrm", MFnNumericData::kInt, -1, &stat);
+	aLastAimDirectionFrom = nAttr.create("lastAimDirectionFrom", "ladfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
+	aAimAxisFrom = nAttr.create("aimAxisFrom", "aaxfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
+	aAimUpAxisFrom = nAttr.create("aimUpAxisFrom", "auaxfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
+	aAimWorldUpFrom = nAttr.create("aimWorldUpFrom", "awufrm", MFnNumericData::kInt, -1, &stat);
     nAttr.setDefault(-1);
     nAttr.setKeyable(true);
 
     aIndexFrom = nAttr.create("indexFrom", "ifrm", MFnNumericData::kInt, -1, &stat);
-    nAttr.setDefault(-1);
-    nAttr.setKeyable(true);
-
-    aShaderIndexFrom = nAttr.create("shaderIndexFrom", "sifrm", MFnNumericData::kInt, -1, &stat);
     nAttr.setDefault(-1);
     nAttr.setKeyable(true);
 
@@ -312,52 +364,82 @@ MStatus partioInstancer::initialize()
     nAttr.setReadable(true);
 
 
-    addAttribute ( aUpdateCache );
+// add attributes
+
     addAttribute ( aSize );
     addAttribute ( aFlipYZ );
+	addAttribute ( aDrawStyle );
+	addAttribute ( aPointSize );
+
+	addAttribute ( aUpdateCache );
     addAttribute ( aCacheDir );
     addAttribute ( aCacheFile );
+	addAttribute ( aCacheActive );
     addAttribute ( aCacheOffset );
     addAttribute ( aCacheStatic );
-    addAttribute ( aCacheActive );
     addAttribute ( aCacheFormat );
-    addAttribute ( aPartioAttributes );
-    addAttribute ( aPointSize );
-    addAttribute ( aDrawStyle );
-    addAttribute ( aForceReload );
-    addAttribute ( aRenderCachePath );
-    addAttribute ( aRotationFrom );
-	addAttribute ( aLastRotationFrom );
-    addAttribute ( aScaleFrom );
-	addAttribute ( aLastScaleFrom );
-    addAttribute ( aIndexFrom );
-    addAttribute ( aShaderIndexFrom );
-    addAttribute ( aInstanceData );
-    addAttribute ( aComputeVeloPos );
-	addAttribute ( aVeloMult );
-    addAttribute ( time );
+	addAttribute ( aForceReload );
+	addAttribute ( aRenderCachePath );
 
-    attributeAffects ( aCacheDir, aUpdateCache );
+	addAttribute ( aComputeVeloPos );
+	addAttribute ( aVeloMult );
+
+    addAttribute ( aPartioAttributes );
+	addAttribute ( aScaleFrom );
+	addAttribute ( aRotationType );
+    addAttribute ( aRotationFrom );
+	addAttribute ( aAimDirectionFrom );
+	addAttribute ( aAimAxisFrom );
+	addAttribute ( aAimUpAxisFrom );
+	addAttribute ( aAimWorldUpFrom );
+
+	addAttribute ( aLastScaleFrom );
+	addAttribute ( aLastRotationFrom );
+	addAttribute ( aLastAimDirectionFrom );
+
+    addAttribute ( aIndexFrom );
+
+    addAttribute ( aInstanceData );
+
+	addAttribute ( time );
+
+// attribute affects
+
     attributeAffects ( aSize, aUpdateCache );
     attributeAffects ( aFlipYZ, aUpdateCache );
+	attributeAffects ( aPointSize, aUpdateCache );
+    attributeAffects ( aDrawStyle, aUpdateCache );
+
+	attributeAffects ( aCacheDir, aUpdateCache );
     attributeAffects ( aCacheFile, aUpdateCache );
+	attributeAffects ( aCacheActive, aUpdateCache );
     attributeAffects ( aCacheOffset, aUpdateCache );
     attributeAffects ( aCacheStatic, aUpdateCache );
     attributeAffects ( aCacheFormat, aUpdateCache );
-    attributeAffects ( aPointSize, aUpdateCache );
-    attributeAffects ( aDrawStyle, aUpdateCache );
     attributeAffects ( aForceReload, aUpdateCache );
-    attributeAffects ( aInstanceData, aUpdateCache );
-    attributeAffects ( aRotationFrom, aUpdateCache );
-	attributeAffects ( aLastRotationFrom, aUpdateCache );
-    attributeAffects ( aScaleFrom, aUpdateCache );
-	attributeAffects ( aLastScaleFrom, aUpdateCache );
-    attributeAffects ( aIndexFrom, aUpdateCache );
-    attributeAffects ( aShaderIndexFrom, aUpdateCache );
-    attributeAffects ( aComputeVeloPos, aUpdateCache );
+
+	attributeAffects ( aComputeVeloPos, aUpdateCache );
 	attributeAffects ( aVeloMult, aUpdateCache );
+
+	attributeAffects ( aScaleFrom, aUpdateCache );
+	attributeAffects ( aRotationType, aUpdateCache );
+
+    attributeAffects ( aRotationFrom, aUpdateCache );
+	attributeAffects ( aAimDirectionFrom, aUpdateCache );
+	attributeAffects ( aAimAxisFrom, aUpdateCache );
+	attributeAffects ( aAimUpAxisFrom, aUpdateCache );
+	attributeAffects ( aAimWorldUpFrom, aUpdateCache );
+
+	attributeAffects ( aLastScaleFrom, aUpdateCache );
+	attributeAffects ( aLastRotationFrom, aUpdateCache );
+	attributeAffects ( aLastAimDirectionFrom, aUpdateCache );
+
+    attributeAffects ( aIndexFrom, aUpdateCache );
+
+	attributeAffects ( aInstanceData, aUpdateCache );
     attributeAffects (time, aUpdateCache);
     attributeAffects (time, aInstanceData);
+
 
     return MS::kSuccess;
 }
@@ -374,12 +456,18 @@ partioInstReaderCache* partioInstancer::updateParticleCache()
 MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 {
     MStatus stat;
-    int rotationFromIndex  		= block.inputValue( aRotationFrom ).asInt();
-	int lastRotFromIndex		= block.inputValue( aLastRotationFrom ).asInt();
-    int scaleFromIndex			= block.inputValue( aScaleFrom ).asInt();
-	int lastScaleFromIndex		= block.inputValue( aLastScaleFrom ).asInt();
-    int indexFromIndex 			= block.inputValue( aIndexFrom ).asInt();
-    int shaderIndexFromIndex	= block.inputValue( aShaderIndexFrom).asInt();
+	short rotationType 				= block.inputValue( aRotationType ).asShort();
+    int rotationFromIndex  			= block.inputValue( aRotationFrom ).asInt();
+	int lastRotFromIndex			= block.inputValue( aLastRotationFrom ).asInt();
+    int scaleFromIndex				= block.inputValue( aScaleFrom ).asInt();
+	int lastScaleFromIndex			= block.inputValue( aLastScaleFrom ).asInt();
+	int aimDirectionFromIndex		= block.inputValue( aAimDirectionFrom ).asInt();
+	int lastAimDirectionFromIndex 	= block.inputValue( aLastAimDirectionFrom ).asInt();
+	int aimAxisFromIndex			= block.inputValue( aAimAxisFrom ).asInt();
+	int aimUpAxisFromIndex			= block.inputValue( aAimUpAxisFrom ).asInt();
+	int aimWorldUpFromIndex			= block.inputValue( aAimWorldUpFrom ).asInt();
+    int indexFromIndex 				= block.inputValue( aIndexFrom ).asInt();
+
 
     bool cacheActive = block.inputValue(aCacheActive).asBool();
 
@@ -483,6 +571,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
             mLastFileLoaded = newCacheFile;
             if (pvCache.particles->numParticles() == 0)
             {
+				pvCache.instanceData.clear();
                 return (MS::kSuccess);
             }
 
@@ -596,35 +685,16 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                 idArray.append((double)attrVal[0]);
             }
 
-            /*
-            /// TODO:  this does not work when scrubbing yet.. really need to put the  resort of channels into the  partio side as a filter
-            /// this is only a temporary hack until we start adding  filter functions to partio
 
-            // only flip the axis stuff if we need to
-            if ( cacheChanged && flipYZ  && !mFlipped )
-            {
-            	float * floatToPos = (float *) realloc(pvCache.flipPos, pvCache.particles->numParticles()*sizeof(float)*3);
-            	if (floatToPos != NULL)
-            	{
-            		pvCache.flipPos =  floatToPos;
-            	}
-
-            	for (int i=0;i<pvCache.particles->numParticles();i++)
-            	{
-            		const float * attrVal = pvCache.particles->data<float>(pvCache.positionAttr,i);
-            		pvCache.flipPos[(i*3)] 		= attrVal[0];
-            		pvCache.flipPos[((i*3)+1)] 	= -attrVal[2];
-            		pvCache.flipPos[((i*3)+2)] 	= attrVal[1];
-            	}
-            	mFlipped = true;
-            }
-            */
-
-
-            if  ( motionBlurStep || cacheChanged || rotationFromIndex != mLastRotationFromIndex ||
-								  scaleFromIndex 	!= mLastScaleFromIndex ||
-								  indexFromIndex 	!= mLastIndexFromIndex ||
-								  shaderIndexFromIndex != mLastShaderIndexFromIndex	)
+            if  ( motionBlurStep || cacheChanged ||
+					rotationFromIndex != mLastRotationFromIndex ||
+					scaleFromIndex 	!= mLastScaleFromIndex ||
+					indexFromIndex 	!= mLastIndexFromIndex ||
+					aimDirectionFromIndex != mLastAimDirectionFromIndex ||
+					aimAxisFromIndex != mLastAimAxisFromIndex ||
+					aimUpAxisFromIndex != mLastAimUpAxisFromIndex ||
+					aimWorldUpFromIndex != mLastAimWorldUpFromIndex
+				)
             {
                 ////////////////////////////////
                 // ROTATION
