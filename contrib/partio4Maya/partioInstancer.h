@@ -101,6 +101,8 @@ public:
     Partio::ParticleAttribute velocityAttr;
     Partio::ParticleAttribute rotationAttr;
 	Partio::ParticleAttribute aimDirAttr;
+	Partio::ParticleAttribute aimPosAttr;
+	Partio::ParticleAttribute aimAxisAttr;
 	Partio::ParticleAttribute aimUpAttr;
 	Partio::ParticleAttribute aimWorldUpAttr;
 	Partio::ParticleAttribute lastRotationAttr;
@@ -151,6 +153,9 @@ public:
     bool GetPlugData();
     void addParticleAttr(int attrIndex, MString attrName );
     partioInstReaderCache* updateParticleCache();
+
+	void updateInstanceDataVector ( partioInstReaderCache &pvCache, MVectorArray &arrayToCheck, MString arrayChannel );
+	void updateInstanceDataDouble ( partioInstReaderCache &pvCache, MDoubleArray &arrayToCheck, MString arrayChannel );
 
 
     MCallbackId partioInstancerOpenCallback;
