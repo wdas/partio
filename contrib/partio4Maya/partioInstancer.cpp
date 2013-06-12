@@ -738,32 +738,47 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                 {
 					updateInstanceDataVector( pvCache, aimDirectionArray, MString("aimDirection"));
 					pvCache.particles->attributeInfo(aimDirectionFromIndex,pvCache.aimDirAttr);
+					if (lastAimDirectionFromIndex >= 0)
+					{
+						pvCache.particles->attributeInfo(lastAimDirectionFromIndex,pvCache.lastAimDirAttr);
+					}
+					else
+					{
+						pvCache.particles->attributeInfo(aimDirectionFromIndex,pvCache.lastAimDirAttr);
+					}
 				}
 				// Aim Position
 				if (aimPositionFromIndex >= 0)
 				{
 					updateInstanceDataVector( pvCache, aimPositionArray, MString("aimPosition"));
-					pvCache.particles->attributeInfo(aimDirectionFromIndex,pvCache.aimPosAttr);
+					pvCache.particles->attributeInfo(aimPositionFromIndex,pvCache.aimPosAttr);
+					if (lastAimPositionFromIndex >= 0)
+					{
+						pvCache.particles->attributeInfo(lastAimPositionFromIndex,pvCache.lastAimPosAttr);
+					}
+					else
+					{
+						pvCache.particles->attributeInfo(aimPositionFromIndex,pvCache.lastAimPosAttr);
+					}
 				}
 				// Aim Axis
 				if (aimAxisFromIndex >= 0)
 				{
 					updateInstanceDataVector( pvCache, aimAxisArray, MString("aimAxis"));
-					pvCache.particles->attributeInfo(aimDirectionFromIndex,pvCache.aimAxisAttr);
+					pvCache.particles->attributeInfo(aimAxisFromIndex,pvCache.aimAxisAttr);
 				}
 				// Aim Up Axis
 				if (aimUpAxisFromIndex >= 0)
 				{
 					updateInstanceDataVector( pvCache, aimUpAxisArray, MString("aimUpAxis"));
-					pvCache.particles->attributeInfo(aimDirectionFromIndex,pvCache.aimUpAttr);
+					pvCache.particles->attributeInfo(aimUpAxisFromIndex,pvCache.aimUpAttr);
 				}
 				// World Up Axis
 				if (aimWorldUpFromIndex >= 0)
 				{
 					updateInstanceDataVector( pvCache, aimWorldUpArray, MString("aimWorldUp"));
-					pvCache.particles->attributeInfo(aimDirectionFromIndex,pvCache.aimWorldUpAttr);
+					pvCache.particles->attributeInfo(aimWorldUpFromIndex,pvCache.aimWorldUpAttr);
 				}
-
 
 				// MAIN LOOP ON PARTICLES
 				for (int i=0;i<pvCache.particles->numParticles();i++)
@@ -856,12 +871,30 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                     {
 						const float * attrVal = pvCache.particles->data<float>(pvCache.aimDirAttr,i);
 						float aimDir = attrVal[0];
+						if (canMotionBlur)
+						{
+							if (pvCache.lastAimDirAttr.count == 1)
+							{
+								const float * lastAttrVal = pvCache.particles->data<float>(pvCache.lastAimDirAttr,i);
+								aimDir += (attrVal[0] - lastAttrVal[0])*deltaTime;
+							}
+						}
 						aimDirectionArray.append(MVector(aimDir,aimDir,aimDir));
                     }
                     else if (pvCache.aimDirAttr.count >= 3)   // we have a 4 float attribute ?
                     {
 						const float * attrVal = pvCache.particles->data<float>(pvCache.aimDirAttr,i);
 						MVector aimDir = MVector(attrVal[0],attrVal[1],attrVal[2]);
+						if (canMotionBlur)
+						{
+							if (pvCache.lastAimDirAttr.count >=3 )
+							{
+								const float * lastAttrVal = pvCache.particles->data<float>(pvCache.lastAimDirAttr,i);
+								aimDir.x += (attrVal[0] - lastAttrVal[0])*deltaTime;
+								aimDir.y += (attrVal[1] - lastAttrVal[1])*deltaTime;
+								aimDir.z += (attrVal[2] - lastAttrVal[2])*deltaTime;
+							}
+						}
 						aimDirectionArray.append(aimDir);
                     }
                     // AIM POSITION
@@ -869,13 +902,57 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                     {
 						const float * attrVal = pvCache.particles->data<float>(pvCache.aimPosAttr,i);
 						float aimPos = attrVal[0];
+						if (canMotionBlur)
+						{
+							if (pvCache.lastAimPosAttr.count == 1)
+							{
+								const float * lastAttrVal = pvCache.particles->data<float>(pvCache.lastAimPosAttr,i);
+								aimPos += (attrVal[0] - lastAttrVal[0])*deltaTime;
+							}
+						}
 						aimPositionArray.append(MVector(aimPos,aimPos,aimPos));
                     }
                     else if (pvCache.aimPosAttr.count >= 3)   // we have a 4 float attribute ?
                     {
 						const float * attrVal = pvCache.particles->data<float>(pvCache.aimPosAttr,i);
 						MVector aimPos = MVector(attrVal[0],attrVal[1],attrVal[2]);
+						if (canMotionBlur)
+						{
+							if (pvCache.lastAimPosAttr.count >=3 )
+							{
+								const float * lastAttrVal = pvCache.particles->data<float>(pvCache.lastAimPosAttr,i);
+								aimPos.x += (attrVal[0] - lastAttrVal[0])*deltaTime;
+								aimPos.y += (attrVal[1] - lastAttrVal[1])*deltaTime;
+								aimPos.z += (attrVal[2] - lastAttrVal[2])*deltaTime;
+							}
+						}
 						aimPositionArray.append(aimPos);
+                    }
+                    // AIM Up Axis
+					if (pvCache.aimUpAttr.count == 1)  // single float value for aimDirection
+                    {
+						const float * attrVal = pvCache.particles->data<float>(pvCache.aimUpAttr,i);
+						float aimUp = attrVal[0];
+						aimUpAxisArray.append(MVector(aimUp,aimUp,aimUp));
+                    }
+                    else if (pvCache.aimUpAttr.count >= 3)   // we have a 4 float attribute ?
+                    {
+						const float * attrVal = pvCache.particles->data<float>(pvCache.aimUpAttr,i);
+						MVector aimUp = MVector(attrVal[0],attrVal[1],attrVal[2]);
+						aimUpAxisArray.append(aimUp);
+                    }
+                    // World Up Axis
+					if (pvCache.aimWorldUpAttr.count == 1)  // single float value for aimDirection
+                    {
+						const float * attrVal = pvCache.particles->data<float>(pvCache.aimWorldUpAttr,i);
+						float worldUp = attrVal[0];
+						aimWorldUpArray.append(MVector(worldUp,worldUp,worldUp));
+                    }
+                    else if (pvCache.aimWorldUpAttr.count >= 3)   // we have a 4 float attribute ?
+                    {
+						const float * attrVal = pvCache.particles->data<float>(pvCache.aimWorldUpAttr,i);
+						MVector worldUp = MVector(attrVal[0],attrVal[1],attrVal[2]);
+						aimWorldUpArray.append(worldUp);
                     }
 
 				} // end frame loop
@@ -923,6 +1000,22 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         if ((indexFromIndex+1) > zPlug.numElements())
         {
             block.outputValue(aIndexFrom).setInt(-1);
+        }
+        if ((aimDirectionFromIndex+1) > zPlug.numElements())
+        {
+            block.outputValue(aAimDirectionFrom).setInt(-1);
+        }
+        if ((aimPositionFromIndex+1) > zPlug.numElements())
+        {
+            block.outputValue(aAimPositionFrom).setInt(-1);
+        }
+        if ((aimAxisFromIndex+1) > zPlug.numElements())
+        {
+            block.outputValue(aAimAxisFrom).setInt(-1);
+        }
+        if ((aimWorldUpFromIndex+1) > zPlug.numElements())
+        {
+            block.outputValue(aAimWorldUpFrom).setInt(-1);
         }
 
         if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache

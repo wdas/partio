@@ -108,6 +108,8 @@ public:
 	Partio::ParticleAttribute lastRotationAttr;
     Partio::ParticleAttribute scaleAttr;
 	Partio::ParticleAttribute lastScaleAttr;
+	Partio::ParticleAttribute lastAimDirAttr;
+	Partio::ParticleAttribute lastAimPosAttr;
     Partio::ParticleAttribute indexAttr;
 //    Partio::ParticleAttribute shaderIndexAttr;
     float* flipPos;
