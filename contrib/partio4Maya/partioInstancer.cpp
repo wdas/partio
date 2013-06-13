@@ -880,7 +880,8 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 								aimDir.x += (attrVal[0] - lastAttrVal[0])*deltaTime;
 								aimDir.y += (attrVal[1] - lastAttrVal[1])*deltaTime;
 								aimDir.z += (attrVal[2] - lastAttrVal[2])*deltaTime;
-								cout << lastAttrVal[0] << " " << lastAttrVal[1] << " " << lastAttrVal[2] << endl;
+								/// TODO: figure out why this is not working on subframes correctly
+								//cout << lastAttrVal[0] << " " << lastAttrVal[1] << " " << lastAttrVal[2] << endl;
 							}
 						}
 						aimDirectionArray.append(aimDir);
