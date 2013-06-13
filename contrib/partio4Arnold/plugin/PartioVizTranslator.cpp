@@ -1,8 +1,6 @@
 #include "PartioVizTranslator.h"
 
-#include "render/RenderSession.h"
 #include "attributes/AttrHelper.h"
-#include "utils/time.h"
 
 #include <ai_msg.h>
 #include <ai_nodes.h>
