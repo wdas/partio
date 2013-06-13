@@ -41,4 +41,5 @@ CMakeScripts
 CMakeFiles
 partio.build
 /src/doc/*
+build-*
 
