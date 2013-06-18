@@ -92,7 +92,6 @@ class partioInstReaderCache
 {
 public:
     partioInstReaderCache();
-    int token;
     MBoundingBox bbox;
     int dList;
     Partio::ParticlesDataMutable* particles;
@@ -247,8 +246,8 @@ private:
     int mLastScaleFromIndex;
 	int mLastLastScaleFromIndex;
     int mLastIndexFromIndex;
-//    int mLastShaderIndexFromIndex;
     bool canMotionBlur;
+	//    int mLastShaderIndexFromIndex;
 
 protected:
 
