@@ -83,7 +83,6 @@ MObject partioVisualizer::aRenderCachePath;
 
 
 partioVizReaderCache::partioVizReaderCache():
-        token(0),
         bbox(MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0))),
         dList(0),
         particles(NULL),
