@@ -369,11 +369,11 @@ global proc pioInstSwitchAttributeFrom(string $nodeName, int $attr, string $menu
 							"aimAxisFrom",
 							"aimUpAxisFrom",
 							"aimWorldUpFrom",
+							"indexFrom",
 							"lastScaleFrom",
 							"lastRotationFrom",
 							"lastAimDirectionFrom",
-							"lastAimPositionFrom",
-							"indexFrom"
+							"lastAimPositionFrom"
 							};
 	int $sel = `optionMenuGrp -q -sl $menu`;
 
