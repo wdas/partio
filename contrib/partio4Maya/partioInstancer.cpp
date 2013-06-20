@@ -123,9 +123,7 @@ partioInstReaderCache::partioInstReaderCache():
         bbox(MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0))),
         dList(0),
         particles(NULL),
-        flipPos(NULL),
-        instanceData(MFnArrayAttrsData()),
-		instanceDataObj(MObject())
+        flipPos(NULL)
 
 {
 }
