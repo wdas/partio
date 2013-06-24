@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 %{
 #include <Partio.h>
+#include <PartioIterator.h>
 namespace Partio{
 typedef uint64_t ParticleIndex;
 }
@@ -153,6 +154,13 @@ class ParticlesData:public ParticlesInfo
     int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const=0;
 
 };
+
+%rename(ParticleIteratorFalse) ParticleIterator<false>;
+%rename(ParticleIteratorTrue) ParticleIterator<true>;
+class ParticleIterator<true>
+{};
+class ParticleIterator<false>
+{};
 
 %unrefobject ParticlesDataMutable "$this->release();"
 %feature("autodoc");
