@@ -33,41 +33,34 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
+// Original contributor drakeguan on github
 #include <Partio.h>
-#include <PartioIterator.h>
 #include <iostream>
+#include <iomanip>
+#include <stdlib.h>
 
 int main(int argc,char *argv[])
 {
+    if(argc != 3){
+        std::cerr<<"Usage is: "<<argv[0]<<" <filename> <attrname> { particle attribute to print info } "<<std::endl;
+        return 1;
+    }
+    Partio::ParticlesDataMutable* p=Partio::read(argv[1]);
+    if(p){
+        Partio::ParticleAttribute attrhandle;
+        p->attributeInfo(argv[2], attrhandle);
 
-    Partio::ParticlesDataMutable* particles=Partio::createInterleave();
+        for(int i = 0; i < std::min(10, p->numParticles()); i++){
+            const float* data = p->data<float>(attrhandle,i);
+            std::cout << argv[2] << i << " ";
+            for(int j = 0; j < attrhandle.count; j++){
+                std::cout << data[j] << " "; 
+            }
+            std::cout << std::endl;
+        }
 
-	particles->addParticles(10);
-
-    Partio::ParticleAttribute position=particles->addAttribute("position",Partio::VECTOR,3);
-    Partio::ParticleAttribute id=particles->addAttribute("id",Partio::INT,1);
-
-    
-    
-    Partio::ParticlesDataMutable::iterator it=particles->begin();
-    Partio::ParticleAccessor positionAccess(position);
-    it.addAccessor(positionAccess);
-    Partio::ParticleAccessor idAccess(id);
-    it.addAccessor(idAccess);
-
-    float x=0;
-    int idCounter=0;
-    for(;it!=particles->end();++it){
-        Partio::Data<float,3>& P=positionAccess.data<Partio::Data<float,3> >(it);
-        Partio::Data<int,1>& id=idAccess.data<Partio::Data<int,1> >(it);
-        P[0]=x;P[1]=-x;P[2]=0;
-        id[0]=idCounter;
-        x+=1.;
-        idCounter++;
+        p->release();
     }
     
-    Partio::write("test.bgeo",*particles);
-    Partio::write("test.geo",*particles);
-    
-
+    return 0;
 }

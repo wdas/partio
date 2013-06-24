@@ -33,8 +33,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#ifndef _endian_h_
-#define _endian_h_
+#ifndef _partioendian_h_
+#define _partioendian_h_
 
 #include <cassert>
 #include <iostream>

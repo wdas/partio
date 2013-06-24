@@ -45,6 +45,7 @@ difficult/error prone to detect what type the PDB file is.
 
 */
 
+
 #define PDB_VECTOR          1
 #define PDB_REAL            2
 #define PDB_LONG            3

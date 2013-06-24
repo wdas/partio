@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
 #include "../Partio.h"
-#include "endian.h"
+#include "PartioEndian.h"
 #include "../core/ParticleHeaders.h"
 #include "ZIP.h"
 
@@ -43,9 +43,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <string>
 #include <memory>
 
-namespace Partio{
+namespace Partio
+{
 
-void writeHoudiniStr(std::ostream& ostream,const std::string& s)
+using namespace std;
+
+void writeHoudiniStr(ostream& ostream,const string& s)
 {
     write<BIGEND>(ostream,(short)s.size());
     ostream.write(s.c_str(),s.size());
@@ -54,9 +57,9 @@ void writeHoudiniStr(std::ostream& ostream,const std::string& s)
 
 ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly)
 {
-    std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
+    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
-        std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
+        cerr<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
     }
 
@@ -79,11 +82,11 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly)
     // Check header magic and version
     const int bgeo_magic=((((('B'<<8)|'g')<<8)|'e')<<8)|'o';
     if(magic!=bgeo_magic){
-        std::cerr<<"Partio: Magic number '"<<magic<<" of '"<<filename<<"' doesn't match bgeo magic '"<<bgeo_magic<<std::endl;
+        cerr<<"Partio: Magic number '"<<magic<<" of '"<<filename<<"' doesn't match bgeo magic '"<<bgeo_magic<<endl;
         return 0;
     }
     if(version!=5){
-        std::cerr<<"Partio: BGEO must be version 5"<<std::endl;
+        cerr<<"Partio: BGEO must be version 5"<<endl;
         return 0;
     }
 
@@ -97,9 +100,9 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly)
 
     // Read attribute definitions
     int particleSize=4; // Size in # of 32 bit primitives 
-    std::vector<int> attrOffsets; // offsets in # of 32 bit offsets
-    std::vector<ParticleAttribute> attrHandles;
-    std::vector<ParticleAccessor> accessors;
+    vector<int> attrOffsets; // offsets in # of 32 bit offsets
+    vector<ParticleAttribute> attrHandles;
+    vector<ParticleAccessor> accessors;
     attrOffsets.push_back(0); // pull values from byte offset
     attrHandles.push_back(simple->addAttribute("position",VECTOR,3)); // we always have one
     accessors.push_back(ParticleAccessor(attrHandles[0]));
@@ -147,12 +150,12 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly)
             }
             particleSize+=size;
         }else if(houdiniType==2){
-            std::cerr<<"Partio: found attr of type 'string', aborting"<<std::endl;
+            cerr<<"Partio: found attr of type 'string', aborting"<<endl;
             delete [] name;
             simple->release();
             return 0;
         }else{
-            std::cerr<<"Partio: unknown attribute "<<houdiniType<<" type... aborting"<<std::endl;
+            cerr<<"Partio: unknown attribute "<<houdiniType<<" type... aborting"<<endl;
             delete [] name;
             simple->release();
             return 0;
@@ -192,13 +195,13 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly)
 
 bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed)
 {
-    std::auto_ptr<std::ostream> output(
+    auto_ptr<ostream> output(
         compressed ? 
-        Gzip_Out(filename,std::ios::out|std::ios::binary)
-        :new std::ofstream(filename,std::ios::out|std::ios::binary));
+        Gzip_Out(filename,ios::out|ios::binary)
+        :new ofstream(filename,ios::out|ios::binary));
 
     if(!*output){
-        std::cerr<<"Partio Unable to open file "<<filename<<std::endl;
+        cerr<<"Partio Unable to open file "<<filename<<endl;
         return false;
     }
 
@@ -217,9 +220,9 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
     write<BIGEND>(*output,magic,versionChar,version,nPoints,nPrims,nPointGroups);
     write<BIGEND>(*output,nPrimGroups,nPointAttrib,nVertexAttrib,nPrimAttrib,nAttrib);
 
-    std::vector<ParticleAttribute> handles;
-    std::vector<ParticleAccessor> accessors;
-    std::vector<int> attrOffsets;
+    vector<ParticleAttribute> handles;
+    vector<ParticleAccessor> accessors;
+    vector<int> attrOffsets;
     bool foundPosition=false;
     int particleSize=4;
     for(int i=0;i<p.numAttributes();i++){
@@ -261,7 +264,7 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
         accessors.push_back(ParticleAccessor(handles.back()));
     }
     if(!foundPosition){
-        std::cerr<<"Partio: didn't find attr 'position' while trying to write GEO"<<std::endl;
+        cerr<<"Partio: didn't find attr 'position' while trying to write GEO"<<endl;
         return false;
     }
 
