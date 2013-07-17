@@ -709,6 +709,20 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 				MVectorArray  aimUpAxisArray;
 				MVectorArray  aimWorldUpArray;
 
+				// clear these out to update on any change
+				pvCache.rotationAttr.type = NONE;
+				pvCache.aimDirAttr.type = NONE;
+				pvCache.aimPosAttr.type = NONE;
+				pvCache.aimAxisAttr.type = NONE;
+				pvCache.aimUpAttr.type = NONE;
+				pvCache.aimWorldUpAttr.type = NONE;
+				pvCache.lastRotationAttr.type = NONE;
+				pvCache.scaleAttr.type = NONE;
+				pvCache.lastScaleAttr.type = NONE;
+				pvCache.lastAimDirAttr.type = NONE;
+				pvCache.lastAimPosAttr.type = NONE;
+				pvCache.indexAttr.type = NONE;
+
 				// Index
 				if (indexFromIndex >=0)
 				{
@@ -1240,7 +1254,6 @@ void partioInstancerUI::draw( const MDrawRequest& request, M3dView& view ) const
 void  partioInstancerUI::drawBoundingBox() const
 {
 
-
     partioInstancer* shapeNode = (partioInstancer*) surfaceShape();
 
     MPoint  bboxMin = shapeNode->pvCache.bbox.min();
@@ -1316,13 +1329,8 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
     float pointSizeVal;
     pointSizePlug.getValue( pointSizeVal );
 
-    int stride =  3*sizeof(float);
-
     if (pvCache->particles)
     {
-        struct Point {
-            float p[3];
-        };
         glPushAttrib(GL_CURRENT_BIT);
 
 		/// looping thru particles one by one...
@@ -1340,7 +1348,7 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
         glEnd( );
         glDisable(GL_POINT_SMOOTH);
 
-        if (drawStyle == 1)
+        if (drawStyle == DRAW_STYLE_LABEL)
         {
             glColor3f(0.0,0.0,0.0);
             for (unsigned int i=0; i < positions.length();i++)
@@ -1359,7 +1367,13 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
 				else if (pvCache->indexAttr.type == Partio::VECTOR)
 				{
 					const float * attrVal = pvCache->particles->data<float>(pvCache->indexAttr,i);
-					idVal = (double)attrVal[0];
+					char idString[100];
+					sprintf(idString,"(%.2f,%.2f,%.2f)", (double)attrVal[0], (double)attrVal[1], (double)attrVal[2]);
+					idVal = idString;
+				}
+				else
+				{
+					idVal = "";
 				}
                 /// TODO: draw text label per particle here
                 view.drawText(idVal, MPoint(positions[i].x, positions[i].y, positions[i].z), M3dView::kLeft);
