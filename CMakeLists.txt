@@ -77,7 +77,7 @@ IF(WIN32)
 	# these are the defaults included with partio
 	SET( ZLIB_INCLUDE_DIR "${PARTIO_HOME}/winReqLibs/zlib-win_x64/include")
 	SET( ZLIB_LIBRARY_DIR "${PARTIO_HOME}/winReqLibs/zlib-win_x64/lib")
-	SET (ZLIB_LIBRARY "${ZLIB_LIBRARY_DIR}/zlib.lib")
+	SET( ZLIB_LIBRARY "${ZLIB_LIBRARY_DIR}/zlib.lib")
 	SET( GLUT_INCLUDE_DIR "${PARTIO_HOME}/winReqLibs/freeglut-2.8.0-1/include")
 	SET( GLUT_LIBRARY_DIR "${PARTIO_HOME}/winReqLibs/freeglut-2.8.0-1/lib/x64")
 	SET( SWIG_EXECUTABLE "${PARTIO_HOME}/winReqLibs/swigwin-2.0.4/swig.exe")

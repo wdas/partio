@@ -13,20 +13,14 @@
 #
 
 find_library(ARNOLD_LIBRARY
-  NAMES
-    ai
-  PATHS
-    $ENV{ARNOLD_HOME}/bin
-  DOC "Arnold library"
-)
+    NAMES ai
+    PATHS $ENV{ARNOLD_HOME}/bin
+    DOC "Arnold library")
 
 find_path(ARNOLD_INCLUDE_DIR ai.h
-  PATHS
-    $ENV{ARNOLD_HOME}/include
-  DOC "Arnold include path"
-)
+    PATHS $ENV{ARNOLD_HOME}/include
+    DOC "Arnold include path")
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(Arnold DEFAULT_MSG
-  ARNOLD_LIBRARY ARNOLD_INCLUDE_DIR
-)
+find_package_handle_standard_args(Arnold DEFAULT_MSG
+    ARNOLD_LIBRARY ARNOLD_INCLUDE_DIR)
