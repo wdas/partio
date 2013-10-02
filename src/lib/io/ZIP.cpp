@@ -188,7 +188,7 @@ struct ZipFileHeader
         Read_Primitive(istream,int_file_attrib); // internal file
         Read_Primitive(istream,ext_file_attrib); // ext final
         Read_Primitive(istream,header_offset);} // rel offset
-    char* buf=new char[std::max(comment_length,std::max(filename_length,extra_length))];
+    char* buf=new char[std::max(comment_length,std::max(filename_length,extra_length))+1];
     istream.read(buf,filename_length);
     buf[filename_length]=0;
     filename=std::string(buf);

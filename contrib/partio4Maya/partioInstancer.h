@@ -92,7 +92,6 @@ class partioInstReaderCache
 {
 public:
     partioInstReaderCache();
-    int token;
     MBoundingBox bbox;
     int dList;
     Partio::ParticlesDataMutable* particles;
@@ -100,11 +99,18 @@ public:
     Partio::ParticleAttribute idAttr;
     Partio::ParticleAttribute velocityAttr;
     Partio::ParticleAttribute rotationAttr;
+	Partio::ParticleAttribute aimDirAttr;
+	Partio::ParticleAttribute aimPosAttr;
+	Partio::ParticleAttribute aimAxisAttr;
+	Partio::ParticleAttribute aimUpAttr;
+	Partio::ParticleAttribute aimWorldUpAttr;
 	Partio::ParticleAttribute lastRotationAttr;
     Partio::ParticleAttribute scaleAttr;
 	Partio::ParticleAttribute lastScaleAttr;
+	Partio::ParticleAttribute lastAimDirAttr;
+	Partio::ParticleAttribute lastAimPosAttr;
     Partio::ParticleAttribute indexAttr;
-    Partio::ParticleAttribute shaderIndexAttr;
+//    Partio::ParticleAttribute shaderIndexAttr;
     float* flipPos;
     MFnArrayAttrsData instanceData;
     MObject instanceDataObj;
@@ -149,41 +155,66 @@ public:
     void addParticleAttr(int attrIndex, MString attrName );
     partioInstReaderCache* updateParticleCache();
 
+	void updateInstanceDataVector ( partioInstReaderCache &pvCache, MVectorArray &arrayToCheck, MString arrayChannel );
+	void updateInstanceDataDouble ( partioInstReaderCache &pvCache, MDoubleArray &arrayToCheck, MString arrayChannel );
+
 
     MCallbackId partioInstancerOpenCallback;
     MCallbackId partioInstancerImportCallback;
     MCallbackId partioInstancerReferenceCallback;
 
 
+/// ATTRS
     static MObject  time;
     static MObject  aSize;         // The size of the logo
     static MObject  aFlipYZ;
+	static MObject  aDrawStyle;
+	static MObject  aPointSize;
+
+/// Cache file related stuff
     static MObject 	aUpdateCache;
     static MObject 	aCacheDir;
     static MObject 	aCacheFile;
-    static MObject 	aUseTransform;
-    static MObject 	aCacheActive;
+	static MObject 	aCacheActive;
     static MObject 	aCacheOffset;
     static MObject  aCacheStatic;
     static MObject 	aCacheFormat;
-    static MObject 	aJitterPos;
-    static MObject 	aJitterFreq;
-    static MObject 	aPartioAttributes;
-    static MObject  aPointSize;
-    static MObject  aDrawStyle;
-    static MObject  aForceReload;
-    static MObject  aRenderCachePath;
-    static MObject	aRotationFrom;
-	static MObject	aLastRotationFrom;
-    static MObject	aScaleFrom;
-	static MObject	aLastScaleFrom;
-    static MObject	aIndexFrom;
-    static MObject	aShaderIndexFrom;
-    static MObject	aInMeshInstances;
-    static MObject	aOutMesh;
-    static MObject	aInstanceData;
-    static MObject  aComputeVeloPos;
+	static MObject  aForceReload;
+	static MObject  aRenderCachePath;
+
+/// point position / velocity
+	static MObject  aComputeVeloPos;
 	static MObject  aVeloMult;
+
+/// attributes
+    static MObject 	aPartioAttributes;
+	static MObject	aScaleFrom;
+	static MObject  aRotationType;
+
+    static MObject	aRotationFrom;
+	static MObject  aAimDirectionFrom;
+	static MObject  aAimPositionFrom;
+	static MObject  aAimAxisFrom;
+	static MObject  aAimUpAxisFrom;
+	static MObject  aAimWorldUpFrom;
+
+	static MObject	aLastScaleFrom;
+	static MObject	aLastRotationFrom;
+	static MObject  aLastAimDirectionFrom;
+	static MObject  aLastAimPositionFrom;
+
+    static MObject	aIndexFrom;
+
+/// not implemented yet
+//	static MObject 	aJitterPos;
+//  static MObject 	aJitterFreq;
+//	static MObject	aAimPositionFrom;
+//	static MObject	aShaderIndexFrom;
+//	static MObject	aInMeshInstances;
+//	static MObject	aOutMesh;
+
+//  output data to instancer
+    static MObject	aInstanceData;
 
 
     static	MTypeId			id;
@@ -202,11 +233,21 @@ private:
     bool mFlipped;
     bool  frameChanged;
     MStringArray attributeList;
+	int mLastRotationTypeIndex;
     int mLastRotationFromIndex;
+	int mLastLastRotationFromIndex;
+	int mLastAimDirectionFromIndex;
+	int mLastLastAimDirecitonFromIndex;
+	int mLastAimPositionFromIndex;
+	int mLastLastAimPositionFromIndex;
+	int mLastAimAxisFromIndex;
+	int mLastAimUpAxisFromIndex;
+	int mLastAimWorldUpFromIndex;
     int mLastScaleFromIndex;
+	int mLastLastScaleFromIndex;
     int mLastIndexFromIndex;
-    int mLastShaderIndexFromIndex;
     bool canMotionBlur;
+	//    int mLastShaderIndexFromIndex;
 
 protected:
 

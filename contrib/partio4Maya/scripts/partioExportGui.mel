@@ -77,6 +77,7 @@ global proc partioExportGui  ()
 	menuItem -label "PTS";
 	menuItem -label "XYZ";
 	menuItem -label "PCD";
+	menuItem -label "ICEcache";
 	menuItem -label "RIB";
 //	menuItem -label "ASS";
 
@@ -245,10 +246,19 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 										 string $cacheDirCtrl,
 										 string $exportPerFrameCheckbox)
 {
+	global string $gMainProgressBar;  // This is defined on maya startup
+
+	// we have to do this here to clear out the  escape status before using the  gMainProgressBar just in case
+	// it was  holding on to the escape status for some reason so cycling thru it this way seemed to fix it
+	progressBar -edit
+	-beginProgress
+	-isInterruptable true
+	$gMainProgressBar;
+	progressBar -edit -endProgress  $gMainProgressBar;
+
 
     int $start = `intFieldGrp -q -v1 $startFrame`;
     int $end  = `intFieldGrp  -q -v1 $endFrame`;
-    int $pdabc = `optionMenuGrp -q -sl $partioExportOptionMenu`;
     string $partioExportFormat = `optionMenuGrp -q -v  $partioExportOptionMenu`;
     string $cacheDir = `textFieldButtonGrp -q -text  $cacheDirCtrl`;
 
@@ -265,6 +275,16 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
     if ($perframe)
     {
         $loopEndFrame = $end;
+        // we only want to bring up the progresswindow when we're using "perframe mode so we can escape cancel the export
+		progressBar -edit
+		-beginProgress
+		-isInterruptable true
+		-status "PartioExport per frame..."
+		-minValue $loopStartFrame
+		-maxValue $loopEndFrame
+		-step 1
+		$gMainProgressBar;
+
     }
 
     for ($x = $loopStartFrame; $x <= $loopEndFrame; $x++)
@@ -277,6 +297,11 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
         {
             $start = $currentFrame;
             $end = $currentFrame;
+            if(`progressBar -query -isCancelled $gMainProgressBar`)
+			{
+				break;
+			}
+			progressBar -edit -step 1 $gMainProgressBar;
         }
 
         for ($particle in $particles)
@@ -333,6 +358,8 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 			}
         }
     }// end frame loop
+
+	progressBar -edit -endProgress  $gMainProgressBar;
 }
 
 /////////////////////////////////////////////
@@ -340,8 +367,8 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 
 global proc  updatePath (string $cacheDirControl)
 {
-    string $result[] = `fileDialog2 -fileMode 3  -dialogStyle 1`;
-print $result[0];
+    string $result[] = `fileDialog2 -fileMode 3 `;
+
     textFieldButtonGrp -e -text $result[0]  $cacheDirControl;
 	optionVar -sv "partioExportGUICachePath" $result[0];
 }

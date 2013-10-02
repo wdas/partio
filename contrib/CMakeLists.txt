@@ -1,1 +1,2 @@
 add_subdirectory(partio4Maya)
+add_subdirectory(partio4Arnold)

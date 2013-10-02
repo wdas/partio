@@ -189,7 +189,7 @@ global proc int pioAEassignCacheFileCB( string $fileAttribute,
 		case "pcd":
 			$extIndex = 11;
 			break;
-		case "ass":
+		case "icecache":
 			$extIndex = 12;
 			break;
 		default:

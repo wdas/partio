@@ -90,7 +90,6 @@ class partioVizReaderCache
 {
 public:
     partioVizReaderCache();
-    int token;
     MBoundingBox bbox;
     int dList;
     Partio::ParticlesDataMutable* particles;
