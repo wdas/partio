@@ -42,4 +42,5 @@ CMakeFiles
 partio.build
 /src/doc/*
 build-*
+_hide
 
