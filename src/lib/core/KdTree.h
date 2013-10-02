@@ -34,13 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 #ifndef KdTree_h
 #define KdTree_h
-
-
-#include <string.h>
-#include <vector>
-#include <float.h>
-#include <algorithm>
-#include <cassert>
+#include <ext/numeric>
 
 namespace Partio
 {
@@ -61,6 +55,12 @@ namespace Partio
       determined based on the node's overall subtree size (left+right+1).
       This can be propagated down during traversal.
 */
+
+#include <string.h>
+#include <vector>
+#include <float.h>
+#include <algorithm>
+#include <cassert>
 
 template <int k> class BBox
 {
@@ -289,8 +289,10 @@ void KdTree<k>::setPoints(const float* p, int n)
     } else _bbox.clear();
 
     // assign sequential ids
-    _ids.reserve(n);
-    while ((int)_ids.size() < n) _ids.push_back(_ids.size());
+    _ids.resize(n);
+    __gnu_cxx::iota(_ids.begin(), _ids.end(), 0);
+//    _ids.reserve(n);
+//    while ((int)_ids.size() < n) _ids.push_back(_ids.size());
     _sorted = 0;
 }
 
@@ -353,7 +355,7 @@ int KdTree<k>::findNPoints(uint64_t *result, float *distanceSquared, float *fina
 {
     float radius_squared=maxRadius*maxRadius;
 
-    if (!size() || !_sorted || nPoints<1) return (int)radius_squared;
+    if (!size() || !_sorted || nPoints<1) return 0;
 
     NearestQuery query(result,distanceSquared,p,nPoints,radius_squared);
     findNPoints(query,0,size(),0);

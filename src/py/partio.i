@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #endif
 
 #include <Partio.h>
+#include <PartioIterator.h>
 namespace Partio{
 typedef uint64_t ParticleIndex;
 }
@@ -159,6 +160,13 @@ class ParticlesData:public ParticlesInfo
     int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const=0;
 
 };
+
+%rename(ParticleIteratorFalse) ParticleIterator<false>;
+%rename(ParticleIteratorTrue) ParticleIterator<true>;
+class ParticleIterator<true>
+{};
+class ParticleIterator<false>
+{};
 
 %unrefobject ParticlesDataMutable "$this->release();"
 %feature("autodoc");
@@ -363,12 +371,16 @@ public:
     PyObject* get(const ParticleAttribute& attr,const ParticleIndex particleIndex)
     {
         PyObject* tuple=PyTuple_New(attr.count);
-        if(attr.type==Partio::INT){
+        if(attr.type==Partio::INT || attr.type==Partio::INDEXEDSTR){
             const int* p=$self->data<int>(attr,particleIndex);
             for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple,k,PyInt_FromLong(p[k]));
-        }else{
+        }else if(attr.type==Partio::FLOAT || attr.type==Partio::VECTOR){
             const float* p=$self->data<float>(attr,particleIndex);
             for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple,k,PyFloat_FromDouble(p[k]));
+        }else{
+            Py_XDECREF(tuple);
+            PyErr_SetString(PyExc_ValueError,"Internal error unexpected data type");
+            return NULL;
         }
         return tuple;
     }
@@ -380,7 +392,7 @@ public:
     {
         const std::vector<std::string>& indexes=self->indexedStrs(attr);
         PyObject* list=PyList_New(indexes.size());
-        for(int k=0;k<indexes.size();k++) PyList_SetItem(list,k,PyString_FromString(indexes[k].c_str()));
+        for(size_t k=0;k<indexes.size();k++) PyList_SetItem(list,k,PyString_FromString(indexes[k].c_str()));
         return list;
     }
 }
@@ -402,7 +414,7 @@ public:
             return NULL;
         }
         
-        if(attr.type==Partio::INT){
+        if(attr.type==Partio::INT || attr.type==Partio::INDEXEDSTR){
             int* p=$self->dataWrite<int>(attr,particleIndex);
             for(int i=0;i<size;i++){
                 PyObject* o=PySequence_GetItem(tuple,i);
@@ -415,7 +427,7 @@ public:
                 }
                 Py_XDECREF(o);
             }
-        }else{
+        }else if(attr.type==Partio::FLOAT || attr.type==Partio::VECTOR){
             float* p=$self->dataWrite<float>(attr,particleIndex);
             for(int i=0;i<size;i++){
                 PyObject* o=PySequence_GetItem(tuple,i);
@@ -431,6 +443,9 @@ public:
                 }
                 Py_XDECREF(o);
             }
+        }else{
+            PyErr_SetString(PyExc_ValueError,"Internal error: invalid attribute type");
+            return NULL;
         }
 
         Py_INCREF(Py_None);
