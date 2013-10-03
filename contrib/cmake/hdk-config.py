@@ -38,7 +38,7 @@ class HcustomInfo:
         self.standalone = standalone
         self.notag = notag
 
-        # these are filled in when we run hcustom 
+        # these are filled in when we run hcustom
         self.tmpfile_name = None
 
         self.compile = None  # the raw compile command
@@ -47,8 +47,8 @@ class HcustomInfo:
         if not self.run_hcustom():
             raise RuntimeError("Couldn't run hcustom, are you sure you have the HDK setup properly ?")
 
-        # all the following attributes are filled in by parse(), but they are left in the platform specific form ie -Ifoo or /Ifoo 
-        
+        # all the following attributes are filled in by parse(), but they are left in the platform specific form ie -Ifoo or /Ifoo
+
         self._compiler = None # the compiler used
         self._optimisations = [] # eg -O2
         self._defines = []  # eg -Dfoo ...
@@ -57,7 +57,7 @@ class HcustomInfo:
         self._include_dirs = []
 
         self._linker = None   # the linker used
-        self._libraries = [] 
+        self._libraries = []
         self._library_dirs = []
         self._frameworks = []
         self._framework_dirs = []
@@ -70,7 +70,7 @@ class HcustomInfo:
 
 
     # these are classes externally visible methods
-    
+
     def cxx(self):
         return self._compiler
 
@@ -153,7 +153,7 @@ class HcustomInfo:
             print '\n\nDBG: >>>>>>>>> compile',self.compile
 
         self._sanitise_unix()
-        
+
         # parse the compile command
 
         # keep track of the flags we've handled
@@ -217,7 +217,7 @@ class HcustomInfo:
             linker  = self.link[0]
             lflags_seen.add(linker)
 
-            # get rid of the link target 
+            # get rid of the link target
             index = self.link.index('-o')
             lflags_seen.update(self.link[index:index+2])
 
@@ -231,7 +231,7 @@ class HcustomInfo:
                 lflags_seen.update(self.link[index:index+2])
         except ValueError:
             pass
-        
+
         # get rid of the architecture
         try:
             index = self.link.index('-arch')
@@ -243,7 +243,7 @@ class HcustomInfo:
         ofiles = [i for i in self.link if i.endswith('.o')]
         libs = [i for i in self.link if i.startswith('-l')]
         lopts = [i for i in self.link if (i.startswith('-f') and not i.startswith('-framework')
-                                          or i=='-shared' 
+                                          or i=='-shared'
                                           or i.startswith('-Wl,')
                                           or i.startswith('-rpath'))]
         fdirs = [i for i in self.link if i.startswith('-F')]
@@ -294,7 +294,7 @@ class HcustomInfo:
             else:
                 res.append(head)
         self.compile = res
-                
+
         # link flags
         res = []
         lst = list(self.link)
@@ -306,7 +306,7 @@ class HcustomInfo:
                 res.append(head)
         self.link = res
 
-        
+
     def run_hcustom(self):
 
         # write a temporary file to tempdir and run hcustom on it
@@ -319,7 +319,7 @@ class HcustomInfo:
             tmpfile_src = os.path.basename(tmpfile.name)
             tmpfile.write("void foo() {}\n")
             tmpfile.flush()
-            
+
             cmd = ["hcustom","-e","-i",dir]
             if self.debug:
                 cmd.append("-g")
@@ -338,7 +338,7 @@ class HcustomInfo:
 
         if debug:
             print 'DBG: *****************\n%s\nDBG: *****************' % output
-            
+
         lines = output.split('\n')
 
         # remove non compile and link lines
@@ -354,7 +354,7 @@ class HcustomInfo:
                 continue
             else:
                 tmp.append(l)
-        lines = tmp    
+        lines = tmp
 
         # we should have two lines left - the first a compile, the other a link
         if self.debug:
@@ -390,7 +390,7 @@ def hih():
                             os.getenv("HOUDINI_MAJOR_RELEASE")+"."+os.getenv("HOUDINI_MINOR_RELEASE"))
     else:
         raise RuntimeError("unknown platform")
-    
+
 
 def write_cmakefile(file):
     """
@@ -402,7 +402,7 @@ def write_cmakefile(file):
 #
 #    Locate the HDK environment
 #
-# This module defines 
+# This module defines
 # HDK_FOUND,
 # HDK_CXX_COMPILER
 # HDK_INCLUDE_DIRS,
@@ -422,7 +422,7 @@ SET(HDK_FOUND 1)
 
     # get the hcustom info, no (debug, notag, no standalone)
     hcinfo = HcustomInfo(False,True,False)
-    
+
     file.write(header)
     file.write("\n")
 
@@ -460,7 +460,7 @@ SET(HDK_FOUND 1)
     file.write("\n\n")
 
     # now for about a standalone version ?
-    
+
     hcinfo = HcustomInfo(False,True,True)
     file.write("# the following are for compiling dso's\n")
     file.write("set(HDK_STANDALONE_DEFINITIONS %s)\n" % " ".join(hcinfo.definitions()+['-D__UT_DSOVersion__']))
@@ -481,7 +481,7 @@ SET(HDK_FOUND 1)
 
     # need to add the frameworks here
     file.write("set(HDK_STANDALONE_LIBRARIES %s)\n" % " ".join(libtmp))
-    
+
 
 
 def make_sesitag(file):
@@ -504,16 +504,16 @@ def make_sesitag(file):
     file.write("#undef  __UT_DSOVersion__\n")
     file.write("#endif\n")
     file.write("#define UT_DSO_TAGINFO \"%s\"\n" % tagstr)
-    file.write("#include <UT/UT_DSOVersion.h>\n")
+    #file.write("#include <UT/UT_DSOVersion.h>\n")
 
 def main():
 
     global debug
-    
+
     if not os.getenv("HFS"):
         print "error: check that houdini is installed properly, currently $HFS isn't defined."
         sys.exit(1)
-        
+
     usage = "Usage: %prog [options]"
     parser = optparse.OptionParser(usage=usage)
     parser.add_option("-C","--cmake",action="store",type="string",dest="cmakefile",
