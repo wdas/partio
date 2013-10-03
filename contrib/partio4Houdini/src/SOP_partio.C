@@ -1,20 +1,20 @@
-/* partio4Houdini  5/01/2013, Miles Green  
- 
+/* partio4Houdini  5/01/2013, Miles Green
+
  PARTIO Import/Export
  Copyright 2013 (c)  All rights reserved
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are
  met:
- 
+
  * Redistributions of source code must retain the above copyright
  notice, this list of conditions and the following disclaimer.
- 
+
  * Redistributions in binary form must reproduce the above copyright
  notice, this list of conditions and the following disclaimer in
  the documentation and/or other materials provided with the
  distribution.
- 
+
  Disclaimer: THIS SOFTWARE IS PROVIDED BY  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
  BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
  FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
@@ -34,7 +34,7 @@
 
 #include <SOP/SOP_Node.h>
 #include <limits.h>
-#include <UT/UT_DSOVersion.h>
+//#include <UT/UT_DSOVersion.h>
 #include <UT/UT_Math.h>
 #include <UT/UT_Interrupt.h>
 #include <GU/GU_Detail.h>
@@ -138,7 +138,7 @@ SOP_partio::myVariables[] = {
 
 bool SOP_partio::matchExtension(UT_String &fileName)
 {
-	
+
 	if(!fileName.isstring())
 	{
 	// No string entered exit
@@ -147,14 +147,14 @@ bool SOP_partio::matchExtension(UT_String &fileName)
 	std::string supportedExtensions[] = {".ptc", ".pdb", ".pdb.gz", ".bgeo", ".geo", ".pdc", ".bin", ".rib", ".mc"};
 
 	for (int i = 0; i < sizeof(supportedExtensions); ++i)
-     {          
-  
+     {
+
         if(fileName.endsWith(supportedExtensions[i].c_str()))
 		{
 		return true;
-		}                
+		}
      }
-	
+
 	// Did not find suported extensions
 	return false;
 
@@ -164,7 +164,7 @@ bool SOP_partio::matchExtension(UT_String &fileName)
 int
 SOP_partio::refreshStatic(void *op, int, fpreal, const PRM_Template *)
 {
-    
+
     SOP_partio *sop = (SOP_partio *)op;
     sop->refresh();
     return 1;
@@ -212,17 +212,17 @@ SOP_partio::getHDKHelp(UT_String &str) const
 OP_ERROR
 SOP_partio::cookMySop(OP_Context &context)
 {
-    
 
-    
+
+
     fpreal now = context.getTime();
     int iomode = IOMODE(0);
     int verbosity = VERBOSITY(0);
-    UT_String filename; 
-    FILEPATH(filename, now); 
-    UT_Interrupt        *boss; 
+    UT_String filename;
+    FILEPATH(filename, now);
+    UT_Interrupt        *boss;
     bool  successReadWrite = 0;
-   
+
 		// Check we have valid file name and extension
 		if(!matchExtension(filename))
 		{
@@ -232,8 +232,8 @@ SOP_partio::cookMySop(OP_Context &context)
 			return error();
 		}
 
-		
- 
+
+
 
 
 
@@ -243,26 +243,26 @@ SOP_partio::cookMySop(OP_Context &context)
     	if (error() < UT_ERROR_ABORT)
     	{
     		boss = UTgetInterrupt();
-       	
+
       		// Start the interrupt server
       		if (boss->opStart("Building partio"))
       		{
-              		if (iomode==0) 
-      				{ 
-      							
-          					
+              		if (iomode==0)
+      				{
+
+
 
 						gdp->clearAndDestroy();
             			successReadWrite = partioLoad(filename, gdp, verbosity);
-          						
-      							
+
+
 						if(successReadWrite==0)
 						{
-							addError(SOP_MESSAGE, "File not valid, unable to load file: ");		
+							addError(SOP_MESSAGE, "File not valid, unable to load file: ");
 						}
-            			
-            		} 
-      				else 
+
+            		}
+      				else
       				{
 						if (lockInputs(context) >= UT_ERROR_ABORT)
         					return error();
@@ -271,15 +271,15 @@ SOP_partio::cookMySop(OP_Context &context)
 							flags().timeDep = 1;
 
       						successReadWrite = partioSave(filename, gdp, verbosity);
-      						
+
       						unlockInputs();
-      						
+
       						if(successReadWrite==0)
 							{
-							addError(SOP_MESSAGE, "Error, unable to save file: ");		
+							addError(SOP_MESSAGE, "Error, unable to save file: ");
 							}
-            				
-							
+
+
       				}
           }
 
@@ -296,12 +296,12 @@ SOP_partio::cookMySop(OP_Context &context)
 /*unsigned
 SOP_partio::disableParms()
 {
-    
+
     int     changed = 0;
     bool    off = false;
 	bool    on = true;
 	float   t = CHgetEvalTime();
-	
+
 	// If no input disable writing
 	if(getInput (0)==0)
 	{
@@ -312,12 +312,12 @@ SOP_partio::disableParms()
 	{
 	changed  = enableParm("filemode", on);
 	}
-	
+
 	error();
     return changed;
-	
 
-		
+
+
 
 }*/
 

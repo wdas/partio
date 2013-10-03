@@ -31,7 +31,7 @@
 
   # Additional library directories.
     LIBDIRS = \
-        -L../../lib
+        -L../../build-Linux-x86_64/lib/Linux-x86_64/
 
     # Additional libraries.
     LIBS = \

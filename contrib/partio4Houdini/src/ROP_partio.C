@@ -1,20 +1,20 @@
-/* partio4Houdini  5/01/2013, Miles Green  
- 
+/* partio4Houdini  5/01/2013, Miles Green
+
  PARTIO Import/Export
  Copyright 2013 (c)  All rights reserved
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are
  met:
- 
+
  * Redistributions of source code must retain the above copyright
  notice, this list of conditions and the following disclaimer.
- 
+
  * Redistributions in binary form must reproduce the above copyright
  notice, this list of conditions and the following disclaimer in
  the documentation and/or other materials provided with the
  distribution.
- 
+
  Disclaimer: THIS SOFTWARE IS PROVIDED BY  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
  BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
  FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
@@ -77,7 +77,7 @@ static PRM_Template	 f3dTemplates[] = {
     PRM_Template(PRM_STRING, PRM_TYPE_DYNAMIC_PATH, 1, &sopPathName,0, 0, 0, 0, &PRM_SpareData::sopPath),
     PRM_Template(PRM_FILE,	1, &theFileName, &theFileDefault,0,	0, 0, &PRM_SpareData::fileChooserModeWrite),
     PRM_Template(PRM_TOGGLE, 1, &alfprogressName, PRMzeroDefaults),
-	PRM_Template(PRM_ORD, 1, &verbosityName, &verbosityDefault,&theVerbosityMenu)   
+	PRM_Template(PRM_ORD, 1, &verbosityName, &verbosityDefault,&theVerbosityMenu)
 };
 
 
@@ -98,7 +98,7 @@ getTemplates()
     theTemplate[ROP_PIO_SOPPATH] = f3dTemplates[0];
     theTemplate[ROP_PIO_SOPOUTPUT] = f3dTemplates[1];
 	theTemplate[ROP_PIO_VERBOSITY] = f3dTemplates[3];
-    theTemplate[ROP_PIO_INITSIM] = theRopTemplates[ROP_IFD_INITSIM_TPLATE];
+    theTemplate[ROP_PIO_INITSIM] = theRopTemplates[ROP_INITSIM_TPLATE];
     theTemplate[ROP_PIO_ALFPROGRESS] = f3dTemplates[2];
     theTemplate[ROP_PIO_TPRERENDER] = theRopTemplates[ROP_TPRERENDER_TPLATE];
     theTemplate[ROP_PIO_PRERENDER] = theRopTemplates[ROP_PRERENDER_TPLATE];
@@ -173,7 +173,7 @@ ROP_partio::startRender(int nframes, fpreal tstart, fpreal tend)
 
 
 		OUTPUTRAW(filename, 0);
-		if(filename.isstring()==0) 
+		if(filename.isstring()==0)
 		{
 				addError(ROP_MESSAGE, "ROP can't write to invalid path");
 				return ROP_ABORT_RENDER;
@@ -191,7 +191,7 @@ ROP_partio::startRender(int nframes, fpreal tstart, fpreal tend)
 	    return 0;
     }
 
-		
+
 
     return rcode;
 }
@@ -262,7 +262,7 @@ ROP_partio::renderFrame(fpreal time, UT_Interrupt *)
 			addError(ROP_MESSAGE, "ROP can't write to invalid path");
 			return ROP_ABORT_RENDER;
 		}
-		
+
 
 	//update progess
     if (ALFPROGRESS() && (myEndTime != myStartTime))
@@ -273,7 +273,7 @@ ROP_partio::renderFrame(fpreal time, UT_Interrupt *)
 			fprintf(stdout, "ALF_PROGRESS %d%%\n", percent);
 			fflush(stdout);
     }
-    
+
     if (error() < UT_ERROR_ABORT)
     {
   		if( !executePostFrameScript(time) )
