@@ -31,9 +31,10 @@
 
 // Notes: This is the main body of code for the SOP partio node: this node can read and write partio formats - (it tries to emulate th eregular fiel node)
 
+#include <string>
+#include <limits.h>
 
 #include <SOP/SOP_Node.h>
-#include <limits.h>
 #include <UT/UT_DSOVersion.h>
 #include <UT/UT_Math.h>
 #include <UT/UT_Interrupt.h>
@@ -44,13 +45,12 @@
 #include <OP/OP_Operator.h>
 #include <OP/OP_OperatorTable.h>
 #include <CH/CH_Manager.h>
+
 #include "SOP_partio.h"
 #include "partio_houdini.h"
-#include <string>
 
 
 using namespace partio;
-
 
 
 //
@@ -79,7 +79,7 @@ newSopOperator(OP_OperatorTable *table)
                         OP_FLAG_GENERATOR)		// Flag it as generator
     );
 }
-static PRM_Default	 theFileDefault(0, "");
+static PRM_Default	theFileDefault(0, "");
 static PRM_Name		theioTypes[] =
 {
     PRM_Name("readfiles", "Read Files"),
@@ -144,7 +144,7 @@ bool SOP_partio::matchExtension(UT_String &fileName)
         // No string entered exit
         return false;
     }
-    std::string supportedExtensions[] = {".ptc", ".pdb", ".pdb.gz", ".bgeo", ".geo", ".pdc", ".bin", ".rib", ".mc"};
+    std::string supportedExtensions[] = {".bgeo", ".geo", ".pda", ".pdb", ".pdb.gz", ".pdc", ".bin", ".prt", ".ptc", ".pts", ".xyz", ".pcd", ".mc",".icecache", ".rib", };
 
     for (int i = 0; i < sizeof(supportedExtensions); ++i)
     {
@@ -203,7 +203,7 @@ SOP_partio::~SOP_partio() {}
 bool
 SOP_partio::getHDKHelp(UT_String &str) const
 {
-    str.harden("This is some help for the partio SOP\n\n This node can read partio suported formats (pdb/ptc/bgeo point)caches\n");
+    str.harden("This is some help for the partio SOP\n\n This node can read partio suported formats:\n bgeo,geo\n pda,pdb,pdb.gz,pdc\nbin\nprt\nptc\npts,xyz,pcd\nmc,icecache,rib caches\n");
     return true;
 }
 
@@ -227,18 +227,12 @@ SOP_partio::cookMySop(OP_Context &context)
     if (!matchExtension(filename))
     {
         gdp->clearAndDestroy();
-        addError(SOP_MESSAGE, "filename empty or filetype specified without .ptc, .pdb .pdb.gz .pdc .geo .mc .bin .rib or .bgeo");
+        addError(SOP_MESSAGE, "filename empty or filetype is not one of:\nbgeo,geo\npda,pdb,pdb.gz,pdc\nbin\nprt\nptc\npts,xyz,pcd\nmc,icecache,rib");
         gdp->notifyCache(GU_CACHE_ALL);
         return error();
     }
 
-
-
-
-
-
-
-    myCurrentFileName = filename;
+  myCurrentFileName = filename;
     // Check to see that there hasn't been a critical error in cooking the SOP.
     if (error() < UT_ERROR_ABORT)
     {
@@ -250,11 +244,8 @@ SOP_partio::cookMySop(OP_Context &context)
             if (iomode==0)
             {
 
-
-
                 gdp->clearAndDestroy();
                 successReadWrite = partioLoad(filename, gdp, verbosity);
-
 
                 if (successReadWrite==0)
                 {
@@ -278,8 +269,6 @@ SOP_partio::cookMySop(OP_Context &context)
                 {
                     addError(SOP_MESSAGE, "Error, unable to save file: ");
                 }
-
-
             }
         }
 

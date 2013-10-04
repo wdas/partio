@@ -45,8 +45,7 @@ namespace partio {
 class SOP_partio : public SOP_Node
 {
 public:
-    static OP_Node		*myConstructor(OP_Network*, const char *,
-                                   OP_Operator *);
+    static OP_Node	*myConstructor(OP_Network*, const char *, OP_Operator *);
 
     /// Stores the description of the interface of the SOP in Houdini.
     /// Each parm template refers to a parameter.
@@ -85,7 +84,8 @@ protected:
     // shadow warnings.
     /*virtual bool                 evalVariableValue( UT_String &v,int i,int thread);*/
 
-    virtual bool         shouldResetGeoToEmpty() const  {
+    virtual bool shouldResetGeoToEmpty() const
+    {
         return false;
     }
 
@@ -93,13 +93,16 @@ private:
     /// The following list of accessors simplify evaluating the parameters
     /// of the SOP.
 
-    int	  VERBOSITY(float t)		{
+    int	  VERBOSITY(float t)
+	{
         return evalInt  ("dbug", 0, t);
     }
-    int	  IOMODE(float t)      {
+    int	  IOMODE(float t)
+	{
         INT_PARM("filemode", 0, t)
     }
-    void  FILEPATH(UT_String &str, float t)    {
+    void  FILEPATH(UT_String &str, float t)
+	{
         STR_PARM("file",  0, t)
     }
     bool  matchExtension(UT_String &str);

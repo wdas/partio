@@ -45,14 +45,11 @@
 #include "partio_houdini.h"
 
 
-
-
 using namespace	HDK_Sample;
-
 
 // Parm Names
 static PRM_Name		sopPathName("soppath",	"SOP Path");
-static PRM_Name		 theFileName("sopoutput", "Output File");
+static PRM_Name		theFileName("sopoutput", "Output File");
 static PRM_Name		verbosityName("verbosity","Verbosity");
 static PRM_Name		tRangeName("f",	"Start/End/inc");
 static PRM_Name		theVerbosityTypes[] =
@@ -66,10 +63,10 @@ static PRM_Name		theVerbosityTypes[] =
 };
 
 // Parm Defaults
-static PRM_ChoiceList theVerbosityMenu(PRM_CHOICELIST_SINGLE, theVerbosityTypes);
-static PRM_Default	 theFileDefault(0, "$HIP/partio.$F.pdc");
-static PRM_Name		alfprogressName("alfprogress", "Alfred Style Progress");
-static PRM_Default	verbosityDefault(0);		// set verbosity to 0
+static PRM_ChoiceList 	theVerbosityMenu(PRM_CHOICELIST_SINGLE, theVerbosityTypes);
+static PRM_Default	 	theFileDefault(0, "$HIP/partio.$F.pdc");
+static PRM_Name			alfprogressName("alfprogress", "Alfred Style Progress");
+static PRM_Default		verbosityDefault(0);		// set verbosity to 0
 
 
 // Parm Template
@@ -191,8 +188,6 @@ ROP_partio::startRender(int nframes, fpreal tstart, fpreal tend)
             return 0;
     }
 
-
-
     return rcode;
 }
 
@@ -251,7 +246,6 @@ ROP_partio::renderFrame(fpreal time, UT_Interrupt *)
         return ROP_ABORT_RENDER;
     }
 
-
     OUTPUT(savepath, time);
     UT_String filename;
     OUTPUT(filename, time);
@@ -262,7 +256,6 @@ ROP_partio::renderFrame(fpreal time, UT_Interrupt *)
         addError(ROP_MESSAGE, "ROP can't write to invalid path");
         return ROP_ABORT_RENDER;
     }
-
 
     //update progess
     if (ALFPROGRESS() && (myEndTime != myStartTime))

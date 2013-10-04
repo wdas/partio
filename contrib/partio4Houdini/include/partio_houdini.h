@@ -29,27 +29,19 @@
  */
 
 
-// Notes: This is the Header for the code that converts to and from partio to houdini's internal formats, the nodes (ROP/SOP) and command line converter all use this code/header
+// Notes: This is the Header for the code that converts to and from partio to houdini's internal formats,
+// the nodes (ROP/SOP) and command line converter all use this code/header
 
-
-
-
-
-
-#include <GU/GU_Detail.h>
 #include <string>
-
-
+#include <GU/GU_Detail.h>
 
 #ifndef partio_houdini_h
 #define partio_houdini_h
-
 
 void toUpperCase(std::string& lowercase);
 
 bool partioLoad(char *fileName, GU_Detail *gdp, int verbosity) ;
 
 bool partioSave(char *fileName, const GU_Detail *gdp, int verbosity) ;
-
 
 #endif

@@ -1,5 +1,4 @@
 /* partio4Houdini  5/01/2013, Miles Green
- * modified by  redpawfx
 
  PARTIO Import/Export
  Copyright 2013 (c)  All rights reserved
@@ -30,9 +29,8 @@
  */
 
 
-// Notes: This is the main body of code that converts to and from partio to houdini's internal formats, the nodes (ROP/SOP) and command line converter all use this code
-
-
+// Notes: This is the main body of code that converts to and from partio to houdini's internal formats,
+// the nodes (ROP/SOP) and command line converter all use this code
 
 
 #include <vector>
@@ -50,7 +48,6 @@
 #include <Partio.h>
 
 #include "partio_houdini.h"
-
 
 
 //helper function to check read file exists
@@ -77,18 +74,14 @@ bool partioLoad(char *fileName, GU_Detail *gdp, int verbosity)
     // read file into partio
     Partio::ParticlesDataMutable* particleData=Partio::read(fileName);
 
-
     if (verbosity>0)
     {
         std::cout<<"Number of particles: "<<particleData->numParticles()<<std::endl;
         std::cout<<"Number of Attributes: "<<particleData->numAttributes()<<std::endl;
     }
 
-
     // build particles
     GU_PrimParticle *part = GU_PrimParticle::build(gdp, particleData->numParticles());
-
-
 
 
     // if houdini particle primitive created
@@ -253,10 +246,7 @@ bool partioLoad(char *fileName, GU_Detail *gdp, int verbosity)
         }
     }
 
-
-
     particleData->release();
-
     return true;
 }
 
@@ -277,7 +267,6 @@ bool partioSave(char *fileName, const GU_Detail *gdp, int verbosity)
 
     // create partio data
     Partio::ParticlesDataMutable* particleData=Partio::createInterleave();
-
 
     // Set Total number of particles
     numPoints = gdp->points().entries();
@@ -323,7 +312,6 @@ bool partioSave(char *fileName, const GU_Detail *gdp, int verbosity)
             }
 
             attrNameStr[a]=attrName;
-
 
             // Create the data storage for each attribute.
             switch ( attrib->getStorageClass() )

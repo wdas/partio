@@ -37,7 +37,6 @@
 
 #include "partio_houdini.h"
 
-
 static void usage(const char *program)
 {
     cerr << "ERROR program arguments called incorrectly\n";

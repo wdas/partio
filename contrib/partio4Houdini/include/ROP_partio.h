@@ -36,7 +36,6 @@
 
 #include <ROP/ROP_Node.h>
 
-
 #define STR_PARM(name, vi, t) \
 		{ evalString(str, name, vi, t); }
 #define STR_PARMRAW(name, vi, t) \
@@ -45,7 +44,6 @@
                 { return evalInt(name, vi, t); }
 #define FLOAT_PARM(name, vi, t) \
                 { return evalFloat(name, vi, t); }
-
 
 
 
@@ -86,8 +84,7 @@ public:
     static OP_TemplatePair	*getTemplatePair();
     static OP_VariablePair	*getVariablePair();
     /// Creates an instance of this node.
-    static OP_Node		*myConstructor(OP_Network *net, const char*name,
-                                   OP_Operator *op);
+    static OP_Node	*myConstructor(OP_Network *net, const char*name, OP_Operator *op);
 
 protected:
     ROP_partio(OP_Network *net, const char *name, OP_Operator *entry);
@@ -159,9 +156,6 @@ public:
     {
         FLOAT_PARM("f", 1, 0)
     }
-
-
-
 
 
 private:
