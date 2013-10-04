@@ -59,9 +59,9 @@ static PRM_Name		theVerbosityTypes[] =
 {
     PRM_Name("errors", "Errors only"),
     PRM_Name("level1", "Level 1"),
-		PRM_Name("level2", "Level 2"),
-		PRM_Name("level3", "Level 3"),
-		PRM_Name("level4", "Level 4"),
+    PRM_Name("level2", "Level 2"),
+    PRM_Name("level3", "Level 3"),
+    PRM_Name("level4", "Level 4"),
     PRM_Name()
 };
 
@@ -77,7 +77,7 @@ static PRM_Template	 f3dTemplates[] = {
     PRM_Template(PRM_STRING, PRM_TYPE_DYNAMIC_PATH, 1, &sopPathName,0, 0, 0, 0, &PRM_SpareData::sopPath),
     PRM_Template(PRM_FILE,	1, &theFileName, &theFileDefault,0,	0, 0, &PRM_SpareData::fileChooserModeWrite),
     PRM_Template(PRM_TOGGLE, 1, &alfprogressName, PRMzeroDefaults),
-	PRM_Template(PRM_ORD, 1, &verbosityName, &verbosityDefault,&theVerbosityMenu)
+    PRM_Template(PRM_ORD, 1, &verbosityName, &verbosityDefault,&theVerbosityMenu)
 };
 
 
@@ -87,7 +87,7 @@ getTemplates()
     static PRM_Template	*theTemplate = 0;
 
     if (theTemplate)
-	return theTemplate;
+        return theTemplate;
 
     theTemplate = new PRM_Template[ROP_PIO_MAXPARMS+1];
     theTemplate[ROP_PIO_RENDER] = theRopTemplates[ROP_RENDER_TPLATE];
@@ -97,7 +97,7 @@ getTemplates()
     theTemplate[ROP_PIO_TAKE] = theRopTemplates[ROP_TAKENAME_TPLATE];
     theTemplate[ROP_PIO_SOPPATH] = f3dTemplates[0];
     theTemplate[ROP_PIO_SOPOUTPUT] = f3dTemplates[1];
-	theTemplate[ROP_PIO_VERBOSITY] = f3dTemplates[3];
+    theTemplate[ROP_PIO_VERBOSITY] = f3dTemplates[3];
     theTemplate[ROP_PIO_INITSIM] = theRopTemplates[ROP_INITSIM_TPLATE];
     theTemplate[ROP_PIO_ALFPROGRESS] = f3dTemplates[2];
     theTemplate[ROP_PIO_TPRERENDER] = theRopTemplates[ROP_TPRERENDER_TPLATE];
@@ -125,7 +125,7 @@ ROP_partio::getTemplatePair()
     static OP_TemplatePair *ropPair = 0;
     if (!ropPair)
     {
-			ropPair = new OP_TemplatePair(getTemplates());
+        ropPair = new OP_TemplatePair(getTemplates());
     }
     return ropPair;
 }
@@ -138,7 +138,7 @@ ROP_partio::getVariablePair()
 {
     static OP_VariablePair *pair = 0;
     if (!pair)
-				pair = new OP_VariablePair(ROP_Node::myVariableList);
+        pair = new OP_VariablePair(ROP_Node::myVariableList);
     return pair;
 }
 
@@ -146,11 +146,11 @@ OP_Node *
 ROP_partio::myConstructor(OP_Network *net, const char *name, OP_Operator *op)
 {
 
-return new ROP_partio(net, name, op);
+    return new ROP_partio(net, name, op);
 }
 
 ROP_partio::ROP_partio(OP_Network *net, const char *name, OP_Operator *entry)
-	: ROP_Node(net, name, entry)
+        : ROP_Node(net, name, entry)
 {
 }
 
@@ -169,26 +169,26 @@ ROP_partio::startRender(int nframes, fpreal tstart, fpreal tend)
     int	rcode = 1;
     myEndTime = tend;
     myStartTime = tstart;
-	UT_String filename;
+    UT_String filename;
 
 
-		OUTPUTRAW(filename, 0);
-		if(filename.isstring()==0)
-		{
-				addError(ROP_MESSAGE, "ROP can't write to invalid path");
-				return ROP_ABORT_RENDER;
-		}
+    OUTPUTRAW(filename, 0);
+    if (filename.isstring()==0)
+    {
+        addError(ROP_MESSAGE, "ROP can't write to invalid path");
+        return ROP_ABORT_RENDER;
+    }
 
     if (INITSIM())
     {
         initSimulationOPs();
-		OPgetDirector()->bumpSkipPlaybarBasedSimulationReset(1);
+        OPgetDirector()->bumpSkipPlaybarBasedSimulationReset(1);
     }
 
     if (error() < UT_ERROR_ABORT)
     {
-		if( !executePreRenderScript(tstart) )
-	    return 0;
+        if ( !executePreRenderScript(tstart) )
+            return 0;
     }
 
 
@@ -203,10 +203,10 @@ ROP_partio::renderFrame(fpreal time, UT_Interrupt *)
     UT_String		 soppath, savepath;
 
 
-    if( !executePreFrameScript(time) )
-		{
-			return ROP_ABORT_RENDER;
-		}
+    if ( !executePreFrameScript(time) )
+    {
+        return ROP_ABORT_RENDER;
+    }
 
     // From here, establish the SOP that will be rendered, if it cannot
     // be found, return 0.
@@ -214,32 +214,32 @@ ROP_partio::renderFrame(fpreal time, UT_Interrupt *)
     // dependent (ie: OUT$F) or the perframe script may have
     // rewired the input to this node.
     sop = CAST_SOPNODE(getInput(0));
-    if( sop )
+    if ( sop )
     {
-			// If we have an input, get the full path to that SOP.
-			sop->getFullPath(soppath);
+        // If we have an input, get the full path to that SOP.
+        sop->getFullPath(soppath);
     }
     else
     {
-			// Otherwise get the SOP Path from our parameter.
-			SOPPATH(soppath, time);
+        // Otherwise get the SOP Path from our parameter.
+        SOPPATH(soppath, time);
     }
 
-    if( !soppath.isstring() )
+    if ( !soppath.isstring() )
     {
-			UT_String filename;
-			addError(ROP_MESSAGE, "Invalid SOP path");
-			return ROP_ABORT_RENDER;
+        UT_String filename;
+        addError(ROP_MESSAGE, "Invalid SOP path");
+        return ROP_ABORT_RENDER;
     }
 
     sop = getSOPNode(soppath, 1);
     if (!sop)
     {
-			addError(ROP_COOK_ERROR, (const char *)soppath);
-			return ROP_ABORT_RENDER;
+        addError(ROP_COOK_ERROR, (const char *)soppath);
+        return ROP_ABORT_RENDER;
     }
 
-		// Get the gdp
+    // Get the gdp
     OP_Context		context(time);
     GU_DetailHandle gdh;
     gdh = sop->getCookedGeoHandle(context);
@@ -247,39 +247,39 @@ ROP_partio::renderFrame(fpreal time, UT_Interrupt *)
     const GU_Detail		*gdp = gdl.getGdp();
     if (!gdp)
     {
-			addError(ROP_COOK_ERROR, (const char *)soppath);
-			return ROP_ABORT_RENDER;
+        addError(ROP_COOK_ERROR, (const char *)soppath);
+        return ROP_ABORT_RENDER;
     }
 
 
-    	OUTPUT(savepath, time);
-		UT_String filename;
-		OUTPUT(filename, time);
-		int verbosity = VERBOSITY();
-		int successWrite = partioSave(filename, gdp, verbosity);
-		if(!successWrite)
-		{
-			addError(ROP_MESSAGE, "ROP can't write to invalid path");
-			return ROP_ABORT_RENDER;
-		}
+    OUTPUT(savepath, time);
+    UT_String filename;
+    OUTPUT(filename, time);
+    int verbosity = VERBOSITY();
+    int successWrite = partioSave(filename, gdp, verbosity);
+    if (!successWrite)
+    {
+        addError(ROP_MESSAGE, "ROP can't write to invalid path");
+        return ROP_ABORT_RENDER;
+    }
 
 
-	//update progess
+    //update progess
     if (ALFPROGRESS() && (myEndTime != myStartTime))
     {
-			float		fpercent = (time - myStartTime) / (myEndTime - myStartTime);
-			int		percent = (int)SYSrint(fpercent * 100);
-			percent = SYSclamp(percent, 0, 100);
-			fprintf(stdout, "ALF_PROGRESS %d%%\n", percent);
-			fflush(stdout);
+        float		fpercent = (time - myStartTime) / (myEndTime - myStartTime);
+        int		percent = (int)SYSrint(fpercent * 100);
+        percent = SYSclamp(percent, 0, 100);
+        fprintf(stdout, "ALF_PROGRESS %d%%\n", percent);
+        fflush(stdout);
     }
 
     if (error() < UT_ERROR_ABORT)
     {
-  		if( !executePostFrameScript(time) )
-  		{
-  	    	return ROP_ABORT_RENDER;
-  		}
+        if ( !executePostFrameScript(time) )
+        {
+            return ROP_ABORT_RENDER;
+        }
     }
 
     return ROP_CONTINUE_RENDER;
@@ -291,12 +291,12 @@ ROP_RENDER_CODE
 ROP_partio::endRender()
 {
     if (INITSIM())
-			OPgetDirector()->bumpSkipPlaybarBasedSimulationReset(-1);
+        OPgetDirector()->bumpSkipPlaybarBasedSimulationReset(-1);
 
     if (error() < UT_ERROR_ABORT)
     {
-			if( !executePostRenderScript(myEndTime) )
-	    	return ROP_ABORT_RENDER;
+        if ( !executePostRenderScript(myEndTime) )
+            return ROP_ABORT_RENDER;
     }
     return ROP_CONTINUE_RENDER;
 }
@@ -307,13 +307,13 @@ newDriverOperator(OP_OperatorTable *table)
     //Field3D::initIO();
 
     table->addOperator(new OP_Operator("partio",
-					"partio",
-					ROP_partio::myConstructor,
-					ROP_partio::getTemplatePair(),
-					1,
-					0,
-					ROP_partio::getVariablePair(),
-					OP_FLAG_GENERATOR));
+                                       "partio",
+                                       ROP_partio::myConstructor,
+                                       ROP_partio::getTemplatePair(),
+                                       1,
+                                       0,
+                                       ROP_partio::getVariablePair(),
+                                       OP_FLAG_GENERATOR));
 
     // Note due to the just-in-time loading of GeometryIO, the f3d
     // won't be added until after your first f3d save/load.
@@ -321,14 +321,14 @@ newDriverOperator(OP_OperatorTable *table)
     UT_ExtensionList		*geoextension;
     geoextension = UTgetGeoExtensions();
     if (!geoextension->findExtension("pdb"))
-				geoextension->addExtension("pdb");
-	if (!geoextension->findExtension("ptc"))
-				geoextension->addExtension("ptc");
-	if (!geoextension->findExtension("pdc"))
-				geoextension->addExtension("pdc");
-	if (!geoextension->findExtension("mc"))
-				geoextension->addExtension("mc");
-	if (!geoextension->findExtension("bin"))
-				geoextension->addExtension("bin");
+        geoextension->addExtension("pdb");
+    if (!geoextension->findExtension("ptc"))
+        geoextension->addExtension("ptc");
+    if (!geoextension->findExtension("pdc"))
+        geoextension->addExtension("pdc");
+    if (!geoextension->findExtension("mc"))
+        geoextension->addExtension("mc");
+    if (!geoextension->findExtension("bin"))
+        geoextension->addExtension("bin");
 }
 

@@ -69,15 +69,15 @@ void
 newSopOperator(OP_OperatorTable *table)
 {
     table->addOperator(
-	    new OP_Operator("partio",			// Internal name
-			    "partio",			// UI name
-			     SOP_partio::myConstructor,	// How to build the SOP
-			     SOP_partio::myTemplateList,	// My parameters
-			     0,				// Min # of sources
-			     1,				// Max # of sources
-			     SOP_partio::myVariables,	// Local variables
-			     OP_FLAG_GENERATOR)		// Flag it as generator
-	    );
+        new OP_Operator("partio",			// Internal name
+                        "partio",			// UI name
+                        SOP_partio::myConstructor,	// How to build the SOP
+                        SOP_partio::myTemplateList,	// My parameters
+                        0,				// Min # of sources
+                        1,				// Max # of sources
+                        SOP_partio::myVariables,	// Local variables
+                        OP_FLAG_GENERATOR)		// Flag it as generator
+    );
 }
 static PRM_Default	 theFileDefault(0, "");
 static PRM_Name		theioTypes[] =
@@ -90,9 +90,9 @@ static PRM_Name		thedebugTypes[] =
 {
     PRM_Name("None", "None"),
     PRM_Name("level 1", "level 1"),
-		PRM_Name("level 2", "level 2"),
-		PRM_Name("level 3", "level 3"),
-		PRM_Name("level 4", "level 4"),
+    PRM_Name("level 2", "level 2"),
+    PRM_Name("level 3", "level 3"),
+    PRM_Name("level 4", "level 4"),
     PRM_Name()
 };
 static PRM_ChoiceList theioTypeMenu(PRM_CHOICELIST_SINGLE, theioTypes);
@@ -116,21 +116,21 @@ static PRM_Default	refreshDefault(0);		// set debug to off
 PRM_Template
 SOP_partio::myTemplateList[] = {
     PRM_Template(PRM_ORD, 1, &iotypeName, 0,&theioTypeMenu),
-	PRM_Template(PRM_FILE, 1, &FileName,&theFileDefault),
-	PRM_Template(PRM_ORD, 1, &debugName, 0,&theioDebugMenu),
-	PRM_Template(PRM_CALLBACK, 1, &refreshName, 0, 0, 0, &refreshStatic),
+    PRM_Template(PRM_FILE, 1, &FileName,&theFileDefault),
+    PRM_Template(PRM_ORD, 1, &debugName, 0,&theioDebugMenu),
+    PRM_Template(PRM_CALLBACK, 1, &refreshName, 0, 0, 0, &refreshStatic),
     PRM_Template()
 };
 
 
 // Here's how we define local variables for the SOP.
 enum {
-  VAR_CP,	  // current point
+    VAR_CP,	  // current point
 };
 
 CH_LocalVariable
 SOP_partio::myVariables[] = {
-	{ "CP", VAR_CP,0},
+    { "CP", VAR_CP,0},
     { 0,0,0}
 };
 
@@ -139,24 +139,24 @@ SOP_partio::myVariables[] = {
 bool SOP_partio::matchExtension(UT_String &fileName)
 {
 
-	if(!fileName.isstring())
-	{
-	// No string entered exit
-	return false;
-	}
-	std::string supportedExtensions[] = {".ptc", ".pdb", ".pdb.gz", ".bgeo", ".geo", ".pdc", ".bin", ".rib", ".mc"};
+    if (!fileName.isstring())
+    {
+        // No string entered exit
+        return false;
+    }
+    std::string supportedExtensions[] = {".ptc", ".pdb", ".pdb.gz", ".bgeo", ".geo", ".pdc", ".bin", ".rib", ".mc"};
 
-	for (int i = 0; i < sizeof(supportedExtensions); ++i)
-     {
+    for (int i = 0; i < sizeof(supportedExtensions); ++i)
+    {
 
-        if(fileName.endsWith(supportedExtensions[i].c_str()))
-		{
-		return true;
-		}
-     }
+        if (fileName.endsWith(supportedExtensions[i].c_str()))
+        {
+            return true;
+        }
+    }
 
-	// Did not find suported extensions
-	return false;
+    // Did not find suported extensions
+    return false;
 
 }
 
@@ -189,10 +189,10 @@ SOP_partio::myConstructor(OP_Network *net, const char *name, OP_Operator *op)
 }
 
 SOP_partio::SOP_partio(OP_Network *net, const char *name, OP_Operator *op)
-	: SOP_Node(net, name, op)
+        : SOP_Node(net, name, op)
 {
 
-		myCurrentFileName = "";
+    myCurrentFileName = "";
 
 }
 
@@ -223,14 +223,14 @@ SOP_partio::cookMySop(OP_Context &context)
     UT_Interrupt        *boss;
     bool  successReadWrite = 0;
 
-		// Check we have valid file name and extension
-		if(!matchExtension(filename))
-		{
-			gdp->clearAndDestroy();
-			addError(SOP_MESSAGE, "filename empty or filetype specified without .ptc, .pdb .pdb.gz .pdc .geo .mc .bin .rib or .bgeo");
-			gdp->notifyCache(GU_CACHE_ALL);
-			return error();
-		}
+    // Check we have valid file name and extension
+    if (!matchExtension(filename))
+    {
+        gdp->clearAndDestroy();
+        addError(SOP_MESSAGE, "filename empty or filetype specified without .ptc, .pdb .pdb.gz .pdc .geo .mc .bin .rib or .bgeo");
+        gdp->notifyCache(GU_CACHE_ALL);
+        return error();
+    }
 
 
 
@@ -238,55 +238,55 @@ SOP_partio::cookMySop(OP_Context &context)
 
 
 
-		myCurrentFileName = filename;
-    	// Check to see that there hasn't been a critical error in cooking the SOP.
-    	if (error() < UT_ERROR_ABORT)
-    	{
-    		boss = UTgetInterrupt();
+    myCurrentFileName = filename;
+    // Check to see that there hasn't been a critical error in cooking the SOP.
+    if (error() < UT_ERROR_ABORT)
+    {
+        boss = UTgetInterrupt();
 
-      		// Start the interrupt server
-      		if (boss->opStart("Building partio"))
-      		{
-              		if (iomode==0)
-      				{
-
-
-
-						gdp->clearAndDestroy();
-            			successReadWrite = partioLoad(filename, gdp, verbosity);
+        // Start the interrupt server
+        if (boss->opStart("Building partio"))
+        {
+            if (iomode==0)
+            {
 
 
-						if(successReadWrite==0)
-						{
-							addError(SOP_MESSAGE, "File not valid, unable to load file: ");
-						}
 
-            		}
-      				else
-      				{
-						if (lockInputs(context) >= UT_ERROR_ABORT)
-        					return error();
-
-							duplicateSource(0, context);
-							flags().timeDep = 1;
-
-      						successReadWrite = partioSave(filename, gdp, verbosity);
-
-      						unlockInputs();
-
-      						if(successReadWrite==0)
-							{
-							addError(SOP_MESSAGE, "Error, unable to save file: ");
-							}
+                gdp->clearAndDestroy();
+                successReadWrite = partioLoad(filename, gdp, verbosity);
 
 
-      				}
-          }
+                if (successReadWrite==0)
+                {
+                    addError(SOP_MESSAGE, "File not valid, unable to load file: ");
+                }
 
-      	// Tell the interrupt server that we've completed. Must do this
-      	// regardless of what opStart() returns.
-      	boss->opEnd();
-    	}
+            }
+            else
+            {
+                if (lockInputs(context) >= UT_ERROR_ABORT)
+                    return error();
+
+                duplicateSource(0, context);
+                flags().timeDep = 1;
+
+                successReadWrite = partioSave(filename, gdp, verbosity);
+
+                unlockInputs();
+
+                if (successReadWrite==0)
+                {
+                    addError(SOP_MESSAGE, "Error, unable to save file: ");
+                }
+
+
+            }
+        }
+
+        // Tell the interrupt server that we've completed. Must do this
+        // regardless of what opStart() returns.
+        boss->opEnd();
+    }
 
     gdp->notifyCache(GU_CACHE_ALL);
     return error();

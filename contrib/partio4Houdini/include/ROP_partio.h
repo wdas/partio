@@ -1,20 +1,20 @@
-/* partio4Houdini  5/01/2013, Miles Green  
- 
+/* partio4Houdini  5/01/2013, Miles Green
+
  PARTIO Import/Export
  Copyright 2013 (c)  All rights reserved
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are
  met:
- 
+
  * Redistributions of source code must retain the above copyright
  notice, this list of conditions and the following disclaimer.
- 
+
  * Redistributions in binary form must reproduce the above copyright
  notice, this list of conditions and the following disclaimer in
  the documentation and/or other materials provided with the
  distribution.
- 
+
  Disclaimer: THIS SOFTWARE IS PROVIDED BY  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
  BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
  FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
@@ -62,7 +62,7 @@ enum {
     ROP_PIO_TAKE,
     ROP_PIO_SOPPATH,
     ROP_PIO_SOPOUTPUT,
-	ROP_PIO_VERBOSITY,
+    ROP_PIO_VERBOSITY,
     ROP_PIO_INITSIM,
     ROP_PIO_ALFPROGRESS,
     ROP_PIO_TPRERENDER,
@@ -87,16 +87,16 @@ public:
     static OP_VariablePair	*getVariablePair();
     /// Creates an instance of this node.
     static OP_Node		*myConstructor(OP_Network *net, const char*name,
-						OP_Operator *op);
+                                   OP_Operator *op);
 
 protected:
-	     ROP_partio(OP_Network *net, const char *name, OP_Operator *entry);
+    ROP_partio(OP_Network *net, const char *name, OP_Operator *entry);
     virtual ~ROP_partio();
 
-	/// Disable parameters according to other parameters.
+    /// Disable parameters according to other parameters.
     /// virtual unsigned		 disableParms();
 
-    /// Called at the beginning of rendering to perform any intialization 
+    /// Called at the beginning of rendering to perform any intialization
     /// necessary.
     /// @param	nframes	    Number of frames being rendered.
     /// @param	s	    Start time, in seconds.
@@ -121,35 +121,53 @@ public:
 
     /// A convenience method to evaluate our custom file parameter.
     void  OUTPUT(UT_String &str, float t)
-    { STR_PARM("sopoutput",  0, t) }
-		void  OUTPUTRAW(UT_String &str, float t)
-    { STR_PARMRAW("sopoutput",  0, t) }
+    {
+        STR_PARM("sopoutput",  0, t)
+    }
+    void  OUTPUTRAW(UT_String &str, float t)
+    {
+        STR_PARMRAW("sopoutput",  0, t)
+    }
     int		INITSIM(void)
-		    { INT_PARM("initsim", 0, 0) }
+    {
+        INT_PARM("initsim", 0, 0)
+    }
     bool	ALFPROGRESS()
-		    { INT_PARM("alfprogress", 0, 0) }
+    {
+        INT_PARM("alfprogress", 0, 0)
+    }
     void	SOPPATH(UT_String &str, float t)
-		    { STR_PARM("soppath", 0, t)}
+    {
+        STR_PARM("soppath", 0, t)
+    }
 
 
-		int	VERBOSITY(void)      
-				{ INT_PARM("verbosity", 0, 0) }
+    int	VERBOSITY(void)
+    {
+        INT_PARM("verbosity", 0, 0)
+    }
 
-		int	TRANGE(void)      
-				{ INT_PARM("trange", 0, 0) }
-		float	STARTFRAME(void)      
-				{ FLOAT_PARM("f", 0, 0) }
-		float	ENDFRAME(void)      
-				{ FLOAT_PARM("f", 1, 0) }
+    int	TRANGE(void)
+    {
+        INT_PARM("trange", 0, 0)
+    }
+    float	STARTFRAME(void)
+    {
+        FLOAT_PARM("f", 0, 0)
+    }
+    float	ENDFRAME(void)
+    {
+        FLOAT_PARM("f", 1, 0)
+    }
 
 
 
-  
+
 
 private:
     float		 myEndTime;
     float		 myStartTime;
-		
+
 };
 
 }	// End HDK_Sample namespace
