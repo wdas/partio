@@ -43,7 +43,7 @@ global proc partioExportGui  ()
     if (`window  -exists  partioExportGui`)
         deleteUI partioExportGui ;
 
-    window  -s true -title "partioExportGui" -w 520 -h 600
+    window  -s true -title "partioExportGui v0.9.6" -w 520 -h 600
 			-iconName "partioExportGui" partioExportGui;
 
 ////////////////////////////////////////////
@@ -106,7 +106,8 @@ global proc partioExportGui  ()
 
 	// edit functions to buttons
     button -e -c ("dynExportSelectedparticles "+$startFrame+" "+$endFrame+" "+$partioExportFormatOptionMenu+" "+$cacheDir+" "+$exportPerFrameCheckbox) $dynExportButton;
-    textFieldButtonGrp -e -bc ("updatePath "+$cacheDir) $cacheDir;
+    textFieldButtonGrp -e -bc ("updatePath "+$cacheDir+" "+1) $cacheDir;
+	textFieldButtonGrp -e -cc ("updatePath "+$cacheDir+" "+0) $cacheDir;
     iconTextButton -e -c "buildParticleScrollList" $refreshButton;
 
     formLayout  -edit
@@ -225,19 +226,67 @@ global proc buildParticleEntry (string $particle, string $parent, int $color )
 
     string $attrs[] = `partioExportGuiListParticleAttrs  $particle "allPP" $ramp $supress `;   // uses a modified  version of listParticleAttrs with a separate list for dynExport
 
+	if(!`attributeExists  "partioCheckboxStatus" $particle`)
+	{
+		addAttr -ln "partioCheckboxStatus"  -dt "string"  $particle;
+		setAttr -type "string" ($particle+".partioCheckboxStatus") ("position,velocity");
+	}
+	string $chekBoxStat = `getAttr  ($particle+".partioCheckboxStatus")`;
+	string $checkboxArray[] = stringToStringArray($chekBoxStat, ",");
+
+
     for ($attr in $attrs)
     {
+		int $status = 0;
         if ($attr == "particleId") {}
-        else {
+        else
+		{
 
             $checkBoxName = ($particle+$attr+"checkBox");
-
-            checkBox -l $attr -v 0 $checkBoxName;
+			if (`stringArrayContains $attr  $checkboxArray`)
+			{
+				$status = 1;
+			}
+            checkBox -l $attr -v $status -onc ("checkboxStatusChanger "+$particle + " " + $attr + " " + 1) -ofc ("checkboxStatusChanger "+$particle + " " + $attr + " " + 0) $checkBoxName;
         }
     }
 
     setParent ..;
     setParent ..;
+}
+
+global proc  checkboxStatusChanger(string $particle, string $attr, int $onOff)
+{
+	print "checkbox changer";
+	if(`attributeExists  "partioCheckboxStatus" $particle`)
+	{
+		string $chekBoxStat = `getAttr  ($particle+".partioCheckboxStatus")`;
+		print $chekBoxStat;
+		string $checkboxArray[] = stringToStringArray($chekBoxStat, ",");
+		if (`stringArrayContains $attr  $checkboxArray`)
+		{
+			if (!$onOff)  // remove from list
+			{
+				string $temp[] ={$attr};
+				$checkboxArray = `stringArrayRemove $temp $checkboxArray`;
+			}
+			else{} // do nothing, highly unlikely, but just to cover all bases
+		}
+		else
+		{
+			// we want to add it to the string
+			stringArrayInsertAtIndex(`size($checkboxArray)`, $checkboxArray, $attr);
+		}
+		setAttr -type "string" ($particle+".partioCheckboxStatus") `stringArrayToString $checkboxArray ","`;
+	}
+	else
+	{
+		addAttr -ln "partioCheckboxStatus"  -dt "string"  $particle;
+		if  ($onOff)
+		{
+			setAttr -type "string" ($particle+".partioCheckboxStatus") ($attr+",");
+		}
+	}
 }
 
 
@@ -365,81 +414,37 @@ global proc dynExportSelectedparticles  (string $startFrame, string $endFrame,
 /////////////////////////////////////////////
 //// update  path
 
-global proc  updatePath (string $cacheDirControl)
+global proc  updatePath (string $cacheDirControl, int $button)
 {
-    string $result[] = `fileDialog2 -fileMode 3 `;
+	string $startingDir =`textFieldButtonGrp -q -text $cacheDirControl`;
+	if ($button)
+	{
 
-    textFieldButtonGrp -e -text $result[0]  $cacheDirControl;
-	optionVar -sv "partioExportGUICachePath" $result[0];
-}
+		if (!`filetest -d $startingDir`)
+		{
+			string $workspace = `workspace -q -rd`;
+			if (`filetest -d ($workspace+"_output")`)
+			{
+				$startingDir = ($workspace + "/_output/particles");
+			}
+			else
+			{
+				$startingDir = ($workspace + "/particles");
+			}
+		}
 
-
-/////////////////////////////////////////////
-//// update cacheDir
-
-global proc  updateCacheDir (string $cacheDirControl, string $manageCacheDirControl, string $dynGlobalsNode, int $switch)
-
-{
-    string $mayaCacheDir;
-
-    if ($switch)
-    {
-        $mayaCacheDir = `textFieldButtonGrp -q -text $manageCacheDirControl`;
-        textFieldGrp -e -text $mayaCacheDir $cacheDirControl;
-    }
-    else
-    {
-        $mayaCacheDir = `textFieldGrp -q -text $cacheDirControl`;
-        textFieldButtonGrp -e -text $mayaCacheDir $manageCacheDirControl;
-    }
-
-    setAttr -type "string" ($dynGlobalsNode+".cacheDirectory") $mayaCacheDir;
-
-    string $workspace = `workspace -q -rd`;
-    string $rebuildParticleDir = ($workspace+"/particles/"+$mayaCacheDir);
-
-    buildCacheDirList  $rebuildParticleDir;
-}
-
-
-//////////////////////////////////////////////
-//// parse particle name
-
-global proc  string[]  parseCacheDir (string $cacheListing)
-
-{
-    string $parts[];
-
-/// parsing the following
-//  MainMast_sail_softParticleShape.250-125000x250.pdc
-
-// returns an array  of values...  0= particleShape, 1= first frame, 2= second frame
-
-    string $x[];
-
-    tokenize $cacheListing "." $x;
-
-//int $size = `size $x[1]`;
-//$x[1] =  `substring  $x[1] 2  $size`;
-//$x[1] =  `substring  $x[1] 1  ($size-2)`;
-
-    string $negative = "";
-    if (`substring $x[1] 1 1` == "-")
-    {
-        $negative = "-";
-    }
-
-    string $frames[];
-
-    tokenize $x[1] "-x" $frames;
-
-    $parts[0] = $x[0];
-    $parts[1] = $negative +$frames[0];
-    $parts[2] = $frames[1];
-    $parts[3] = `substituteAllString $frames[2] "@" ""`;
-
-    return $parts;
-
+		string $result[] = `fileDialog2 -dir $startingDir -fileMode 3 `;
+		if (`size $result[0]` > 0) // else the dialog was most likely cancelled and we don't want to update
+		{
+			textFieldButtonGrp -e -text $result[0]  $cacheDirControl;
+			optionVar -sv "partioExportGUICachePath" $result[0];
+		}
+	}
+	else
+	{
+		textFieldButtonGrp -e -text $startingDir  $cacheDirControl;
+		optionVar -sv "partioExportGUICachePath" $startingDir;
+	}
 }
 
 
