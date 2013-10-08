@@ -166,6 +166,7 @@ public:
 
 /// ATTRS
     static MObject  time;
+	static MObject  aByFrame;
     static MObject  aSize;         // The size of the logo
     static MObject  aFlipYZ;
 	static MObject  aDrawStyle;

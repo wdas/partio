@@ -245,8 +245,9 @@ AtNode* CPartioVizTranslator::ExportProcedural ( AtNode* procedural, bool update
         MString formattedName = m_DagNode.findPlug ( "renderCachePath" ).asString();
         int frameNum = m_DagNode.findPlug ( "time" ).asInt();
         int frameOffset = m_DagNode.findPlug ( "cacheOffset" ).asInt();
+		int byFrame = m_DagNode.findPlug ( "byFrame" ).asInt();
 
-        int finalFrame = frameNum + frameOffset;
+        int finalFrame = (frameNum + frameOffset) * byFrame;
 
         /// TODO:  this is only temporary
         /// need to make the node actually update itself properly

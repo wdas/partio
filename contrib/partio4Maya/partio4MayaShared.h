@@ -80,7 +80,7 @@ public:
     static MStringArray partioGetBaseFileName(MString inFileName);
     static void 	updateFileName (MString cacheFile, MString cacheDir,
                                  bool cacheStatic, int cacheOffset,
-                                 short cacheFormat, int integerTime,
+                                 short cacheFormat, int integerTime, int byFrame,
                                  int &cachePadding, MString &formatExt,
                                  MString &outputFramePath, MString &outputRenderPath);
 

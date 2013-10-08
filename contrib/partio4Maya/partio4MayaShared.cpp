@@ -213,7 +213,7 @@ MStringArray partio4Maya::partioGetBaseFileName(MString inFileName)
 
 void partio4Maya::updateFileName (MString cacheFile, MString cacheDir,
                                   bool cacheStatic, int cacheOffset,
-                                  short cacheFormat, int integerTime,
+                                  short cacheFormat, int integerTime, int byFrame,
                                   int &cachePadding, MString &formatExt,
                                   MString &outputFramePath, MString &outputRenderPath
                                  )
@@ -239,7 +239,7 @@ void partio4Maya::updateFileName (MString cacheFile, MString cacheDir,
 ///////////////////////////////////////////////
 ///  output path  as normal
 
-    cacheFrame =  integerTime + cacheOffset;
+	cacheFrame =  (integerTime  + cacheOffset) * byFrame;
 
     MString formatString =  "%s%s%s%0";
     // special case for PDCs and maya nCache files because of the funky naming convention  TODO: support substepped/retiming  caches

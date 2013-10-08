@@ -55,6 +55,7 @@ using namespace std;
 MTypeId partioVisualizer::id( ID_PARTIOVISUALIZER );
 
 MObject partioVisualizer::time;
+MObject partioVisualizer::aByFrame;
 MObject partioVisualizer::aDrawSkip;
 MObject partioVisualizer::aUpdateCache;
 MObject partioVisualizer::aSize;         // The size of the logo
@@ -197,6 +198,15 @@ MStatus partioVisualizer::initialize()
     time = nAttr.create( "time", "tm", MFnNumericData::kLong ,0);
     uAttr.setKeyable( true );
 
+	aByFrame = nAttr.create( "byFrame", "byf", MFnNumericData::kInt ,1);
+    nAttr.setKeyable( true );
+    nAttr.setReadable( true );
+    nAttr.setWritable( true );
+    nAttr.setConnectable( true );
+    nAttr.setStorable( true );
+    nAttr.setMin(1);
+    nAttr.setMax(100);
+
     aSize = uAttr.create( "iconSize", "isz", MFnUnitAttribute::kDistance );
     uAttr.setDefault( 0.25 );
 
@@ -335,6 +345,7 @@ MStatus partioVisualizer::initialize()
     addAttribute ( aDrawStyle );
     addAttribute ( aForceReload );
     addAttribute ( aRenderCachePath );
+	addAttribute ( aByFrame );
     addAttribute ( time );
 
 	attributeAffects ( aCacheActive, aUpdateCache);
@@ -355,7 +366,9 @@ MStatus partioVisualizer::initialize()
     attributeAffects ( aDefaultRadius, aUpdateCache );
     attributeAffects ( aDrawStyle, aUpdateCache );
     attributeAffects ( aForceReload, aUpdateCache );
-    attributeAffects (time, aUpdateCache);
+	attributeAffects ( aByFrame, aUpdateCache );
+	attributeAffects ( aByFrame, aRenderCachePath );
+	attributeAffects (time, aUpdateCache);
     attributeAffects (time,aRenderCachePath);
 
 
@@ -413,6 +426,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
         float defaultRadius			= block.inputValue( aDefaultRadius).asFloat();
         bool forceReload 			= block.inputValue( aForceReload ).asBool();
         int integerTime				= block.inputValue(time).asInt();
+		int byFrame 				= block.inputValue( aByFrame ).asInt();
         bool flipYZ 				= block.inputValue( aFlipYZ ).asBool();
         MString renderCachePath 	= block.inputValue( aRenderCachePath ).asString();
 
@@ -424,7 +438,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
         partio4Maya::updateFileName( cacheFile,  cacheDir,
                                      cacheStatic,  cacheOffset,
-                                     cacheFormat,  integerTime,
+                                     cacheFormat,  integerTime, byFrame,
                                      cachePadding, formatExt,
                                      newCacheFile, renderCacheFile
                                    );

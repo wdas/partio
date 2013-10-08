@@ -69,6 +69,7 @@ MTypeId partioInstancer::id( ID_PARTIOINSTANCER );
 
 /// ATTRS
 MObject partioInstancer::time;
+MObject partioInstancer::aByFrame;
 MObject partioInstancer::aSize;         // The size of the logo
 MObject partioInstancer::aFlipYZ;
 MObject partioInstancer::aDrawStyle;
@@ -240,6 +241,15 @@ MStatus partioInstancer::initialize()
 
     time = uAttr.create("time", "tm", MFnUnitAttribute::kTime, 0.0, &stat );
     uAttr.setKeyable( true );
+
+	aByFrame = nAttr.create( "byFrame", "byf", MFnNumericData::kInt ,1);
+    nAttr.setKeyable( true );
+    nAttr.setReadable( true );
+    nAttr.setWritable( true );
+    nAttr.setConnectable( true );
+    nAttr.setStorable( true );
+    nAttr.setMin(1);
+    nAttr.setMax(100);
 
     aSize = uAttr.create( "iconSize", "isz", MFnUnitAttribute::kDistance );
     uAttr.setDefault( 0.25 );
@@ -417,6 +427,7 @@ MStatus partioInstancer::initialize()
 
     addAttribute ( aInstanceData );
 
+	addAttribute ( aByFrame );
 	addAttribute ( time );
 
 // attribute affects
@@ -457,6 +468,8 @@ MStatus partioInstancer::initialize()
 	attributeAffects ( aInstanceData, aUpdateCache );
     attributeAffects (time, aUpdateCache);
     attributeAffects (time, aInstanceData);
+	attributeAffects (aByFrame, aUpdateCache);
+	attributeAffects (aByFrame, aInstanceData);
 
 
     return MS::kSuccess;
@@ -522,6 +535,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         short cacheFormat	= block.inputValue( aCacheFormat ).asShort();
         bool forceReload 	= block.inputValue( aForceReload ).asBool();
         MTime inputTime		= block.inputValue( time ).asTime();
+		int byFrame 		= block.inputValue( aByFrame ).asInt();
         bool flipYZ 		= block.inputValue( aFlipYZ ).asBool();
         MString renderCachePath = block.inputValue( aRenderCachePath ).asString();
         bool computeMotionBlur =block.inputValue( aComputeVeloPos ).asBool();
@@ -546,7 +560,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
         partio4Maya::updateFileName( cacheFile,  cacheDir,
                                      cacheStatic,  cacheOffset,
-                                     cacheFormat,  integerTime,
+                                     cacheFormat,  integerTime, byFrame,
                                      cachePadding, formatExt,
                                      newCacheFile, renderCacheFile
                                    );

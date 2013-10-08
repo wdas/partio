@@ -62,6 +62,7 @@ MObject partioEmitter::aJitterPos;
 MObject partioEmitter::aJitterFreq;
 MObject partioEmitter::aPartioAttributes;
 MObject partioEmitter::aMayaPPAttributes;
+MObject partioEmitter::aByFrame;
 
 partioEmitter::partioEmitter():
         lastWorldPoint ( 0, 0, 0, 1 ),
@@ -175,6 +176,15 @@ MStatus partioEmitter::initialize()
     aCacheStatic = nAttr.create("staticCache", "statC", MFnNumericData::kBoolean, 0, &status);
     nAttr.setKeyable(true);
 
+	aByFrame = nAttr.create( "byFrame", "byf", MFnNumericData::kInt ,1);
+    nAttr.setKeyable( true );
+    nAttr.setReadable( true );
+    nAttr.setWritable( true );
+    nAttr.setConnectable( true );
+    nAttr.setStorable( true );
+    nAttr.setMin(1);
+    nAttr.setMax(100);
+
     aCacheFormat = eAttr.create( "cacheFormat", "cachFmt");
     std::map<short,MString> formatExtMap;
     partio4Maya::buildSupportedExtensionList(formatExtMap,false);
@@ -229,6 +239,7 @@ MStatus partioEmitter::initialize()
     status = addAttribute ( aJitterFreq );
     status = addAttribute ( aPartioAttributes );
     status = addAttribute ( aMayaPPAttributes );
+	status = addAttribute ( aByFrame );
     status = attributeAffects ( aCacheDir, mOutput );
     status = attributeAffects ( aCacheFile, mOutput );
     status = attributeAffects ( aCacheOffset, mOutput );
@@ -237,6 +248,7 @@ MStatus partioEmitter::initialize()
     status = attributeAffects ( aUseEmitterTransform, mOutput );
     status = attributeAffects ( aJitterPos, mOutput );
     status = attributeAffects ( aJitterFreq, mOutput );
+	status = attributeAffects ( aByFrame, mOutput );
     return ( status );
 }
 
@@ -258,6 +270,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     float jitterFreq	= block.inputValue( aJitterFreq ).asFloat();
     bool useEmitterTxfm	= block.inputValue( aUseEmitterTransform ).asBool();
     bool cacheStatic    = block.inputValue( aCacheStatic ).asBool();
+	int  byFrame = block.inputValue( aByFrame ).asInt();
     MString cacheDir = block.inputValue(aCacheDir).asString();
     MString cacheFile = block.inputValue(aCacheFile).asString();
 
@@ -358,7 +371,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 
     partio4Maya::updateFileName( cacheFile,  cacheDir,
                                  cacheStatic,  cacheOffset,
-                                 cacheFormat,  integerTime,
+                                 cacheFormat,  integerTime, byFrame,
                                  cachePadding, formatExt,
                                  newCacheFile, renderCacheFile
                                );
@@ -747,7 +760,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
 					const float* vel=particles->data<float>(velAttribute,it->second);
 					velo = MVector(vel[0],vel[1],vel[2]);
 				}
-				
+
 				inPosArray.append(temp+(jitter));
                 inVelArray.append(velo*inheritFactor);
                 partioIDs.append(id[0]);
