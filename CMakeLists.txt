@@ -146,7 +146,7 @@ ADD_SUBDIRECTORY (src/lib)
 ADD_SUBDIRECTORY (src/tools)
 ADD_SUBDIRECTORY (src/py)
 ADD_SUBDIRECTORY (src/tests)
-ADD_SUBDIRECTORY (src/houdini)
+#ADD_SUBDIRECTORY (src/houdini)
 #ADD_SUBDIRECTORY (src/doc)
 ADD_SUBDIRECTORY (contrib)
 

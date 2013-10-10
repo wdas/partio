@@ -69,8 +69,6 @@ double fov;
 double pointSize;
 double brightness;
 
-bool useColor;
-bool useAlpha;
 bool sourceChanged;
 bool frameForwardPressed;
 bool frameBackwardPressed;
@@ -79,8 +77,12 @@ bool brightnessDownPressed;
 bool* keyStates;
 bool frameMissing;
 bool anyKeyPressed;
-bool colorMissing;
-bool alphaMissing;
+float R;
+float G;
+float B;
+float A;
+int colorFromIndex;
+int alphaFromIndex;
 
 string loadError;
 string particleFile;
@@ -97,8 +99,12 @@ static void processNormalKeys(unsigned char key, int x, int y);
 static void processNormalUpKeys(unsigned char key, int x, int y);
 static void processSpecialKeys(int key, int x, int y);
 static void processSpecialUpKeys(int key, int x, int y);
-void timer();
-
+void handleKeyInfo();
+void timer(int time);
+int buildPopupMenu();
+void colorFromMenu(int idCommand);
+void alphaFromMenu(int idCommand);
+void processMainMenu(int idCommand);
 int main(int argc,char *argv[]);
 
 

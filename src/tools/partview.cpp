@@ -88,23 +88,50 @@ void renderBitmapString(
     }
 }
 
+// DEBOUNCE SPEED timer for keyStates
+void timer(int time)
+{
+    reloadParticleFile(time);
+    glutPostRedisplay();
+}
+
 /////////////////////////////////////////
 /// RENDER  callback
 
 static void render()
 {
+    //cout << "render" << endl;
+    if (keyStates[27])  // escape pressed,  just exit
+    {
+        exit(0);
+    }
+    anyKeyPressed = false;
+    for (int x = 0; x<256; x++)
+    {
+        if (keyStates[x] == true)
+        {
+            anyKeyPressed = true;
+        }
+    }
+    if (frameBackwardPressed || frameForwardPressed || brightnessDownPressed || brightnessUpPressed)
+    {
+        anyKeyPressed = true;
+    }
+
+    if (anyKeyPressed)
+    {
+        handleKeyInfo();
+    }
+
     static bool inited=false;
     if (!inited || sourceChanged)
     {
         //cout << "not inited" << endl;
-        inited=true;
-        colorMissing = false;
 
 
         glEnable(GL_DEPTH_TEST);
         glEnable(GL_DEPTH);
         //glDepthMask(0); // turns the particles inside out
-        glPointSize(3);
 
         Vec3 bmin(FLT_MAX,FLT_MAX,FLT_MAX),bmax(-FLT_MAX,-FLT_MAX,-FLT_MAX);
 
@@ -114,9 +141,9 @@ static void render()
             {
 
                 if (!particles->attributeInfo("position",positionAttr) &&
-					!particles->attributeInfo("Position",positionAttr) &&
-					!particles->attributeInfo("pos",positionAttr) &&
-					!particles->attributeInfo("Pos",positionAttr) )
+                        !particles->attributeInfo("Position",positionAttr) &&
+                        !particles->attributeInfo("pos",positionAttr) &&
+                        !particles->attributeInfo("Pos",positionAttr) )
                 {
                     std::cerr<<"Failed to find position attribute "<<std::endl;
                 }
@@ -137,32 +164,48 @@ static void render()
                         camera.fit(fov,bmin,bmax);
                     }
                 }
-                if (!particles->attributeInfo("rgbPP", colorAttr) &
-                        !particles->attributeInfo("rgb", colorAttr) &
-                        !particles->attributeInfo("color", colorAttr) &
-                        !particles->attributeInfo("pointColor", colorAttr))
+                if (!sourceChanged)
                 {
-                    //std::cerr<<"Failed to find color attribute "<<std::endl;
-                    colorMissing = true;
+                    if (!particles->attributeInfo("rgbPP", colorAttr) &
+                            !particles->attributeInfo("rgb", colorAttr) &
+                            !particles->attributeInfo("color", colorAttr) &
+                            !particles->attributeInfo("pointColor", colorAttr))
+                    {
+                        //std::cerr<<"Failed to find color attribute "<<std::endl;
+                        colorFromIndex = -1;
+                    }
+                    else
+                    {
+                        colorFromIndex = colorAttr.attributeIndex;
+                    }
+                    if (!particles->attributeInfo("opacity", alphaAttr) &
+                            !particles->attributeInfo("opacityPP", alphaAttr) &
+                            !particles->attributeInfo("alpha", alphaAttr) &
+                            !particles->attributeInfo("alphaPP", alphaAttr) &
+                            !particles->attributeInfo("pointOpacity", alphaAttr))
+                    {
+                        alphaFromIndex = -1;
+                    }
+                    else
+                    {
+                        alphaFromIndex = alphaAttr.attributeIndex;
+                    }
                 }
-                if (!particles->attributeInfo("opacity", colorAttr) &
-                        !particles->attributeInfo("opacityPP", colorAttr) &
-                        !particles->attributeInfo("alpha", colorAttr) &
-                        !particles->attributeInfo("alphaPP", colorAttr) &
-                        !particles->attributeInfo("pointOpacity", colorAttr))
-                {
-                    alphaMissing = true;
-                    //std::cerr<<"Failed to find opacity/alpha attribute "<<std::endl;
-                    glDisable(GL_BLEND);
-                }
-                else
-				{
-					glEnable(GL_BLEND);
-					glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-				}
             }
         }
+        inited = true;
         sourceChanged=false;
+    }
+
+    glDisable(GL_BLEND);
+    if (alphaFromIndex >=0)
+    {
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    }
+    else
+    {
+        glDisable(GL_BLEND);
     }
 
     glEnableClientState( GL_VERTEX_ARRAY );
@@ -204,6 +247,31 @@ static void render()
     sprintf(pointCountString,"PointCount:%i",particles->numParticles());
     renderBitmapString(5,40,0,GLUT_BITMAP_HELVETICA_18,pointCountString);
 
+
+    char colorString[75];
+    if (colorFromIndex >=0)
+    {
+        sprintf(colorString,"Color->%s",colorAttr.name.c_str());
+    }
+    else
+    {
+        sprintf(colorString,"Color->None");
+    }
+
+    renderBitmapString(5,60,0,GLUT_BITMAP_HELVETICA_18, colorString);
+
+    char alphaString[75];
+    if (alphaFromIndex >=0)
+    {
+        sprintf(alphaString,"Alpha->%s",alphaAttr.name.c_str());
+    }
+    else
+    {
+        sprintf(alphaString,"Alpha->None");
+    }
+
+    renderBitmapString(5,80,0,GLUT_BITMAP_HELVETICA_18, alphaString);
+
     char frameNumString[50];
     if (!frameMissing)
     {
@@ -223,73 +291,84 @@ static void render()
     glPopMatrix();
     restorePerspectiveProjection();
 
-    glPointSize(pointSize);
-
-
     if (particles->numParticles() > 0)
     {
         // now setup the position/color/alpha output pointers
 
-        const float * pos=particles->data<float>(positionAttr,0);
+        const GLfloat * pos=particles->data<float>(positionAttr,0);
         glVertexPointer( 3, GL_FLOAT, 0, pos );
 
-        float colorR = 0.75;
-        float colorG = 0.75;
-        float colorB = 0.75;
+        float colorR = R;
+        float colorG = G;
+        float colorB = B;
 
-        if (useColor && !colorMissing)
+        static GLfloat * rgba = NULL;
+
+        if (colorFromIndex >=0)
         {
-            const float * rgb =particles->data<float>(colorAttr,0);
-            if (useAlpha && !alphaMissing)
+            particles->attributeInfo(colorFromIndex,colorAttr);
+
+            const float * rgbPtr =particles->data<float>(colorAttr,0);
+            if (alphaFromIndex >=0)
             {
-                const float* alpha=particles->data<float>(alphaAttr,0);
-                float * rgba = (float *) malloc(particles->numParticles()*sizeof(float)*4);
+                particles->attributeInfo(alphaFromIndex, alphaAttr);
+				cout << alphaAttr.name.c_str() << endl;
+                const float* alphaPtr=particles->data<float>(alphaAttr,0);
+                rgba = (float *) malloc(particles->numParticles()*sizeof(float)*4);
                 for (int i=0;i<particles->numParticles();i++)
                 {
-                    rgba[i*3] = rgb[i*3];
-                    rgba[(i*3)+1] = rgb[(i*3)+1];
-                    rgba[(i*3)+2] = rgb[(i*3)+2];
-                    rgba[(i*3)+3] = alpha[i];
+						rgba[i*4] = rgbPtr[i*3];
+						rgba[(i*4)+1] = rgbPtr[(i*3)+1];
+						rgba[(i*4)+2] = rgbPtr[(i*3)+2];
+						if (alphaAttr.type == 3)
+						{
+							rgba[(i*4)+3] = (alphaPtr[i*3] + alphaPtr[(i*3)+1] + alphaPtr[(i*3)+2])/3;
+						}
+						else
+						{
+							rgba[(i*4)+3] = alphaPtr[i];
+						}
                 }
                 glColorPointer(  4, GL_FLOAT, 0, rgba );
-				free(rgba);
             }
             else
             {
-                glColorPointer(  3, GL_FLOAT, 0, rgb );
+                glColorPointer(  3, GL_FLOAT, 0, rgbPtr );
             }
         }
         else
         {
-            float * rgba;
-            const float* alpha;
-
-            if (useAlpha && !alphaMissing)
+            if (alphaFromIndex >= 0)
             {
+                particles->attributeInfo(alphaFromIndex, alphaAttr);
                 rgba = (float *) malloc(particles->numParticles()*sizeof(float)*4);
-                alpha=particles->data<float>(alphaAttr,0);
+                const float * alphaPtr=particles->data<float>(alphaAttr,0);
                 for (int i=0;i<particles->numParticles();i++)
                 {
                     rgba[i*4] = colorR+brightness;
                     rgba[(i*4)+1] = colorG+brightness;
                     rgba[(i*4)+2] = colorB+brightness;
-                    rgba[(i*4)+3] = alpha[i];
+                    rgba[(i*4)+3] = alphaPtr[i];
                 }
                 glColorPointer(  4, GL_FLOAT, 0, rgba );
             }
             else
             {
                 rgba = (float *) malloc(particles->numParticles()*sizeof(float)*3);
-                for (int i=0;i<particles->numParticles()*3;i++)
+                for (int i=0;i<particles->numParticles();i++)
                 {
-                    rgba[i] = colorR+brightness;
+                    rgba[i*3] = colorR+brightness;
+                    rgba[(i*3)+1] = colorG+brightness;
+                    rgba[(i*3)+2] = colorB+brightness;
                 }
                 glColorPointer(  3, GL_FLOAT, 0, rgba );
             }
-            free(rgba);
+
         }
 
     }
+
+    glPointSize(pointSize);
 
     glDrawArrays( GL_POINTS, 0, particles->numParticles() );
 
@@ -320,7 +399,7 @@ void  reloadParticleFile(int direction)
     stringstream ss(currentFrame);
 
     while (getline(ss, fileName,'/'))
-    {}
+        {}
     origFileName = fileName;
 
     string token;
@@ -345,53 +424,53 @@ void  reloadParticleFile(int direction)
         numberString = fileParts[fileParts.size()-2];
         extension = fileParts[fileParts.size()-1];
 
-		if (fileParts.size() <3)
-		{
-			if (extension == "mc") // assuming we have a real Maya NParticle export not a custom one  ex.. nParticleShape1Frame42.mc
-			{
-				numberString.replace(numberString.find("Frame"), 5, ".");
-				string nParticleName;
-				stringstream npName(numberString);
+        if (fileParts.size() <3)
+        {
+            if (extension == "mc") // assuming we have a real Maya NParticle export not a custom one  ex.. nParticleShape1Frame42.mc
+            {
+                numberString.replace(numberString.find("Frame"), 5, ".");
+                string nParticleName;
+                stringstream npName(numberString);
 
-				while (getline(npName, nParticleName, '.'))
-				{
-					fileParts.push_back(nParticleName);
-				}
-				numberString = fileParts[fileParts.size()-1];
-				paddingString = "%i";
-			}
-			else
-			{
-				// SINGLE FILE?
-				numberString = "";
-				paddingString = "";
-			}
-		}
-		else
-		{
-			if (extension  == "pdc")
-			{
-				pdcMultiplier = 250;
-				paddingString = "%i";
-			}
+                while (getline(npName, nParticleName, '.'))
+                {
+                    fileParts.push_back(nParticleName);
+                }
+                numberString = fileParts[fileParts.size()-1];
+                paddingString = "%i";
+            }
+            else
+            {
+                // SINGLE FILE?
+                numberString = "";
+                paddingString = "";
+            }
+        }
+        else
+        {
+            if (extension  == "pdc")
+            {
+                pdcMultiplier = 250;
+                paddingString = "%i";
+            }
 
-			/// trying to cover all our bases here.. there's probably a better way to do this.
-			else if(extension == "pdb" && numberString.substr(1,1) != "0")
-			{
-				paddingString = "%i";
-			}
+            /// trying to cover all our bases here.. there's probably a better way to do this.
+            else if (extension == "pdb" && numberString.substr(1,1) != "0")
+            {
+                paddingString = "%i";
+            }
 
-			else
-			{
-				int padding = numberString.length();
-				stringstream ss;
-				ss << padding;
-				paddingString = "%0";
-				paddingString += ss.str();
-				paddingString += "i";
-			}
+            else
+            {
+                int padding = numberString.length();
+                stringstream ss;
+                ss << padding;
+                paddingString = "%0";
+                paddingString += ss.str();
+                paddingString += "i";
+            }
 
-		}
+        }
 
         stringstream numberPart(numberString);
         if ( numberPart >> frameNumber )
@@ -410,10 +489,10 @@ void  reloadParticleFile(int direction)
                 frameNumberOGL = frameNumber/pdcMultiplier;
             }
             // now replace the number in the string with the new one
-			fileName.replace(fileName.rfind(numberString), numberString.length(), newFrameString);
+            fileName.replace(fileName.rfind(numberString), numberString.length(), newFrameString);
 
-			currentFrame.replace(currentFrame.find(origFileName), origFileName.length(), fileName);
-			particleFile = currentFrame;
+            currentFrame.replace(currentFrame.find(origFileName), origFileName.length(), fileName);
+            particleFile = currentFrame;
         }
         else
         {
@@ -421,126 +500,42 @@ void  reloadParticleFile(int direction)
         }
     }
 
-	if (particleFile != lastParticleFile)
-	{
-		struct stat statinfo;
-		int result = stat(particleFile.c_str(),&statinfo);
-		if (result >=0)
-		{
-			particles=0;
-			particles=read(particleFile.c_str());
-			if (!glutGetWindow()) {
-				return;
-			}
-			if (particles)
-			{
-				frameMissing = false;
-				sourceChanged = true;
-				render();
-				glutPostRedisplay();
-				cout << particleFile << endl;
-				lastParticleFile = particleFile;
-			}
-			else
-			{
-				frameMissing = true;
-				loadError = "Couldn't load particle file!";
-			}
-		}
-		else
-		{
-			frameMissing = true;
-			loadError  = "FILE MISSING!!! on disk";
-			particleFile = origFileName;
-
-		}
-	}
-}
-
-///////////////////////////////////////////
-/// main TIMER loop function
-/// TODO: this function needs to be more responsive to keyboard input.... with larger caches it will  act like the key press is stuck down
-
-
-
-void timer(int time)
-{
-
-    if (anyKeyPressed)
+    if (particleFile != lastParticleFile)
     {
-        //cout << "any key pressed" << endl;
-        if (keyStates[27])  // escape pressed,  just exit
+        struct stat statinfo;
+        int result = stat(particleFile.c_str(),&statinfo);
+        if (result >=0)
         {
-            exit(0);
-        }
-
-        static GLuint Clock=glutGet(GLUT_ELAPSED_TIME);
-        static GLfloat deltaT;
-        Clock = glutGet(GLUT_ELAPSED_TIME);
-        deltaT=Clock-PreviousClock;
-
-        if (deltaT > 200)  // initial key press delay
-        {
-
-            if (keyStates['='])
-            {
-                pointSize += 0.5;
+            particles=0;
+            particles=read(particleFile.c_str());
+            if (!glutGetWindow()) {
+                return;
             }
-            else if (keyStates['-'])
+            if (particles)
             {
-                if (pointSize > .5)
-                {
-                    pointSize -= 0.5;
-                }
-            }
-
-            if (keyStates['z'])
-            {
-                if ( fov > 10)
-                {
-                    fov -= 5;
-                }
-            }
-            else if (keyStates['Z'])
-            {
-                if (fov < 180)
-                {
-                    fov += 5;
-                }
-            }
-
-            if (brightnessDownPressed)
-            {
-                if (brightness >= -1)
-                    brightness -= .02;
-            }
-            if (brightnessUpPressed)
-            {
-                if (brightness <= 1)
-                    brightness += .02;
-            }
-
-            if (frameForwardPressed)
-            {
-                reloadParticleFile(1);
-            }
-            else if (frameBackwardPressed)
-            {
-                reloadParticleFile(-1);
+                frameMissing = false;
+                sourceChanged = true;
+                render();
+                //glutPostRedisplay();
+                cout << particleFile << endl;
+                lastParticleFile = particleFile;
             }
             else
             {
-                glutPostRedisplay();
+                frameMissing = true;
+                loadError = "Couldn't load particle file!";
             }
+        }
+        else
+        {
+            frameMissing = true;
+            loadError  = "FILE MISSING!!! on disk";
+            particleFile = origFileName;
 
         }
-
-        glutTimerFunc(10,timer,0);
-
     }
-    glutPostRedisplay();
-
 }
+
 
 ///////////////////////////////////////////
 /// PROCESS Mouse / Keyboard functions
@@ -584,14 +579,16 @@ static void motionFunc(int x,int y)
 
 }
 
-static void processNormalKeys(unsigned char key, int x, int y)
+// this is the main function called by the render loop when it needs to redraw
+void handleKeyInfo()
 {
-    anyKeyPressed = true;
-    keyStates[key] = true;
+
+    bool validKey = false;
 
     if (keyStates['='])
     {
         pointSize += 0.5;
+        validKey = true;
     }
     else if (keyStates['-'])
     {
@@ -599,25 +596,7 @@ static void processNormalKeys(unsigned char key, int x, int y)
         {
             pointSize -= 0.5;
         }
-    }
-    if (keyStates['c'])
-    {
-        if (useColor) {
-            useColor = false;
-        }
-        else {
-            useColor = true;
-        }
-    }
-
-    if (keyStates['a'])
-    {
-        if (useAlpha) {
-            useAlpha = false;
-        }
-        else {
-            useAlpha = true;
-        }
+        validKey = true;
     }
 
     if (keyStates['z'])
@@ -626,6 +605,8 @@ static void processNormalKeys(unsigned char key, int x, int y)
         {
             fov -= 5;
         }
+        keyStates['z'] = false;
+        validKey = true;
     }
     else if (keyStates['Z'])
     {
@@ -633,60 +614,98 @@ static void processNormalKeys(unsigned char key, int x, int y)
         {
             fov += 5;
         }
+        keyStates['Z'] = false;
+        validKey = true;
     }
-    glutTimerFunc(200,timer,0);
+
+    if (brightnessUpPressed)
+    {
+        if (brightness <= 1)
+        {
+            brightness += .02;
+        }
+        brightnessDownPressed = false;
+        validKey = true;
+    }
+    if (brightnessDownPressed)
+    {
+        if (brightness >=0)
+        {
+            brightness -= .02;
+        }
+        brightnessUpPressed = false;
+        validKey = true;
+    }
+
+    // we have to put in a keyrepeat delay for frame changes or else the speed of the refresh banks up too many
+    static GLuint Clock=glutGet(GLUT_ELAPSED_TIME);
+    static GLfloat deltaT;
+    Clock = glutGet(GLUT_ELAPSED_TIME);
+    deltaT=Clock-PreviousClock;
+
+    if (deltaT > 125)  // initial key press delay
+    {
+        if (frameForwardPressed)
+        {
+            glutTimerFunc(125,timer,1);
+            frameBackwardPressed = false;
+        }
+        else if (frameBackwardPressed)
+        {
+            glutTimerFunc(125,timer,-1);
+            frameForwardPressed = false;
+
+        }
+        PreviousClock=glutGet(GLUT_ELAPSED_TIME);
+    }
+
+    if (validKey)
+    {
+        glutPostRedisplay();
+    }
+}
+
+static void processNormalKeys(unsigned char key, int x, int y)
+{
+    keyStates[key] = true;
     glutPostRedisplay();
-    PreviousClock=glutGet(GLUT_ELAPSED_TIME);
 }
 
 static void processNormalUpKeys(unsigned char key, int x, int y)
 {
     keyStates[key] =false;
-    anyKeyPressed = false;
+    glutPostRedisplay();
 }
 
 
 static void  processSpecialKeys(int key, int x, int y)
 {
-    anyKeyPressed = true;
 
     if (key == GLUT_KEY_UP)
     {
-        if (brightness <= 1)
-            brightness += .02;
         brightnessUpPressed = true;
-        PreviousClock=glutGet(GLUT_ELAPSED_TIME);
     }
     if (key == GLUT_KEY_DOWN)
     {
-        if (brightness >=1)
-            brightness -= .02;
         brightnessDownPressed = true;
-        PreviousClock=glutGet(GLUT_ELAPSED_TIME);
     }
 
     if (key == GLUT_KEY_RIGHT )
     {
-        reloadParticleFile(1);
         frameForwardPressed = true;
-		frameBackwardPressed = false;
-        PreviousClock=glutGet(GLUT_ELAPSED_TIME);
+        frameBackwardPressed = false;
     }
     else if (key == GLUT_KEY_LEFT )
     {
-        reloadParticleFile(-1);
         frameBackwardPressed = true;
-		frameForwardPressed = false;
-        PreviousClock=glutGet(GLUT_ELAPSED_TIME);
+        frameForwardPressed = false;
     }
-    glutTimerFunc(200,timer,0);
     glutPostRedisplay();
 
 }
 
 void processSpecialUpKeys(int key, int x, int y)
 {
-    anyKeyPressed = false;
     if ( key == GLUT_KEY_UP )
     {
         brightnessUpPressed = false;
@@ -703,11 +722,60 @@ void processSpecialUpKeys(int key, int x, int y)
     {
         frameBackwardPressed = false;
     }
+    glutPostRedisplay();
 }
 
 /// END PROCESSING MOUSE/KEYS
 //////////////////////////////////////////////
 
+
+/// channel control menus
+//////////////////////////////////////////////
+int buildPopupMenu()
+{
+    int numAttr=particles->numAttributes();
+    int colorMenu, alphaMenu, mainMenu;
+    colorMenu = glutCreateMenu (colorFromMenu);
+    glutAddMenuEntry("None", -1);
+    for (int i = 0; i < numAttr; i++)
+    {
+        Partio::ParticleAttribute attr;
+        particles->attributeInfo(i,attr);
+        glutAddMenuEntry(attr.name.c_str(), i);
+    }
+
+    alphaMenu = glutCreateMenu(alphaFromMenu);
+    glutAddMenuEntry("None", -1);
+    for (int i = 0; i < numAttr; i++)
+    {
+        Partio::ParticleAttribute attr;
+        particles->attributeInfo(i,attr);
+        glutAddMenuEntry(attr.name.c_str(), i);
+    }
+
+    mainMenu = glutCreateMenu(processMainMenu);
+    glutAddSubMenu("Color From->", colorMenu);
+    glutAddSubMenu("Opacity From->",alphaMenu);
+
+    return mainMenu;
+}
+
+void processMainMenu(int idCommand)
+{
+    // just a placeholder since it just contains the other
+}
+
+void colorFromMenu(int idCommand)
+{
+    colorFromIndex = idCommand;
+    glutPostRedisplay();
+}
+
+void alphaFromMenu(int idCommand)
+{
+    alphaFromIndex = idCommand;
+    glutPostRedisplay();
+}
 
 
 //////////////////////////////////////////////////////
@@ -722,13 +790,15 @@ int main(int argc,char *argv[])
     fov=60;
     pointSize = 1.5;
     brightness = 0.0;
-    useColor = true;
-    useAlpha = true;
     numPoints= 0;
     particleFile = "";
     sourceChanged = false;
     frameNumberOGL = 0;
     keyStates = new bool[256];
+    for (int x = 0; x<256; x++)
+    {
+        keyStates[x] = false;
+    }
     frameForwardPressed = false;
     frameBackwardPressed = false;
     brightnessUpPressed = false;
@@ -737,8 +807,10 @@ int main(int argc,char *argv[])
     frameMissing = false;
     loadError = "";
     anyKeyPressed = false;
-    colorMissing = false;
-    alphaMissing = false;
+
+    R = 1;
+    G = 1;
+    B = 1;
 
     glutInit(&argc,argv);
     if (argc!=2)
@@ -751,7 +823,8 @@ int main(int argc,char *argv[])
 
     reloadParticleFile(0);
 
-    if (particles) {
+    if (particles)
+    {
         glutInitWindowSize(1024,768);
         glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
         glutCreateWindow("PartView");
@@ -764,18 +837,15 @@ int main(int argc,char *argv[])
         glutSpecialUpFunc(processSpecialUpKeys);
         glutSpecialFunc(processSpecialKeys);
         glutIgnoreKeyRepeat(true);
+        buildPopupMenu();
+        glutAttachMenu(GLUT_RIGHT_BUTTON);
         glutMainLoop();
-
-    } else {
+    }
+    else
+    {
         std::cerr<<"failed to read particle file "<<particleFile<<std::endl;
         return 1;
     }
     particles->release();
     return 0;
-
 }
-
-
-
-
-
