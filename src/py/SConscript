@@ -44,8 +44,7 @@ envpy=env.Clone(CPPPATH=[variant_build_abs+"/include"]
               ,LIBS=["partio"])
 
 
-pythonDir="/usr"
-#pythonDir=os.environ["RP_python2"]
+pythonDir=sys.prefix
 
 envpy.Append(CXXFLAGS=["-Wno-format"])
 envpy.Append(CPPPATH=[pythonDir+"/include/python%s" % python_ver
