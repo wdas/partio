@@ -43,6 +43,7 @@ class ParticleHeaders:public ParticlesDataMutable
 public:
     ParticleHeaders();
     void release() const;
+	ParticlesDataMutable* reset() const;
 protected:
     virtual ~ParticleHeaders();
 

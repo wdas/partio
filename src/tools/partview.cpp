@@ -506,8 +506,17 @@ void  reloadParticleFile(int direction)
         int result = stat(particleFile.c_str(),&statinfo);
         if (result >=0)
         {
-            particles=0;
-            particles=read(particleFile.c_str());
+			if (particles)
+			{
+				//cout << particles << endl;
+				particles = particles->reset();
+				particles = NULL;
+				//cout << particles << endl;
+			}
+
+			ParticlesData* newParticles = read(particleFile.c_str());
+            particles = newParticles;
+			//cout << particles << endl;
             if (!glutGetWindow()) {
                 return;
             }
@@ -785,8 +794,7 @@ int main(int argc,char *argv[])
 {
 
     // initialize variables
-
-    particles=0;
+    particles = 0;
     fov=60;
     pointSize = 1.5;
     brightness = 0.0;
@@ -847,5 +855,6 @@ int main(int argc,char *argv[])
         return 1;
     }
     particles->release();
+	delete [] keyStates;
     return 0;
 }

@@ -54,6 +54,8 @@ public:
 
     void release() const;
 
+	ParticlesDataMutable* reset() const;
+
     ParticlesSimple();
 
     int numAttributes() const;
