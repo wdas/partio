@@ -110,7 +110,7 @@ public:
 
 private:
 
-    long 		seedValue( int  plugIndex, MDataBlock& block );
+    long 	seedValue( int  plugIndex, MDataBlock& block );
 
     MStatus	getWorldPosition ( MPoint &p );
 

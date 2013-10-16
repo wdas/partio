@@ -209,7 +209,6 @@ public:
 /// not implemented yet
 //	static MObject 	aJitterPos;
 //  static MObject 	aJitterFreq;
-//	static MObject	aAimPositionFrom;
 //	static MObject	aShaderIndexFrom;
 //	static MObject	aInMeshInstances;
 //	static MObject	aOutMesh;
@@ -222,6 +221,7 @@ public:
     float 					multiplier;
     bool 					cacheChanged;
     partioInstReaderCache  	pvCache;
+	int  drawError;
 
 
 private:

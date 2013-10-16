@@ -54,15 +54,15 @@ scale (vectorArray) *
 shear (vectorArray)
 visibility (doubleArray)
 objectIndex (doubleArray) *
-rotationType (doubleArray)
+rotationType (doubleArray) *
 rotation (vectorArray) *
-aimDirection (vectorArray)
-aimPosition (vectorArray)
-aimAxis (vectorArray)
-aimUpAxis (vectorArray)
-aimWorldUp (vectorArray)
+aimDirection (vectorArray) *
+aimPosition (vectorArray) *
+aimAxis (vectorArray) *
+aimUpAxis (vectorArray) *
+aimWorldUp (vectorArray) *
 age (doubleArray)
-id (doubleArray)
+id (doubleArray) *
 */
 
 MTypeId partioInstancer::id( ID_PARTIOINSTANCER );
@@ -110,7 +110,6 @@ MObject partioInstancer::aLastAimPositionFrom;
 MObject partioInstancer::aIndexFrom;
 
 /// not implemented yet
-//	MObject partioInstancer::aAimPositionFrom;
 //	MObject partioInstancer::aShaderIndexFrom;
 //	MObject partioInstancer::aInMeshInstances;
 //	MObject partioInstancer::aOutMesh;
@@ -155,7 +154,8 @@ partioInstancer::partioInstancer()
         mLastIndexFromIndex(-1),
         cacheChanged(false),
         multiplier(1.0),
-        canMotionBlur(false)
+        canMotionBlur(false),
+        drawError(0)
 
 {
     pvCache.particles = NULL;
@@ -502,11 +502,12 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 	int aimWorldUpFromIndex			= block.inputValue( aAimWorldUpFrom ).asInt();
     int indexFromIndex 				= block.inputValue( aIndexFrom ).asInt();
 
-
+	drawError = 0;
     bool cacheActive = block.inputValue(aCacheActive).asBool();
 
     if (!cacheActive)
     {
+		drawError = 2;
         return ( MS::kSuccess );
     }
 
@@ -525,6 +526,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
         if (cacheDir  == "" || cacheFile == "" )
         {
+			drawError = 1;
             // too much noise!
             //MGlobal::displayError("PartioEmitter->Error: Please specify cache file!");
             return ( MS::kFailure );
@@ -590,10 +592,18 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
         if (!partio4Maya::partioCacheExists(newCacheFile.asChar()))
         {
-            pvCache.particles=0; // resets the particles
+			ParticlesDataMutable* newParticles;
+			newParticles = pvCache.particles;
+			pvCache.particles=NULL; // resets the pointer
+
+			if (newParticles != NULL)
+			{
+				newParticles->release(); // frees the mem
+			}
             pvCache.bbox.clear();
 			pvCache.instanceData.clear();
 			mLastFileLoaded = "";
+			drawError = 1;
         }
 
         if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()) && (newCacheFile != mLastFileLoaded || forceReload) )
@@ -601,8 +611,15 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
             cacheChanged = true;
             mFlipped = false;
             MGlobal::displayWarning(MString("PartioInstancer->Loading: " + newCacheFile));
-            pvCache.particles=0; // resets the particles
 
+			ParticlesDataMutable* newParticles;
+			newParticles = pvCache.particles;
+			pvCache.particles=NULL; // resets the pointer
+
+			if (newParticles != NULL)
+			{
+				newParticles->release(); // frees the mem
+			}
             pvCache.particles=read(newCacheFile.asChar());
 
             mLastFileLoaded = newCacheFile;
@@ -1257,6 +1274,15 @@ void partioInstancerUI::draw( const MDrawRequest& request, M3dView& view ) const
     {
         drawBoundingBox();
     }
+
+	if (shapeNode->drawError == 1)
+	{
+		glColor3f(.75f,0.0f,0.0f);
+	}
+	else if (shapeNode->drawError == 2)
+	{
+		glColor3f(0.0f,0.0f,0.0f);
+	}
 
     partio4Maya::drawPartioLogo(shapeNode->multiplier);
 

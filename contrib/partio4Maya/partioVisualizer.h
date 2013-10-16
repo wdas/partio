@@ -178,6 +178,7 @@ public:
     float 					multiplier;
     bool 					cacheChanged;
     partioVizReaderCache  	pvCache;
+	int drawError;
 
 
 private:
@@ -198,7 +199,6 @@ private:
     bool mFlipped;
     bool  frameChanged;
     MStringArray attributeList;
-    bool drawError;
 
 
 protected:

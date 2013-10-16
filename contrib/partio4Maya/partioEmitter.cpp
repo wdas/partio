@@ -409,7 +409,7 @@ MStatus partioEmitter::compute ( const MPlug& plug, MDataBlock& block )
     if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()))
     {
         MGlobal::displayInfo(MString("partioEmitter->Loading: " + newCacheFile));
-        ParticlesDataMutable* particles=0;
+        ParticlesDataMutable* particles= NULL;
         ParticleAttribute IdAttribute;
         ParticleAttribute posAttribute;
         ParticleAttribute velAttribute;
