@@ -43,4 +43,6 @@ partio.build
 /src/doc/*
 build-*
 _hide
+sesitag.C
+*.so
 

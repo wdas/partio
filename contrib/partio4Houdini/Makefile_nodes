@@ -1,0 +1,45 @@
+	# cmake still to come - for the moment (on mac/linux)
+	# cd $HFS
+	# source houdini_setup 
+	# run: make -f Makefile_nodes
+
+
+    # Installation directory.
+    INSTDIR = $(HOME)/houdini$(HOUDINI_MAJOR_RELEASE).$(HOUDINI_MINOR_RELEASE)
+
+    # List of C++ source files to build.
+    # SOP_Main.C registers the operators and handles the DSO-specifics.
+    SOURCES = \
+    	./src/partio_houdini.C \
+        ./src/SOP_partio.C \
+        ./src/ROP_partio.C 
+        
+
+    # Icons for custom node operators.
+    ICONS = \
+        ./icons/SOP_partio.svg  \
+	./icons/ROP_partio.svg  
+		
+		
+    # Use the highest optimization level.
+    OPTIMIZER = -O3
+
+    # Additional include directories.
+    INCDIRS = \
+        -I../../src/lib \
+        -I./include
+
+  # Additional library directories.
+    LIBDIRS = \
+        -L../../build-Linux-x86_64/lib/Linux-x86_64/
+
+    # Additional libraries.
+    LIBS = \
+        -lpartio \
+	-lz
+
+    # Set the plugin library name.
+    DSONAME = partio.so
+    
+    # Include the GNU Makefile.
+    include $(HFS)/toolkit/makefiles/Makefile.gnu
