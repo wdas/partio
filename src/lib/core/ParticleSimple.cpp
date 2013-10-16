@@ -68,6 +68,15 @@ release() const
     freeCached(const_cast<ParticlesSimple*>(this));
 }
 
+ParticlesDataMutable* ParticlesSimple::reset() const
+{
+	//std::cout << "simple reset" << std::endl;
+	freeCached(const_cast<ParticlesSimple*>(this));
+	ParticlesDataMutable* newParticlesData;
+	return newParticlesData;
+}
+
+
 int ParticlesSimple::
 numParticles() const
 {

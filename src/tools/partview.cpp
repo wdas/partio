@@ -302,19 +302,19 @@ static void render()
         float colorG = G;
         float colorB = B;
 
-        static GLfloat * rgba = NULL;
+        static GLfloat* rgba = NULL;
 
         if (colorFromIndex >=0)
         {
             particles->attributeInfo(colorFromIndex,colorAttr);
 
-            const float * rgbPtr =particles->data<float>(colorAttr,0);
+            const float * rgbPtr = particles->data<float>(colorAttr,0);
             if (alphaFromIndex >=0)
             {
                 particles->attributeInfo(alphaFromIndex, alphaAttr);
 				cout << alphaAttr.name.c_str() << endl;
                 const float* alphaPtr=particles->data<float>(alphaAttr,0);
-                rgba = (float *) malloc(particles->numParticles()*sizeof(float)*4);
+                rgba = (GLfloat *) malloc(particles->numParticles()*sizeof(GLfloat)*4);
                 for (int i=0;i<particles->numParticles();i++)
                 {
 						rgba[i*4] = rgbPtr[i*3];
@@ -330,6 +330,10 @@ static void render()
 						}
                 }
                 glColorPointer(  4, GL_FLOAT, 0, rgba );
+				if (rgba)
+				{
+					free (rgba);
+				}
             }
             else
             {
@@ -341,7 +345,7 @@ static void render()
             if (alphaFromIndex >= 0)
             {
                 particles->attributeInfo(alphaFromIndex, alphaAttr);
-                rgba = (float *) malloc(particles->numParticles()*sizeof(float)*4);
+                rgba = (GLfloat *) malloc(particles->numParticles()*sizeof(GLfloat)*4);
                 const float * alphaPtr=particles->data<float>(alphaAttr,0);
                 for (int i=0;i<particles->numParticles();i++)
                 {
@@ -354,7 +358,7 @@ static void render()
             }
             else
             {
-                rgba = (float *) malloc(particles->numParticles()*sizeof(float)*3);
+                rgba = (GLfloat *) malloc(particles->numParticles()*sizeof(GLfloat)*3);
                 for (int i=0;i<particles->numParticles();i++)
                 {
                     rgba[i*3] = colorR+brightness;
@@ -362,10 +366,13 @@ static void render()
                     rgba[(i*3)+2] = colorB+brightness;
                 }
                 glColorPointer(  3, GL_FLOAT, 0, rgba );
+
             }
-
+            if (rgba)
+			{
+				free (rgba);
+			}
         }
-
     }
 
     glPointSize(pointSize);
@@ -378,6 +385,7 @@ static void render()
     glEnd();
 
     glutSwapBuffers();
+
 
 
 }
@@ -506,8 +514,18 @@ void  reloadParticleFile(int direction)
         int result = stat(particleFile.c_str(),&statinfo);
         if (result >=0)
         {
-            particles=0;
-            particles=read(particleFile.c_str());
+			ParticlesData* newParticles = read(particleFile.c_str());
+
+			if (particles)
+			{
+				//cout << particles << endl;
+				particles = particles->reset();
+				particles = NULL;
+			}
+
+			//cout << newParticles << endl;
+            particles = newParticles;
+
             if (!glutGetWindow()) {
                 return;
             }
@@ -785,8 +803,7 @@ int main(int argc,char *argv[])
 {
 
     // initialize variables
-
-    particles=0;
+    particles = 0;
     fov=60;
     pointSize = 1.5;
     brightness = 0.0;
@@ -847,5 +864,6 @@ int main(int argc,char *argv[])
         return 1;
     }
     particles->release();
+	delete [] keyStates;
     return 0;
 }

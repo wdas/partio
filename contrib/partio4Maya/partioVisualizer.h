@@ -146,6 +146,7 @@ public:
     MCallbackId partioVisualizerReferenceCallback;
 
     static MObject  time;
+	static MObject  aByFrame;
     static MObject  aSize;         // The size of the logo
     static MObject  aDrawSkip;
     static MObject  aFlipYZ;
@@ -177,6 +178,7 @@ public:
     float 					multiplier;
     bool 					cacheChanged;
     partioVizReaderCache  	pvCache;
+	int drawError;
 
 
 private:
@@ -197,7 +199,6 @@ private:
     bool mFlipped;
     bool  frameChanged;
     MStringArray attributeList;
-    bool drawError;
 
 
 protected:

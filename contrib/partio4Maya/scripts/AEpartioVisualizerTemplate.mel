@@ -37,6 +37,7 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 	editorTemplate -callCustom pioAEoutpathNew pioAEoutpathReplace cacheDir;
 	editorTemplate -addControl "cachePrefix";
 	editorTemplate -addControl "cacheOffset";
+	editorTemplate -addControl "byFrame";
 	editorTemplate -addControl "cacheFormat";
 	editorTemplate -addControl "iconSize";
 	editorTemplate -callCustom pioVizForceUpdate pioVizForceUpdate $nodeName;

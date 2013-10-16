@@ -54,21 +54,22 @@ scale (vectorArray) *
 shear (vectorArray)
 visibility (doubleArray)
 objectIndex (doubleArray) *
-rotationType (doubleArray)
+rotationType (doubleArray) *
 rotation (vectorArray) *
-aimDirection (vectorArray)
-aimPosition (vectorArray)
-aimAxis (vectorArray)
-aimUpAxis (vectorArray)
-aimWorldUp (vectorArray)
+aimDirection (vectorArray) *
+aimPosition (vectorArray) *
+aimAxis (vectorArray) *
+aimUpAxis (vectorArray) *
+aimWorldUp (vectorArray) *
 age (doubleArray)
-id (doubleArray)
+id (doubleArray) *
 */
 
 MTypeId partioInstancer::id( ID_PARTIOINSTANCER );
 
 /// ATTRS
 MObject partioInstancer::time;
+MObject partioInstancer::aByFrame;
 MObject partioInstancer::aSize;         // The size of the logo
 MObject partioInstancer::aFlipYZ;
 MObject partioInstancer::aDrawStyle;
@@ -109,7 +110,6 @@ MObject partioInstancer::aLastAimPositionFrom;
 MObject partioInstancer::aIndexFrom;
 
 /// not implemented yet
-//	MObject partioInstancer::aAimPositionFrom;
 //	MObject partioInstancer::aShaderIndexFrom;
 //	MObject partioInstancer::aInMeshInstances;
 //	MObject partioInstancer::aOutMesh;
@@ -154,7 +154,8 @@ partioInstancer::partioInstancer()
         mLastIndexFromIndex(-1),
         cacheChanged(false),
         multiplier(1.0),
-        canMotionBlur(false)
+        canMotionBlur(false),
+        drawError(0)
 
 {
     pvCache.particles = NULL;
@@ -240,6 +241,15 @@ MStatus partioInstancer::initialize()
 
     time = uAttr.create("time", "tm", MFnUnitAttribute::kTime, 0.0, &stat );
     uAttr.setKeyable( true );
+
+	aByFrame = nAttr.create( "byFrame", "byf", MFnNumericData::kInt ,1);
+    nAttr.setKeyable( true );
+    nAttr.setReadable( true );
+    nAttr.setWritable( true );
+    nAttr.setConnectable( true );
+    nAttr.setStorable( true );
+    nAttr.setMin(1);
+    nAttr.setMax(100);
 
     aSize = uAttr.create( "iconSize", "isz", MFnUnitAttribute::kDistance );
     uAttr.setDefault( 0.25 );
@@ -417,6 +427,7 @@ MStatus partioInstancer::initialize()
 
     addAttribute ( aInstanceData );
 
+	addAttribute ( aByFrame );
 	addAttribute ( time );
 
 // attribute affects
@@ -457,6 +468,8 @@ MStatus partioInstancer::initialize()
 	attributeAffects ( aInstanceData, aUpdateCache );
     attributeAffects (time, aUpdateCache);
     attributeAffects (time, aInstanceData);
+	attributeAffects (aByFrame, aUpdateCache);
+	attributeAffects (aByFrame, aInstanceData);
 
 
     return MS::kSuccess;
@@ -489,11 +502,12 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 	int aimWorldUpFromIndex			= block.inputValue( aAimWorldUpFrom ).asInt();
     int indexFromIndex 				= block.inputValue( aIndexFrom ).asInt();
 
-
+	drawError = 0;
     bool cacheActive = block.inputValue(aCacheActive).asBool();
 
     if (!cacheActive)
     {
+		drawError = 2;
         return ( MS::kSuccess );
     }
 
@@ -512,6 +526,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
         if (cacheDir  == "" || cacheFile == "" )
         {
+			drawError = 1;
             // too much noise!
             //MGlobal::displayError("PartioEmitter->Error: Please specify cache file!");
             return ( MS::kFailure );
@@ -522,6 +537,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         short cacheFormat	= block.inputValue( aCacheFormat ).asShort();
         bool forceReload 	= block.inputValue( aForceReload ).asBool();
         MTime inputTime		= block.inputValue( time ).asTime();
+		int byFrame 		= block.inputValue( aByFrame ).asInt();
         bool flipYZ 		= block.inputValue( aFlipYZ ).asBool();
         MString renderCachePath = block.inputValue( aRenderCachePath ).asString();
         bool computeMotionBlur =block.inputValue( aComputeVeloPos ).asBool();
@@ -546,7 +562,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
         partio4Maya::updateFileName( cacheFile,  cacheDir,
                                      cacheStatic,  cacheOffset,
-                                     cacheFormat,  integerTime,
+                                     cacheFormat,  integerTime, byFrame,
                                      cachePadding, formatExt,
                                      newCacheFile, renderCacheFile
                                    );
@@ -576,10 +592,18 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
         if (!partio4Maya::partioCacheExists(newCacheFile.asChar()))
         {
-            pvCache.particles=0; // resets the particles
+			ParticlesDataMutable* newParticles;
+			newParticles = pvCache.particles;
+			pvCache.particles=NULL; // resets the pointer
+
+			if (newParticles != NULL)
+			{
+				newParticles->release(); // frees the mem
+			}
             pvCache.bbox.clear();
 			pvCache.instanceData.clear();
 			mLastFileLoaded = "";
+			drawError = 1;
         }
 
         if ( newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()) && (newCacheFile != mLastFileLoaded || forceReload) )
@@ -587,8 +611,15 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
             cacheChanged = true;
             mFlipped = false;
             MGlobal::displayWarning(MString("PartioInstancer->Loading: " + newCacheFile));
-            pvCache.particles=0; // resets the particles
 
+			ParticlesDataMutable* newParticles;
+			newParticles = pvCache.particles;
+			pvCache.particles=NULL; // resets the pointer
+
+			if (newParticles != NULL)
+			{
+				newParticles->release(); // frees the mem
+			}
             pvCache.particles=read(newCacheFile.asChar());
 
             mLastFileLoaded = newCacheFile;
@@ -1243,6 +1274,15 @@ void partioInstancerUI::draw( const MDrawRequest& request, M3dView& view ) const
     {
         drawBoundingBox();
     }
+
+	if (shapeNode->drawError == 1)
+	{
+		glColor3f(.75f,0.0f,0.0f);
+	}
+	else if (shapeNode->drawError == 2)
+	{
+		glColor3f(0.0f,0.0f,0.0f);
+	}
 
     partio4Maya::drawPartioLogo(shapeNode->multiplier);
 

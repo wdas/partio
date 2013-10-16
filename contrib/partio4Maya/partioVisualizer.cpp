@@ -55,6 +55,7 @@ using namespace std;
 MTypeId partioVisualizer::id( ID_PARTIOVISUALIZER );
 
 MObject partioVisualizer::time;
+MObject partioVisualizer::aByFrame;
 MObject partioVisualizer::aDrawSkip;
 MObject partioVisualizer::aUpdateCache;
 MObject partioVisualizer::aSize;         // The size of the logo
@@ -110,7 +111,7 @@ partioVisualizer::partioVisualizer()
         frameChanged(false),
         multiplier(1.0),
         mFlipped(false),
-        drawError(false)
+        drawError(0)
 {
     pvCache.particles = NULL;
     pvCache.flipPos = (float *) malloc(sizeof(float));
@@ -196,6 +197,15 @@ MStatus partioVisualizer::initialize()
 
     time = nAttr.create( "time", "tm", MFnNumericData::kLong ,0);
     uAttr.setKeyable( true );
+
+	aByFrame = nAttr.create( "byFrame", "byf", MFnNumericData::kInt ,1);
+    nAttr.setKeyable( true );
+    nAttr.setReadable( true );
+    nAttr.setWritable( true );
+    nAttr.setConnectable( true );
+    nAttr.setStorable( true );
+    nAttr.setMin(1);
+    nAttr.setMax(100);
 
     aSize = uAttr.create( "iconSize", "isz", MFnUnitAttribute::kDistance );
     uAttr.setDefault( 0.25 );
@@ -335,6 +345,7 @@ MStatus partioVisualizer::initialize()
     addAttribute ( aDrawStyle );
     addAttribute ( aForceReload );
     addAttribute ( aRenderCachePath );
+	addAttribute ( aByFrame );
     addAttribute ( time );
 
 	attributeAffects ( aCacheActive, aUpdateCache);
@@ -355,7 +366,9 @@ MStatus partioVisualizer::initialize()
     attributeAffects ( aDefaultRadius, aUpdateCache );
     attributeAffects ( aDrawStyle, aUpdateCache );
     attributeAffects ( aForceReload, aUpdateCache );
-    attributeAffects (time, aUpdateCache);
+	attributeAffects ( aByFrame, aUpdateCache );
+	attributeAffects ( aByFrame, aRenderCachePath );
+	attributeAffects (time, aUpdateCache);
     attributeAffects (time,aRenderCachePath);
 
 
@@ -373,7 +386,6 @@ partioVizReaderCache* partioVisualizer::updateParticleCache()
 
 MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 {
-
 
     int colorFromIndex  = block.inputValue( aColorFrom ).asInt();
     int opacityFromIndex= block.inputValue( aAlphaFrom ).asInt();
@@ -395,10 +407,10 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
         MString cacheDir 	= block.inputValue(aCacheDir).asString();
         MString cacheFile = block.inputValue(aCacheFile).asString();
 
-        drawError = false;
+        drawError = 0;
         if (cacheDir  == "" || cacheFile == "" )
         {
-            drawError = true;
+            drawError = 1;
             // too much printing  rather force draw of icon to red or something
             //MGlobal::displayError("PartioVisualizer->Error: Please specify cache file!");
             return ( MS::kFailure );
@@ -413,6 +425,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
         float defaultRadius			= block.inputValue( aDefaultRadius).asFloat();
         bool forceReload 			= block.inputValue( aForceReload ).asBool();
         int integerTime				= block.inputValue(time).asInt();
+		int byFrame 				= block.inputValue( aByFrame ).asInt();
         bool flipYZ 				= block.inputValue( aFlipYZ ).asBool();
         MString renderCachePath 	= block.inputValue( aRenderCachePath ).asString();
 
@@ -424,7 +437,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
         partio4Maya::updateFileName( cacheFile,  cacheDir,
                                      cacheStatic,  cacheOffset,
-                                     cacheFormat,  integerTime,
+                                     cacheFormat,  integerTime, byFrame,
                                      cachePadding, formatExt,
                                      newCacheFile, renderCacheFile
                                    );
@@ -458,19 +471,38 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 //////////////////////////////////////////////
 /// or it can change from a time input change
 
+
         if (!partio4Maya::partioCacheExists(newCacheFile.asChar()))
         {
-            pvCache.particles=0; // resets the particles
+			ParticlesDataMutable* newParticles;
+			newParticles = pvCache.particles;
+			pvCache.particles=NULL; // resets the particles
+
+			if (newParticles != NULL)
+			{
+				//cout <<  "releasing" << endl;
+				newParticles->release();
+			}
             pvCache.bbox.clear();
+			mLastFileLoaded = "";
+			drawError = 1;
         }
 
         //  after updating all the file path stuff,  exit here if we don't want to actually load any new data
 		if (!cacheActive)
 		{
 			forceReload = true;
-			pvCache.particles=0; // resets the particles
+			ParticlesDataMutable* newParticles;
+			newParticles = pvCache.particles;
+			pvCache.particles=NULL; // resets the pointer
+
+			if (newParticles != NULL)
+			{
+				newParticles->release();
+			}
             pvCache.bbox.clear();
 			mLastFileLoaded = "";
+			drawError = 2;
 			return ( MS::kSuccess );
 		}
 
@@ -479,13 +511,22 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
                 (newCacheFile != mLastFileLoaded || forceReload)
            )
         {
-
             cacheChanged = true;
             mFlipped = false;
             MGlobal::displayWarning(MString("PartioVisualizer->Loading: " + newCacheFile));
-            pvCache.particles=0; // resets the particles
 
-            pvCache.particles=read(newCacheFile.asChar());
+			/////////////////////////////////////////////
+			/// This seems to work to solve the mem leak
+			ParticlesDataMutable* newParticles;
+			newParticles = pvCache.particles;
+			pvCache.particles=NULL; // resets the pointer
+
+			if (newParticles != NULL)
+			{
+				newParticles->release(); // frees the mem
+			}
+			pvCache.particles = read(newCacheFile.asChar());
+			///////////////////////////////////////
 
             mLastFileLoaded = newCacheFile;
             if (pvCache.particles->numParticles() == 0)
@@ -552,36 +593,6 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
         if (pvCache.particles)
         {
-            /*
-            /// TODO:  this does not work when scrubbing yet.. really need to put the  resort of channels into the  partio side as a filter
-            /// this is only a temporary hack until we start adding  filter functions to partio
-
-            // only flip the axis stuff if we need to
-            if ( cacheChanged && flipYZ  && !mFlipped )
-            {
-            	float * floatToPos = (float *) realloc(pvCache.flipPos, pvCache.particles->numParticles()*sizeof(float)*3);
-            	if (floatToPos != NULL)
-            	{
-            		pvCache.flipPos =  floatToPos;
-            	}
-            	else
-            	{
-            		free(pvCache.flipPos);
-            		MGlobal::displayError("PartioVisualizer->unable to allocate new memory for flip particles");
-            		return (MS::kFailure);
-            	}
-
-            	for (int i=0;i<pvCache.particles->numParticles();i++)
-            	{
-            		const float * attrVal = pvCache.particles->data<float>(pvCache.positionAttr,i);
-            		pvCache.flipPos[(i*3)] 		= attrVal[0];
-            		pvCache.flipPos[((i*3)+1)] 	= -attrVal[2];
-            		pvCache.flipPos[((i*3)+2)] 	= attrVal[1];
-            	}
-            	mFlipped = true;
-            }
-            */
-
             // something changed..
             if  (cacheChanged || mLastColorFromIndex != colorFromIndex || mLastColor != defaultColor)
             {
@@ -796,25 +807,6 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
                 delete [] temp;
             }
 
-            /* mel way may be borked
-            // after overwriting the string array with new attrs, delete any extra entries not needed
-            MPlug yPlug (thisMObject(), aPartioAttributes);
-            if (yPlug.numElements() != numAttr)
-            {
-            	MString command = "";
-            	MString yPlugName = yPlug.name();
-            	for (unsigned int x = attributeList.length(); x<yPlug.numElements(); x++)
-            	{
-            		command += "removeMultiInstance -b true ";
-            		command += yPlugName;
-            		command += "[";
-            		command += x;
-            		command += "]";
-            		command += ";";
-            	}
-            	MGlobal::executeCommandOnIdle(command);   // now that we're not clearing the entire list, we can do this at maya's leisure
-            }
-            */
             MArrayDataHandle hPartioAttrs = block.inputArrayValue(aPartioAttributes);
             MArrayDataBuilder bPartioAttrs = hPartioAttrs.builder();
             // do we need to clean up some attributes from our array?
@@ -929,7 +921,16 @@ void partioVisualizerUI::draw( const MDrawRequest& request, M3dView& view ) cons
         drawPartio(cache,drawStyle);
     }
 
-    partio4Maya::drawPartioLogo(shapeNode->multiplier);
+	if (shapeNode->drawError == 1)
+	{
+		glColor3f(.75f,0.0f,0.0f);
+	}
+	else if (shapeNode->drawError == 2)
+	{
+		glColor3f(0.0f,0.0f,0.0f);
+	}
+
+	partio4Maya::drawPartioLogo(shapeNode->multiplier);
 
     view.endGL();
 }
@@ -1003,7 +1004,7 @@ void  partioVisualizerUI::drawBoundingBox() const
 
 void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle) const
 {
-    partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
+	partioVisualizer* shapeNode = (partioVisualizer*) surfaceShape();
 
     MObject thisNode = shapeNode->thisMObject();
     MPlug drawSkipPlug( thisNode, shapeNode->aDrawSkip );
@@ -1035,9 +1036,6 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
     if (pvCache->particles)
     {
-        struct Point {
-            float p[3];
-        };
         glPushAttrib(GL_CURRENT_BIT);
 
         if (alphaFromVal >=0 || defaultAlphaVal < 1) //testing settings
@@ -1059,13 +1057,6 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
             //glEnable(GL_ALPHA_TEST);
         }
 
-        // THIS IS KINDA TRICKY.... we do this switch between drawing procedures because on big caches, when the reallocation happens
-        // its big enough that it apparently frees the memory that the GL_Color arrays are using and  causes a segfault.
-        // so we only draw once  using the "one by one" method  when the arrays change size, and then  swap back to  the speedier
-        // pointer copy  way  after everything is settled down a bit for main interaction.   It is a significant  improvement on large
-        // datasets in user interactivity speed to use pointers
-
-        //if(!shapeNode->cacheChanged && drawStyle == 0)  might not need to switch this for cache change any more, only draw style
         if ( drawStyle == 0 )
         {
             glEnableClientState( GL_VERTEX_ARRAY );
@@ -1078,14 +1069,8 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
                 const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,0);
 
-                //if(flipYZVal)
-                //{
-                //	glVertexPointer( 3, GL_FLOAT, stride, pvCache->flipPos );
-                //}
-                //else
-                //{
                 glVertexPointer( 3, GL_FLOAT, stride, partioPositions );
-                //}
+
 
                 if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
                 {
@@ -1108,11 +1093,6 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
             glPointSize(pointSizeVal);
 
-            //if (drawStyle == 0)
-            //{
-            //	glBegin(GL_POINTS);
-            //}
-
             for (int i=0;i<pvCache->particles->numParticles();i+=(drawSkipVal+1))
             {
                 if (defaultAlphaVal < 1 || alphaFromVal >=0)  // use transparency switch
@@ -1123,12 +1103,7 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
                 {
                     glColor3f(pvCache->rgb[i*3],pvCache->rgb[(i*3)+1],pvCache->rgb[(i*3)+2]);
                 }
-                //if (flipYZVal)
-                //{
-                //	glVertex3f(pvCache->flipPos[0], pvCache->flipPos[1], pvCache->flipPos[2]);
-                //}
-                //else
-                //{
+
                 const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
                 if (drawStyle == 1 || drawStyle == 2) // unfilled circles, disks, or spheres
                 {
@@ -1140,16 +1115,11 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
                 {
                     glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
                 }
-                //}
             }
-
-            //glEnd( );
-        }
+		}
         glDisable(GL_POINT_SMOOTH);
         glPopAttrib();
     } // if (particles)
-
-
 }
 
 partioVisualizerUI::partioVisualizerUI()

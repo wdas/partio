@@ -96,6 +96,7 @@ public:
     static MObject 	aJitterFreq;
     static MObject 	aPartioAttributes;
     static MObject  aMayaPPAttributes;
+	static MObject  aByFrame;
 
     virtual MStatus	compute ( const MPlug& plug, MDataBlock& block );
     static void 	reInit(void *data);
@@ -109,7 +110,7 @@ public:
 
 private:
 
-    long 		seedValue( int  plugIndex, MDataBlock& block );
+    long 	seedValue( int  plugIndex, MDataBlock& block );
 
     MStatus	getWorldPosition ( MPoint &p );
 
