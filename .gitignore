@@ -39,10 +39,9 @@ cmake_install.*
 ._*
 CMakeScripts
 CMakeFiles
-partio.build
 /src/doc/*
 build-*
 _hide
 sesitag.C
 *.so
-
+/win64/
