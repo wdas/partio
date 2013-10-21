@@ -204,6 +204,7 @@ endif()
 
 message(STATUS "Maya Location: ${MAYA_LOCATION}")
 message(STATUS "Maya VERSION: ${MAYA_VERSION}")
+SET(MAYA_FOUND TRUE)
 
 find_path(MAYA_INCLUDE_DIR maya/MFn.h
     HINTS ${MAYA_LOCATION}
@@ -216,7 +217,7 @@ LIST(APPEND MAYA_INCLUDE_DIRS ${MAYA_INCLUDE_DIR})
     
 FIND_PATH(MAYA_DEVKIT_INC_DIR GL/glext.h
   HINTS
-    $ENV{MAYA_LOCATION}
+    ${MAYA_LOCATION}
   PATH_SUFFIXES
 	devkit/plug-ins/
   DOC "Maya's devkit headers path"
