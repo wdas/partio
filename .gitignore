@@ -45,3 +45,4 @@ _hide
 sesitag.C
 *.so
 /win64/
+/linux64/

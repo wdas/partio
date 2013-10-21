@@ -34,5 +34,5 @@
 foreach(item makecircle makeline jsontest)
     ADD_EXECUTABLE(${item} "${item}.cpp")
     TARGET_LINK_LIBRARIES(${item} ${PARTIO_LIBRARIES})
-    INSTALL(TARGETS ${item} DESTINATION ${EXECUTABLE_OUTPUT_PATH})
+    INSTALL(TARGETS ${item} DESTINATION ${EXECUTABLE_INSTALL_PATH})
 endforeach(item)
