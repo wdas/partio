@@ -219,7 +219,8 @@ FIND_PATH(MAYA_DEVKIT_INC_DIR GL/glext.h
   HINTS
     ${MAYA_LOCATION}
   PATH_SUFFIXES
-	devkit/plug-ins/
+	devkit/plug-ins/   # linux
+	../../devkit/plug-ins   # osx
   DOC "Maya's devkit headers path"
 )
 LIST(APPEND MAYA_INCLUDE_DIRS ${MAYA_DEVKIT_INC_DIR})
