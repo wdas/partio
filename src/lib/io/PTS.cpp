@@ -1,6 +1,6 @@
 /*
 PARTIO SOFTWARE
-Copyright (c) 2011 Disney Enterprises, Inc. and Contributors,  All rights reserved
+Copyright (c) 2013  Disney Enterprises, Inc. and Contributors,  All rights reserved
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
