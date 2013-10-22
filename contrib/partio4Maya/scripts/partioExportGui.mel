@@ -77,7 +77,7 @@ global proc partioExportGui  ()
 	menuItem -label "PTS";
 	menuItem -label "XYZ";
 	menuItem -label "PCD";
-	menuItem -label "ICEcache";
+	//menuItem -label "ICEcache";
 	menuItem -label "RIB";
 //	menuItem -label "ASS";
 

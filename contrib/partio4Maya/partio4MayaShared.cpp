@@ -326,11 +326,11 @@ void partio4Maya::buildSupportedExtensionList(std::map<short,MString> &formatExt
     formatExtMap[9] = "pts";
     formatExtMap[10] = "xyz";
     formatExtMap[11] = "pcd";
-	formatExtMap[12] = "icecache";
+	//formatExtMap[12] = "icecache";
     if (write)
     {
-        formatExtMap[13] = "rib";
-        formatExtMap[14] = "ass";
+        formatExtMap[12] = "rib";
+        formatExtMap[13] = "ass";
     }
 }
 
