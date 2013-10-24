@@ -1,5 +1,8 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
-add_subdirectory(plugin)
-add_subdirectory(procedurals)
-#add_subdirectory(shaders)
+find_package(MtoA)
+if(MTOA_FOUND)
+	ADD_SUBDIRECTORY(plugin)
+endif()
+ADD_SUBDIRECTORY(procedurals)
+#ADD_SUBDIRECTORY(shaders)
 

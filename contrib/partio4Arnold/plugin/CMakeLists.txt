@@ -35,34 +35,11 @@ endif(COMMAND cmake_policy)
 
 SET(CMAKE_CXX_WARNING_LEVEL 4)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../../cmake)
-
-
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 ## allow more human readable "if then else" constructs
 SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
 ## Use verbose make file
 SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
-
-find_package(Arnold)
-find_package(MtoA)
-find_package(Maya)
-
-##################################################
-### CUSTOMIZE PATH TO MTOA SOURCE
-# Set this to the main source directory for MTOA
-if(MTOA_FOUND)
-	SET( MTOA_DEVEL_INCLUDE ${MTOA_INCLUDE_DIR} )
-	MESSAGE(STATUS "MTOA Found DEVEL_INCLUDE: ${MTOA_DEVEL_INCLUDE}")
-else (MTOA_FOUND)
-	SET (MTOA_DEVEL_HOME "/Volumes/sv-dev01/devRepo/johnc/arnold/mtoa")
-	SET (MTOA_DEVEL_INCLUDE ${MTOA_DEVEL_HOME}/plugins/mtoa)
-	SET (MTOA_DEVEL_INCLUDE /Volumes/luma/_globalSoft/rez-release/mtoa/$ENV{MTOA_VERSION}/Linux/maya-$ENV{MAYA_VERSION_NUM}/arnold-4.0.15/include)
-	MESSAGE(STATUS "MTOA using DEVEL_INCLUDE: ${MTOA_DEVEL_INCLUDE}")
-	endif(MTOA_FOUND)
-
-### END
-##################################################
 
 set (PLUGIN_NAME "partioTranslator")
 set (CMAKE_PROJECT_NAME "partioVizTranslator")
@@ -86,17 +63,19 @@ if (UNIX)
 ENDIF()
 
 
-
-SET (PARTIO_INCLUDE ${INCLUDE_OUTPUT_PATH} )
-SET (PARTIO_LIBDIR  ${LIBRARY_OUTPUT_PATH} )
-
 set (STD_INCLUDES "." ".." "/usr/X11R6/include" "/usr/include" "/usr/include/CC")
 set (STD_LIB "/usr/lib/")
 
-
-
-include_directories (${STD_INCLUDES} ${partio4ArnoldINCLUDES} ${MAYA_INCLUDE_DIR} ${ARNOLD_INCLUDE_DIR} ${MTOA_DEVEL_INCLUDE} ${MTOA_INCLUDE_DIR} ${PARTIO_INCLUDE})
-link_directories  ( ${STD_LIB} ${MAYA_LIBRARY_DIR} ${MTOA_mtoa_api_LIBRARY} ${ARNOLD_LIBRARY}  ${PARTIO_LIBDIR} ${ZLIB_LIBRARY_DIR})
+include_directories(${STD_INCLUDES}
+                    ${partio4ArnoldINCLUDES}
+                    ${MAYA_INCLUDE_DIR}
+                    ${ARNOLD_INCLUDE_DIR}
+                    ${MTOA_INCLUDE_DIR})
+link_directories(${STD_LIB}
+                 ${MAYA_LIBRARY_DIR}
+                 ${MTOA_mtoa_api_LIBRARY}
+                 ${ARNOLD_LIBRARY}
+                 ${ZLIB_LIBRARY_DIR})
 
 # Maya CFLAGS
 IF (APPLE)
@@ -148,26 +127,32 @@ FILE(GLOB partio4ArnoldCPP "*.cpp")
 FILE(GLOB partio4ArnoldINCLUDES "*.h")
 
 
-SET(MAYA_LIBS OpenMaya Foundation OpenMayaAnim OpenMayaFX OpenMayaUI OpenMayaRender)
+SET(MAYA_LIBS
+  ${MAYA_OpenMaya_LIBRARY}
+  ${MAYA_Foundation_LIBRARY}
+  ${MAYA_OpenMayaAnim_LIBRARY}
+  ${MAYA_OpenMayaFX_LIBRARY}
+  ${MAYA_OpenMayaUI_LIBRARY}
+  ${MAYA_OpenMayaRender_LIBRARY})
 
-IF (WIN32)
-	SET(PARTIO_LIB  partio)
-elseif(APPLE)
-	SET(PARTIO_LIB  libpartio.a)
-elseif(UNIX)
-	SET(PARTIO_LIB  libpartio.a)
-ENDIF()
-
+SET(PARTIO_LIB  partio)
 
 ADD_LIBRARY(${PLUGIN_NAME} SHARED ${partio4ArnoldINCLUDES} ${partio4ArnoldCPP})
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
 
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${ZLIB}  ${MAYA_LIBS}  ${PARTIO_LIB} ${ARNOLD_LIBRARY} ${MTOA_mtoa_api_LIBRARY} )
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME}
+                      ${ZLIB}
+                      ${MAYA_LIBS}
+                      ${PARTIO_LIB}
+                      ${ARNOLD_LIBRARY}
+                      ${MTOA_mtoa_api_LIBRARY})
 
-SET (PARTIO4ARNOLD_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/arnold/mtoa-$ENV{MTOA_VERSION}/${PARTIO_BUILD_PLATFORM}/extensions)
+#SET (PARTIO4ARNOLD_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/arnold/mtoa-$ENV{MTOA_VERSION}/${PARTIO_BUILD_PLATFORM}/extensions)
 
-INSTALL( TARGETS ${PLUGIN_NAME} DESTINATION ${PARTIO4ARNOLD_OUTPUT_PATH} )
+INSTALL( TARGETS ${PLUGIN_NAME}
+         DESTINATION arnold/mtoa/extensions )
 
 FILE(GLOB PARTIO4ARNOLD_SCRIPTS "*.py")
-INSTALL( FILES ${PARTIO4ARNOLD_SCRIPTS} DESTINATION ${PARTIO4ARNOLD_OUTPUT_PATH})
+INSTALL( FILES ${PARTIO4ARNOLD_SCRIPTS}
+         DESTINATION arnold/mtoa/extensions )
 

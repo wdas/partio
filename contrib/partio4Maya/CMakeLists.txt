@@ -10,10 +10,6 @@ endif(COMMAND cmake_policy)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 
-find_package(Maya)
-
-if (MAYA_FOUND)
-
 
 IF ( UNIX AND NOT APPLE )
 	ADD_DEFINITIONS(-DLINUX)
@@ -54,16 +50,12 @@ if (UNIX)
 	set (SUFFIX ".so")
 ENDIF()
 
-
-## if building from the default partio contrib dir you can leave this alone
-SET (PARTIO_INCLUDE ${INCLUDE_OUTPUT_PATH} )
-SET (PARTIO_LIBDIR  ${LIBRARY_OUTPUT_PATH} )
-
+# FIXME: why is this necessary?
 set (STD_INCLUDES "." ".." "/usr/X11R6/include" "/usr/include" "/usr/include/CC")
 set (STD_LIB "/usr/lib/")
 
-include_directories (${STD_INCLUDES} ${partio4MayaINCLUDES} ${MAYA_INCLUDE_DIRS} ${PARTIO_INCLUDE})
-link_directories  ( ${STD_LIB} ${MAYA_LIBRARY_DIR} ${PARTIO_LIBDIR} ${ZLIB_LIBRARY_DIR})
+include_directories(${STD_INCLUDES} ${partio4MayaINCLUDES} ${MAYA_INCLUDE_DIRS})
+link_directories(${STD_LIB} ${MAYA_LIBRARY_DIR} ${ZLIB_LIBRARY_DIR})
 
 add_definitions(-D_BOOL)
 add_definitions(-DREQUIRE_IOSTREAM)
@@ -114,21 +106,20 @@ IF(WIN32)
 	set_target_properties(${PLUGIN_NAME} PROPERTIES LINK_FLAGS "/export:initializePlugin /export:uninitializePlugin")
 ENDIF()
 
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME} ${ZLIB} ${PARTIO_LIB} ${MAYA_LIBS} ${OPENGL_gl_LIBRARY} ${OPENGL_glu_LIBRARY})
+TARGET_LINK_LIBRARIES(${PLUGIN_NAME}
+                      ${ZLIB}
+                      ${PARTIO_LIB}
+                      ${MAYA_LIBS}
+                      ${OPENGL_gl_LIBRARY}
+                      ${OPENGL_glu_LIBRARY})
 
-SET (PARTIO4MAYA_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/maya/${MAYA_VERSION}/plug-ins/${PARTIO_BUILD_PLATFORM})
-SET (PARTIO4MAYA_OUTPUTSCRIPTS_PATH  ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/maya/${MAYA_VERSION}/scripts)
-SET (PARTIO4MAYA_OUTPUTICONS_PATH  ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/maya/${MAYA_VERSION}/icons)
-
-
-INSTALL( TARGETS ${PLUGIN_NAME}  DESTINATION  ${PARTIO4MAYA_OUTPUT_PATH})
+INSTALL(TARGETS ${PLUGIN_NAME}
+		DESTINATION maya/plug-ins)
 
 FILE(GLOB PARTIO4MAYA_SCRIPTS "scripts/*.mel")
-INSTALL( FILES ${PARTIO4MAYA_SCRIPTS} DESTINATION ${PARTIO4MAYA_OUTPUTSCRIPTS_PATH})
+INSTALL(FILES ${PARTIO4MAYA_SCRIPTS}
+		DESTINATION maya/scripts)
 
 FILE(GLOB PARTIO4MAYA_ICONS "icons/*")
-INSTALL( FILES ${PARTIO4MAYA_ICONS} DESTINATION ${PARTIO4MAYA_OUTPUTICONS_PATH})
-
-
-ENDIF(MAYA_FOUND)
-
+INSTALL(FILES ${PARTIO4MAYA_ICONS}
+		DESTINATION maya/icons)

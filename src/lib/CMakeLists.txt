@@ -37,5 +37,10 @@ ADD_LIBRARY (partio ${io_cpp} ${core_cpp})
 
 FILE(GLOB public_includes "*.h")
 
-INSTALL (TARGETS partio DESTINATION ${LIBRARY_INSTALL_PATH})
-INSTALL( FILES  ${public_includes} 	DESTINATION ${INCLUDE_INSTALL_PATH})
+INSTALL(TARGETS partio
+		LIBRARY DESTINATION lib
+		ARCHIVE DESTINATION lib)
+
+INSTALL(FILES ${public_includes}
+        DESTINATION include)
+
