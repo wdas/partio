@@ -43,6 +43,8 @@ implied warranties of merchantability, fitness for a particular purpose and non-
 infringement.
 */
 #include <Partio.h>
+#include "../lib/io/PartioBinaryJson.h"
+#include <fstream>
 
 int main(int argc,char *argv[]){
 
@@ -50,10 +52,23 @@ int main(int argc,char *argv[]){
         std::cerr<<"Usage: "<<argv[0]<<" <filename>"<<std::endl;
         return 1;
     }
-    Partio::ParticlesDataMutable* parts=Partio::testRead(argv[1]);
+    std::string filename=argv[1];
+
+#if 0
+    std::ifstream fp(filename.c_str(),std::ios::in);
+    Partio::JSONParserState state(fp);
+    Partio::ParticlesDataMutable* particles=Partio::create();
+    Partio::PrintParser parser(state);
+
+    parser.parse();
+
+#else
+
+    Partio::ParticlesDataMutable* parts=Partio::testRead(filename.c_str());
     if(parts){
         // write old format
         Partio::write("testdump.bgeo",*parts);
     }
+#endif
     return 0;
 }

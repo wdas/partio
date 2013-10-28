@@ -92,9 +92,9 @@ class JSONParseError : public std::runtime_error
 {
     std::string offsetStr(const JSONParserState& state){
         size_t offset=state.getOffset();
-        char buf[1024];
-        sprintf(buf,"offset %d ",offset);
-        return buf;
+        std::stringstream ss;
+        ss<<"offset "<<offset;
+        return ss.str();
     }
 public:
     JSONParseError(const std::string& s,const JSONParserState& state): runtime_error(hex(state.getOffset()) +": "+s) {}
@@ -246,8 +246,8 @@ struct JSONParser
 
     int64 readLength(){
         uint8 lengthCode;
-        uint32 length32;
-        int64 length64;
+        //uint32 length32;
+        //int64 length64;
         read<LITEND>(state.fp,lengthCode);
         //std::cerr<<"length code "<<int(lengthCode)<<std::endl;
         if(lengthCode<0xf1) return lengthCode;
@@ -327,15 +327,39 @@ struct JSONParser
     void numberDataNotify(){
         T val;
         read<LITEND>(state.fp,val);
-        Derived().numberData<T>(currKey,val);
+        Derived().template numberData<T>(currKey,val);
     }
 
     template<class T> void uniformArray(){
         int64 length=readLength();
         // give delegate chance to do something
-        if(!Derived().uniformArray<T>(currKey,length)){
+        if(!Derived().template uniformArray<T>(currKey,length)){
             uniformArrayDefaultImpl<T>(currKey,length);
         }
+    }
+    void uniformArrayBool(){
+        int64 length=readLength();
+        //std::cerr<<"uniform bool array length "<<length<<std::endl;;
+        if(!Derived().uniformArrayBool(currKey,length)){
+            return;
+        }
+        if(!length) return;
+        int wordsToRead=length/32;
+        for(int i=0;i<wordsToRead;i++){
+            uint32 word;
+            read<LITEND>(state.fp,word);
+            for(int bit=0;bit<32;bit++){
+                bool val=((1<<bit) & word) != 0;
+                Derived().template numberData<bool>(currKey,val);
+            }
+        }
+        uint32 lastWord;
+        read<LITEND>(state.fp,lastWord);
+        for(int bit=0;bit<length%32;bit++){
+            bool val=((1<<bit) & lastWord) != 0;
+            Derived().template numberData<bool>(currKey,val);
+        }
+
     }
     template<class T> bool uniformArrayDefaultImpl(const char* currKey,int length){
         int count=length; // /sizeof(T);
@@ -354,6 +378,7 @@ struct JSONParser
             case JID_UINT16: uniformArray<uint16>();break;
             case JID_INT32: uniformArray<int32>();break;
             case JID_INT64: uniformArray<int64>();break;
+            case JID_BOOL: uniformArrayBool();break;
             case JID_TOKENREF: break; // TODO: implement
             case JID_STRING: break; // TODO: implement
             default: throw JSONParseError("UNKNOWN DATA TYPE "+hex(currToken),state);
@@ -393,7 +418,7 @@ struct JSONParser
             case JID_UINT8: numberDataNotify<uint8>();return JID_UINT8;break;
             case JID_UNIFORM_ARRAY: uniformArray();return JID_UNIFORM_ARRAY;break;
             case JID_STRING: Derived().string(currKey,readString());break;
-                
+            
             default:
                 throw JSONParseError("Unknown token 0x"+hex(currToken),state);
         }
@@ -429,6 +454,10 @@ struct NULLParser:public JSONParser<NULLParser>
     template<class T> bool uniformArray(const char* currKey,int length){
         return false;
     }
+    /// got a bool uniform array (needs special bitmask handling)
+    bool uniformArrayBool(const char* currKey,int length){
+        return false;
+    }
 };
 
 namespace{
@@ -457,7 +486,7 @@ struct PrintParser:public JSONParser<PrintParser>
     }
     template<class T> void numberData(const char* key,T x){
         indent();
-        std::cerr<<keyString(key)<<" num "<<x<<std::endl;
+        std::cerr<<keyString(key)<<" num = '"<<(long long)x<<"'"<<std::endl;
     }
     void boolData(const char* key,bool x){
         indent();
@@ -486,9 +515,25 @@ struct PrintParser:public JSONParser<PrintParser>
         std::cerr<<"]"<<std::endl;
     }
     template<class T> bool uniformArray(const char* key,int length){
+        indent();
         std::cerr<<"uniform array begin key="<<keyString(key)<<" length "<<length<<std::endl;
-        return false;
+        if(!length) return true;
+        else{
+            _indent++;
+            return false;
+        }            
     }
+    bool uniformArrayBool(const char* key,int length){
+        indent();
+        std::cerr<<"uniform array begin key="<<keyString(key)<<" length "<<length<<std::endl;
+        if(!length) return true;
+        else{
+            _indent++;
+            return false;
+        }            
+    }
+
+
 };
 
 } // namespace Partio

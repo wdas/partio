@@ -87,8 +87,12 @@ struct BGEOAttributeType:public JSONParser<BGEOAttributeType>
         return false;
     }
 
-
+    bool uniformArrayBool(const char* currKey,int length){
+        return false;
+    }
 };
+
+//struct BGEOConstantPageFlags:public JSONParser<BGEOAtt
  
 struct BGEOAttributeValues:public JSONParser<BGEOAttributeValues>
 {
@@ -186,11 +190,20 @@ struct BGEOAttributeValues:public JSONParser<BGEOAttributeValues>
         std::cerr<<"mapend"<<std::endl;
     }
     bool arrayBegin(const char* key){
+        if(strcmp(key,"constantpageflags")==0){
+            //BGEOConstantPageFlags flags;
+            PrintParser flags(state);
+            flags.array();
+            return true;
+        }
         throw JSONParseError("Got unknown key in values block in attribute"+keyString(key),state);
         return false;
         //std::cerr<<"arraybegin "<<key<<std::endl;
     }
     void arrayEnd(){}
+    bool uniformArrayBool(const char* currKey,int length){
+        return false;
+    }
 };
 
 
@@ -238,6 +251,9 @@ struct BGEOAttributeValue:public JSONParser<BGEOAttributeValue>
         std::cerr<<"arrayend"<<std::endl;
     }
     template<class T> bool uniformArray(const char* currKey,int length){
+        return false;
+    }
+    bool uniformArrayBool(const char* currKey,int length){
         return false;
     }
 
@@ -320,7 +336,9 @@ struct BGEOAttributes:public JSONParser<BGEOAttributes>
     }
     bool mapBegin(const char* key){return false;}
     void mapEnd(){}
-
+    bool uniformArrayBool(const char* currKey,int length){
+        return false;
+    }
 
 };
 
@@ -390,6 +408,9 @@ struct BGEOMainParser:public JSONParser<BGEOMainParser>
     template<class T> bool uniformArray(const char* currKey,int length){
         return false;
     }
+    bool uniformArrayBool(const char* currKey,int length){
+        return false;
+    }
 
 };
 
@@ -415,6 +436,9 @@ struct BGEOParser:public JSONParser<BGEOParser>
     }
     void arrayEnd(){throw JSONParseError("invalid arrayEnd at top level",state);}
     template<class T> bool uniformArray(const char* currKey,int length){
+        return false;
+    }
+    bool uniformArrayBool(const char* currKey,int length){
         return false;
     }
 };
