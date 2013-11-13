@@ -474,14 +474,17 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
         if (!partio4Maya::partioCacheExists(newCacheFile.asChar()))
         {
-			ParticlesDataMutable* newParticles;
-			newParticles = pvCache.particles;
-			pvCache.particles=NULL; // resets the particles
-
-			if (newParticles != NULL)
+			if (pvCache.particles != NULL)
 			{
-				//cout <<  "releasing" << endl;
-				newParticles->release();
+				ParticlesDataMutable* newParticles;
+				newParticles = pvCache.particles;
+				pvCache.particles=NULL; // resets the particles
+
+				if (newParticles != NULL)
+				{
+					//cout <<  "releasing" << endl;
+					newParticles->release();
+				}
 			}
             pvCache.bbox.clear();
 			mLastFileLoaded = "";
@@ -492,13 +495,16 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 		if (!cacheActive)
 		{
 			forceReload = true;
-			ParticlesDataMutable* newParticles;
-			newParticles = pvCache.particles;
-			pvCache.particles=NULL; // resets the pointer
-
-			if (newParticles != NULL)
+			if (pvCache.particles != NULL)
 			{
-				newParticles->release();
+				ParticlesDataMutable* newParticles;
+				newParticles = pvCache.particles;
+				pvCache.particles=NULL; // resets the pointer
+
+				if (newParticles != NULL)
+				{
+					newParticles->release();
+				}
 			}
             pvCache.bbox.clear();
 			mLastFileLoaded = "";
@@ -515,15 +521,18 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
             mFlipped = false;
             MGlobal::displayWarning(MString("PartioVisualizer->Loading: " + newCacheFile));
 
-			/////////////////////////////////////////////
-			/// This seems to work to solve the mem leak
-			ParticlesDataMutable* newParticles;
-			newParticles = pvCache.particles;
-			pvCache.particles=NULL; // resets the pointer
-
-			if (newParticles != NULL)
+			if(pvCache.particles != NULL)
 			{
-				newParticles->release(); // frees the mem
+				/////////////////////////////////////////////
+				/// This seems to work to solve the mem leak
+				ParticlesDataMutable* newParticles;
+				newParticles = pvCache.particles;
+				pvCache.particles=NULL; // resets the pointer
+
+				if (newParticles != NULL)
+				{
+					newParticles->release(); // frees the mem
+				}
 			}
 			pvCache.particles = read(newCacheFile.asChar());
 			///////////////////////////////////////

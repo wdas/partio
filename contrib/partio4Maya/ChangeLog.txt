@@ -1,0 +1,101 @@
+/* partio and partio4Maya  10/31/2013 John Cassella  http://redpawfx.com  http://luma-pictures.com and 
+Copyright 2013 (c)  All rights reserved
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+* Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in
+the documentation and/or other materials provided with the
+distribution.
+
+Disclaimer: THIS SOFTWARE IS PROVIDED BY  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING,
+BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE, NONINFRINGEMENT AND TITLE ARE DISCLAIMED.
+IN NO EVENT SHALL  THE COPYRIGHT HOLDER OR
+CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND BASED ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+*/
+
+vvvvvvvvvvvvvvvvvv
+CHANGELOG HISTORY
+^^^^^^^^^^^^^^^^^^
+
+---------------------------------------------------
+Partio4Maya  alpha preview 0.9a  (03-27-2012)
+-- initial release,   PartioVizualizer, PartioEmitter, PartioExport created
+
+---------------------------------------------------
+Partio4Maya  alpha preview 0.9.1a  (04-11-2012)
+WHATS NEW:
+
+-MAC OSX VERSION!
+-much cleaner build environment
+-better support for cache file names in all OS's
+-file format now supports _0001.ext and  .0001.ext  file naming conventions (max users rejoice) 
+-added renderCachePath attribute to visualizer for utility purposes
+
+---------------------------------------------------
+Partio4Maya  beta 0.9.3b  (10-05-2012) 
+WHATS NEW:
+-2011/2012/2013 compiles
+-PartioInstancer Node created
+-PartioImport Command created
+-PartioVisualizer is now a shape node
+-Fixed reported crashes
+-added Partio Shelf
+-added PartioExport  -filename flag 
+-PartioVisualizer now has radius controls and visualization
+-many misc bugs squashed 
+
+----------------------------------------------------
+Partio4Maya / Partio Source  beta 0.9.5  (10-01-2013)  (unreleased in binary form) 
+WHATS NEW:
+-PartioInstancer now supports most rotation parameters the standard maya instancer will support
+-PartioExport/GUI now supports Escape key interrupt in all modes.. command line, and GUI based exports.
+-PartioInstancer PP text now properly supports writing vectors and floats 
+-PartioVisualizer now updates cache path even if node is not active, 
+  so you can  have a visualzier turned off and still render the frame correctly 
+
+WHATS NEW in Partio Source:
+-added initial Partio4Arnold  (see partio4Arnold contrib directory) 
+----------------------------------------------------
+Partio-core / Partio4Maya / Partio Source  beta 0.9.6  (10-31-2013)
+WHATS NEW in the Partio-core:
+-partview had some leaky mem, and crashing, which has been fixed, and  it now also supports  user right click menus  for  "color from and  "opacity from"  
+  (this will need some testing on other Os's / graphics cards / drivers etc..) 
+-Removed ICECache support from readers/writers for now, code needs to be updated to be cross platform compatible,
+  it does not work in windows and didn't try on Osx at all,  at the moment and was crashing on  read/write  under linux as well...  
+
+WHATS NEW in Partio4Maya:
+-All memory leaks shoud now be fixed in all partio nodes! 
+-PartioVisualizer viewport icon changes color when no cache is present or its turned inactive
+-PartioExportGui now stores the checkbox status for each particle object on that object so when you re-open a scene or the partioExport window,
+  you'll have your last exported particles already checked. 
+--PartioExprortGui now more intelligently handles  file output path changes and  allows user to change file path in the text edit line if desired,
+  for quick versioning up 
+--All Partio nodes now support a "frameSkip" or "byFrame" attr for simple frame skip retimes  directly in the node.
+
+WHATS NEW in Partio Source:
+- Merged Milo Green's   Partio4Houdini  fork and set up proper project cmake build scripts for it.
+  (see partio4Houdini contrib directory)
+
+----------------------------------------------------
+Partio-core / Partio4Maya / Partio Source  beta 0.9.7  (??-??-??)
+
+COMING SOON! 
+
+
+
+
+
+

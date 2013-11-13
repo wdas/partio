@@ -64,6 +64,9 @@ ENDIF("$ENV{FLAVOR}" STREQUAL "optimize")
 IF("$ENV{FLAVOR}" STREQUAL "debug")
     SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
 ENDIF("$ENV{FLAVOR}" STREQUAL "debug")
+IF("$ENV{FLAVOR}" STREQUAL "debugInfo")
+    SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "type of build" FORCE)
+ENDIF("$ENV{FLAVOR}" STREQUAL "debugInfo")
 # Set to release if nothing else defined
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "Release" CACHE STRING

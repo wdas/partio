@@ -103,7 +103,7 @@ public:
 
     typedef ParticleIterator<true> const_iterator;
 
-	virtual ParticlesData* reset() const = 0;
+	//virtual ParticlesData* reset() const = 0;
 
     //! Fill the user supplied values array with data corresponding to the given
     //! list of particles. Specify whether or not your indices are sorted.
@@ -187,7 +187,8 @@ public:
 
     typedef ParticleIterator<false> iterator;
 
-	virtual ParticlesDataMutable* reset() const = 0;
+	//virtual ParticlesDataMutable* reset() const = 0;
+
     //! Get a pointer to the data corresponding to the given particleIndex and
     //! attribute given by the attribute handle.
     template<class T> inline T* dataWrite(const ParticleAttribute& attribute,

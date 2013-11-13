@@ -56,7 +56,7 @@ public:
 
     void release() const;
 
-	ParticlesDataMutable* reset() const;
+	//ParticlesDataMutable* reset() const;
 
     ParticlesSimpleInterleave();
 

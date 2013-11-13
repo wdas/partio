@@ -67,13 +67,16 @@ release() const
     freeCached(const_cast<ParticlesSimpleInterleave*>(this));
 }
 
+/*
 ParticlesDataMutable* ParticlesSimpleInterleave::reset() const
 {
 	std::cout << "interleave reset" << std::endl;
 	freeCached(const_cast<ParticlesSimpleInterleave*>(this));
-	ParticlesDataMutable* newParticlesData;
+	ParticlesDataMutable* newParticlesData = create();
 	return newParticlesData;
 }
+*/
+
 
 
 int ParticlesSimpleInterleave::
