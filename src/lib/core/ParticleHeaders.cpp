@@ -56,13 +56,17 @@ release() const
     delete this;
 }
 
+/*
 ParticlesDataMutable* ParticleHeaders::reset() const
 {
 	//std::cout << "particleHeaders reset" << std::endl;
 	delete this;
-	ParticlesDataMutable * newParticlesData;
+	ParticlesDataMutable * newParticlesData = create();
 	return newParticlesData;
 }
+*/
+
+
 
 int ParticleHeaders::
 numParticles() const

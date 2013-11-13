@@ -592,13 +592,16 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
         if (!partio4Maya::partioCacheExists(newCacheFile.asChar()))
         {
-			ParticlesDataMutable* newParticles;
-			newParticles = pvCache.particles;
-			pvCache.particles=NULL; // resets the pointer
-
-			if (newParticles != NULL)
+			if (pvCache.particles != NULL)
 			{
-				newParticles->release(); // frees the mem
+				ParticlesDataMutable* newParticles;
+				newParticles = pvCache.particles;
+				pvCache.particles=NULL; // resets the pointer
+
+				if (newParticles != NULL)
+				{
+					newParticles->release(); // frees the mem
+				}
 			}
             pvCache.bbox.clear();
 			pvCache.instanceData.clear();
@@ -612,13 +615,16 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
             mFlipped = false;
             MGlobal::displayWarning(MString("PartioInstancer->Loading: " + newCacheFile));
 
-			ParticlesDataMutable* newParticles;
-			newParticles = pvCache.particles;
-			pvCache.particles=NULL; // resets the pointer
-
-			if (newParticles != NULL)
+			if (pvCache.particles != NULL)
 			{
-				newParticles->release(); // frees the mem
+				ParticlesDataMutable* newParticles;
+				newParticles = pvCache.particles;
+				pvCache.particles=NULL; // resets the pointer
+
+				if (newParticles != NULL)
+				{
+					newParticles->release(); // frees the mem
+				}
 			}
             pvCache.particles=read(newCacheFile.asChar());
 

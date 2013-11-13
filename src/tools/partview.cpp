@@ -519,7 +519,7 @@ void  reloadParticleFile(int direction)
 			if (particles)
 			{
 				//cout << particles << endl;
-				particles = particles->reset();
+				//particles = particles->reset();
 				particles = NULL;
 			}
 
