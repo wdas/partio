@@ -48,6 +48,7 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 #include <string>
 #include <memory>
 
+
 namespace Partio{
 
 using namespace std;
@@ -146,7 +147,9 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly){
             float pressure = 1.0;
             float mass = 1.0;
             float temperature = 1.0;
-            int pid = 0;
+
+			int pid = 0; // versions  < 12
+			uint64_t pid64 = 0; // versions >=12
 
             input->read ((char *) &position[0], sizeof(float));
                 simple->dataWrite<float>(posAttr, partIndex)[0] = (float)position[0];
@@ -211,8 +214,17 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly){
                 simple->dataWrite<float>(massAttr, partIndex)[0] = (float)mass;
             input->read ((char *) &temperature, sizeof(temperature));
                 simple->dataWrite<float>(tempAttr, partIndex)[0] = (float)temperature;
-            input->read ((char *) &pid, sizeof(pid));
+			if (header.version < 12)
+			{
+				input->read ((char *) &pid, sizeof(pid));
                 simple->dataWrite<int>(pidAttr, partIndex)[0] = (int)pid;
+			}
+			else if (header.version >=12)
+			{
+				input->read ((char *) &pid64, sizeof(pid64));
+                simple->dataWrite<int>(pidAttr, partIndex)[0] = (int)pid64;
+			}
+
         }
     }
 
@@ -240,7 +252,7 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
     header.framePerSecond = 24; // frames per second
     header.scaleScene = 1.0; // scene scale
     header.fluidType = 9; // fluid type
-    header.version =  11; // version (11 is most current)
+    header.version =  13; // version (13 is most current) ///NOTE, version 12+ now sets pid as a uint64_t instead of int so switch this if you need backward compat
     header.frameNumber =  1; // frame number
     header.elapsedSimulationTime = 0.0416666; //   time elapsed (in seconds)
     header.numParticles = p.numParticles(); // number of particles
@@ -308,7 +320,8 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
         float pressure = 1.0;
         float mass = 1.0;
         float temperature = 1.0;
-        int pid = particles;
+		int pid = particles;
+		uint64_t pid64 = particles;
 
         // now run thru  the exported attrs  and  replace values for things that we do have
 
@@ -403,8 +416,16 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
             }
             else if (attr.name == "id")
             {
-                const int* data = p.data<int>(attr, particles);
-                pid= data[0];
+				if (header.version <12)
+				{
+					const int* data = p.data<int>(attr, particles);
+					pid= data[0];
+				}
+				else if (header.version >= 12)
+				{
+					const int* data = p.data<int>(attr, particles);
+					pid64 = data[0];
+				}
             }
 
             else
@@ -447,7 +468,14 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
         output->write ((const char *) &pressure, sizeof (pressure));
         output->write ((const char *) &mass, sizeof (mass));
         output->write ((const char *) &temperature, sizeof (temperature));
-        output->write ((const char *) &pid, sizeof (pid));
+		if (header.version < 12)
+		{
+			output->write ((const char *) &pid, sizeof (pid));
+		}
+		else if (header.version >=12)
+		{
+			output->write ((const char *) &pid64, sizeof (pid64));
+		}
 
     }
 
