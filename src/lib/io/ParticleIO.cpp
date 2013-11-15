@@ -51,26 +51,27 @@ readers()
     static map<string,READER_FUNCTION> data;
     static bool initialized=false;
     if(!initialized){
-        data["bgeo"]=readBGEO;
-        data["bhclassic"]=readBGEO;
-        data["geo"]=readGEO;
-        data["hclassic"]=readGEO;
-        data["pdb"]=readPDB;
-        data["pdb32"]=readPDB32;
-        data["pdb64"]=readPDB64;
-        data["pda"]=readPDA;
-        data["mc"]=readMC;
-        data["ptc"]=readPTC;
-        data["pdc"]=readPDC;
-        data["prt"]=readPRT;
-        data["bin"]=readBIN;
-        data["pts"]=readPTS;
-		data["xyz"]=readXYZ;
-		data["pcd"]=readPCD;
-		//data["icecache"]=readICECACHE;
-        data["ptf"]=readPTC;
-        data["itbl"]=readBGEO;
-        data["atbl"]=readBGEO;
+        data["bgeo"]		=readBGEO;
+        data["bhclassic"]	=readBGEO;
+        data["geo"]			=readGEO;
+        data["hclassic"]	=readGEO;
+        data["pdb"]			=readPDB;
+        data["pdb32"]		=readPDB32;
+        data["pdb64"]		=readPDB64;
+        data["pda"]			=readPDA;
+        data["mc"]			=readMC;
+        data["ptc"]			=readPTC;
+        data["pdc"]			=readPDC;
+        data["prt"]			=readPRT;
+        data["bin"]			=readBIN;
+        data["pts"]			=readPTS;
+		data["xyz"]			=readXYZ;
+		data["pcd"]			=readPCD;
+		//data["icecache"]	=readICECACHE;
+        data["ptf"]			=readPTC;
+        data["itbl"]		=readBGEO;
+        data["atbl"]		=readBGEO;
+		data["rpc"]			=readRPC;
     }
     return data;
 }
@@ -81,22 +82,23 @@ writers()
     static map<string,WRITER_FUNCTION> data;
     static bool initialized=false;
     if(!initialized){
-        data["bgeo"]=writeBGEO;
-        data["geo"]=writeGEO;
-        data["pdb"]=writePDB;
-        data["pdb32"]=writePDB32;
-        data["pdb64"]=writePDB64;
-        data["pda"]=writePDA;
-        data["ptc"]=writePTC;
-        data["rib"]=writeRIB;
-        data["pdc"]=writePDC;
-        data["prt"]=writePRT;
-        data["bin"]=writeBIN;
-		data["pcd"]=writePCD;
+        data["bgeo"]	=writeBGEO;
+        data["geo"]		=writeGEO;
+        data["pdb"]		=writePDB;
+        data["pdb32"]	=writePDB32;
+        data["pdb64"]	=writePDB64;
+        data["pda"]		=writePDA;
+        data["ptc"]		=writePTC;
+        data["rib"]		=writeRIB;
+        data["pdc"]		=writePDC;
+        data["prt"]		=writePRT;
+        data["bin"]		=writeBIN;
+		data["pcd"]		=writePCD;
 		//data["icecache"]=writeICECACHE;
-        data["ptf"]=writePTC;
-        data["itbl"]=writeBGEO;
-        data["atbl"]=writeBGEO;
+        data["ptf"]		=writePTC;
+        data["itbl"]	=writeBGEO;
+        data["atbl"]	=writeBGEO;
+		//data["rpc"]		=writeRPC;
     }
     return data;
 }

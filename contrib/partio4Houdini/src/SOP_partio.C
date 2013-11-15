@@ -144,7 +144,7 @@ bool SOP_partio::matchExtension(UT_String &fileName)
         // No string entered exit
         return false;
     }
-    std::string supportedExtensions[] = {".bgeo", ".geo", ".pda", ".pdb", ".pdb.gz", ".pdc", ".bin", ".prt", ".ptc", ".pts", ".xyz", ".pcd", ".mc",".icecache", ".rib", };
+    std::string supportedExtensions[] = {".bgeo", ".geo", ".pda", ".pdb", ".pdb.gz", ".pdc", ".bin", ".rpc", ".prt", ".ptc", ".pts", ".xyz", ".pcd", ".mc",".icecache", ".rib", };
 
     for (int i = 0; i < sizeof(supportedExtensions); ++i)
     {
@@ -203,7 +203,7 @@ SOP_partio::~SOP_partio() {}
 bool
 SOP_partio::getHDKHelp(UT_String &str) const
 {
-    str.harden("This is some help for the partio SOP\n\n This node can read partio suported formats:\n bgeo,geo\n pda,pdb,pdb.gz,pdc\nbin\nprt\nptc\npts,xyz,pcd\nmc,icecache,rib caches\n");
+    str.harden("This is some help for the partio SOP\n\n This node can read partio suported formats:\n bgeo,geo\n pda,pdb,pdb.gz,pdc\nbin,rpc\nprt\nptc\npts,xyz,pcd\nmc,icecache,rib caches\n");
     return true;
 }
 
@@ -227,7 +227,7 @@ SOP_partio::cookMySop(OP_Context &context)
     if (!matchExtension(filename))
     {
         gdp->clearAndDestroy();
-        addError(SOP_MESSAGE, "filename empty or filetype is not one of:\nbgeo,geo\npda,pdb,pdb.gz,pdc\nbin\nprt\nptc\npts,xyz,pcd\nmc,icecache,rib");
+        addError(SOP_MESSAGE, "filename empty or filetype is not one of:\nbgeo,geo\npda,pdb,pdb.gz,pdc\nbin,rpc\nprt\nptc\npts,xyz,pcd\nmc,icecache,rib");
         gdp->notifyCache(GU_CACHE_ALL);
         return error();
     }
