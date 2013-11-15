@@ -514,17 +514,17 @@ void  reloadParticleFile(int direction)
         int result = stat(particleFile.c_str(),&statinfo);
         if (result >=0)
         {
-			ParticlesData* newParticles = read(particleFile.c_str());
 
-			if (particles)
+			ParticlesData* newParticles;
+			newParticles = particles;
+			particles = NULL;
+			if (newParticles != NULL)
 			{
 				//cout << particles << endl;
 				//particles = particles->reset();
-				particles = NULL;
+				newParticles->release();
 			}
-
-			//cout << newParticles << endl;
-            particles = newParticles;
+			particles = read(particleFile.c_str());
 
             if (!glutGetWindow()) {
                 return;
