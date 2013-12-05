@@ -135,7 +135,6 @@ SET(MAYA_LIBS
   ${MAYA_OpenMayaUI_LIBRARY}
   ${MAYA_OpenMayaRender_LIBRARY})
 
-SET(PARTIO_LIB  partio)
 
 ADD_LIBRARY(${PLUGIN_NAME} SHARED ${partio4ArnoldINCLUDES} ${partio4ArnoldCPP})
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
@@ -143,7 +142,7 @@ set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME}
                       ${ZLIB}
                       ${MAYA_LIBS}
-                      ${PARTIO_LIB}
+					  ${PARTIO_LIBRARIES}
                       ${ARNOLD_LIBRARY}
                       ${MTOA_mtoa_api_LIBRARY})
 

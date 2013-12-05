@@ -89,14 +89,6 @@ endif()
 
 SET(MAYA_LIBS OpenMaya Foundation OpenMayaAnim OpenMayaFX OpenMayaUI OpenMayaRender)
 
-IF (WIN32)
-	SET(PARTIO_LIB  partio)
-elseif(APPLE)
-	SET(PARTIO_LIB  libpartio.a)
-elseif(UNIX)
-	SET(PARTIO_LIB  libpartio.a)
-ENDIF()
-
 
 ADD_LIBRARY(${PLUGIN_NAME} SHARED ${TARGET_H} ${TARGET_SRC})
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
@@ -108,7 +100,7 @@ ENDIF()
 
 TARGET_LINK_LIBRARIES(${PLUGIN_NAME}
                       ${ZLIB}
-                      ${PARTIO_LIB}
+                      ${PARTIO_LIBRARIES}
                       ${MAYA_LIBS}
                       ${OPENGL_gl_LIBRARY}
                       ${OPENGL_glu_LIBRARY})
