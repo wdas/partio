@@ -61,7 +61,8 @@ set (CMAKE_PROJECT_NAME "partio4Houdini")
 #  we want to override the  Compiler here to use a newer version because maya's compiler and  houdini's don't usually jive
 SET( CMAKE_CXX_COMPILER /usr/bin/g++)
 SET( CMAKE_C_COMPILER /usr/bin/gcc)
-SET( SYS_INCLUDE /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include )
+## hardcoding this is bad.. don't know how to fix this yet... 
+SET( SYS_INCLUDE /usr/lib/gcc/x86_64-redhat-linux/4.8.2/include )
 
 
 find_package(Houdini)
@@ -74,9 +75,6 @@ if(HOUDINI_FOUND)
 	add_custom_command(OUTPUT sesitag.C
 					DEPENDS src/ROP_partio.C
                    COMMAND ${PROJECT_SOURCE_DIR}/contrib/cmake/hdk-config.py --tagfile=${CMAKE_BINARY_DIR}/contrib/partio4Houdini/sesitag.C)
-	SET (HOUDINI_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/houdini/$ENV{HOUDINI_VERSION}/dso)
-	SET (HOUDINI_ICONS_PATH  ${CMAKE_SOURCE_DIR}/build-${PARTIO_BUILD_PLATFORM}/houdini/$ENV{HOUDINI_VERSION}/Icons)
-
 	SET (HOUDINI_INCS ${HOUDINI_INCLUDE_DIRS} ${SYS_INCLUDE})
 	SET (HOUDINI_LIBDIR ${HOUDINI_LIBRARY_DIRS})
 	SET (HOUDINI_LIBS HoudiniUI HoudiniOPZ HoudiniOP3 HoudiniOP2 HoudiniOP1 HoudiniSIM HoudiniGEO HoudiniPRM HoudiniUT)
@@ -91,6 +89,13 @@ if(HOUDINI_FOUND)
 	target_link_libraries(${PLUGIN_NAME} ${PARTIO_LIBRARIES} ${HOUDINI_LIBS} ${HOUDINI_SYS_LIBS})
 
 	## install everything
+	SET (HOUDINI_OUTPUT_PATH houdini/dso)
+	SET (HOUDINI_ICONS_PATH  houdini/Icons)
+	IF (${LOCAL_INSTALL})
+		SET (HOUDINI_OUTPUT_PATH houdini/$ENV{HOUDINI_VERSION}/dso)
+		SET (HOUDINI_ICONS_PATH  houdini/$ENV{HOUDINI_VERSION}/Icons)
+	ENDIF(${LOCAL_INSTALL})
+
 	INSTALL(TARGETS ${PLUGIN_NAME} DESTINATION ${HOUDINI_OUTPUT_PATH} )
 
 	FILE(GLOB PARTIO4HOUDINI_ICONS "icons/*")

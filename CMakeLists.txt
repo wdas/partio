@@ -103,10 +103,13 @@ ELSE(WIN32)
 	SET( CMAKE_CXX_FLAGS "-fPIC")
 ENDIF(WIN32)
 
+# to switch between rez and local install paths 
+SET (LOCAL_INSTALL 0)
+
 ## Set install location
 IF ( ${CMAKE_INSTALL_PREFIX}  STREQUAL  "/usr/local")
 	message(STATUS  "CMAKE INSTALL PREFIX  being changed to local build")
-
+	SET (LOCAL_INSTALL 1)
 	IF (UNIX)
 		EXECUTE_PROCESS(COMMAND sh -c "echo `uname`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
 		SET(PARTIO_BUILD_PLATFORM "${VARIANT_DIRECTORY}")
