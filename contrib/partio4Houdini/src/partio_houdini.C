@@ -39,6 +39,7 @@
 
 #include <GU/GU_PrimPart.h>
 #include <GEO/GEO_AttributeHandle.h>
+#include <GEO/GEO_AttributeOwner.h>
 #include <UT/UT_Vector3.h>
 #include <UT/UT_Vector4.h>
 #include <GU/GU_Detail.h>
