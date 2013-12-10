@@ -63,8 +63,10 @@ struct fixedFloatArray
 };
 %}
 
-%init %{ 
+%init %{
+#ifdef PARTIO_USE_NUMPY
 import_array();
+#endif
 %}
 
 // Particle Types
@@ -310,7 +312,6 @@ public:
 
         return PyArray_Return((PyArrayObject *)array);
     }
-#endif
 
     %feature("autodoc");
     %feature("docstring","Get");
@@ -344,6 +345,7 @@ public:
  
         return PyArray_Return((PyArrayObject *)array);
     }
+#endif
 
     %feature("autodoc");
     %feature("docstring","Gets a single flattened tuple, containing attribute data for all particles");

@@ -62,30 +62,29 @@ if(NOT _NUMPY_SEARCH_SUCCESS MATCHES 0)
             "NumPy import failure:\n${_NUMPY_ERROR_VALUE}")
     endif()
     set(NUMPY_FOUND FALSE)
+else()
+    # Convert the process output into a list
+    string(REGEX REPLACE ";" "\\\\;" _NUMPY_VALUES ${_NUMPY_VALUES})
+    string(REGEX REPLACE "\n" ";" _NUMPY_VALUES ${_NUMPY_VALUES})
+    list(GET _NUMPY_VALUES 0 NUMPY_VERSION)
+    list(GET _NUMPY_VALUES 1 NUMPY_INCLUDE_DIRS)
+
+    # Make sure all directory separators are '/'
+    string(REGEX REPLACE "\\\\" "/" NUMPY_INCLUDE_DIRS ${NUMPY_INCLUDE_DIRS})
+
+    # Get the major and minor version numbers
+    string(REGEX REPLACE "\\." ";" _NUMPY_VERSION_LIST ${NUMPY_VERSION})
+    list(GET _NUMPY_VERSION_LIST 0 NUMPY_VERSION_MAJOR)
+    list(GET _NUMPY_VERSION_LIST 1 NUMPY_VERSION_MINOR)
+    list(GET _NUMPY_VERSION_LIST 2 NUMPY_VERSION_PATCH)
+    string(REGEX MATCH "[0-9]*" NUMPY_VERSION_PATCH ${NUMPY_VERSION_PATCH})
+    math(EXPR NUMPY_VERSION_DECIMAL
+        "(${NUMPY_VERSION_MAJOR} * 10000) + (${NUMPY_VERSION_MINOR} * 100) + ${NUMPY_VERSION_PATCH}")
+
+    find_package_message(NUMPY
+        "Found NumPy: version \"${NUMPY_VERSION}\" ${NUMPY_INCLUDE_DIRS}"
+        "${NUMPY_INCLUDE_DIRS}${NUMPY_VERSION}")
+
+    set(NUMPY_FOUND TRUE)
+    set(NUMPY_INCLUDE_DIR ${NUMPY_INCLUDE_DIRS} CACHE STRING "Numpy include path")
 endif()
-
-# Convert the process output into a list
-string(REGEX REPLACE ";" "\\\\;" _NUMPY_VALUES ${_NUMPY_VALUES})
-string(REGEX REPLACE "\n" ";" _NUMPY_VALUES ${_NUMPY_VALUES})
-list(GET _NUMPY_VALUES 0 NUMPY_VERSION)
-list(GET _NUMPY_VALUES 1 NUMPY_INCLUDE_DIRS)
-
-# Make sure all directory separators are '/'
-string(REGEX REPLACE "\\\\" "/" NUMPY_INCLUDE_DIRS ${NUMPY_INCLUDE_DIRS})
-
-# Get the major and minor version numbers
-string(REGEX REPLACE "\\." ";" _NUMPY_VERSION_LIST ${NUMPY_VERSION})
-list(GET _NUMPY_VERSION_LIST 0 NUMPY_VERSION_MAJOR)
-list(GET _NUMPY_VERSION_LIST 1 NUMPY_VERSION_MINOR)
-list(GET _NUMPY_VERSION_LIST 2 NUMPY_VERSION_PATCH)
-string(REGEX MATCH "[0-9]*" NUMPY_VERSION_PATCH ${NUMPY_VERSION_PATCH})
-math(EXPR NUMPY_VERSION_DECIMAL
-    "(${NUMPY_VERSION_MAJOR} * 10000) + (${NUMPY_VERSION_MINOR} * 100) + ${NUMPY_VERSION_PATCH}")
-
-find_package_message(NUMPY
-    "Found NumPy: version \"${NUMPY_VERSION}\" ${NUMPY_INCLUDE_DIRS}"
-    "${NUMPY_INCLUDE_DIRS}${NUMPY_VERSION}")
-
-set(NUMPY_FOUND TRUE)
-set(NUMPY_INCLUDE_DIR ${NUMPY_INCLUDE_DIRS} CACHE STRING "Numpy include path")
-

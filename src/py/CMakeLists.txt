@@ -48,11 +48,13 @@ IF(SWIG_FOUND)
 		SET(CMAKE_SWIG_FLAGS "")
 
 		SET_SOURCE_FILES_PROPERTIES(partio.i PROPERTIES CPLUSPLUS ON)
-		SET_SOURCE_FILES_PROPERTIES(partio.i
-		                            PROPERTIES SWIG_FLAGS "-includeall -module _partio")
+
+		# This fails. not sure when it worked, but it gets overridden if numpy is found (CHAD)
+		#SET_SOURCE_FILES_PROPERTIES(partio.i
+		#                            PROPERTIES SWIG_FLAGS "-includeall -module _partio")
 
 		IF(NUMPY_FOUND)
-		  INCLUDE_DIRECTORIES(${NUMPY_INCLUDE_DIRS})
+		 	INCLUDE_DIRECTORIES(${NUMPY_INCLUDE_DIRS})
 			ADD_DEFINITIONS (-DPARTIO_USE_NUMPY)
 			SET_SOURCE_FILES_PROPERTIES(partio.i PROPERTIES SWIG_FLAGS "-DPARTIO_USE_NUMPY")
 		ENDIF(NUMPY_FOUND)
