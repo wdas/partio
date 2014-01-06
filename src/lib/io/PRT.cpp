@@ -59,21 +59,21 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 
 namespace Partio{
 
-#define OUT_BUFSIZE		(4096)
+#define OUT_BUFSIZE        (4096)
 
 typedef struct FileHeadder {
-    unsigned char	magic[8];
-    unsigned int	headersize;
-    unsigned char	signature[32];
-    unsigned int	version;
+    unsigned char   magic[8];
+    unsigned int    headersize;
+    unsigned char   signature[32];
+    unsigned int    version;
     unsigned long long numParticles;
 } PRT_File_Headder;
 
 typedef struct Channel {
-    unsigned char	name[32];
-    unsigned int	type;
-    unsigned int	arity;
-    unsigned int	offset;
+    unsigned char   name[32];
+    unsigned int    type;
+    unsigned int    arity;
+    unsigned int    offset;
 } Channel;
 
 static unsigned char magic[8] = {192, 'P', 'R', 'T', '\r', '\n', 26, '\n'};
@@ -82,6 +82,8 @@ static unsigned char signature[32] = {
     0x63,0x6c,0x65,0x20,0x46,0x6f,0x72,0x6d,0x61,0x74,0x00,0x00,0x00,0x00,0x00,0x00
     };
 
+static unsigned int sizes[11] = {2, 4, 8, 2, 4, 8, 2, 4, 8, 1, 1};
+    
 #ifndef USE_ILMHALF
 union f_ui {
     unsigned int ui;
@@ -122,14 +124,14 @@ static bool write_buffer(std::ostream& os, z_stream& z, char* out_buf, void* p, 
     z.next_in=(Bytef*)p;
     z.avail_in=(uInt)size;
     while (z.avail_in!=0 || flush) {
-	z.next_out = (Bytef*)out_buf;
-	z.avail_out = OUT_BUFSIZE;
-	int ret=deflate(&z,flush?Z_FINISH:Z_NO_FLUSH);
-	if (!(ret!=Z_BUF_ERROR && ret!=Z_STREAM_ERROR)) {
+    z.next_out = (Bytef*)out_buf;
+    z.avail_out = OUT_BUFSIZE;
+    int ret=deflate(&z,flush?Z_FINISH:Z_NO_FLUSH);
+    if (!(ret!=Z_BUF_ERROR && ret!=Z_STREAM_ERROR)) {
             std::cerr<<"Zlib error "<<z.msg<<std::endl;;
             return false;
         }
-        int	generated_output=(int)(z.next_out-(Bytef*)out_buf);
+        int generated_output=(int)(z.next_out-(Bytef*)out_buf);
         os.write((char*)out_buf,generated_output);
         if (ret==Z_STREAM_END) break;
     }
@@ -158,42 +160,49 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
         std::cerr<<"Partio: failed to get PRT magic"<<std::endl;
         return 0;
     }
+    
+    // The header may be a different size in other PRT versions
+    if (header.headersize > sizeof(FileHeadder))
+        input->seekg(header.headersize);
+    
     int reserve=0;
     int channels=0;
     int channelsize=0;
-    read<LITEND>(*input,reserve);		// reserved
-    read<LITEND>(*input,channels);		// number of channel
-    read<LITEND>(*input,channelsize);	// size of channel
+    read<LITEND>(*input,reserve);        // reserved
+    read<LITEND>(*input,channels);       // number of channel
+    read<LITEND>(*input,channelsize);    // size of channel
 
     simple->addParticles((const int)header.numParticles);
-
+    
     std::vector<Channel> chans;
     std::vector<ParticleAttribute> attrs;
-
+    
+    unsigned particleSize = 0;
+    
     for (int i=0; i<channels; i++) {
         Channel ch;
         input->read((char*)&ch, sizeof(Channel));
         ParticleAttributeType type=NONE;
         switch (ch.type) {
-        case 0:	// int16
-        case 1:	// int32
-        case 2:	// int64
+        case 0:    // int16
+        case 1:    // int32
+        case 2:    // int64
             type = INT;
             break;
-        case 3:	// float16
-        case 4:	// float32
-        case 5:	// float64
+        case 3:    // float16
+        case 4:    // float32
+        case 5:    // float64
             if (ch.arity == 3)
                 type = VECTOR;
             else
                 type = FLOAT;
             break;
-        case 6:	// uint16
-        case 7:	// uint32
-        case 8:	// uint64
+        case 6:    // uint16
+        case 7:    // uint32
+        case 8:    // uint64
             type = INT;
             break;
-        case 9:	// int8
+        case 9:    // int8
         case 10:// uint8
             type = INT;
             break;
@@ -209,6 +218,13 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
             chans.push_back(ch);
             attrs.push_back(attrHandle);
         }
+        
+        // The size of the particle is determined from the channel with largest offset. The channels are not required to be listed in order.
+        particleSize = (std::max)( particleSize, chans.back().offset + sizes[type] );
+        
+        // The channel entry might have more data in other PRT versions.
+        if ((unsigned)channelsize > sizeof(Channel))
+            input->seekg(channelsize - sizeof(Channel), std::ios::cur);
     }
 
     if (headersOnly) return simple;
@@ -223,66 +239,57 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
     char in_buf[OUT_BUFSIZE];
     z.next_in = 0;
     z.avail_in = 0;
+    
+    char* prt_buf = new char[particleSize];
 
     for (unsigned int particleIndex=0;particleIndex<(unsigned int )simple->numParticles();particleIndex++) {
+        // Read the particle from the file, and decompress it into a single particle-sized buffer.
+        read_buffer(*input, z, (char*)in_buf, prt_buf, particleSize);
+        
         for (unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++) {
             if (attrs[attrIndex].type==Partio::INT) {
                 int* data=simple->dataWrite<int>(attrs[attrIndex],particleIndex);
                 for (int count=0;count<attrs[attrIndex].count;count++) {
                     int ival = 0;
                     switch (chans[attrIndex].type) {
-                    case 0:	// int16
+                    case 0:    // int16
                         {
-                            short val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(short));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<short*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(short) ] );
                         }
                         break;
-                    case 1:	// int32
+                    case 1:    // int32
                         {
-                            read_buffer(*input, z, (char*)in_buf, &ival, sizeof(int));
+                            ival = (int)*reinterpret_cast<int*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(int) ] );
                         }
                         break;
-                    case 2:	// int64
+                    case 2:    // int64
                         {
-                            long long val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(long long));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<long long*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(long long) ] );
                         }
                         break;
-                    case 6:	// uint16
+                    case 6:    // uint16
                         {
-                            unsigned short val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned short));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<unsigned short*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(unsigned short) ] );
                         }
                         break;
-                    case 7:	// uint32
+                    case 7:    // uint32
                         {
-                            unsigned int val;
-                            read_buffer(*input, z, (char*)in_buf,  &val, sizeof(unsigned int));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<unsigned int*>( &prt_buf[ chans[attrIndex].offset +  + count * sizeof(unsigned int) ] );
                         }
                         break;
-                    case 8:	// uint64
+                    case 8:    // uint64
                         {
-                            unsigned long long val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned long long));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<unsigned long long*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(unsigned long long) ] );
                         }
                         break;
-                    case 9:	// int8
+                    case 9:    // int8
                         {
-                            char val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(char));
-                            ival = (int)val;
+                            ival = (int)prt_buf[ chans[attrIndex].offset + count ];
                         }
                         break;
                     case 10:// uint8
                         {
-                            unsigned char val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned char));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<unsigned char*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(unsigned char) ] );
                         }
                         break;
                     }
@@ -291,39 +298,37 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
             }else if (attrs[attrIndex].type==Partio::FLOAT || attrs[attrIndex].type==Partio::VECTOR) {
                 float* data=simple->dataWrite<float>(attrs[attrIndex],particleIndex);
                 for (int count=0;count<attrs[attrIndex].count;count++) {
-                    float fval;
+                    float fval = 0;
                     switch (chans[attrIndex].type) {
-                    case 3:	// float16
+                    case 3:    // float16
                         {
 #ifdef USE_ILMHALF
-                            half val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(half));
-                            fval = (float)(val);
+                            fval = (float)*reinterpret_cast<half*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(half) ] );
 #else
-                            unsigned short val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(val));
+                            unsigned short val = *reinterpret_cast<unsigned short*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(unsigned short) ] );
                             fval = half2float[val].f;
 #endif
                         }
                         break;
-                    case 4:	// float32
+                    case 4:    // float32
                         {
-                            read_buffer(*input, z, (char*)in_buf, &fval, sizeof(float));
+                            fval = (float)*reinterpret_cast<float*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(float) ] );
                         }
                         break;
-                    case 5:	// float64
+                    case 5:    // float64
                         {
-                            double val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(double));
-                            fval = (float)val;
+                            fval = (float)*reinterpret_cast<double*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(double) ] );
                         }
                         break;
                     }
                     data[count]=fval;
                 }
             }
-		}
-	}
+        }
+    }
+    
+    delete prt_buf;
+    
     if (inflateEnd( &z ) != Z_OK) {
         std::cerr<<"Zlib inflateEnd error"<<std::endl;
         return 0;
@@ -335,7 +340,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
 
 bool writePRT(const char* filename,const ParticlesData& p,const bool /*compressed*/)
 {
-	/// Krakatoa pukes on 0 particle files for some reason so don't export at all....
+    /// Krakatoa pukes on 0 particle files for some reason so don't export at all....
     int numParts = p.numParticles();
     if (numParts)
     {
@@ -373,7 +378,7 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
             case FLOAT: ch.type=4; ch.arity=attr.count; offset += sizeof(float)*attr.count; break;
             case INT: ch.type=1; ch.arity=attr.count; offset += sizeof(int)*attr.count; break;
             case VECTOR: ch.type=4; ch.arity=attr.count; offset += sizeof(float)*attr.count; break;
-			case INDEXEDSTR:; break;
+            case INDEXEDSTR:; break;
             case NONE:;break;
             }
             if (ch.arity) {
