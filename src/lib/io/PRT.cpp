@@ -59,21 +59,21 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 
 namespace Partio{
 
-#define OUT_BUFSIZE        (4096)
+#define OUT_BUFSIZE		(4096)
 
 typedef struct FileHeadder {
-    unsigned char   magic[8];
-    unsigned int    headersize;
-    unsigned char   signature[32];
-    unsigned int    version;
+    unsigned char	magic[8];
+    unsigned int	headersize;
+    unsigned char	signature[32];
+    unsigned int	version;
     unsigned long long numParticles;
 } PRT_File_Headder;
 
 typedef struct Channel {
-    unsigned char   name[32];
-    unsigned int    type;
-    unsigned int    arity;
-    unsigned int    offset;
+    unsigned char	name[32];
+    unsigned int	type;
+    unsigned int	arity;
+    unsigned int	offset;
 } Channel;
 
 static unsigned char magic[8] = {192, 'P', 'R', 'T', '\r', '\n', 26, '\n'};
@@ -124,14 +124,14 @@ static bool write_buffer(std::ostream& os, z_stream& z, char* out_buf, void* p, 
     z.next_in=(Bytef*)p;
     z.avail_in=(uInt)size;
     while (z.avail_in!=0 || flush) {
-    z.next_out = (Bytef*)out_buf;
-    z.avail_out = OUT_BUFSIZE;
-    int ret=deflate(&z,flush?Z_FINISH:Z_NO_FLUSH);
-    if (!(ret!=Z_BUF_ERROR && ret!=Z_STREAM_ERROR)) {
+	z.next_out = (Bytef*)out_buf;
+	z.avail_out = OUT_BUFSIZE;
+	int ret=deflate(&z,flush?Z_FINISH:Z_NO_FLUSH);
+	if (!(ret!=Z_BUF_ERROR && ret!=Z_STREAM_ERROR)) {
             std::cerr<<"Zlib error "<<z.msg<<std::endl;;
             return false;
         }
-        int generated_output=(int)(z.next_out-(Bytef*)out_buf);
+        int	generated_output=(int)(z.next_out-(Bytef*)out_buf);
         os.write((char*)out_buf,generated_output);
         if (ret==Z_STREAM_END) break;
     }
@@ -168,12 +168,12 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
     int reserve=0;
     int channels=0;
     int channelsize=0;
-    read<LITEND>(*input,reserve);        // reserved
-    read<LITEND>(*input,channels);       // number of channel
-    read<LITEND>(*input,channelsize);    // size of channel
+    read<LITEND>(*input,reserve);		// reserved
+    read<LITEND>(*input,channels);		// number of channel
+    read<LITEND>(*input,channelsize);	// size of channel
 
     simple->addParticles((const int)header.numParticles);
-    
+
     std::vector<Channel> chans;
     std::vector<ParticleAttribute> attrs;
     
@@ -184,25 +184,25 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
         input->read((char*)&ch, sizeof(Channel));
         ParticleAttributeType type=NONE;
         switch (ch.type) {
-        case 0:    // int16
-        case 1:    // int32
-        case 2:    // int64
+        case 0:	// int16
+        case 1:	// int32
+        case 2:	// int64
             type = INT;
             break;
-        case 3:    // float16
-        case 4:    // float32
-        case 5:    // float64
+        case 3:	// float16
+        case 4:	// float32
+        case 5:	// float64
             if (ch.arity == 3)
                 type = VECTOR;
             else
                 type = FLOAT;
             break;
-        case 6:    // uint16
-        case 7:    // uint32
-        case 8:    // uint64
+        case 6:	// uint16
+        case 7:	// uint32
+        case 8:	// uint64
             type = INT;
             break;
-        case 9:    // int8
+        case 9:	// int8
         case 10:// uint8
             type = INT;
             break;
@@ -252,37 +252,37 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
                 for (int count=0;count<attrs[attrIndex].count;count++) {
                     int ival = 0;
                     switch (chans[attrIndex].type) {
-                    case 0:    // int16
+                    case 0:	// int16
                         {
                             ival = (int)*reinterpret_cast<short*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(short) ] );
                         }
                         break;
-                    case 1:    // int32
+                    case 1:	// int32
                         {
                             ival = (int)*reinterpret_cast<int*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(int) ] );
                         }
                         break;
-                    case 2:    // int64
+                    case 2:	// int64
                         {
                             ival = (int)*reinterpret_cast<long long*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(long long) ] );
                         }
                         break;
-                    case 6:    // uint16
+                    case 6:	// uint16
                         {
                             ival = (int)*reinterpret_cast<unsigned short*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(unsigned short) ] );
                         }
                         break;
-                    case 7:    // uint32
+                    case 7:	// uint32
                         {
                             ival = (int)*reinterpret_cast<unsigned int*>( &prt_buf[ chans[attrIndex].offset +  + count * sizeof(unsigned int) ] );
                         }
                         break;
-                    case 8:    // uint64
+                    case 8:	// uint64
                         {
                             ival = (int)*reinterpret_cast<unsigned long long*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(unsigned long long) ] );
                         }
                         break;
-                    case 9:    // int8
+                    case 9:	// int8
                         {
                             ival = (int)prt_buf[ chans[attrIndex].offset + count ];
                         }
@@ -300,7 +300,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
                 for (int count=0;count<attrs[attrIndex].count;count++) {
                     float fval = 0;
                     switch (chans[attrIndex].type) {
-                    case 3:    // float16
+                    case 3:	// float16
                         {
 #ifdef USE_ILMHALF
                             fval = (float)*reinterpret_cast<half*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(half) ] );
@@ -310,12 +310,12 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
 #endif
                         }
                         break;
-                    case 4:    // float32
+                    case 4:	// float32
                         {
                             fval = (float)*reinterpret_cast<float*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(float) ] );
                         }
                         break;
-                    case 5:    // float64
+                    case 5:	// float64
                         {
                             fval = (float)*reinterpret_cast<double*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(double) ] );
                         }
@@ -324,8 +324,8 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
                     data[count]=fval;
                 }
             }
-        }
-    }
+		}
+	}
     
     delete prt_buf;
     
@@ -340,7 +340,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
 
 bool writePRT(const char* filename,const ParticlesData& p,const bool /*compressed*/)
 {
-    /// Krakatoa pukes on 0 particle files for some reason so don't export at all....
+	/// Krakatoa pukes on 0 particle files for some reason so don't export at all....
     int numParts = p.numParticles();
     if (numParts)
     {
@@ -378,7 +378,7 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
             case FLOAT: ch.type=4; ch.arity=attr.count; offset += sizeof(float)*attr.count; break;
             case INT: ch.type=1; ch.arity=attr.count; offset += sizeof(int)*attr.count; break;
             case VECTOR: ch.type=4; ch.arity=attr.count; offset += sizeof(float)*attr.count; break;
-            case INDEXEDSTR:; break;
+			case INDEXEDSTR:; break;
             case NONE:;break;
             }
             if (ch.arity) {
