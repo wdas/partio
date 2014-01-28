@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
 #include <iostream>
+#include "../core/Mutex.h"
 #include "../Partio.h"
 #include "readers.h"
 
@@ -44,12 +45,15 @@ using namespace std;
 typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool);
 typedef bool (*WRITER_FUNCTION)(const char*,const ParticlesData&,const bool);
 
+PartioMutex initializationMutex;
+
 map<string,READER_FUNCTION>&
 readers()
 {
     static map<string,READER_FUNCTION> data;
     static bool initialized=false;
     if(!initialized){
+	initializationMutex.lock();
         data["bgeo"]=readBGEO;
         data["bhclassic"]=readBGEO;
         data["geo"]=readGEO;
@@ -67,6 +71,8 @@ readers()
         data["ptf"]=readPTC;
         data["itbl"]=readBGEO;
         data["atbl"]=readBGEO;
+	initialized=true;
+	initializationMutex.unlock();
     }
     return data;
 }
@@ -77,6 +83,7 @@ writers()
     static map<string,WRITER_FUNCTION> data;
     static bool initialized=false;
     if(!initialized){
+	initializationMutex.lock();
         data["bgeo"]=writeBGEO;
         data["geo"]=writeGEO;
         data["pdb"]=writePDB;
@@ -91,6 +98,8 @@ writers()
         data["ptf"]=writePTC;
         data["itbl"]=writeBGEO;
         data["atbl"]=writeBGEO;
+	initialized=true;
+	initializationMutex.unlock();
     }
     return data;
 }
