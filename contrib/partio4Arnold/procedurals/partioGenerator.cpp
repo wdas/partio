@@ -163,10 +163,10 @@ static int MyInit ( AtNode *mynode, void **user_ptr )
         else
         {
             AiMsgInfo ( "[partioGenerator] skipping, no points" );
-            return  FALSE;
+            return  false;
         }
     }
-    return TRUE;
+    return true;
 }
 
 // close  partio cache
@@ -177,7 +177,7 @@ static int MyCleanup ( void *user_ptr )
         AiMsgInfo ( "[partioGenerator] releasing points!" );
         points->release();
     }
-    return TRUE;
+    return true;
 }
 
 static int MyNumNodes ( void *user_ptr )
@@ -368,7 +368,7 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
         if ( hasOpacPP )
         {
             const float * partioOpac = points->data<float> ( opacityAttr,i );
-            AtFloat opac;
+            float opac;
             if ( opacityAttr.count == 1 )
             {
                 opac = partioOpac[0];
@@ -398,7 +398,7 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
         if ( hasRadiusPP && !arg_overrideRadiusPP )
         {
             const float * partioRadius = points->data<float> ( radiusAttr,i );
-            AtFloat rad;
+            float rad;
             if ( radiusAttr.count == 1 )
             {
                 rad = partioRadius[0];
@@ -462,6 +462,6 @@ proc_loader
     vtable->NumNodes = MyNumNodes;
     vtable->GetNode  = MyGetNode;
     strcpy ( vtable->version, AI_VERSION );
-    return TRUE;
+    return true;
 }
 

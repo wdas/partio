@@ -37,7 +37,7 @@ void CPartioVizTranslator::NodeInitializer ( CAbTranslator context )
     data.enums= enumNames;
     helper.MakeInputEnum ( data );
 
-    data.defaultValue.BOOL = FALSE;
+    data.defaultValue.BOOL = false;
     data.name = "aiOverrideRadiusPP";
     data.shortName = "ai_override_radiusPP";
     helper.MakeInputBoolean ( data );

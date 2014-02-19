@@ -15,7 +15,7 @@ public:
     void Export ( AtNode* anode );
     void ExportMotion ( AtNode* anode, unsigned int step );
     virtual void Update ( AtNode* anode );
-    virtual void UpdateMotion ( AtNode* anode, AtUInt step );
+    virtual void UpdateMotion ( AtNode* anode, uint step );
 
 protected:
     CPartioVizTranslator()  :
