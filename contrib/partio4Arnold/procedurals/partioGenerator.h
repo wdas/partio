@@ -27,8 +27,8 @@ const char* arg_rgbFrom;
 const char* arg_opacFrom;
 const char* arg_radFrom;
 AtRGB arg_defaultColor;
-AtFloat arg_defaultOpac;
-AtFloat arg_stepSize;
+float arg_defaultOpac;
+float arg_stepSize;
 
 float arg_motionBlurMult;
 float global_motionByFrame;
