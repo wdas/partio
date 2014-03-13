@@ -64,7 +64,8 @@ dp1=envpy.InstallAs(variant_install_abs+"/%s/_partio.so" % python_mod,lib)
 dp2=envpy.InstallAs(variant_install_abs+"/%s/partio.py" % python_mod,"partio.py")
 envpy.Depends(dp1,dp2)
 
-envpy.Alias('python', [dp1,dp2])
+dp3=envpy.Install(variant_install_abs+"/share/swig","partio.i")
+envpy.Alias('python', [dp1,dp2,dp3])
 
 # Find all .cpp's and make them into programs with same names as cpp
 #filter={"partview.cpp":0}  # don't compile this, it requires better env
