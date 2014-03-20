@@ -1045,8 +1045,11 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
     if (pvCache->particles)
     {
-        glPushAttrib(GL_CURRENT_BIT);
-
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+		// Store the current blend types
+		GLint blendAttrs[2];
+		glGetIntegerv(GL_BLEND_SRC, & blendAttrs[0]);
+		glGetIntegerv(GL_BLEND_DST, & blendAttrs[1]);
         if (alphaFromVal >=0 || defaultAlphaVal < 1) //testing settings
         {
 
@@ -1068,6 +1071,7 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
         if ( drawStyle == 0 )
         {
+			glDisable(GL_POINT_SMOOTH);
             glEnableClientState( GL_VERTEX_ARRAY );
             glEnableClientState( GL_COLOR_ARRAY );
 
@@ -1126,7 +1130,10 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
                 }
             }
 		}
+        glDisable(GL_BLEND);
         glDisable(GL_POINT_SMOOTH);
+		// Restore blend settings
+		glBlendFunc(blendAttrs[0], blendAttrs[1]);
         glPopAttrib();
     } // if (particles)
 }
