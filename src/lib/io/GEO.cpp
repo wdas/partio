@@ -155,9 +155,11 @@ ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly)
                 //*input>>indexName;
                 indexName=scanString(*input);
                 //std::cerr<<"Partio:    index "<<j<<" is "<<indexName<<std::endl;
-                int id=simple->registerIndexedStr(attribute,indexName.c_str());
-                if(id != j){
-                    cerr<<"Partio: error on read, expected registeerIndexStr to return index "<<j<<" but got "<<id<<" for string "<<indexName<<endl;
+                if (!headersOnly) {
+                    int id=simple->registerIndexedStr(attribute,indexName.c_str());
+                    if(id != j){
+                        cerr<<"Partio: error on read, expected registerIndexStr to return index "<<j<<" but got "<<id<<" for string "<<indexName<<endl;
+                    }
                 }
             }
             accessors.push_back(ParticleAccessor(attrs.back()));

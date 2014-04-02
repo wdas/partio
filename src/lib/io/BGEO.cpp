@@ -142,9 +142,11 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly)
                 char* indexName=new char[indexNameLength+1];;
                 input->read(indexName,indexNameLength);
                 indexName[indexNameLength]=0;
-                int id=simple->registerIndexedStr(attribute,indexName);
-                if(id != ii){
-                    std::cerr<<"Partio: error on read, expected registeerIndexStr to return index "<<ii<<" but got "<<id<<" for string "<<indexName<<std::endl;
+                if (!headersOnly) {
+                    int id=simple->registerIndexedStr(attribute,indexName);
+                    if(id != ii){
+                        std::cerr<<"Partio: error on read, expected registerIndexStr to return index "<<ii<<" but got "<<id<<" for string "<<indexName<<std::endl;
+                    }
                 }
                 delete [] indexName;
             }
