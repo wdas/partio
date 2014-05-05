@@ -327,7 +327,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
 		}
 	}
     
-    delete prt_buf;
+    delete[] prt_buf;
     
     if (inflateEnd( &z ) != Z_OK) {
         std::cerr<<"Zlib inflateEnd error"<<std::endl;

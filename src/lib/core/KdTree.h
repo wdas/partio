@@ -314,7 +314,7 @@ void KdTree<k>::sort()
     // reorder points to match id order
     std::vector<Point> newpoints(np);
     for (int i = 0; i < np; i++)
-	newpoints[i] = _points[_ids[i]];
+	newpoints[i] = _points[static_cast<unsigned int>(_ids[i])];
     std::swap(_points, newpoints);
 }
 

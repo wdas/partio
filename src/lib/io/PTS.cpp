@@ -90,7 +90,7 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
     input->getline(line,1024);
     int valcount = 0;
 #ifdef PARTIO_WIN32
-	char * nextLine;
+	char * nextLine = NULL;
     char * pch = strtok_s( line, "\t ", &nextLine );
 #else
 	char * pch = strtok( line, "\t " );

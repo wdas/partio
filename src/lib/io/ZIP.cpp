@@ -513,7 +513,7 @@ Find_And_Read_Central_Header()
     std::ios::streamoff read_start=max_comment_size+read_size_before_comment;
     if(read_start>end_position) read_start=end_position;
     istream.seekg(end_position-read_start);
-    char *buf=new char[read_start];
+    char *buf=new char[static_cast<unsigned int>(read_start)];
     if(read_start<=0){std::cerr<<"ZIP: Invalid read buffer size"<<std::endl;return false;}
     istream.read(buf,read_start);
     int found=-1;
