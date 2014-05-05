@@ -77,7 +77,7 @@ numParticles() const
 int ParticlesSimpleInterleave::
 numAttributes() const
 {
-    return attributes.size();
+    return static_cast<int>(attributes.size());
 }
 
 
@@ -183,10 +183,10 @@ addAttribute(const char* attribute,ParticleAttributeType type,const int count)
     ParticleAttribute attr;
     attr.name=attribute;
     attr.type=type;
-    attr.attributeIndex=attributes.size(); //  all arrays separate so we don't use this here!
+    attr.attributeIndex=static_cast<int>(attributes.size()); //  all arrays separate so we don't use this here!
     attr.count=count;
     attributes.push_back(attr);
-    nameToAttribute[attribute]=attributes.size()-1;
+    nameToAttribute[attribute]=static_cast<int>(attributes.size()-1);
 
     // repackage data for new attribute
     int oldStride=stride;
@@ -320,7 +320,7 @@ registerIndexedStr(const ParticleAttribute& attribute,const char* str)
     IndexedStrTable& table=attributeIndexedStrs[attribute.attributeIndex];
     std::map<std::string,int>::const_iterator it=table.stringToIndex.find(str);
     if(it!=table.stringToIndex.end()) return it->second;
-    int newIndex=table.strings.size();
+    int newIndex=static_cast<int>(table.strings.size());
     table.strings.push_back(str);
     table.stringToIndex[str]=newIndex;
     return newIndex;

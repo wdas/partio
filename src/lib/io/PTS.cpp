@@ -89,14 +89,23 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
 	input->getline(line,1024);
     input->getline(line,1024);
     int valcount = 0;
-    char * pch = strtok( line, "\t " );
+#ifdef PARTIO_WIN32
+	char * nextLine;
+    char * pch = strtok_s( line, "\t ", &nextLine );
+#else
+	char * pch = strtok( line, "\t " );
+#endif
     while ( pch )
     {
         if ( *pch != 0 && *pch != '\n' )
 		{
             valcount++;
         }
-        pch = strtok( NULL, "\t " );
+#ifdef PARTIO_WIN32
+        pch = strtok_s( NULL, "\t ", &nextLine );
+#else
+		pch = strtok( NULL, "\t " );
+#endif
     }
 
 

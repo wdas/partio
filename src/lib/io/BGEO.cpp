@@ -237,7 +237,7 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
                 int houdiniType=4;
                 unsigned short size=attr.count;
                 const std::vector<std::string>& indexTable=p.indexedStrs(attr);
-                int numIndexes=indexTable.size();
+                int numIndexes=static_cast<int>(indexTable.size());
                 write<BIGEND>(*output,size,houdiniType,numIndexes);
                 for(int i=0;i<numIndexes;i++)
                     writeHoudiniStr(*output,indexTable[i]);

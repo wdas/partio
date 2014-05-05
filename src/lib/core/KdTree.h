@@ -211,7 +211,7 @@ template <int k> class KdTree
  public:
     KdTree();
     ~KdTree();
-    int size() const { return _points.size(); }
+    int size() const { return static_cast<int>(_points.size()); }
     const BBox<k>& bbox() const { return _bbox; }
     const float* point(int i) const { return _points[i].p; }
     uint64_t id(int i) const { return _ids[i]; }
@@ -229,7 +229,7 @@ template <int k> class KdTree
     struct ComparePointsById {
 	float* points;
 	ComparePointsById(float* p) : points(p) {}
-	bool operator() (int a, int b) { return points[a*k] < points[b*k]; }
+	bool operator() (uint64_t a, uint64_t b) { return points[a*k] < points[b*k]; }
     };
     void findPoints(std::vector<uint64_t>& result, const BBox<k>& bbox,
 		    int n, int size, int j) const;
@@ -307,7 +307,7 @@ void KdTree<k>::sort()
     _sorted = 1;
 
     // reorder ids to sort points
-    int np = _points.size();
+    int np = static_cast<int>(_points.size());
     if (!np) return;
     if (np > 1) sortSubtree(0, np, 0);
 

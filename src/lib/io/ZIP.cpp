@@ -276,7 +276,7 @@ public:
         while(strm.avail_out!=0){
             if(strm.avail_in==0){ // buffer empty, read some more from file
                 istream.read((char*)in,part_of_zip_file?std::min((unsigned int)buffer_size,header.compressed_size-total_read):(unsigned int)buffer_size);
-                strm.avail_in=istream.gcount();
+                strm.avail_in=static_cast<uInt>(istream.gcount());
                 total_read+=strm.avail_in;
                 strm.next_in=(Bytef*)in;}
             int ret=inflate(&strm,Z_NO_FLUSH); // decompress
@@ -295,14 +295,14 @@ public:
         return unzip_count;}
     else{ // uncompressed, so just read
         istream.read((char*)(out+4),std::min(buffer_size-4,header.uncompressed_size-total_read));
-        int count=istream.gcount();
+        int count=static_cast<int>(istream.gcount());
         total_read+=count;
         return count;}
     return 1;}
 
     virtual int underflow()
     {if(gptr() && (gptr()<egptr())) return traits_type::to_int_type(*gptr()); // if we already have data just use it
-    int put_back_count=gptr()-eback();
+    int put_back_count=static_cast<int>(gptr()-eback());
     if(put_back_count>4) put_back_count=4;
     std::memmove(out+(4-put_back_count),gptr()-put_back_count,put_back_count);
     int num=process();
@@ -345,8 +345,8 @@ public:
         setg(0,0,0);
         setp((char*)in,(char*)(in+buffer_size-4)); // we want to be 4 aligned
         // Write appropriate header
-        if(header){header->header_offset=stream.tellp();header->Write(ostream,false);}
-        else{header_offset=stream.tellp();gzip_header.Write(ostream);}
+        if(header){header->header_offset=static_cast<unsigned int>(stream.tellp());header->Write(ostream,false);}
+        else{header_offset=static_cast<unsigned int>(stream.tellp());gzip_header.Write(ostream);}
         uncompressed_size=crc=0;
     }
 
@@ -368,7 +368,7 @@ protected:
     int process(bool flush)
     {if(!valid) return -1;
     strm.next_in=(Bytef*)pbase();
-    strm.avail_in=pptr()-pbase();
+    strm.avail_in=static_cast<uInt>(pptr()-pbase());
     while(strm.avail_in!=0 || flush){
         strm.avail_out=buffer_size;
         strm.next_out=(Bytef*)out;
@@ -377,12 +377,12 @@ protected:
             valid=false;
             std::cerr<<"gzip: gzip error "<<strm.msg<<std::endl;;
             return -1;}
-        int generated_output=strm.next_out-(Bytef*)out;
+        int generated_output=static_cast<int>(strm.next_out-(Bytef*)out);
         ostream.write((char*)out,generated_output);
         if(header) header->compressed_size+=generated_output;
         if(ret==Z_STREAM_END) break;}
     // update counts, crc's and buffers
-    int consumed_input=pptr()-pbase();
+    int consumed_input=static_cast<int>(pptr()-pbase());
     uncompressed_size+=consumed_input;
     crc=crc32(crc,(Bytef*)in,consumed_input);
     setp(pbase(),pbase()+buffer_size-4);return 1;}
