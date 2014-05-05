@@ -332,7 +332,14 @@ void KdTree<k>::sortSubtree(int n, int size, int j)
 
     // sort left and right subtrees using next discriminant
     if (left <= 1) return;
+#ifdef _MSC_VER  
+    #pragma warning (push)  
+    #pragma warning (disable : 4127)  // suppress the warning due to the constant k being tested at runtime, an alternative would be to specialize the template class for k = 0
+#endif  
     if (k > 1) j = (j+1)%k;
+#ifdef _MSC_VER  
+    #pragma warning (pop)  
+#endif  
     sortSubtree(n+1, left, j);
     if (right <= 1) return;
     sortSubtree(n+left+1, right, j);

@@ -41,12 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 namespace Partio{
 
-#ifdef PartioBIG_ENDIAN
-static const bool big_endian=true;
-#else
-static const bool big_endian=false;
-#endif
-
 template<class T>
 void endianSwap(T& value)
 {
@@ -58,17 +52,29 @@ void endianSwap(T& value)
      }
 }
 
+#ifdef PartioBIG_ENDIAN
 struct BIGEND {
-    template<class T> static void swap(T& x){
-        if(!big_endian) endianSwap(x);
+    template<class T> static void swap(T&){
     }
 };
 
 struct LITEND {
     template<class T> static void swap(T& x){
-        if(big_endian) endianSwap(x);
+        endianSwap(x);
     }
 };
+#else
+struct BIGEND {
+    template<class T> static void swap(T& x){
+        endianSwap(x);
+    }
+};
+
+struct LITEND {
+    template<class T> static void swap(T&){
+    }
+};
+#endif
 
 template<class E,class T> inline void
 read(std::istream& input,T& d)

@@ -298,7 +298,7 @@ public:
         int count=static_cast<int>(istream.gcount());
         total_read+=count;
         return count;}
-    return 1;}
+    }
 
     virtual int underflow()
     {if(gptr() && (gptr()<egptr())) return traits_type::to_int_type(*gptr()); // if we already have data just use it
@@ -310,8 +310,11 @@ public:
     if(num<=0) return EOF;
     return traits_type::to_int_type(*gptr());}
 
-    virtual int overflow(int c=EOF)
+    virtual int overflow(int)
     {assert(false);return EOF;}
+
+	// assignment operator declared and not defined, to suppress warning 4512 for Visual Studio
+	ZipStreambufDecompress& operator=(const ZipStreambufDecompress& _Right);
 
 //#####################################################################
 };
@@ -394,9 +397,12 @@ protected:
     {std::runtime_error("Attempt to read write only ostream");return 0;}
 
     virtual int overflow(int c=EOF)
-    {if(c!=EOF){*pptr()=c;pbump(1);}
+    {if(c!=EOF){*pptr()=static_cast<char>(c);pbump(1);}
     if(process(false)==EOF) return EOF;
     return c;}
+
+	// assignment operator declared and not defined, to suppress warning 4512 for Visual Studio
+	ZipStreambufCompress& operator=(const ZipStreambufCompress& _Right);
 
 //#####################################################################
 };
@@ -467,7 +473,7 @@ ZipFileWriter::
 // Function ZipFileWriter
 //#####################################################################
 std::ostream* ZipFileWriter::
-Add_File(const std::string& filename,const bool binary)
+Add_File(const std::string& filename,const bool)
 {
     files.push_back(new ZipFileHeader(filename));
     return new ZIP_FILE_OSTREAM(files.back(),ostream);
@@ -542,7 +548,7 @@ Find_And_Read_Central_Header()
 //#####################################################################
 // Function Get_File
 //#####################################################################
-std::istream* ZipFileReader::Get_File(const std::string& filename,const bool binary)
+std::istream* ZipFileReader::Get_File(const std::string& filename,const bool)
 {
     std::map<std::string,ZipFileHeader*>::iterator i=filename_to_header.find(filename);
     if(i!=filename_to_header.end()){

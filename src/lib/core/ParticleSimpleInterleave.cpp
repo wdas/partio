@@ -128,7 +128,7 @@ sort()
 }
 
 void ParticlesSimpleInterleave::
-findPoints(const float bboxMin[3],const float bboxMax[3],std::vector<ParticleIndex>& points) const
+findPoints(const float[3],const float[3],std::vector<ParticleIndex>&) const
 {
 #if 0
     if(!kdtree){
@@ -146,8 +146,8 @@ findPoints(const float bboxMin[3],const float bboxMax[3],std::vector<ParticleInd
 }
 
 float ParticlesSimpleInterleave::
-findNPoints(const float center[3],const int nPoints,const float maxRadius,std::vector<ParticleIndex>& points,
-    std::vector<float>& pointDistancesSquared) const
+findNPoints(const float[3],const int,const float,std::vector<ParticleIndex>&,
+    std::vector<float>&) const
 {
 #if 0
     if(!kdtree){
@@ -164,8 +164,8 @@ findNPoints(const float center[3],const int nPoints,const float maxRadius,std::v
 }
 
 int ParticlesSimpleInterleave::
-findNPoints(const float center[3],int nPoints,const float maxRadius, ParticleIndex *points,
-    float *pointDistancesSquared, float *finalRadius2) const
+findNPoints(const float[3], int, const float, ParticleIndex *,
+    float *, float *) const
 {
     // TODO: I guess they don't support this lookup here
     return 0;
@@ -262,14 +262,14 @@ setupIteratorNextBlock(Partio::ParticleIterator<true>& iterator) const
 }
 
 void ParticlesSimpleInterleave::
-setupAccessor(Partio::ParticleIterator<false>& iterator,ParticleAccessor& accessor)
+setupAccessor(Partio::ParticleIterator<false>&,ParticleAccessor& accessor)
 {
     accessor.stride=stride;
     accessor.basePointer=data+attributeOffsets[accessor.attributeIndex];
 }
 
 void ParticlesSimpleInterleave::
-setupAccessor(Partio::ParticleIterator<true>& iterator,ParticleAccessor& accessor) const
+setupAccessor(Partio::ParticleIterator<true>&,ParticleAccessor& accessor) const
 {
     accessor.stride=stride;
     accessor.basePointer=data+attributeOffsets[accessor.attributeIndex];
@@ -283,8 +283,7 @@ dataInternal(const ParticleAttribute& attribute,const ParticleIndex particleInde
 }
 
 void ParticlesSimpleInterleave::
-dataInternalMultiple(const ParticleAttribute& attribute,const int indexCount,
-    const ParticleIndex* particleIndices,const bool sorted,char* values) const
+dataInternalMultiple(const ParticleAttribute&,const int,const ParticleIndex*,const bool,char*) const
 {
 #if 0
     assert(attribute.attributeIndex>=0 && attribute.attributeIndex<(int)attributes.size());
@@ -297,8 +296,8 @@ dataInternalMultiple(const ParticleAttribute& attribute,const int indexCount,
 }
 
 void ParticlesSimpleInterleave::
-dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
-    const ParticleIndex* particleIndices,const bool sorted,float* values) const
+dataAsFloat(const ParticleAttribute&,const int,
+    const ParticleIndex*,const bool,float*) const
 {
 #if 0
     assert(attribute.attributeIndex>=0 && attribute.attributeIndex<(int)attributes.size());

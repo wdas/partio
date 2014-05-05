@@ -267,14 +267,14 @@ setupIteratorNextBlock(Partio::ParticleIterator<true>& iterator) const
 
 
 void ParticlesSimple::
-setupAccessor(Partio::ParticleIterator<false>& iterator,ParticleAccessor& accessor)
+setupAccessor(Partio::ParticleIterator<false>&,ParticleAccessor& accessor)
 {
     accessor.stride=accessor.count*sizeof(float);
     accessor.basePointer=attributeData[accessor.attributeIndex];
 }
 
 void ParticlesSimple::
-setupAccessor(Partio::ParticleIterator<true>& iterator,ParticleAccessor& accessor) const
+setupAccessor(Partio::ParticleIterator<true>&,ParticleAccessor& accessor) const
 {
     accessor.stride=accessor.count*sizeof(float);
     accessor.basePointer=attributeData[accessor.attributeIndex];
@@ -289,7 +289,7 @@ dataInternal(const ParticleAttribute& attribute,const ParticleIndex particleInde
 
 void ParticlesSimple::
 dataInternalMultiple(const ParticleAttribute& attribute,const int indexCount,
-    const ParticleIndex* particleIndices,const bool sorted,char* values) const
+    const ParticleIndex* particleIndices,const bool,char* values) const
 {
     assert(attribute.attributeIndex>=0 && attribute.attributeIndex<(int)attributes.size());
 
