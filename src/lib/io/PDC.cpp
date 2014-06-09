@@ -74,11 +74,11 @@ string readName(istream& input){
     return result;
 }
 
-ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly){
+ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly,const bool verbose){
 
     auto_ptr<istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){
-        std::cerr << "Partio: Unable to open file " << filename << std::endl;
+        if(verbose) std::cerr << "Partio: Unable to open file " << filename << std::endl;
         return 0;
     }
 

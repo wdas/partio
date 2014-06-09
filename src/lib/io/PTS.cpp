@@ -54,12 +54,12 @@ using namespace std;
 
 // TODO: convert this to use iterators like the rest of the readers/writers
 
-ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly,const bool verbose)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if (!*input)
     {
-        cerr<<"Partio: Can't open particle data file: "<<filename<<endl;
+        if(verbose) cerr<<"Partio: Can't open particle data file: "<<filename<<endl;
         return 0;
     }
 

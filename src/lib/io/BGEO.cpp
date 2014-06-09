@@ -55,11 +55,11 @@ void writeHoudiniStr(ostream& ostream,const string& s)
 }
 
 
-ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const bool verbose)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
-        cerr<<"Partio: Unable to open file "<<filename<<endl;
+        if(verbose) cerr<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
     }
 

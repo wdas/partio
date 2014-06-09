@@ -74,12 +74,12 @@ typedef struct{
 } BIN_HEADER;
 
 
-ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly){
+ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly,const bool verbose){
 
     auto_ptr<istream> input(new ifstream(filename,ios::in|ios::binary));
 
     if(!*input){
-        cerr << "Partio: Unable to open file " << filename << endl;
+        if(verbose) cerr << "Partio: Unable to open file " << filename << endl;
         return 0;
     }
 

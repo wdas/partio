@@ -107,11 +107,11 @@ string scanString(istream& input)
     return string(buf);
 }
 
-ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly,const bool verbose)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in));
     if(!*input){
-        cerr<<"Partio: Can't open particle data file: "<<filename<<endl;
+        if(verbose) cerr<<"Partio: Can't open particle data file: "<<filename<<endl;
         return 0;
     }
     int NPoints=0, NPointAttrib=0;

@@ -79,11 +79,11 @@ bool ParseSpec(const string& spec,string& typeName,string& name)
     return true;
 }
 
-ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly,const bool verbose)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
-        cerr<<"Partio: Unable to open file "<<filename<<endl;
+        if(verbose) cerr<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
     }
 

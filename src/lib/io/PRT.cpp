@@ -140,11 +140,11 @@ static bool write_buffer(std::ostream& os, z_stream& z, char* out_buf, void* p, 
 
 
 
-ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly,const bool verbose)
 {
     std::auto_ptr<std::istream> input(new std::ifstream(filename,std::ios::in|std::ios::binary));
     if (!*input) {
-        std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
+        if(verbose) std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
         return 0;
     }
 

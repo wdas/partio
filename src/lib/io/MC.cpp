@@ -129,11 +129,11 @@ bool IsStringInCharArray(std::string target, char** list){
 static const int MC_MAGIC = ((((('F'<<8)|'O')<<8)|'R')<<8)|'4';
 static const int HEADER_SIZE = 56;
 
-ParticlesDataMutable* readMC(const char* filename, const bool headersOnly){
+ParticlesDataMutable* readMC(const char* filename, const bool headersOnly,const bool verbose){
 
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){
-        std::cerr << "Partio: Unable to open file " << filename << std::endl;
+        if(verbose) std::cerr << "Partio: Unable to open file " << filename << std::endl;
         return 0;
     }
 

@@ -89,12 +89,12 @@ string GetString(istream& input,bool& error)
 }
 
 
-template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,const bool headersOnly)
+template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,const bool headersOnly,const bool verbose)
 {
 
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
-        cerr<<"Partio: Unable to open file "<<filename<<endl;
+        if(verbose) cerr<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
     }
 
@@ -251,11 +251,11 @@ bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compr
     return true;
 }
 
-ParticlesDataMutable* readPDB32(const char* filename,const bool headersOnly)
-{return readPDBHelper<32>(filename,headersOnly);}
+ParticlesDataMutable* readPDB32(const char* filename,const bool headersOnly,const bool verbose)
+{return readPDBHelper<32>(filename,headersOnly,verbose);}
 
-ParticlesDataMutable* readPDB64(const char* filename,const bool headersOnly)
-{return readPDBHelper<64>(filename,headersOnly);}
+ParticlesDataMutable* readPDB64(const char* filename,const bool headersOnly,const bool verbose)
+{return readPDBHelper<64>(filename,headersOnly,verbose);}
 
 bool writePDB32(const char* filename,const ParticlesData& p,const bool compressed)
 {return writePDBHelper<32>(filename,p,compressed);}
@@ -263,11 +263,11 @@ bool writePDB32(const char* filename,const ParticlesData& p,const bool compresse
 bool writePDB64(const char* filename,const ParticlesData& p,const bool compressed)
 {return writePDBHelper<64>(filename,p,compressed);}
 
-ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly,const bool verbose)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
-        cerr<<"Partio: Unable to open file "<<filename<<endl;
+        if(verbose) cerr<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
     }
     // Read header and add as many particles as found
@@ -283,9 +283,9 @@ ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly)
     input->read((char*)&channelIOHeader,sizeof(channelIOHeader));
     //cout<<"we got channel io as "<<int(channelIOHeader.type)<<" swap is "<<channelIOHeader.swap<<endl;
     if(channelIOHeader.type > 5  || channelIOHeader.type < 0 || (channelIOHeader.swap != 1 && channelIOHeader.swap != 0)){
-        return readPDBHelper<32>(filename,headersOnly);
+        return readPDBHelper<32>(filename,headersOnly,verbose);
     }else{
-        return readPDBHelper<64>(filename,headersOnly);
+        return readPDBHelper<64>(filename,headersOnly,verbose);
     }
 }
 

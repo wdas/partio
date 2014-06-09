@@ -42,7 +42,7 @@ namespace Partio{
 using namespace std;
 
 // reader and writer code
-typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool);
+typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool,const bool);
 typedef bool (*WRITER_FUNCTION)(const char*,const ParticlesData&,const bool);
 
 PartioMutex initializationMutex;
@@ -131,7 +131,7 @@ bool extensionIgnoringGz(const string& filename,string& ret,bool &endsWithGz)
 }
 
 ParticlesDataMutable*
-read(const char* c_filename)
+read(const char* c_filename,bool verbose)
 {
     string filename(c_filename);
     string extension;
@@ -142,11 +142,11 @@ read(const char* c_filename)
         cerr<<"Partio: No reader defined for extension "<<extension<<endl;
         return 0;
     }
-    return (*i->second)(c_filename,false);
+    return (*i->second)(c_filename,false,verbose);
 }
 
 ParticlesInfo*
-readHeaders(const char* c_filename)
+readHeaders(const char* c_filename,bool verbose)
 {
     string filename(c_filename);
     string extension;
@@ -157,7 +157,7 @@ readHeaders(const char* c_filename)
         cerr<<"Partio: No reader defined for extension "<<extension<<endl;
         return 0;
     }
-    return (*i->second)(c_filename,true);
+    return (*i->second)(c_filename,true,verbose);
 }
 
 void
