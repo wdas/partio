@@ -194,6 +194,9 @@ public:
     /// Returns a token for the given string. This allows efficient storage of string data
     virtual int registerIndexedStr(const ParticleAttribute& attribute,const char* str)=0;
 
+    /// Returns a token for the given string. This allows efficient storage of string data
+    virtual void setIndexedStr(const ParticleAttribute& attribute,int indexedStringToken,const char* str)=0;
+
     //! Preprocess the data for finding nearest neighbors by sorting into a
     //! KD-Tree. Note: all particle pointers are invalid after this call.
     virtual void sort()=0;

@@ -342,3 +342,11 @@ indexedStrs(const ParticleAttribute& attr) const
     return table.strings;
 }
 
+
+void ParticlesSimpleInterleave::setIndexedStr(const ParticleAttribute& attribute,int indexedStringToken,const char* str){
+    IndexedStrTable& table=attributeIndexedStrs[attribute.attributeIndex];
+    if(indexedStringToken >= table.strings.size() || indexedStringToken < 0) return;
+    table.stringToIndex.erase(table.stringToIndex.find(table.strings[indexedStringToken]));
+    table.strings[indexedStringToken] = str;
+    table.stringToIndex[str]=indexedStringToken;
+}

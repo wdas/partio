@@ -173,6 +173,10 @@ public:
     %feature("docstring","Registers a string in the particular attribute");
     virtual int registerIndexedStr(const ParticleAttribute& attribute,const char* str)=0;
 
+    %feature("autodoc");
+    %feature("docstring","Changes a given index's associated string (for all particles that use this index too)");
+    virtual void setIndexedStr(const ParticleAttribute& attribute,int particleAttributeHandle,const char* str)=0;
+
 
     %feature("autodoc");
     %feature("docstring","Prepares data for N nearest neighbor searches using the\n"
