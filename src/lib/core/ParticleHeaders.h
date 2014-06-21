@@ -53,6 +53,7 @@ protected:
 
     int registerIndexedStr(const ParticleAttribute& attribute,const char* str);
     int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const;
+    void setIndexedStr(const ParticleAttribute& attribute,int indexedStrHandle,const char* str);
     const std::vector<std::string>& indexedStrs(const ParticleAttribute& attr) const;
 
     virtual void dataAsFloat(const ParticleAttribute& attribute,const int indexCount,

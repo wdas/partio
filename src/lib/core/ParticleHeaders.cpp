@@ -188,3 +188,8 @@ dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
     assert(false);
 }
 
+
+void ParticleHeaders::
+setIndexedStr(const ParticleAttribute& attribute,int indexedStringToken,const char* str){
+    assert(false);
+}

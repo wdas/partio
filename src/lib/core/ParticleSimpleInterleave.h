@@ -66,6 +66,7 @@ public:
     virtual void dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
         const ParticleIndex* particleIndices,const bool sorted,float* values) const;
     int registerIndexedStr(const ParticleAttribute& attribute,const char* str);
+    void setIndexedStr(const ParticleAttribute& attribute,int indexedStringToken,const char* str);
     int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const;
     const std::vector<std::string>& indexedStrs(const ParticleAttribute& attr) const;
 
