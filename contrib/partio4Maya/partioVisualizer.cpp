@@ -1045,12 +1045,15 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
     if (pvCache->particles)
     {
-        glPushAttrib(GL_CURRENT_BIT);
-
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+		// Store the current blend types
+		GLint blendAttrs[2];
+		glGetIntegerv(GL_BLEND_SRC, & blendAttrs[0]);
+		glGetIntegerv(GL_BLEND_DST, & blendAttrs[1]);
         if (alphaFromVal >=0 || defaultAlphaVal < 1) //testing settings
         {
 
-            // TESTING AROUND with dept/transparency  sorting issues..
+            // TESTING AROUND with depth/transparency  sorting issues..
             glDepthMask(true);
             //cout << "depthMask"<<  glGetError() << endl;
             glEnable(GL_DEPTH_TEST);
@@ -1068,6 +1071,7 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
         if ( drawStyle == 0 )
         {
+			glDisable(GL_POINT_SMOOTH);
             glEnableClientState( GL_VERTEX_ARRAY );
             glEnableClientState( GL_COLOR_ARRAY );
 
@@ -1126,7 +1130,10 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
                 }
             }
 		}
+        glDisable(GL_BLEND);
         glDisable(GL_POINT_SMOOTH);
+		// Restore blend settings
+		glBlendFunc(blendAttrs[0], blendAttrs[1]);
         glPopAttrib();
     } // if (particles)
 }
@@ -1156,8 +1163,8 @@ void partioVisualizerUI::getDrawRequests(const MDrawInfo & info,
     getDrawData(geom, data);
     request.setDrawData(data);
 
-    // Are we displaying locators?
-    if (!info.objectDisplayStatus(M3dView::kDisplayLocators))
+    // Are we displaying dynamics?
+    if (!info.objectDisplayStatus(M3dView::kDisplayDynamics))
         return;
 
     M3dView::DisplayStatus displayStatus = info.displayStatus();
@@ -1183,6 +1190,7 @@ void partioVisualizerUI::getDrawRequests(const MDrawInfo & info,
     default:
         break;
     }
+    request.setIsTransparent( true );
     queue.add(request);
 
 }

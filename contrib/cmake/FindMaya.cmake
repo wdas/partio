@@ -47,7 +47,7 @@
 macro(MAYA_SET_PLUGIN_PROPERTIES target)
     set_target_properties(${target} PROPERTIES
         SUFFIX ${MAYA_PLUGIN_SUFFIX})
-    
+
     set(_maya_DEFINES REQUIRE_IOSTREAM _BOOL)
 
     if(APPLE)
@@ -214,7 +214,7 @@ find_path(MAYA_INCLUDE_DIR maya/MFn.h
     DOC "Maya's include path")
 
 LIST(APPEND MAYA_INCLUDE_DIRS ${MAYA_INCLUDE_DIR})
-    
+
 FIND_PATH(MAYA_DEVKIT_INC_DIR GL/glext.h
   HINTS
     ${MAYA_LOCATION}

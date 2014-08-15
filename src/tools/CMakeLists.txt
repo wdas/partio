@@ -37,6 +37,7 @@ include_directories(
 )
 
 IF(GLUT_FOUND AND OPENGL_FOUND)
+    INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
     ADD_EXECUTABLE(partview partview.cpp)
     target_link_libraries(partview ${PARTIO_LIBRARIES} ${GLUT_LIBRARY} ${OPENGL_LIBRARY})
 	IF (${LOCAL_INSTALL})

@@ -34,18 +34,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 #ifndef KdTree_h
 #define KdTree_h
-
-#ifdef WIN32
-	#include <numeric>
-#else
+#if defined(__clang__) && defined(_LIBCPP_VERSION)
+#include <numeric>
+#elif defined(__GNUC__)
 #include <ext/numeric>
 #endif
-
-#include <string.h>
-#include <vector>
-#include <float.h>
-#include <algorithm>
-#include <cassert>
 
 namespace Partio
 {
@@ -301,13 +294,11 @@ void KdTree<k>::setPoints(const float* p, int n)
 
     // assign sequential ids
     _ids.resize(n);
-
-#ifdef WIN32
-    iota(_ids.begin(), _ids.end(), 0);
-#else
-	__gnu_cxx::iota(_ids.begin(), _ids.end(), 0);
+#if defined(__clang__) && defined(_LIBCPP_VERSION)
+    std::iota(_ids.begin(), _ids.end(), 0);
+#elif defined(__GNUC__)
+    __gnu_cxx::iota(_ids.begin(), _ids.end(), 0);
 #endif
-
 //    _ids.reserve(n);
 //    while ((int)_ids.size() < n) _ids.push_back(_ids.size());
     _sorted = 0;
