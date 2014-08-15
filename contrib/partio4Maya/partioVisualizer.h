@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MColor.h>
 #include <maya/MDagPath.h>
 #include <maya/MDataHandle.h>
+#include <maya/MArrayDataBuilder.h>
 #include <maya/MDataBlock.h>
 #include <maya/MDistance.h>
 #include <maya/MDrawData.h>
