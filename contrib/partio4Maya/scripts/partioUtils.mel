@@ -192,9 +192,9 @@ global proc int pioAEassignCacheFileCB( string $fileAttribute,
 		case "rpc":
 			$extIndex = 12;
 			break;
-		//case "icecache":
-		//	$extIndex = 13;
-		//	break;
+		case "bhclassic":
+			$extIndex = 13;
+			break;
 		default:
 			$extIndex = 4;
 			break;

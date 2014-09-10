@@ -71,7 +71,6 @@ readers()
         data["pts"]			=readPTS;
 		data["xyz"]			=readXYZ;
 		data["pcd"]			=readPCD;
-		//data["icecache"]	=readICECACHE;
         data["ptf"]			=readPTC;
         data["itbl"]		=readBGEO;
         data["atbl"]		=readBGEO;
@@ -89,22 +88,22 @@ writers()
     static bool initialized=false;
     if(!initialized){
     initializationMutex.lock();
-        data["bgeo"]	=writeBGEO;
-        data["geo"]		=writeGEO;
-        data["pdb"]		=writePDB;
-        data["pdb32"]	=writePDB32;
-        data["pdb64"]	=writePDB64;
-        data["pda"]		=writePDA;
-        data["ptc"]		=writePTC;
-        data["rib"]		=writeRIB;
-        data["pdc"]		=writePDC;
-        data["prt"]		=writePRT;
-        data["bin"]		=writeBIN;
-		data["pcd"]		=writePCD;
-		//data["icecache"]=writeICECACHE;
-        data["ptf"]		=writePTC;
-        data["itbl"]	=writeBGEO;
-        data["atbl"]	=writeBGEO;
+        data["bgeo"]		=writeBGEO;
+		data["bhclassic"] 	=writeBGEO;
+        data["geo"]			=writeGEO;
+        data["pdb"]			=writePDB;
+        data["pdb32"]		=writePDB32;
+        data["pdb64"]		=writePDB64;
+        data["pda"]			=writePDA;
+        data["ptc"]			=writePTC;
+        data["rib"]			=writeRIB;
+        data["pdc"]			=writePDC;
+        data["prt"]			=writePRT;
+        data["bin"]			=writeBIN;
+		data["pcd"]			=writePCD;
+        data["ptf"]			=writePTC;
+        data["itbl"]		=writeBGEO;
+        data["atbl"]		=writeBGEO;
 		//data["rpc"]		=writeRPC;
 	initialized=true;
 	initializationMutex.unlock();
@@ -142,9 +141,11 @@ ParticlesDataMutable*
 read(const char* c_filename)
 {
     string filename(c_filename);
+	cout << filename << endl;
     string extension;
     bool endsWithGz;
     if(!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
+	cout << filename << "->" << extension << "->" << endsWithGz << endl;
     map<string,READER_FUNCTION>::iterator i=readers().find(extension);
     if(i==readers().end()){
         cerr<<"Partio: No reader defined for extension "<<extension<<endl;
