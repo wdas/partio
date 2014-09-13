@@ -141,14 +141,12 @@ ParticlesDataMutable*
 read(const char* c_filename)
 {
     string filename(c_filename);
-	cout << filename << endl;
     string extension;
     bool endsWithGz;
     if(!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
-	cout << filename << "->" << extension << "->" << endsWithGz << endl;
     map<string,READER_FUNCTION>::iterator i=readers().find(extension);
     if(i==readers().end()){
-        cerr<<"Partio: No reader defined for extension "<<extension<<endl;
+        cerr<<"Partio READ: No reader defined for extension "<<extension<<endl;
         return 0;
     }
     return (*i->second)(c_filename,false);
@@ -163,7 +161,7 @@ readHeaders(const char* c_filename)
     if(!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
     map<string,READER_FUNCTION>::iterator i=readers().find(extension);
     if(i==readers().end()){
-        cerr<<"Partio: No reader defined for extension "<<extension<<endl;
+        cerr<<"Partio READ HEADERS: No reader defined for extension "<<extension<<endl;
         return 0;
     }
     return (*i->second)(c_filename,true);
