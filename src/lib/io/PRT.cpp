@@ -116,6 +116,10 @@ static bool read_buffer(std::istream& is, z_stream& z, char* in_buf, void* p, si
             std::cerr<<"Zlib error "<<z.msg<<std::endl;;
             return false;
         }
+        if (ret == Z_STREAM_END && z.avail_out > 0) {
+            std::cerr<<"Truncated prt file  "<<std::endl;;
+            return false;
+        }
     }
     return true;
 }
