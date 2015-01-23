@@ -224,7 +224,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
         }
         
         // The size of the particle is determined from the channel with largest offset. The channels are not required to be listed in order.
-        particleSize = (std::max)( particleSize, chans.back().offset + sizes[type] );
+        particleSize = (std::max)( particleSize, chans.back().offset + sizes[ch.type] );
         
         // The channel entry might have more data in other PRT versions.
         if ((unsigned)channelsize > sizeof(Channel))
