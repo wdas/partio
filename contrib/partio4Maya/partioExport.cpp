@@ -248,6 +248,23 @@ MStatus PartioExport::doIt(const MArgList& Args)
     computation.beginComputation();
 
     MFnParticleSystem PS(objNode);
+	MFnParticleSystem DPS(objNode);
+	bool isDeformed = false;
+
+	if (PS.isDeformedParticleShape())
+	{
+		MObject origObj = PS.originalParticleShape();
+		PS.setObject(origObj);
+		isDeformed = true;
+	}
+	else
+	{
+		MObject defObj = PS.deformedParticleShape(&status);
+		DPS.setObject(defObj);
+		isDeformed = true;
+	}
+	//cout <<  "Orig Particle system -> "  <<  PS.name() << endl;
+	//cout <<  "Deformed Particle system -> " <<  DPS.name() << endl;
 
     int outFrame= -123456;
 
@@ -258,10 +275,18 @@ MStatus PartioExport::doIt(const MArgList& Args)
 		if (frame == startFrame && startFrame < endFrame)
 		{
 			PS.evaluateDynamics(dynTime,true);
+			if (isDeformed)
+			{
+				DPS.evaluateDynamics(dynTime,true);
+			}
 		}
 		else
 		{
 			PS.evaluateDynamics(dynTime,false);
+			if (isDeformed)
+			{
+				DPS.evaluateDynamics(dynTime,false);
+			}
 		}
 
 		/// why is this being done AFTER the evaluate dynamics stuff?
@@ -309,8 +334,8 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
         MGlobal::displayInfo("PartioExport-> exporting: "+ outputPath);
 
-
         unsigned int particleCount = PS.count();
+
 
         Partio::ParticlesDataMutable* p = Partio::createInterleave();
         p->addParticles((const int)particleCount);
@@ -413,7 +438,17 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
                     if ( attrName == "position" )
                     {
-                        PS.position( VA );
+						if (isDeformed)
+						{
+							//cout <<  "trying deformed position attr" << endl;
+							//cout <<  "counts match ? " <<  PS.count() << "<->" << DPS.count() << endl;
+							DPS.position( VA );
+						}
+						else
+						{
+							cout <<  " using undeformed position attr" << endl;
+							PS.position( VA );
+						}
                     }
                     else if ( attrName == "velocity")
                     {
