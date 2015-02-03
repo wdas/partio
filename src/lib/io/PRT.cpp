@@ -116,6 +116,10 @@ static bool read_buffer(std::istream& is, z_stream& z, char* in_buf, void* p, si
             std::cerr<<"Zlib error "<<z.msg<<std::endl;;
             return false;
         }
+        if (ret == Z_STREAM_END && z.avail_out > 0) {
+            std::cerr<<"Truncated prt file  "<<std::endl;;
+            return false;
+        }
     }
     return true;
 }
@@ -220,7 +224,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
         }
         
         // The size of the particle is determined from the channel with largest offset. The channels are not required to be listed in order.
-        particleSize = (std::max)( particleSize, chans.back().offset + sizes[type] );
+        particleSize = (std::max)( particleSize, chans.back().offset + sizes[ch.type] );
         
         // The channel entry might have more data in other PRT versions.
         if ((unsigned)channelsize > sizeof(Channel))
