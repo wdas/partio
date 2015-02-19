@@ -24,6 +24,7 @@ protected:
         // Just for debug info, translator creates whatever arnold nodes are required
         // through the CreateArnoldNodes method
         m_abstract.arnold = "procedural";
+		
     }
     void ExportBoundingBox ( AtNode* procedural );
 
@@ -36,6 +37,7 @@ protected:
 
 
     MFnDagNode m_DagNode;
+	MString m_customAttrs;
 };
 
 #endif // PARTIOVIZTRANSLATOR_H

@@ -113,6 +113,7 @@ global proc pioVizCustomAttrsManage (string $nodeName)
 	int $colorFrom = `getAttr ($nodeName+".colorFrom")` + 2;
 	int $opacityFrom = `getAttr ($nodeName+".opacityFrom")` + 2;
 	int $radiusFrom  = `getAttr ($nodeName+".radiusFrom")` + 2;
+	int $incandFrom = `getAttr ($nodeName+".incandescenceFrom")` + 2;
 
 
 	string $colorMenu = `optionMenuGrp -label "Color from->"`;
@@ -128,6 +129,20 @@ global proc pioVizCustomAttrsManage (string $nodeName)
        	 menuItem -label $attr;
     }
 	optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 0 + " " + $colorMenu)  $colorMenu;
+	
+	string $incandMenu = `optionMenuGrp -label "Incandescence from->"`;
+	menuItem -l "None";
+
+    for ($multi in $multiList)
+    {
+		string $tok[];
+		tokenize $multi "[" $tok;
+		string $index = $tok[1];
+		$index = substituteAllString($index, "]", "");
+		string $attr = `getAttr ($nodeName+"."+$multi)`;
+       	 menuItem -label $attr;
+    }
+	optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $incandMenu)  $incandMenu;
 
 
     string $opacMenu = `optionMenuGrp -label "Opacity from->"`;
@@ -141,7 +156,7 @@ global proc pioVizCustomAttrsManage (string $nodeName)
 		string $attr = `getAttr ($nodeName+"."+$multi)`;
        	 menuItem -label $attr;
     }
-    optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $opacMenu)  $opacMenu;
+    optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $opacMenu)  $opacMenu;
 
 
 	string $radiusMenu = `optionMenuGrp -label "Radius from->"`;
@@ -155,12 +170,13 @@ global proc pioVizCustomAttrsManage (string $nodeName)
 		string $attr = `getAttr ($nodeName+"."+$multi)`;
        	 menuItem -label $attr;
     }
-	optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $radiusMenu)  $radiusMenu;
+	optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 3 + " " + $radiusMenu)  $radiusMenu;
 
 
 	if (`size($multiList)`)
 	{
 		optionMenuGrp -e -sl $colorFrom  $colorMenu;
+		optionMenuGrp -e -sl $incandFrom $incandMenu;
 		optionMenuGrp -e -sl $opacityFrom $opacMenu;
 		optionMenuGrp -e -sl $radiusFrom $radiusMenu;
 	}
@@ -169,7 +185,7 @@ global proc pioVizCustomAttrsManage (string $nodeName)
 
 global proc pioVizSwitchAttributeFrom(string $nodeName, int $attr, string $menu)
 {
-	string $attrList[] = {"colorFrom", "opacityFrom", "radiusFrom"};
+	string $attrList[] = {"colorFrom", "incandescenceFrom", "opacityFrom", "radiusFrom"};
 	int $sel = `optionMenuGrp -q -sl $menu`;
 
 	setAttr ($nodeName+"."+$attrList[$attr]) ($sel-2);
@@ -199,7 +215,7 @@ global proc  pioVizSwapAboutText()
 {
 
 	string $text1 =  "Partio Visualizer!!";
-	string $text2 =  "Partio Visualizer by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2012";
+	string $text2 =  "Partio Visualizer by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2015";
 
 	string $text = `text -q -l pioVizAboutText`;
 	if (`gmatch $text "Partio Visualizer!!"`)

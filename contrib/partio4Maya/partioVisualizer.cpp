@@ -73,6 +73,7 @@ MObject partioVisualizer::aPartioAttributes;
 MObject partioVisualizer::aColorFrom;
 MObject partioVisualizer::aRadiusFrom;
 MObject partioVisualizer::aAlphaFrom;
+MObject partioVisualizer::aIncandFrom;
 MObject partioVisualizer::aPointSize;
 MObject partioVisualizer::aDefaultPointColor;
 MObject partioVisualizer::aDefaultAlpha;
@@ -105,6 +106,7 @@ partioVisualizer::partioVisualizer()
         mLastColorFromIndex(-1),
         mLastAlphaFromIndex(-1),
         mLastRadiusFromIndex(-1),
+        mLastIncandFromIndex(-1),
         mLastColor(1,0,0),
         mLastRadius(1.0),
         cacheChanged(false),
@@ -172,6 +174,7 @@ void partioVisualizer::initCallback()
     MPlug(tmo,aColorFrom).getValue(mLastColorFromIndex);
     MPlug(tmo,aAlphaFrom).getValue(mLastAlphaFromIndex);
     MPlug(tmo,aRadiusFrom).getValue(mLastRadiusFromIndex);
+	MPlug(tmo,aIncandFrom).getValue(mLastIncandFromIndex);
     MPlug(tmo,aSize).getValue(multiplier);
     MPlug(tmo,aInvertAlpha).getValue(mLastInvertAlpha);
     MPlug(tmo,aCacheStatic).getValue(mLastStatic);
@@ -284,6 +287,10 @@ MStatus partioVisualizer::initialize()
     aAlphaFrom = nAttr.create("opacityFrom", "ofrm", MFnNumericData::kInt, -1, &stat);
     nAttr.setDefault(-1);
     nAttr.setKeyable(true);
+	
+	aIncandFrom= nAttr.create("incandescenceFrom", "ifrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
 
     aRadiusFrom = nAttr.create("radiusFrom", "rfrm", MFnNumericData::kInt, -1, &stat);
     nAttr.setDefault(-1);
@@ -335,6 +342,7 @@ MStatus partioVisualizer::initialize()
     addAttribute ( aCacheFormat );
     addAttribute ( aPartioAttributes );
     addAttribute ( aColorFrom );
+	addAttribute ( aIncandFrom );
     addAttribute ( aAlphaFrom );
     addAttribute ( aRadiusFrom );
     addAttribute ( aPointSize );
@@ -357,6 +365,7 @@ MStatus partioVisualizer::initialize()
     attributeAffects ( aCacheStatic, aUpdateCache );
     attributeAffects ( aCacheFormat, aUpdateCache );
     attributeAffects ( aColorFrom, aUpdateCache );
+	attributeAffects ( aIncandFrom, aUpdateCache );
     attributeAffects ( aAlphaFrom, aUpdateCache );
     attributeAffects ( aRadiusFrom, aUpdateCache );
     attributeAffects ( aPointSize, aUpdateCache );
@@ -388,6 +397,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 {
 
     int colorFromIndex  = block.inputValue( aColorFrom ).asInt();
+	int incandFromIndex = block.inputValue( aIncandFrom ).asInt();
     int opacityFromIndex= block.inputValue( aAlphaFrom ).asInt();
     int radiusFromIndex = block.inputValue( aRadiusFrom ).asInt();
     bool cacheActive = block.inputValue(aCacheActive).asBool();
@@ -606,7 +616,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
             if  (cacheChanged || mLastColorFromIndex != colorFromIndex || mLastColor != defaultColor)
             {
                 int numAttrs = pvCache.particles->numAttributes();
-                if (colorFromIndex+1 > numAttrs || opacityFromIndex+1 > numAttrs || radiusFromIndex+1 > numAttrs)
+                if (colorFromIndex+1 > numAttrs || opacityFromIndex+1 > numAttrs || radiusFromIndex+1 > numAttrs || incandFromIndex+1 > numAttrs)
                 {
                     // reset the attrs
                     block.outputValue(aColorFrom).setInt(-1);
@@ -615,10 +625,13 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
                     block.setClean(aAlphaFrom);
                     block.outputValue(aRadiusFrom).setInt(-1);
                     block.setClean(aRadiusFrom);
+					block.outputValue(aIncandFrom).setInt(-1);
+					block.setClean(aIncandFrom);
 
                     colorFromIndex  = block.inputValue( aColorFrom ).asInt();
                     opacityFromIndex= block.inputValue( aAlphaFrom ).asInt();
                     radiusFromIndex = block.inputValue( aRadiusFrom ).asInt();
+					incandFromIndex = block.inputValue( aIncandFrom ).asInt();
                 }
 
                 if (colorFromIndex >=0)
@@ -768,6 +781,10 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
                 mLastRadius = defaultRadius;
                 mLastRadiusFromIndex = radiusFromIndex;
             }
+            if  (cacheChanged || incandFromIndex != mLastIncandFromIndex ) // incandescence does not affect viewport draw for now
+            {
+                mLastIncandFromIndex = incandFromIndex;
+            }
         }
     }
 
@@ -788,6 +805,10 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
         if ((radiusFromIndex+1) > zPlug.numElements())
         {
             block.outputValue(aRadiusFrom).setInt(-1);
+        }
+        if ((incandFromIndex+1) > zPlug.numElements())
+        {
+            block.outputValue(aIncandFrom).setInt(-1);
         }
 
         if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache
@@ -1042,6 +1063,9 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
     float defaultAlphaVal;
     defaultAlphaPlug.getValue( defaultAlphaVal );
 
+	MPlug incandFromPlug( thisNode, shapeNode->aIncandFrom);
+	int incandFromVal;
+	incandFromPlug.getValue( incandFromVal );
 
     if (pvCache->particles)
     {

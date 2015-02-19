@@ -61,6 +61,7 @@ static int MyInit ( AtNode *mynode, void **user_ptr )
     cacheExists = false;
     canMotionBlur = false;
     hasRgbPP = false;
+	hasIncandPP = false;
     hasOpacPP = false;
     hasRadiusPP = false;
 
@@ -75,9 +76,11 @@ static int MyInit ( AtNode *mynode, void **user_ptr )
     arg_rgbFrom				= "";
     arg_opacFrom			= "";
     arg_radFrom             = "";
+	arg_incandFrom			= "";
     arg_defaultColor 		= AI_RGB_WHITE;
     arg_defaultOpac			= 1.0f;
     arg_stepSize			= 0.0f;
+	arg_extraPPAttrs		= "";
     global_motionBlurSteps 	= 1;
     global_fps 				= 24;
     global_motionByFrame 	= 0.5f;
@@ -116,6 +119,10 @@ static int MyInit ( AtNode *mynode, void **user_ptr )
     {
         arg_rgbFrom				= AiNodeGetStr ( mynode, "arg_rgbFrom" );
     }
+    if ( AiNodeLookUpUserParameter ( mynode, "arg_incandFrom" ) != NULL )
+    {
+        arg_incandFrom				= AiNodeGetStr ( mynode, "arg_incandFrom" );
+    }
     if ( AiNodeLookUpUserParameter ( mynode, "arg_opacFrom" ) != NULL )
     {
         arg_opacFrom			= AiNodeGetStr ( mynode, "arg_opacFrom" );
@@ -147,6 +154,10 @@ static int MyInit ( AtNode *mynode, void **user_ptr )
     if ( AiNodeLookUpUserParameter ( mynode, "arg_stepSize" ) != NULL )
     {
         arg_stepSize			= AiNodeGetFlt ( mynode, "arg_stepSize" );
+    }
+    if ( AiNodeLookUpUserParameter ( mynode, "arg_extraPPAttrs" ) != NULL )
+    {
+        arg_extraPPAttrs		= AiNodeGetStr ( mynode, "arg_extraPPAttrs" );
     }
 
     AiMsgInfo ( "[partioGenerator] loading cache  %s", arg_file );
@@ -208,6 +219,9 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
     AtArray *radarr;
     AtArray *rgbArr;
     AtArray *opacityArr;
+	AtArray *incandArr;
+	AtArray *floatArr;
+	AtArray *vecArr;
     pointarr 	= AiArrayAllocate ( pointCount,global_motionBlurSteps,AI_TYPE_POINT );
 
 ////////////////
@@ -234,6 +248,23 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
         AiNodeDeclare ( currentInstance, "rgbPP", "constant RGB" );
         AiNodeSetRGB ( currentInstance , "rgbPP", arg_defaultColor.r, arg_defaultColor.g, arg_defaultColor.b );
     }
+////////////
+/// Incandescence
+
+
+    if ( arg_incandFrom && arg_incandFrom[0] !='\0' && points->attributeInfo ( arg_incandFrom, incandAttr ) )
+    {
+        AiNodeDeclare ( currentInstance, "incandescencePP", "uniform RGB" );
+        AiMsgInfo ( "[partioGenerator] found incandescencePP attr..." );
+        hasIncandPP = true;
+        incandArr = AiArrayAllocate ( pointCount,1,AI_TYPE_RGB );
+    }
+    else
+    {
+        AiNodeDeclare ( currentInstance, "incandescencePP", "constant RGB" );
+        AiNodeSetRGB ( currentInstance , "incandescencePP", 0.0, 0.0, 0.0 );
+    }
+
 
 //////////////
 /// OPACITY
@@ -271,6 +302,61 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
         AiArraySetFlt ( radarr , 0,  arg_radius*arg_radiusMult );
     }
 
+
+// now parse and include any extra attrs
+
+	std::vector<ParticleAttribute> extraAttrs;
+	std::vector<AtArray*>  arnoldArrays;
+
+
+	char  extraAttrStr[1000];
+	strncpy(extraAttrStr, arg_extraPPAttrs, sizeof(extraAttrStr));
+	char* parts[100] = {0};
+	unsigned int index = 0;
+	parts[index] = strtok(extraAttrStr, " ");
+	while(parts[index] != 0)
+	{
+		ParticleAttribute user;
+		if (points->attributeInfo(parts[index],user))
+		{
+			// we don't want to double export these 
+			if( user.name != "position" &&
+				user.name != "velocity" &&
+				user.name != "rgbPP" &&
+				user.name != "incandescencePP" &&
+				user.name != "opacityPP" && 
+				user.name != "radiusPP")
+			{
+				if (user.type == FLOAT || user.count == 1)
+				{
+					AiNodeDeclare ( currentInstance, parts[index], "uniform Float" );
+					floatArr     = AiArrayAllocate ( pointCount,1,AI_TYPE_FLOAT );
+					arnoldArrays.push_back(floatArr);
+				}
+				else if (user.type == VECTOR || user.count == 3)
+				{
+					AiNodeDeclare ( currentInstance, parts[index], "uniform Vector" );
+					vecArr =  AiArrayAllocate ( pointCount,1,AI_TYPE_VECTOR );
+					arnoldArrays.push_back(vecArr);
+				}
+				extraAttrs.push_back(user);
+			}
+			else
+			{
+				AiMsgWarning( "[partioGenerator] caught double export call for %s, skipping....", parts[index]);
+			}
+		}
+		else
+		{
+			AiMsgWarning( "[partioGenerator] export ppAttr %s skipped, it doesn't exist  in the cache", parts[index]);
+		}
+
+		++index;
+		parts[index] = strtok(0," ");
+
+	}
+
+
 ///////////////////////////////////////////////
 /// LOOP particles
 
@@ -291,7 +377,37 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
             point.y = 0.0f;
             point.z = 0.0f;
             badParticle = true;
-            AiMsgWarning ( "[partioGenerator] found INF or NAN particle, hiding it..." );
+				AiMsgWarning ( "[partioGenerator] found INF or NAN particle, hiding it..." );
+			}
+
+			/// User Defined or default  RadiusAttr
+			float rad;
+			if ( hasRadiusPP && !arg_overrideRadiusPP )
+			{
+				const float * partioRadius = points->data<float> ( radiusAttr,i );
+				if ( radiusAttr.count == 1 )
+				{
+					rad = partioRadius[0];
+				}
+				else
+				{
+					rad = abs ( float ( ( partioRadius[0]*0.2126 ) + ( partioRadius[1]*0.7152 ) + ( partioRadius[2]*.0722 ) ) );
+				}
+
+				rad *= arg_radiusMult;
+				rad *= arg_radius;
+				// clamp the radius to maxParticleRadius just in case we have rogue particles
+				if ( rad > arg_maxParticleRadius )
+				{
+					rad = arg_maxParticleRadius;
+				}
+
+				// if we decide to support motion blur radius scale then re-enable here
+				//for (int s = 0; s < global_motionBlurSteps; s++)
+				//{
+				//	AiArraySetFlt(radarr , ((s*pointCount)+i), rad);
+				//}
+				AiArraySetFlt ( radarr , (i) , rad );
         }
 
         if ( canMotionBlur )
@@ -363,6 +479,31 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
             //}
             AiArraySetRGB ( rgbArr, i, color );
         }
+        /// INCANDESCENCE 
+        if ( hasIncandPP )
+        {
+            const float * partioRGB = points->data<float> ( incandAttr, i );
+            AtRGB incand;
+            if ( incandAttr.count > 1 )
+            {
+                incand.r = partioRGB[0];
+                incand.g = partioRGB[1];
+                incand.b = partioRGB[2];
+            }
+            else
+            {
+                incand.r = partioRGB[0];
+                incand.g = partioRGB[0];
+                incand.b = partioRGB[0];
+            }
+
+            // currently no support for motion blur of arbitrary attrs in points
+            //for (int s = 0; s < global_motionBlurSteps; s++)
+            //{
+            //	AiArraySetRGB(rgbArr,((s*pointCount)+i), color);
+            //}
+            AiArraySetRGB ( incandArr, i, incand );
+        }
 
         /// opacityPP
         if ( hasOpacPP )
@@ -393,43 +534,35 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
             }
             //}
         }
-
-        /// User Defined or default  RadiusAttr
-        if ( hasRadiusPP && !arg_overrideRadiusPP )
+		for (int x = 0; x < extraAttrs.size(); x++)
         {
-            const float * partioRadius = points->data<float> ( radiusAttr,i );
-            float rad;
-            if ( radiusAttr.count == 1 )
+			if (extraAttrs[x].type == FLOAT)
             {
-                rad = partioRadius[0];
+					
+				const float * partioFLOAT = points->data<float> ( extraAttrs[x],i );
+				float floatVal = partioFLOAT[0];
+				AiArraySetFlt ( arnoldArrays[x] , i , floatVal );
             }
-            else
+			else if (extraAttrs[x].type == VECTOR)
             {
-                rad = abs ( float ( ( partioRadius[0]*0.2126 ) + ( partioRadius[1]*0.7152 ) + ( partioRadius[2]*.0722 ) ) );
-            }
-
-            rad *= arg_radiusMult;
-            rad *= arg_radius;
-            // clamp the radius to maxParticleRadius just in case we have rogue particles
-            if ( rad > arg_maxParticleRadius )
-            {
-                rad = arg_maxParticleRadius;
-            }
-
-            // if we decide to support motion blur radius scale then re-enable here
-            //for (int s = 0; s < global_motionBlurSteps; s++)
-            //{
-            //	AiArraySetFlt(radarr , ((s*pointCount)+i), rad);
-            //}
-            AiArraySetFlt ( radarr , i, rad );
+				const float * partioVEC = points->data<float> ( extraAttrs[x], i );
+				AtVector vecVal;
+				vecVal.x = partioVEC[0];
+				vecVal.y = partioVEC[0];
+				vecVal.z = partioVEC[0];
+				AiArraySetVec( arnoldArrays[x], i, vecVal);
+			}
         }
-
     } // for loop per particle
 
 
     if ( hasRgbPP )
     {
         AiNodeSetArray ( currentInstance, "rgbPP", rgbArr );
+    }
+    if ( hasIncandPP )
+    {
+        AiNodeSetArray ( currentInstance, "incandescencePP", incandArr );
     }
     if ( hasOpacPP )
     {
@@ -438,6 +571,13 @@ static AtNode *MyGetNode ( void *user_ptr, int i )
 
     AiNodeSetArray ( currentInstance, "radius", radarr );
 
+
+	for (int x = 0; x < arnoldArrays.size(); x++)
+	{
+		AiNodeSetArray( currentInstance, extraAttrs[x].name.c_str(), arnoldArrays[x]);
+	}
+
+	
 
     /// these  will always be here
     AiNodeSetArray ( currentInstance, "points", pointarr );

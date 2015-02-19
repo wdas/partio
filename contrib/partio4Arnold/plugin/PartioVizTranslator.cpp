@@ -71,6 +71,16 @@ void CPartioVizTranslator::NodeInitializer ( CAbTranslator context )
     data.softMax.FLT = 2.f;
     helper.MakeInputFloat ( data );
 
+	data.defaultValue.STR = "";
+	data.name = "aiExportAttributes";
+	data.shortName = "ai_export_attributes";
+	helper.MakeInputString( data );
+	
+	data.defaultValue.STR = "";
+	data.name = "aiOverrideProcedural";
+	data.shortName = "ai_override_procedural";
+	helper.MakeInputString( data );
+
 }
 
 AtNode* CPartioVizTranslator::CreateArnoldNodes()
@@ -231,6 +241,7 @@ AtNode* CPartioVizTranslator::ExportProcedural ( AtNode* procedural, bool update
     ProcessRenderFlags ( procedural );
 
     ExportPartioVizShaders ( procedural );
+	
 
     if ( !update )
     {
@@ -241,6 +252,14 @@ AtNode* CPartioVizTranslator::ExportProcedural ( AtNode* procedural, bool update
         //MString dso = envProcPath+(MString("/partioGenerator.so"));
 
         MString dso = ( "partioGenerator.so" );
+
+		// we add this here so we can add in a custom   particle reading procedural instead of the default one
+		MString overrideProc = m_DagNode.findPlug ( "aiOverrideProcedural" ).asString();
+
+		if(overrideProc.length() > 0)
+		{
+			dso = overrideProc;
+		}
 
         MString formattedName = m_DagNode.findPlug ( "renderCachePath" ).asString();
         int frameNum = m_DagNode.findPlug ( "time" ).asInt();
@@ -332,20 +351,28 @@ AtNode* CPartioVizTranslator::ExportProcedural ( AtNode* procedural, bool update
         AiNodeDeclare ( procedural, "arg_rgbFrom", "constant STRING" );
         AiNodeDeclare ( procedural, "arg_opacFrom", "constant STRING" );
         AiNodeDeclare ( procedural, "arg_radFrom", "constant STRING" );
+		AiNodeDeclare ( procedural, "arg_incandFrom", "constant STRING" );
 
         MPlug partioAttrs = m_DagNode.findPlug ( "partioCacheAttributes" );
 
         int colorIndex = m_DagNode.findPlug ( "colorFrom" ).asInt();
         int opacIndex = m_DagNode.findPlug ( "opacityFrom" ).asInt();
         int radiusIndex =  m_DagNode.findPlug ( "radiusFrom" ).asInt();
+		int incandIndex =  m_DagNode.findPlug ( "incandescenceFrom" ).asInt();
 
         MString rgbFrom = "";
         MString opacFrom = "";
         MString radFrom = "";
+		MString incaFrom = "";
         if ( colorIndex >=0 )
         {
             MPlug rgbArrayEntry = partioAttrs.elementByLogicalIndex ( colorIndex );
             rgbArrayEntry.getValue ( rgbFrom );
+        }
+        if ( incandIndex >=0 )
+        {
+            MPlug incandArrayEntry = partioAttrs.elementByLogicalIndex ( incandIndex );
+            incandArrayEntry.getValue ( incaFrom );
         }
         if ( opacIndex >=0 )
         {
@@ -361,6 +388,7 @@ AtNode* CPartioVizTranslator::ExportProcedural ( AtNode* procedural, bool update
         AiNodeSetStr ( procedural, "arg_rgbFrom", rgbFrom.asChar() );
         AiNodeSetStr ( procedural, "arg_opacFrom", opacFrom.asChar() );
         AiNodeSetStr ( procedural, "arg_radFrom", radFrom.asChar() );
+		AiNodeSetStr ( procedural, "arg_incandFrom", incaFrom.asChar() );
 
         MFloatVector defaultColor;
 
@@ -388,6 +416,14 @@ AtNode* CPartioVizTranslator::ExportProcedural ( AtNode* procedural, bool update
             AiNodeDeclare ( procedural, "arg_stepSize", "constant FLOAT" );
             AiNodeSetFlt ( procedural, "arg_stepSize", stepSize );
         }
+
+        m_customAttrs = m_DagNode.findPlug( "aiExportAttributes").asString();
+
+        if (m_customAttrs.length() > 0)
+		{
+			AiNodeDeclare  ( procedural, "arg_extraPPAttrs", "constant STRING" );
+			AiNodeSetStr ( procedural , "arg_extraPPAttrs", m_customAttrs.asChar());
+		}
 
         /// right now because we're using  load at init, we don't need to export the bounding box
         //ExportBoundingBox(procedural);
