@@ -219,7 +219,7 @@ void partio4Maya::updateFileName (MString cacheFile, MString cacheDir,
                                  )
 {
     formatExt = setExt(cacheFormat);
-	int fps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
+	int fps = (int)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
 
     MStringArray fileParts = partioGetBaseFileName(cacheFile);
 
