@@ -7,6 +7,8 @@ class PartioVisualizerTemplate(templates.ShapeTranslatorTemplate):
     def setup(self):
         self.commonShapeAttributes()
         self.addSeparator()
+        self.addControl("aiExportAttributes", label="Export Extra PP attrs")
+        self.addSeparator()
         self.addControl("aiRenderPointsAs", label="Render Points As")
         self.addControl("aiOverrideRadiusPP", label="Override RadiusPP")
         self.addControl("aiRadiusMultiplier", label="Radius Multiplier")
@@ -15,5 +17,8 @@ class PartioVisualizerTemplate(templates.ShapeTranslatorTemplate):
         self.addControl("aiStepSize",label="Volume Step Size")
         self.addSeparator()
         self.addControl("aiMotionBlurMultiplier",label="Motion Blur Mult")
+        self.addSeparator()
+        self.addControl("aiOverrideProcedural", label="Override render procedural" )
+        self.addControl("aiTranslator", label= "Override MTOA Translator")
 
 templates.registerTranslatorUI(PartioVisualizerTemplate, "partioVisualizer", "partioTranslator")

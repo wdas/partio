@@ -98,6 +98,7 @@ public:
     Partio::ParticleAttribute colorAttr;
     Partio::ParticleAttribute opacityAttr;
     Partio::ParticleAttribute radiusAttr;
+	Partio::ParticleAttribute incandescenceAttr;
     float* rgb;
     float* rgba;
     MFloatArray radius;
@@ -164,6 +165,7 @@ public:
     static MObject 	aPartioAttributes;
     static MObject  aColorFrom;
     static MObject  aAlphaFrom;
+	static MObject  aIncandFrom;
     static MObject  aRadiusFrom;
     static MObject  aPointSize;
     static MObject  aDefaultPointColor;
@@ -192,6 +194,7 @@ private:
     int mLastColorFromIndex;
     int mLastAlphaFromIndex;
     int mLastRadiusFromIndex;
+	int mLastIncandFromIndex;
     MFloatVector mLastColor;
     float mLastAlpha;
     bool mLastInvertAlpha;

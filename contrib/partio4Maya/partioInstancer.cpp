@@ -543,7 +543,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         bool computeMotionBlur =block.inputValue( aComputeVeloPos ).asBool();
 		float veloMult 		= block.inputValue ( aVeloMult ).asFloat();
 
-        int fps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
+        int fps = (int)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
         int integerTime = (int)floor((inputTime.value())+.52);
         float deltaTime  = float(inputTime.value() - integerTime);
 
@@ -705,7 +705,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 					MVector velo(vel[0],vel[1],vel[2]);
 					if (motionBlurStep)
 					{
-						int mFps = (float)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
+						int mFps = (int)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
 						pos += ((velo*veloMult)/mFps)*deltaTime;
 					}
 				}
