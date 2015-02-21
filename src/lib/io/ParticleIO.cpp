@@ -85,7 +85,9 @@ writers()
     if(!initialized){
 	initializationMutex.lock();
         data["bgeo"]=writeBGEO;
+        data["bhclassic"]=writeBGEO;
         data["geo"]=writeGEO;
+        data["hclassic"]=writeGEO;
         data["pdb"]=writePDB;
         data["pdb32"]=writePDB32;
         data["pdb64"]=writePDB64;

@@ -112,5 +112,9 @@ public:
     //! for example for a PTC file to read and write this could be "color" or "point"
     // std::string comment;
 };
+
+class FixedAttribute : public ParticleAttribute
+{
+};
 }
 #endif

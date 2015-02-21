@@ -43,6 +43,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <string>
 #include <memory>
 
+#include <string.h>
+
 namespace Partio
 {
 
@@ -55,59 +57,12 @@ void writeHoudiniStr(ostream& ostream,const string& s)
 }
 
 
-ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const bool verbose)
+bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<ParticleAttribute>& attrHandles, vector<ParticleAccessor>& accessors, int nAttrib, istream* input, ParticlesDataMutable* simple, bool headersOnly)
 {
-    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
-    if(!*input){
-        if(verbose) cerr<<"Partio: Unable to open file "<<filename<<endl;
-        return 0;
-    }
-
-    // header values
-    int magic;
-    char versionChar;
-    int version;
-    int nPoints;
-    int nPrims;
-    int nPointGroups;
-    int nPrimGroups;
-    int nPointAttrib;
-    int nVertexAttrib;
-    int nPrimAttrib;
-    int nAttrib;
-    read<BIGEND>(*input,magic,versionChar,version,nPoints,nPrims,nPointGroups);
-    read<BIGEND>(*input,nPrimGroups,nPointAttrib,nVertexAttrib,nPrimAttrib,nAttrib);
-
-
-    // Check header magic and version
-    const int bgeo_magic=((((('B'<<8)|'g')<<8)|'e')<<8)|'o';
-    if(magic!=bgeo_magic){
-        cerr<<"Partio: Magic number '"<<magic<<" of '"<<filename<<"' doesn't match bgeo magic '"<<bgeo_magic<<endl;
-        return 0;
-    }
-    if(version!=5){
-        cerr<<"Partio: BGEO must be version 5"<<endl;
-        return 0;
-    }
-
-    // Allocate a simple particle with the appropriate number of points
-    ParticlesDataMutable* simple=0;
-    if(headersOnly) simple=new ParticleHeaders;
-    else simple=create();
-
-    simple->addParticles(nPoints);
-
-
-    // Read attribute definitions
-    int particleSize=4; // Size in # of 32 bit primitives 
-    vector<int> attrOffsets; // offsets in # of 32 bit offsets
-    vector<ParticleAttribute> attrHandles;
-    vector<ParticleAccessor> accessors;
     attrOffsets.push_back(0); // pull values from byte offset
     attrHandles.push_back(simple->addAttribute("position",VECTOR,3)); // we always have one
     accessors.push_back(ParticleAccessor(attrHandles[0]));
-    
-    for(int i=0;i<nPointAttrib;i++){
+    for(int i=0;i<nAttrib;i++){
         unsigned short nameLength;
         read<BIGEND>(*input,nameLength);
         char* name=new char[nameLength+1];
@@ -165,31 +120,185 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const
         delete[] name;
     }
 
-    if(headersOnly) return simple; // escape before we try to edit data
+    return true;
+}
 
-    // Read the points
-    int *buffer=new int[particleSize];
+bool getFixedAttributes(int& particleSize, vector<int>& attrOffsets, vector<FixedAttribute>& attrHandles, int nAttrib, istream* input, ParticlesDataMutable* simple, bool headersOnly)
+{
+    for(int i=0;i<nAttrib;i++){
+        unsigned short nameLength;
+        read<BIGEND>(*input,nameLength);
+        char* name=new char[nameLength+1];
+        input->read(name,nameLength);name[nameLength]=0;
+#if 0
+        if (!strcmp(name,"varmap")) {
+            delete [] name;
+            unsigned short a;
+            int b;
+            int c;
+            read<BIGEND>(*input,a,b,c);
+            for (int i=0; i<c; i++) {
+                unsigned short d;
+                read<BIGEND>(*input,d);
+                char* crap=new char[d+1];
+                input->read(crap,d);crap[d]=0;
+                std::cerr << a << " " << b << " " << c << " " << d << " " << crap << std::endl;
+                delete [] crap;
+            }
+            continue;
+        }
+#endif
+        unsigned short size;
+        int houdiniType;
+        read<BIGEND>(*input,size,houdiniType);
+        if(houdiniType==0 || houdiniType==1 || houdiniType==5){
+            // read default values. don't do anything with them
+            for(int i=0;i<size;i++) {
+                int defaultValue;
+                input->read((char*)&defaultValue,sizeof(int));
+            }
+            ParticleAttributeType type=NONE;
+            if(houdiniType==0) type=FLOAT;
+            else if(houdiniType==1) type=INT;
+            else if(houdiniType==5) type=VECTOR;
+            attrHandles.push_back(simple->addFixedAttribute(name,type,size));
+            attrOffsets.push_back(particleSize);
+            particleSize+=size;
+        }else if(houdiniType==4){
+            FixedAttribute fixedAttribute=simple->addFixedAttribute(name,INDEXEDSTR,size);
+            attrHandles.push_back(fixedAttribute);
+            attrOffsets.push_back(particleSize);
+            int numIndices=0;
+            read<BIGEND>(*input,numIndices);
+            for(int ii=0;ii<numIndices;ii++){
+                unsigned short indexNameLength;
+                read<BIGEND>(*input,indexNameLength);
+                char* indexName=new char[indexNameLength+1];;
+                input->read(indexName,indexNameLength);
+                indexName[indexNameLength]=0;
+                if (!headersOnly) {
+                    int id=simple->registerFixedIndexedStr(fixedAttribute,indexName);
+                    if(id != ii){
+                        std::cerr<<"Partio: error on read, expected registerIndexStr to return index "<<ii<<" but got "<<id<<" for string "<<indexName<<std::endl;
+                    }
+                }
+                delete [] indexName;
+            }
+            particleSize+=size;
+        }else if(houdiniType==2){
+            cerr<<"Partio: found attr of type 'string', aborting"<<endl;
+            delete [] name;
+            simple->release();
+            return 0;
+        }else{
+            cerr<<"Partio: unknown attribute "<<houdiniType<<" type... aborting"<<endl;
+            delete [] name;
+            simple->release();
+            return 0;
+        }
+        delete[] name;
+    }
 
-    // make iterator and register accessors
-    ParticlesDataMutable::iterator iterator=simple->begin();
-    for(size_t i=0;i<accessors.size();i++) iterator.addAccessor(accessors[i]);
+    return true;
+}
 
-    for(ParticlesDataMutable::iterator end=simple->end();iterator!=end;++iterator){
-        //for(int i=0;i<nPoints;i++){
-        input->read((char*)buffer,particleSize*sizeof(int));
-        for(unsigned int attrIndex=0;attrIndex<attrHandles.size();attrIndex++){
-            ParticleAttribute& handle=attrHandles[attrIndex];
-            ParticleAccessor& accessor=accessors[attrIndex];
-            // TODO: this violates strict aliasing, we could just go to char* and make
-            // a different endian swapper
-            int* data=accessor.raw<int>(iterator);
-            for(int k=0;k<handle.count;k++){
-                BIGEND::swap(buffer[attrOffsets[attrIndex]+k]);
-                data[k]=buffer[attrOffsets[attrIndex]+k];
+ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const bool verbose)
+{
+    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
+    if(!*input){
+        if(verbose) cerr<<"Partio: Unable to open file "<<filename<<endl;
+        return 0;
+    }
+
+    // header values
+    int magic;
+    char versionChar;
+    int version;
+    int nPoints;
+    int nPrims;
+    int nPointGroups;
+    int nPrimGroups;
+    int nPointAttrib;
+    int nVertexAttrib;
+    int nPrimAttrib;
+    int nAttrib;
+    read<BIGEND>(*input,magic,versionChar,version,nPoints,nPrims,nPointGroups);
+    read<BIGEND>(*input,nPrimGroups,nPointAttrib,nVertexAttrib,nPrimAttrib,nAttrib);
+
+
+    // Check header magic and version
+    const int bgeo_magic=((((('B'<<8)|'g')<<8)|'e')<<8)|'o';
+    if(magic!=bgeo_magic){
+        cerr<<"Partio: Magic number '"<<magic<<" of '"<<filename<<"' doesn't match bgeo magic '"<<bgeo_magic<<endl;
+        return 0;
+    }
+    if(version!=5){
+        cerr<<"Partio: BGEO must be version 5"<<endl;
+        return 0;
+    }
+
+    // Allocate a simple particle with the appropriate number of points
+    ParticlesDataMutable* simple=0;
+    if(headersOnly) simple=new ParticleHeaders;
+    else simple=create();
+
+    simple->addParticles(nPoints);
+
+
+    // Read attribute definitions
+    int particleSize=4; // Size in # of 32 bit primitives 
+    vector<int> attrOffsets; // offsets in # of 32 bit offsets
+    vector<ParticleAttribute> attrHandles;
+    vector<ParticleAccessor> accessors;
+    getAttributes(particleSize, attrOffsets, attrHandles, accessors, nPointAttrib, input.get(), simple, headersOnly);
+
+    if(headersOnly) {
+        input->seekg(nPoints*particleSize*sizeof(int),input->cur);
+    } else {
+        // Read the points
+        int *buffer=new int[particleSize];
+
+        // make iterator and register accessors
+        ParticlesDataMutable::iterator iterator=simple->begin();
+        for(size_t i=0;i<accessors.size();i++) iterator.addAccessor(accessors[i]);
+
+        for(ParticlesDataMutable::iterator end=simple->end();iterator!=end;++iterator){
+            input->read((char*)buffer,particleSize*sizeof(int));
+            for(unsigned int attrIndex=0;attrIndex<attrHandles.size();attrIndex++){
+                ParticleAttribute& handle=attrHandles[attrIndex];
+                ParticleAccessor& accessor=accessors[attrIndex];
+                // TODO: this violates strict aliasing, we could just go to char* and make
+                // a different endian swapper
+                int* data=accessor.raw<int>(iterator);
+                for(int k=0;k<handle.count;k++){
+                    BIGEND::swap(buffer[attrOffsets[attrIndex]+k]);
+                    data[k]=buffer[attrOffsets[attrIndex]+k];
+                }
             }
         }
+        delete [] buffer;
     }
-    delete [] buffer;
+
+    particleSize=0;
+    vector<int> fixedAttrOffsets; // offsets in # of 32 bit offsets
+    vector<FixedAttribute> fixedAttrHandles;
+    getFixedAttributes(particleSize, fixedAttrOffsets, fixedAttrHandles, nAttrib, input.get(), simple, headersOnly);
+
+    if (headersOnly) return simple;
+
+    // Read the points
+    int *fixedBuffer=new int[particleSize];
+    input->read((char*)fixedBuffer,particleSize*sizeof(int));
+    for(unsigned int attrIndex=0;attrIndex<fixedAttrHandles.size();attrIndex++){
+        FixedAttribute& handle=fixedAttrHandles[attrIndex];
+        // TODO: this violates strict aliasing, we could just go to char* and make
+        // a different endian swapper
+        for(int k=0;k<handle.count;k++){
+            BIGEND::swap(fixedBuffer[fixedAttrOffsets[attrIndex]+k]);
+            simple->fixedDataWrite<int>(fixedAttrHandles[attrIndex])[k]=fixedBuffer[fixedAttrOffsets[attrIndex]+k];
+        }
+    }
+    delete [] fixedBuffer;
 
     // return the populated simpleParticle
     return simple;
@@ -211,13 +320,13 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
     char versionChar='V';
     int version=5;
     int nPoints=p.numParticles();
-    int nPrims=1;
+    int nPrims=0;
     int nPointGroups=0;
     int nPrimGroups=0;
     int nPointAttrib=p.numAttributes()-1;
     int nVertexAttrib=0;
-    int nPrimAttrib=1;
-    int nAttrib=0;
+    int nPrimAttrib=0;
+    int nAttrib=p.numFixedAttributes();
 
     write<BIGEND>(*output,magic,versionChar,version,nPoints,nPrims,nPointGroups);
     write<BIGEND>(*output,nPrimGroups,nPointAttrib,nVertexAttrib,nPrimAttrib,nAttrib);
@@ -285,7 +394,7 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
                 buffer[attrOffsets[attrIndex]+k]=data[k];
                 BIGEND::swap(buffer[attrOffsets[attrIndex]+k]);
             }
-        }        
+        }
         // set homogeneous coordinate
         float *w=(float*)&buffer[3];
         *w=1.;
@@ -294,21 +403,61 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
     }
     delete [] buffer;
 
-    // Write primitive attribs
-    writeHoudiniStr(*output,"generator");
-    write<BIGEND>(*output,(short)0x1); // count 1
-    write<BIGEND>(*output,(int)0x4); // type 4 index
-    write<BIGEND>(*output,(int)0x1); // type 4 index
-    writeHoudiniStr(*output,"papi");
+    vector<FixedAttribute> fixedHandles;
+    vector<int> fixedAttrOffsets;
+    particleSize=0;
+    for(int i=0;i<p.numFixedAttributes();i++){
+        FixedAttribute attr;
+        p.fixedAttributeInfo(i,attr);
 
-    // Write the primitive
-    write<BIGEND>(*output,(int)0x8000);
-    write<BIGEND>(*output,(int)nPoints);
-    if(nPoints>(int)1<<16)
-        for(int i=0;i<nPoints;i++) write<BIGEND>(*output,(int)i);
-    else
-        for(int i=0;i<nPoints;i++) write<BIGEND>(*output,(unsigned short)i);
-    write<BIGEND>(*output,(int)0);
+        writeHoudiniStr(*output,attr.name);
+        if(attr.type==INDEXEDSTR){
+            int houdiniType=4;
+            unsigned short size=attr.count;
+            const std::vector<std::string>& indexTable=p.fixedIndexedStrs(attr);
+            int numIndexes=indexTable.size();
+            write<BIGEND>(*output,size,houdiniType,numIndexes);
+            for(int ii=0;ii<numIndexes;ii++) {
+                writeHoudiniStr(*output,indexTable[ii]);
+            }
+        }else{
+            int houdiniType=0;
+            switch(attr.type){
+            case FLOAT: houdiniType=0;break;
+            case INT: houdiniType=1;break;
+            case VECTOR: houdiniType=5;break;
+            case INDEXEDSTR:
+            case NONE: assert(false);houdiniType=0;break;
+            }
+            unsigned short size=attr.count;
+            write<BIGEND>(*output,size,houdiniType);
+            for(int i=0;i<attr.count;i++){
+                int defaultValue=0;
+                write<BIGEND>(*output,defaultValue);
+            }
+        }
+        fixedAttrOffsets.push_back(particleSize);
+        particleSize+=attr.count;
+
+        fixedHandles.push_back(attr);
+    }
+
+    int *fixedBuffer=new int[particleSize];
+
+    for(unsigned int attrIndex=0;attrIndex<fixedHandles.size();attrIndex++){
+        FixedAttribute& handle=fixedHandles[attrIndex];
+        // TODO: this violates strict aliasing, we could just go to char* and make
+        // a different endian swapper
+
+        for(int k=0;k<handle.count;k++){
+
+            fixedBuffer[fixedAttrOffsets[attrIndex]+k]=p.fixedData<int>(fixedHandles[attrIndex])[k];
+            BIGEND::swap(fixedBuffer[fixedAttrOffsets[attrIndex]+k]);
+        }
+    }
+    output->write((char*)fixedBuffer,particleSize*sizeof(int));
+
+    delete [] fixedBuffer;
 
     // Write extra
     write<BIGEND>(*output,(char)0x00);
