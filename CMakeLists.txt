@@ -93,7 +93,7 @@ ENDIF(ZLIB_FOUND)
 
 ## Make modules able to see partio library
 # Setup environment variable to link partio
-SET( PARTIO_LIBRARIES ${ZLIB_LIBRARY} partio )
+SET( PARTIO_LIBRARIES partio ${ZLIB_LIBRARY} )
 # make it so partio can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/lib )
 
