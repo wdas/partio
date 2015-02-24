@@ -56,12 +56,34 @@ void writeHoudiniStr(ostream& ostream,const string& s)
     ostream.write(s.c_str(),s.size());
 }
 
-
-bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<ParticleAttribute>& attrHandles, vector<ParticleAccessor>& accessors, int nAttrib, istream* input, ParticlesDataMutable* simple, bool headersOnly)
+template<class T>
+struct Helper
 {
-    attrOffsets.push_back(0); // pull values from byte offset
-    attrHandles.push_back(simple->addAttribute("position",VECTOR,3)); // we always have one
-    accessors.push_back(ParticleAccessor(attrHandles[0]));
+    T addAttribute(ParticlesDataMutable* simple, const char* name, ParticleAttributeType type, int size);
+    int registerIndexedStr(const T& attribute,const char* str);
+};
+template<>
+struct Helper<ParticleAttribute>
+{
+    ParticleAttribute addAttribute(ParticlesDataMutable* simple, const char* name, ParticleAttributeType type, int size) {return simple->addAttribute(name,type,size);}
+    int registerIndexedStr(ParticlesDataMutable* simple, const ParticleAttribute& attribute,const char* str) {return simple->registerIndexedStr(attribute,str);}
+};
+template<>
+struct Helper<FixedAttribute>
+{
+    FixedAttribute addAttribute(ParticlesDataMutable* simple, const char* name, ParticleAttributeType type, int size) {return simple->addFixedAttribute(name,type,size);}
+    int registerIndexedStr(ParticlesDataMutable* simple, const FixedAttribute& attribute,const char* str) {return simple->registerFixedIndexedStr(attribute,str);}
+};
+
+struct FixedDummyAccessor{
+    template<class T>
+    FixedDummyAccessor(const T& /*attr*/){}
+};
+
+template<class TAttribute, class TAccessor>
+bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<TAttribute>& attrHandles, vector<TAccessor>& accessors, int nAttrib, istream* input, ParticlesDataMutable* simple, bool headersOnly)
+{
+    Helper<TAttribute> helper;
     for(int i=0;i<nAttrib;i++){
         unsigned short nameLength;
         read<BIGEND>(*input,nameLength);
@@ -80,14 +102,14 @@ bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<ParticleA
             if(houdiniType==0) type=FLOAT;
             else if(houdiniType==1) type=INT;
             else if(houdiniType==5) type=VECTOR;
-            attrHandles.push_back(simple->addAttribute(name,type,size));
-            accessors.push_back(ParticleAccessor(attrHandles.back()));
+            attrHandles.push_back(helper.addAttribute(simple,name,type,size));
+            accessors.push_back(TAccessor(attrHandles.back()));
             attrOffsets.push_back(particleSize);
             particleSize+=size;
         }else if(houdiniType==4){
-            ParticleAttribute attribute=simple->addAttribute(name,INDEXEDSTR,size);
+            TAttribute attribute=helper.addAttribute(simple,name,INDEXEDSTR,size);
             attrHandles.push_back(attribute);
-            accessors.push_back(ParticleAccessor(attrHandles.back()));
+            accessors.push_back(TAccessor(attrHandles.back()));
             attrOffsets.push_back(particleSize);
             int numIndices=0;
             read<BIGEND>(*input,numIndices);
@@ -98,86 +120,7 @@ bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<ParticleA
                 input->read(indexName,indexNameLength);
                 indexName[indexNameLength]=0;
                 if (!headersOnly) {
-                    int id=simple->registerIndexedStr(attribute,indexName);
-                    if(id != ii){
-                        std::cerr<<"Partio: error on read, expected registerIndexStr to return index "<<ii<<" but got "<<id<<" for string "<<indexName<<std::endl;
-                    }
-                }
-                delete [] indexName;
-            }
-            particleSize+=size;
-        }else if(houdiniType==2){
-            cerr<<"Partio: found attr of type 'string', aborting"<<endl;
-            delete [] name;
-            simple->release();
-            return 0;
-        }else{
-            cerr<<"Partio: unknown attribute "<<houdiniType<<" type... aborting"<<endl;
-            delete [] name;
-            simple->release();
-            return 0;
-        }
-        delete[] name;
-    }
-
-    return true;
-}
-
-bool getFixedAttributes(int& particleSize, vector<int>& attrOffsets, vector<FixedAttribute>& attrHandles, int nAttrib, istream* input, ParticlesDataMutable* simple, bool headersOnly)
-{
-    for(int i=0;i<nAttrib;i++){
-        unsigned short nameLength;
-        read<BIGEND>(*input,nameLength);
-        char* name=new char[nameLength+1];
-        input->read(name,nameLength);name[nameLength]=0;
-#if 0
-        if (!strcmp(name,"varmap")) {
-            delete [] name;
-            unsigned short a;
-            int b;
-            int c;
-            read<BIGEND>(*input,a,b,c);
-            for (int i=0; i<c; i++) {
-                unsigned short d;
-                read<BIGEND>(*input,d);
-                char* crap=new char[d+1];
-                input->read(crap,d);crap[d]=0;
-                std::cerr << a << " " << b << " " << c << " " << d << " " << crap << std::endl;
-                delete [] crap;
-            }
-            continue;
-        }
-#endif
-        unsigned short size;
-        int houdiniType;
-        read<BIGEND>(*input,size,houdiniType);
-        if(houdiniType==0 || houdiniType==1 || houdiniType==5){
-            // read default values. don't do anything with them
-            for(int i=0;i<size;i++) {
-                int defaultValue;
-                input->read((char*)&defaultValue,sizeof(int));
-            }
-            ParticleAttributeType type=NONE;
-            if(houdiniType==0) type=FLOAT;
-            else if(houdiniType==1) type=INT;
-            else if(houdiniType==5) type=VECTOR;
-            attrHandles.push_back(simple->addFixedAttribute(name,type,size));
-            attrOffsets.push_back(particleSize);
-            particleSize+=size;
-        }else if(houdiniType==4){
-            FixedAttribute fixedAttribute=simple->addFixedAttribute(name,INDEXEDSTR,size);
-            attrHandles.push_back(fixedAttribute);
-            attrOffsets.push_back(particleSize);
-            int numIndices=0;
-            read<BIGEND>(*input,numIndices);
-            for(int ii=0;ii<numIndices;ii++){
-                unsigned short indexNameLength;
-                read<BIGEND>(*input,indexNameLength);
-                char* indexName=new char[indexNameLength+1];;
-                input->read(indexName,indexNameLength);
-                indexName[indexNameLength]=0;
-                if (!headersOnly) {
-                    int id=simple->registerFixedIndexedStr(fixedAttribute,indexName);
+                    int id=helper.registerIndexedStr(simple,attribute,indexName);
                     if(id != ii){
                         std::cerr<<"Partio: error on read, expected registerIndexStr to return index "<<ii<<" but got "<<id<<" for string "<<indexName<<std::endl;
                     }
@@ -250,6 +193,9 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const
     vector<int> attrOffsets; // offsets in # of 32 bit offsets
     vector<ParticleAttribute> attrHandles;
     vector<ParticleAccessor> accessors;
+    attrOffsets.push_back(0); // pull values from byte offset
+    attrHandles.push_back(simple->addAttribute("position",VECTOR,3)); // we always have one
+    accessors.push_back(ParticleAccessor(attrHandles[0]));
     getAttributes(particleSize, attrOffsets, attrHandles, accessors, nPointAttrib, input.get(), simple, headersOnly);
 
     if(headersOnly) {
@@ -282,7 +228,8 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const
     particleSize=0;
     vector<int> fixedAttrOffsets; // offsets in # of 32 bit offsets
     vector<FixedAttribute> fixedAttrHandles;
-    getFixedAttributes(particleSize, fixedAttrOffsets, fixedAttrHandles, nAttrib, input.get(), simple, headersOnly);
+    vector<FixedDummyAccessor> fixedAccessors;
+    getAttributes(particleSize, fixedAttrOffsets, fixedAttrHandles, fixedAccessors, nAttrib, input.get(), simple, headersOnly);
 
     if (headersOnly) return simple;
 

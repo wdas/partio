@@ -106,6 +106,7 @@ private:
     int particleCount;
     int allocatedCount;
     char* data;
+    char* fixedData;
     int stride;
 	struct IndexedStrTable{
         std::map<std::string,int> stringToIndex; // TODO: this should be a hash table unordered_map

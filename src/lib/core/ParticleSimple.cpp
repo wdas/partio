@@ -59,6 +59,7 @@ ParticlesSimple::
 ~ParticlesSimple()
 {
     for(unsigned int i=0;i<attributeData.size();i++) free(attributeData[i]);
+    for(unsigned int i=0;i<fixedAttributeData.size();i++) free(fixedAttributeData[i]);
     delete kdtree;
 }
 

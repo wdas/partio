@@ -50,7 +50,7 @@ using namespace Partio;
 
 ParticlesSimpleInterleave::
 ParticlesSimpleInterleave()
-    :particleCount(0),allocatedCount(0),data(0),stride(0),kdtree(0)
+    :particleCount(0),allocatedCount(0),data(0),fixedData(0),stride(0),kdtree(0)
 {
 }
 
@@ -58,6 +58,7 @@ ParticlesSimpleInterleave::
 ~ParticlesSimpleInterleave()
 {
     free(data);
+    free(fixedData);
     delete kdtree;
 }
 
@@ -254,17 +255,17 @@ addFixedAttribute(const char* attribute,ParticleAttributeType type,const int cou
     int oldStride=stride;
     int newStride=stride+TypeSize(type)*count;
     char* newData=(char*)malloc((size_t)newStride);
-    if(data){
+    if(fixedData){
         char* ptrNew=newData;
-        char* ptrOld=data;
+        char* ptrOld=fixedData;
         for(int i=0;i<particleCount;i++){
             memcpy(ptrNew,ptrOld,oldStride);
             ptrNew+=newStride;
             ptrOld+=oldStride;
         }
     }
-    free(data);
-    data=newData;
+    free(fixedData);
+    fixedData=newData;
     stride=newStride;
     fixedAttributeOffsets.push_back(oldStride);
     fixedAttributeIndexedStrs.push_back(IndexedStrTable());

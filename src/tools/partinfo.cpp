@@ -92,13 +92,13 @@ int main(int argc,char *argv[])
             }
         }
 
-        numAttr=p->numFixedAttributes();
-        if (numAttr) {
+        int numFixedAttr=p->numFixedAttributes();
+        if (numFixedAttr) {
             std::cout<<"---------------------------"<<std::endl;
             std::cout<<"Fixed Attributes"<<std::endl;
             std::cout<<std::setw(12)<<"Type"<<std::setw(10)<<"Count"<<std::setw(30)<<"Name"<<std::endl;
             std::cout<<std::setw(12)<<"----"<<std::setw(10)<<"-----"<<std::setw(30)<<"----"<<std::endl;
-            for(int i=0;i<numAttr;i++){
+            for(int i=0;i<numFixedAttr;i++){
                 Partio::FixedAttribute attr;
                 p->fixedAttributeInfo(i,attr);
                 std::cout<<std::setw(12)<<Partio::TypeName(attr.type)
@@ -106,7 +106,7 @@ int main(int argc,char *argv[])
                          <<std::setw(30)<<attr.name<<std::endl;;
             }
 
-            for(int i=0;i<numAttr;i++){
+            for(int i=0;i<numFixedAttr;i++){
                 Partio::FixedAttribute attr;
                 p->fixedAttributeInfo(i,attr);
                 std::cout<<std::setw(10)<<Partio::TypeName(attr.type)<<" "<<std::setw(10)<<attr.name;

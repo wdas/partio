@@ -78,14 +78,17 @@ public:
 
     //! Number of per-particle attributes.
     virtual int numAttributes() const=0;
+    //! Number of fixed attributes.
     virtual int numFixedAttributes() const=0;
 
     //! Lookup an attribute by name and store a handle to the attribute.
     virtual bool attributeInfo(const char* attributeName,ParticleAttribute& attribute) const=0;
+    //! Lookup an attribute by name and store a handle to the attribute.
     virtual bool fixedAttributeInfo(const char* attributeName,FixedAttribute& attribute) const=0;
 
     //! Lookup an attribute by index and store a handle to the attribute.
     virtual bool attributeInfo(const int attributeInfo,ParticleAttribute& attribute) const=0;
+    //! Lookup an attribute by index and store a handle to the attribute.
     virtual bool fixedAttributeInfo(const int attributeInfo,FixedAttribute& attribute) const=0;
 };
 
@@ -128,10 +131,12 @@ public:
 
     /// All indexed strings for an attribute
     virtual const std::vector<std::string>& indexedStrs(const ParticleAttribute& attr) const=0;
+    /// All indexed strings for an attribute
     virtual const std::vector<std::string>& fixedIndexedStrs(const FixedAttribute& attr) const=0;
 
     /// Looks up the index for a given string for a given attribute, returns -1 if not found
     virtual int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const=0;
+    /// Looks up the index for a given string for a given attribute, returns -1 if not found
     virtual int lookupFixedIndexedStr(const FixedAttribute& attribute,const char* str) const=0;
 
     //! Fill the user supplied values array with data corresponding to the given
@@ -203,6 +208,8 @@ public:
         return static_cast<T*>(dataInternal(attribute,particleIndex));
     }
 
+    //! Get a pointer to the data corresponding to the attribute given by the
+    //! fixed attribute handle.
     template<class T> inline T* fixedDataWrite(const FixedAttribute& attribute) const
     {
         // TODO: add type checking
@@ -211,10 +218,12 @@ public:
 
     /// Returns a token for the given string. This allows efficient storage of string data
     virtual int registerIndexedStr(const ParticleAttribute& attribute,const char* str)=0;
+    /// Returns a token for the given string. This allows efficient storage of string data
     virtual int registerFixedIndexedStr(const FixedAttribute& attribute,const char* str)=0;
 
     /// Returns a token for the given string. This allows efficient storage of string data
     virtual void setIndexedStr(const ParticleAttribute& attribute,int indexedStringToken,const char* str)=0;
+    /// Returns a token for the given string. This allows efficient storage of string data
     virtual void setFixedIndexedStr(const FixedAttribute& attribute,int indexedStringToken,const char* str)=0;
 
     //! Preprocess the data for finding nearest neighbors by sorting into a
@@ -225,6 +234,7 @@ public:
     virtual ParticleAttribute addAttribute(const char* attribute,ParticleAttributeType type,
         const int count)=0;
 
+    //! Adds a fixed attribute with the provided name, type and count
     virtual FixedAttribute addFixedAttribute(const char* attribute,ParticleAttributeType type,
         const int count)=0;
 
