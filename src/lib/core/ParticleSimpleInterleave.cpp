@@ -50,7 +50,7 @@ using namespace Partio;
 
 ParticlesSimpleInterleave::
 ParticlesSimpleInterleave()
-    :particleCount(0),allocatedCount(0),data(0),stride(0),kdtree(0)
+    :particleCount(0),allocatedCount(0),data(0),fixedData(0),stride(0),kdtree(0)
 {
 }
 
@@ -58,6 +58,7 @@ ParticlesSimpleInterleave::
 ~ParticlesSimpleInterleave()
 {
     free(data);
+    free(fixedData);
     delete kdtree;
 }
 
@@ -80,6 +81,11 @@ numAttributes() const
     return attributes.size();
 }
 
+int ParticlesSimpleInterleave::
+numFixedAttributes() const
+{
+    return fixedAttributes.size();
+}
 
 bool ParticlesSimpleInterleave::
 attributeInfo(const int attributeIndex,ParticleAttribute& attribute) const
@@ -90,11 +96,30 @@ attributeInfo(const int attributeIndex,ParticleAttribute& attribute) const
 }
 
 bool ParticlesSimpleInterleave::
+fixedAttributeInfo(const int attributeIndex,FixedAttribute& attribute) const
+{
+    if(attributeIndex<0 || attributeIndex>=(int)fixedAttributes.size()) return false;
+    attribute=fixedAttributes[attributeIndex];
+    return true;
+}
+
+bool ParticlesSimpleInterleave::
 attributeInfo(const char* attributeName,ParticleAttribute& attribute) const
 {
     std::map<std::string,int>::const_iterator it=nameToAttribute.find(attributeName);
     if(it!=nameToAttribute.end()){
         attribute=attributes[it->second];
+        return true;
+    }
+    return false;
+}
+
+bool ParticlesSimpleInterleave::
+fixedAttributeInfo(const char* attributeName,FixedAttribute& attribute) const
+{
+    std::map<std::string,int>::const_iterator it=nameToFixedAttribute.find(attributeName);
+    if(it!=nameToFixedAttribute.end()){
+        attribute=fixedAttributes[it->second];
         return true;
     }
     return false;
@@ -210,6 +235,44 @@ addAttribute(const char* attribute,ParticleAttributeType type,const int count)
     return attr;
 }
 
+FixedAttribute ParticlesSimpleInterleave::
+addFixedAttribute(const char* attribute,ParticleAttributeType type,const int count)
+{
+	//std::cerr<< "AddAttribute interleave" << std::endl;
+    if(nameToFixedAttribute.find(attribute) != nameToFixedAttribute.end()){
+        std::cerr<<"Partio: addFixedAttribute failed because attr '"<<attribute<<"'"<<" already exists"<<std::endl;
+        return FixedAttribute();
+    }
+    FixedAttribute attr;
+    attr.name=attribute;
+    attr.type=type;
+    attr.attributeIndex=attributes.size(); //  all arrays separate so we don't use this here!
+    attr.count=count;
+    fixedAttributes.push_back(attr);
+    nameToFixedAttribute[attribute]=fixedAttributes.size()-1;
+
+    // repackage data for new attribute
+    int oldStride=stride;
+    int newStride=stride+TypeSize(type)*count;
+    char* newData=(char*)malloc((size_t)newStride);
+    if(fixedData){
+        char* ptrNew=newData;
+        char* ptrOld=fixedData;
+        for(int i=0;i<particleCount;i++){
+            memcpy(ptrNew,ptrOld,oldStride);
+            ptrNew+=newStride;
+            ptrOld+=oldStride;
+        }
+    }
+    free(fixedData);
+    fixedData=newData;
+    stride=newStride;
+    fixedAttributeOffsets.push_back(oldStride);
+    fixedAttributeIndexedStrs.push_back(IndexedStrTable());
+
+    return attr;
+}
+
 ParticleIndex ParticlesSimpleInterleave::
 addParticle()
 {
@@ -282,6 +345,12 @@ dataInternal(const ParticleAttribute& attribute,const ParticleIndex particleInde
     return data+particleIndex*stride+attributeOffsets[attribute.attributeIndex];
 }
 
+void* ParticlesSimpleInterleave::
+fixedDataInternal(const FixedAttribute& attribute) const
+{
+    return data+allocatedCount*stride+fixedAttributeOffsets[attribute.attributeIndex];
+}
+
 void ParticlesSimpleInterleave::
 dataInternalMultiple(const ParticleAttribute& attribute,const int indexCount,
     const ParticleIndex* particleIndices,const bool sorted,char* values) const
@@ -327,9 +396,30 @@ registerIndexedStr(const ParticleAttribute& attribute,const char* str)
 }
 
 int ParticlesSimpleInterleave::
+registerFixedIndexedStr(const FixedAttribute& attribute,const char* str)
+{
+    IndexedStrTable& table=fixedAttributeIndexedStrs[attribute.attributeIndex];
+    std::map<std::string,int>::const_iterator it=table.stringToIndex.find(str);
+    if(it!=table.stringToIndex.end()) return it->second;
+    int newIndex=table.strings.size();
+    table.strings.push_back(str);
+    table.stringToIndex[str]=newIndex;
+    return newIndex;
+}
+
+int ParticlesSimpleInterleave::
 lookupIndexedStr(Partio::ParticleAttribute const &attribute, char const *str) const
 {
     const IndexedStrTable& table=attributeIndexedStrs[attribute.attributeIndex];
+    std::map<std::string,int>::const_iterator it=table.stringToIndex.find(str);
+    if(it!=table.stringToIndex.end()) return it->second;
+    return -1;
+}
+
+int ParticlesSimpleInterleave::
+lookupFixedIndexedStr(Partio::FixedAttribute const &attribute, char const *str) const
+{
+    const IndexedStrTable& table=fixedAttributeIndexedStrs[attribute.attributeIndex];
     std::map<std::string,int>::const_iterator it=table.stringToIndex.find(str);
     if(it!=table.stringToIndex.end()) return it->second;
     return -1;
@@ -342,10 +432,25 @@ indexedStrs(const ParticleAttribute& attr) const
     return table.strings;
 }
 
+const std::vector<std::string>& ParticlesSimpleInterleave::
+fixedIndexedStrs(const FixedAttribute& attr) const
+{
+    const IndexedStrTable& table=fixedAttributeIndexedStrs[attr.attributeIndex];
+    return table.strings;
+}
+
 
 void ParticlesSimpleInterleave::setIndexedStr(const ParticleAttribute& attribute,int indexedStringToken,const char* str){
     IndexedStrTable& table=attributeIndexedStrs[attribute.attributeIndex];
-    if(indexedStringToken >= table.strings.size() || indexedStringToken < 0) return;
+    if(indexedStringToken >= int(table.strings.size()) || indexedStringToken < 0) return;
+    table.stringToIndex.erase(table.stringToIndex.find(table.strings[indexedStringToken]));
+    table.strings[indexedStringToken] = str;
+    table.stringToIndex[str]=indexedStringToken;
+}
+
+void ParticlesSimpleInterleave::setFixedIndexedStr(const FixedAttribute& attribute,int indexedStringToken,const char* str){
+    IndexedStrTable& table=fixedAttributeIndexedStrs[attribute.attributeIndex];
+    if(indexedStringToken >= int(table.strings.size()) || indexedStringToken < 0) return;
     table.stringToIndex.erase(table.stringToIndex.find(table.strings[indexedStringToken]));
     table.strings[indexedStringToken] = str;
     table.stringToIndex[str]=indexedStringToken;
