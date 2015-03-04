@@ -167,7 +167,7 @@ bool skipPrimitives(int nPoints, int nPrims, int nPrimAttrib, istream* input)
         if(primType==0x00008000) {
             int size;
             read<BIGEND>(*input,size);
-            if(nPoints>(int)1<<16)
+            if(nPoints>=(int)1<<16)
                 input->seekg(size*sizeof(int),input->cur);
             else
                 input->seekg(size*sizeof(unsigned short),input->cur);
