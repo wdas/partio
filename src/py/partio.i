@@ -288,7 +288,7 @@ public:
 
     %feature("autodoc");
     %feature("docstring","Gets fixed attribute data");
-    PyObject* get(const FixedAttribute& attr)
+    PyObject* getFixed(const FixedAttribute& attr)
     {
         PyObject* tuple=PyTuple_New(attr.count);
         if(attr.type==Partio::INT || attr.type==Partio::INDEXEDSTR){
@@ -384,7 +384,7 @@ public:
     %feature("autodoc");
     %feature("docstring","Sets data on a given fixed attribute.\n"
         "Data must be specified as tuple.");
-    PyObject* set(const FixedAttribute& attr,PyObject* tuple)
+    PyObject* setFixed(const FixedAttribute& attr,PyObject* tuple)
     {
         if(!PySequence_Check(tuple)){
             PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
