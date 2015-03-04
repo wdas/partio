@@ -75,9 +75,16 @@ struct Helper<FixedAttribute>
     int registerIndexedStr(ParticlesDataMutable* simple, const FixedAttribute& attribute,const char* str) {return simple->registerFixedIndexedStr(attribute,str);}
 };
 
-struct FixedDummyAccessor{
+class DummyAttribute {};
+template<>
+struct Helper<DummyAttribute>
+{
+    DummyAttribute addAttribute(ParticlesDataMutable* simple, const char* name, ParticleAttributeType type, int size) { return DummyAttribute(); }
+    int registerIndexedStr(ParticlesDataMutable* simple, const DummyAttribute& attribute,const char* str) { return 0; }
+};
+struct DummyAccessor{
     template<class T>
-    FixedDummyAccessor(const T& /*attr*/){}
+    DummyAccessor(const T& /*attr*/){}
 };
 
 template<class TAttribute, class TAccessor>
@@ -142,6 +149,34 @@ bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<TAttribut
         delete[] name;
     }
 
+    return true;
+}
+
+// ignore primitive attributes, only know about Particle Systems currently
+bool skipPrimitives(int nPoints, int nPrims, int nPrimAttrib, istream* input)
+{
+    int particleSize=0;
+    vector<int> primAttrOffsets; // offsets in # of 32 bit offsets
+    vector<DummyAttribute> primAttrHandles;
+    vector<DummyAccessor> primAccessors;
+    getAttributes(particleSize, primAttrOffsets, primAttrHandles, primAccessors, nPrimAttrib, input, 0, true);
+
+    for(int i=0;i<nPrims;i++) {
+        int primType;
+        read<BIGEND>(*input,primType);
+        if(primType==0x00008000) {
+            int size;
+            read<BIGEND>(*input,size);
+            if(nPoints>=(int)1<<16)
+                input->seekg(size*sizeof(int),input->cur);
+            else
+                input->seekg(size*sizeof(unsigned short),input->cur);
+            input->seekg(particleSize*sizeof(int),input->cur);
+        } else {
+            std::cerr << "Partio: Unrecognized Primitive Type: 0x" << std::hex << primType << " - Cannot process detail attributes" << std::endl;
+            return false;
+        }
+    }
     return true;
 }
 
@@ -225,10 +260,12 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const
         delete [] buffer;
     }
 
+    if (!skipPrimitives(nPoints, nPrims, nPrimAttrib, input.get())) return simple;
+
     particleSize=0;
     vector<int> fixedAttrOffsets; // offsets in # of 32 bit offsets
     vector<FixedAttribute> fixedAttrHandles;
-    vector<FixedDummyAccessor> fixedAccessors;
+    vector<DummyAccessor> fixedAccessors;
     getAttributes(particleSize, fixedAttrOffsets, fixedAttrHandles, fixedAccessors, nAttrib, input.get(), simple, headersOnly);
 
     if (headersOnly) return simple;
