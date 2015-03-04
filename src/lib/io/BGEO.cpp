@@ -153,7 +153,7 @@ bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<TAttribut
 }
 
 // ignore primitive attributes, only know about Particle Systems currently
-bool skipPrimitives(int nPrims, int nPrimAttrib, istream* input)
+bool skipPrimitives(int nPoints, int nPrims, int nPrimAttrib, istream* input)
 {
     int particleSize=0;
     vector<int> primAttrOffsets; // offsets in # of 32 bit offsets
@@ -167,10 +167,13 @@ bool skipPrimitives(int nPrims, int nPrimAttrib, istream* input)
         if(primType==0x00008000) {
             int size;
             read<BIGEND>(*input,size);
-            input->seekg(size*sizeof(unsigned short),input->cur);
+            if(nPoints>(int)1<<16)
+                input->seekg(size*sizeof(int),input->cur);
+            else
+                input->seekg(size*sizeof(unsigned short),input->cur);
             input->seekg(particleSize*sizeof(int),input->cur);
         } else {
-            std::cerr << "Partio: Unrecognized Primitive Type: " << std::hex << primType << std::endl;
+            std::cerr << "Partio: Unrecognized Primitive Type: 0x" << std::hex << primType << " - Cannot process detail attributes" << std::endl;
             return false;
         }
     }
@@ -257,7 +260,7 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const
         delete [] buffer;
     }
 
-    if (!skipPrimitives(nPrims, nPrimAttrib, input.get())) return simple;
+    if (!skipPrimitives(nPoints, nPrims, nPrimAttrib, input.get())) return simple;
 
     particleSize=0;
     vector<int> fixedAttrOffsets; // offsets in # of 32 bit offsets
