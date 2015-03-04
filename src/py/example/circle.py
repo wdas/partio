@@ -59,8 +59,9 @@ while t<2*math.pi:
     p.set(color,i,(t/2./math.pi,1-(t/2./math.pi),0))
     p.set(radius,i,(.02,))
     p.set(normal,i,(0,1,0))
+    foo=p.get(position,i)
 
     t+=dt
 
 # Write to a point cloud
-papi.write("spiral.ptc",p)
+partio.write("spiral.ptc",p)
