@@ -1,0 +1,61 @@
+//////////////////////////////////////////////////////////////////////////////
+// partioPoint shader:
+// simple low level control over shading of particles
+// with built in support for particle rgbPP, incandescencePP and opacityPP sampling
+// author johnc (redpawfx)  
+
+global proc AEpartioPointTemplate( string $nodeName )
+{
+	AEswatchDisplay $nodeName;
+
+	editorTemplate -beginScrollLayout;
+
+	editorTemplate -callCustom AEshaderTypeNew AEshaderTypeReplace "message";
+		editorTemplate -addControl "premult";
+		
+			editorTemplate -beginLayout "Color" -collapse false;
+				editorTemplate -addControl "overrideRgbPP";
+				editorTemplate -addControl "particleColor";
+			editorTemplate -endLayout;
+			editorTemplate -beginLayout "Opacity" -collapse false;
+				editorTemplate -addControl "overrideOpacityPP";
+				editorTemplate -addControl "particleOpacity";
+				editorTemplate -addControl "blackHole";
+				editorTemplate -addControl "doShadowOpacity";
+				editorTemplate -addControl "matteOpacity";
+			editorTemplate -endLayout;
+			editorTemplate -beginLayout "Lighting" -collapse false;
+				editorTemplate -addControl "useLighting";
+				//editorTemplate -l "KAmbient  (Ka)" -addControl "Ka"; // ambient removed in arnold 4.1+
+				editorTemplate -l "KDiffuse  (Kd)" -addControl "Kd";
+				editorTemplate -l "KIndirect (Ki)" -addControl "Ki";
+				editorTemplate -l "KSpecular (Ks)" -addControl "Ks";
+				editorTemplate -l "specularCoef"   -addControl "shiny";
+			editorTemplate -endLayout;
+			editorTemplate -beginLayout "Ambient Occlusion" -collapse false;
+				editorTemplate -l "KOcclusion (KOcc)" -addControl "KOcc";
+				editorTemplate -addControl "occSamples";
+				editorTemplate -addControl "occSpread";
+				editorTemplate -addControl "occFalloff";
+				editorTemplate -addControl "occMinDist";
+				editorTemplate -addControl "occMaxDist";
+				editorTemplate -addControl "invertOcc";
+			editorTemplate -endLayout;
+			editorTemplate -beginLayout "Emission" -collapse false;
+				editorTemplate -l "Emission From incandescence" -addControl "emColorFromIncan";
+				editorTemplate -addControl "emission";
+				editorTemplate -addControl "emission_weight";
+			editorTemplate -endLayout;
+			editorTemplate -beginLayout "AOVs" -collapse false;
+				editorTemplate -addControl "aov_direct_diffuse";
+				editorTemplate -addControl "aov_indirect_diffuse";
+				editorTemplate -addControl "aov_emission";
+			editorTemplate -endLayout;
+				
+	editorTemplate -addExtraControls;
+
+	editorTemplate -endScrollLayout;
+
+	editorTemplate -suppress "normalCamera";
+	editorTemplate -suppress "nodeState";
+}
