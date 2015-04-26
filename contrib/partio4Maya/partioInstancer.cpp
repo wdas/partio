@@ -1065,39 +1065,39 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         unsigned int numAttr=pvCache.particles->numAttributes();
         MPlug zPlug (thisMObject(), aPartioAttributes);
 
-        if ((rotationFromIndex+1) > zPlug.numElements())
+        if ((rotationFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aRotationFrom).setInt(-1);
         }
-        if ((scaleFromIndex+1) > zPlug.numElements())
+        if ((scaleFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aScaleFrom).setInt(-1);
         }
-        if ((lastRotFromIndex+1) > zPlug.numElements())
+        if ((lastRotFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aLastRotationFrom).setInt(-1);
         }
-        if ((lastScaleFromIndex+1) > zPlug.numElements())
+        if ((lastScaleFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aLastScaleFrom).setInt(-1);
         }
-        if ((indexFromIndex+1) > zPlug.numElements())
+        if ((indexFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aIndexFrom).setInt(-1);
         }
-        if ((aimDirectionFromIndex+1) > zPlug.numElements())
+        if ((aimDirectionFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aAimDirectionFrom).setInt(-1);
         }
-        if ((aimPositionFromIndex+1) > zPlug.numElements())
+        if ((aimPositionFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aAimPositionFrom).setInt(-1);
         }
-        if ((aimAxisFromIndex+1) > zPlug.numElements())
+        if ((aimAxisFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aAimAxisFrom).setInt(-1);
         }
-        if ((aimWorldUpFromIndex+1) > zPlug.numElements())
+        if ((aimWorldUpFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aAimWorldUpFrom).setInt(-1);
         }
