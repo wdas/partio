@@ -228,7 +228,7 @@ SOP_partio::cookMySop(OP_Context &context)
     {
         gdp->clearAndDestroy();
         addError(SOP_MESSAGE, "filename empty or filetype is not one of:\nbgeo,geo\npda,pdb,pdb.gz,pdc\nbin,rpc\nprt\nptc\npts,xyz,pcd\nmc,icecache,rib");
-        gdp->notifyCache(GU_CACHE_ALL);
+        //gdp->notifyCache(GU_CACHE_ALL);
         return error();
     }
 
@@ -277,7 +277,7 @@ SOP_partio::cookMySop(OP_Context &context)
         boss->opEnd();
     }
 
-    gdp->notifyCache(GU_CACHE_ALL);
+    //gdp->notifyCache(GU_CACHE_ALL);
     return error();
 }
 

@@ -794,19 +794,19 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
         unsigned int numAttr=pvCache.particles->numAttributes();
         MPlug zPlug (thisMObject(), aPartioAttributes);
 
-        if ((colorFromIndex+1) > zPlug.numElements())
+        if ((colorFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aColorFrom).setInt(-1);
         }
-        if ((opacityFromIndex+1) > zPlug.numElements())
+        if ((opacityFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aAlphaFrom).setInt(-1);
         }
-        if ((radiusFromIndex+1) > zPlug.numElements())
+        if ((radiusFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aRadiusFrom).setInt(-1);
         }
-        if ((incandFromIndex+1) > zPlug.numElements())
+        if ((incandFromIndex+1) > (int)zPlug.numElements())
         {
             block.outputValue(aIncandFrom).setInt(-1);
         }

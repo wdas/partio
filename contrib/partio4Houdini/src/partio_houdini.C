@@ -36,10 +36,13 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <iostream>
 
 #include <GU/GU_PrimPart.h>
 #include <GEO/GEO_AttributeHandle.h>
-#include <GEO/GEO_AttributeOwner.h>
+//#include <GEO/GEO_AttributeOwner.h>
+#include <GA/GA_Types.h>
+#include <GA/GA_PageHandle.h>
 #include <UT/UT_Vector3.h>
 #include <UT/UT_Vector4.h>
 #include <GU/GU_Detail.h>
@@ -63,12 +66,12 @@ bool partioLoad(char *fileName, GU_Detail *gdp, int verbosity)
 
     if (verbosity>0)
     {
-        cerr << "partio: loading " << fileName << " verbosity: "<< verbosity <<  endl;
+		std::cerr << "partio: loading " << fileName << " verbosity: "<< verbosity <<  std::endl;
     }
 
     if (!fexists(fileName))
     {
-        // cerr << " Error: File does not exist: " << fileName <<  endl;
+        // std::cerr << " Error: File does not exist: " << fileName <<  std::endl;
         return false;
     }
 
@@ -123,7 +126,7 @@ bool partioLoad(char *fileName, GU_Detail *gdp, int verbosity)
                     gdp->addFloatTuple(GA_ATTRIB_POINT, houAttrName.c_str(), 3);
                 }
 
-                GA_RWPageHandleV3 v_ph(gdp, GEO_POINT_DICT, houAttrName.c_str());
+                GA_RWPageHandleV3 v_ph(gdp, GA_ATTRIB_POINT, houAttrName.c_str());
 
                 if (v_ph.isValid())
                 {
@@ -157,7 +160,7 @@ bool partioLoad(char *fileName, GU_Detail *gdp, int verbosity)
 
                 // add houdini attrand get handle to it  (fast interator handle)
                 gdp->addFloatTuple(GA_ATTRIB_POINT, attrHandle.name.c_str(), 1);
-                GA_RWPageHandleF   f_ph(gdp, GEO_POINT_DICT, attrHandle.name.c_str(),0);
+                GA_RWPageHandleF   f_ph(gdp, GA_ATTRIB_POINT, attrHandle.name.c_str(),0);
 
                 if (f_ph.isValid())
                 {
@@ -190,7 +193,7 @@ bool partioLoad(char *fileName, GU_Detail *gdp, int verbosity)
 
 
                 gdp->addIntTuple(GA_ATTRIB_POINT, attrHandle.name.c_str(), 1);
-                GA_RWPageHandleI   i_ph(gdp, GEO_POINT_DICT, attrHandle.name.c_str(),0);
+                GA_RWPageHandleI   i_ph(gdp, GA_ATTRIB_POINT, attrHandle.name.c_str(),0);
 
                 if (i_ph.isValid())
                 {
@@ -256,7 +259,7 @@ bool partioSave(char *fileName, const GU_Detail *gdp, int verbosity)
 {
     if (verbosity>0)
     {
-        cerr << "partio: saving " << fileName <<" verbosity: "<< verbosity <<endl;
+		std::cerr << "partio: saving " << fileName <<" verbosity: "<< verbosity << std::endl;
     }
 
     int nvars = 0,  numPoints;
@@ -270,7 +273,8 @@ bool partioSave(char *fileName, const GU_Detail *gdp, int verbosity)
     Partio::ParticlesDataMutable* particleData=Partio::createInterleave();
 
     // Set Total number of particles
-    numPoints = gdp->points().entries();
+    //numPoints = gdp->points().entries();  // older version of houdini < 14
+	numPoints = gdp->getPointRange().getEntries();
     particleData->addParticles(numPoints);
 
     // get houdini num of point attrs (P/Position is not included)
@@ -424,7 +428,7 @@ bool partioSave(char *fileName, const GU_Detail *gdp, int verbosity)
                 }
 
 
-                GA_ROPageHandleV3 v_ph(gdp, GEO_POINT_DICT, houAttrName.c_str());
+                GA_ROPageHandleV3 v_ph(gdp, GA_ATTRIB_POINT, houAttrName.c_str());
 
                 if (v_ph.isValid())
                 {
@@ -460,7 +464,7 @@ bool partioSave(char *fileName, const GU_Detail *gdp, int verbosity)
 
                 // add houdini attrand get handle to it  (fast interator handle)
 
-                GA_ROPageHandleF   f_ph(gdp, GEO_POINT_DICT, attrHandle.name.c_str(),0);
+                GA_ROPageHandleF   f_ph(gdp, GA_ATTRIB_POINT, attrHandle.name.c_str(),0);
 
                 if (f_ph.isValid())
                 {
@@ -491,7 +495,7 @@ bool partioSave(char *fileName, const GU_Detail *gdp, int verbosity)
             case Partio::INT:
             {
 
-                GA_ROPageHandleI   i_ph(gdp, GEO_POINT_DICT, attrHandle.name.c_str(),0);
+                GA_ROPageHandleI   i_ph(gdp, GA_ATTRIB_POINT, attrHandle.name.c_str(),0);
 
                 if (i_ph.isValid())
                 {
