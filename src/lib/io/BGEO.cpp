@@ -152,6 +152,18 @@ bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<TAttribut
     return true;
 }
 
+// read buffer, seekg doesn't work with gzip
+void skip(istream *input, int numChars)
+{
+    static const int bufferSize = 4096;
+    static char buffer[bufferSize];
+    while (numChars>0) {
+        int toRead=std::min(numChars,bufferSize);
+        input->read(buffer,toRead);
+        numChars-=toRead;
+    }
+}
+
 // ignore primitive attributes, only know about Particle Systems currently
 bool skipPrimitives(int nPoints, int nPrims, int nPrimAttrib, istream* input)
 {
@@ -168,10 +180,10 @@ bool skipPrimitives(int nPoints, int nPrims, int nPrimAttrib, istream* input)
             int size;
             read<BIGEND>(*input,size);
             if(nPoints>=(int)1<<16)
-                input->seekg(size*sizeof(int),input->cur);
+                skip(input,size*sizeof(int));
             else
-                input->seekg(size*sizeof(unsigned short),input->cur);
-            input->seekg(particleSize*sizeof(int),input->cur);
+                skip(input,size*sizeof(unsigned short));
+            skip(input,particleSize*sizeof(int));
         } else {
             std::cerr << "Partio: Unrecognized Primitive Type: 0x" << std::hex << primType << " - Cannot process detail attributes" << std::endl;
             return false;
@@ -234,7 +246,7 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const
     getAttributes(particleSize, attrOffsets, attrHandles, accessors, nPointAttrib, input.get(), simple, headersOnly);
 
     if(headersOnly) {
-        input->seekg(nPoints*particleSize*sizeof(int),input->cur);
+        skip(input.get(),nPoints*particleSize*sizeof(int));
     } else {
         // Read the points
         int *buffer=new int[particleSize];
