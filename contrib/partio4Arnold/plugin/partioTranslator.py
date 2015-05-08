@@ -3,15 +3,6 @@ import mtoa.ui.ae.templates as templates
 from mtoa.ui.ae.templates import AttributeTemplate, registerTranslatorUI
 
 class PartioVisualizerTemplate(templates.ShapeTranslatorTemplate):
-
-    def PartioRemapCreate(self, attrName):
-        pm.setUITemplate('attributeEditorTemplate', pst=True)
-        pm.gradientControl('aiRemapRadiusCurveCtrl', at=attrName)
-        pm.setUITemplate(ppt=True)
-
-    def PartioRemapUpdate(self, attrName):
-        pm.gradientControl('aiRemapRadiusCurveCtrl', edit=True, at=attrName)
-
     def setup(self):
         self.commonShapeAttributes()
         self.addSeparator()
@@ -21,9 +12,6 @@ class PartioVisualizerTemplate(templates.ShapeTranslatorTemplate):
         self.addControl("aiOverrideRadiusPP", label="Override RadiusPP")
         self.addControl("aiRadiusMultiplier", label="Radius Multiplier")
         self.addControl("aiMaxParticleRadius", label="Clamp Max Radius")        
-        self.beginLayout(label='Remap Radius', collapse=True)
-        self.addCustom('aiRemapRadiusCurve', self.PartioRemapCreate, self.PartioRemapUpdate)
-        self.endLayout()
         self.addSeparator()
         self.addControl("aiStepSize",label="Volume Step Size")
         self.addSeparator()

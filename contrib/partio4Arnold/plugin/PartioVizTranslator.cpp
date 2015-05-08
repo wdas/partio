@@ -105,10 +105,6 @@ void CPartioVizTranslator::NodeInitializer ( CAbTranslator context )
     data.name = "aiOverrideProcedural";
     data.shortName = "ai_override_procedural";
     helper.MakeInputString( data );
-
-    data.name = "aiRemapRadiusCurve";
-    data.shortName = "ai_remap_radius_curve";
-    helper.MakeInputCurveRamp( data );
 }
 
 AtNode* CPartioVizTranslator::CreateArnoldNodes()
