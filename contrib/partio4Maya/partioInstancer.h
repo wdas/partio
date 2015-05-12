@@ -210,25 +210,19 @@ public:
 
 //  output data to instancer
     static MObject  aInstanceData;
+    static MObject  aExportAttributes;
 
 
     static  MTypeId         id;
-    float                   multiplier;
-    bool                    cacheChanged;
     partioInstReaderCache   pvCache;
-    int  drawError;
-
 
 private:
-
+    MStringArray attributeList;
     MString mLastFileLoaded;
     MString mLastPath;
     MString mLastFile;
-    MString mLastExt;
-    bool mLastFlipStatus;
-    bool mFlipped;
-    bool  frameChanged;
-    MStringArray attributeList;
+    MString mLastExt;    
+    MString mLastExportAttributes;
     int mLastRotationTypeIndex;
     int mLastRotationFromIndex;
     int mLastLastRotationFromIndex;
@@ -242,8 +236,16 @@ private:
     int mLastScaleFromIndex;
     int mLastLastScaleFromIndex;
     int mLastIndexFromIndex;
-    bool canMotionBlur;
+    bool mLastFlipStatus;
+    bool mFlipped;
+    bool frameChanged;
+    bool canMotionBlur;    
     //    int mLastShaderIndexFromIndex;
+
+public:
+    float                   multiplier;    
+    int                     drawError;
+    bool                    cacheChanged;
 
 protected:
 
