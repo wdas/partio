@@ -16,9 +16,6 @@
 #include <vector>
 #include <sys/stat.h>
 
-using namespace std;
-using namespace Partio;
-
 template <typename T>
 void getParam(T& param, AtNode* node, const char* paramName)
 {
@@ -61,7 +58,7 @@ void getParam<AtRGB>(AtRGB& param, AtNode* node, const char* paramName)
 }
 
 struct PartioData{
-    Partio::ParticlesDataMutable* points;
+    Partio::ParticlesData* points;
     AtNode* mynode;
 
     Partio::ParticleAttribute positionAttr;
@@ -172,7 +169,7 @@ struct PartioData{
         if (partioCacheExists(arg_file))
         {
             cacheExists = true;
-            points = read(arg_file.c_str());
+            points = Partio::read(arg_file.c_str());
             if (points)
                 return true;
             else
@@ -206,7 +203,7 @@ struct PartioData{
         AiMsgInfo("[partioGenerator] loaded %d points", pointCount);
 
         // first we filter invalid particles properly
-        // then we try avoid emitting very small ones
+        // then we try avoid very small ones
         // to do that we need radius and position info
 
         const float singleRadius = arg_radius * arg_radiusMult;
@@ -255,7 +252,7 @@ struct PartioData{
                     if (radiusAttr.count == 1)
                         rad = partioRadius[0];
                     else
-                        rad = abs(float((partioRadius[0] * 0.2126f) + (partioRadius[1] * 0.7152f) + (partioRadius[2] * .0722f)));
+                        rad = ABS(float((partioRadius[0] * 0.2126f) + (partioRadius[1] * 0.7152f) + (partioRadius[2] * .0722f)));
 
                     rad *= arg_radius * arg_radiusMult;                    
                 }
@@ -362,7 +359,7 @@ struct PartioData{
 
 
         // now parse and include any extra attrs
-        std::vector<ParticleAttribute> extraAttrs;
+        std::vector<Partio::ParticleAttribute> extraAttrs;
         std::vector<AtArray*> arnoldArrays;
 
         char extraAttrStr[1000];
@@ -372,7 +369,7 @@ struct PartioData{
         parts[index] = strtok(extraAttrStr, " ");
         while (parts[index] != 0)
         {
-            ParticleAttribute user;
+        	Partio::ParticleAttribute user;
             if (points->attributeInfo(parts[index],user))
             {
                 // we don't want to double export these 
@@ -383,13 +380,13 @@ struct PartioData{
                    user.name != "opacityPP" && 
                    user.name != "radiusPP")
                 {
-                    if (user.type == FLOAT || user.count == 1)
+                    if (user.type == Partio::FLOAT || user.count == 1)
                     {
                         AiNodeDeclare(currentInstance, parts[index], "uniform Float");
                         floatArr = AiArrayAllocate(pointCount, 1, AI_TYPE_FLOAT);
                         arnoldArrays.push_back(floatArr);
                     }
-                    else if (user.type == VECTOR || user.count == 3)
+                    else if (user.type == Partio::VECTOR || user.count == 3)
                     {
                         AiNodeDeclare(currentInstance, parts[index], "uniform Vector");
                         vecArr = AiArrayAllocate(pointCount, 1, AI_TYPE_VECTOR);
@@ -405,9 +402,7 @@ struct PartioData{
 
             ++index;
             parts[index] = strtok(0," ");
-
         }
-
 
         ///////////////////////////////////////////////
         /// LOOP particles
@@ -482,14 +477,14 @@ struct PartioData{
             }
             for (int x = 0; x < extraAttrs.size(); ++x)
             {
-                if (extraAttrs[x].type == FLOAT)
+                if (extraAttrs[x].type == Partio::FLOAT)
                 {
                         
                     const float* partioFLOAT = points->data<float>(extraAttrs[x], id);
                     float floatVal = partioFLOAT[0];
                     AiArraySetFlt(arnoldArrays[x], i, floatVal);
                 }
-                else if (extraAttrs[x].type == VECTOR)
+                else if (extraAttrs[x].type == Partio::VECTOR)
                 {
                     const float * partioVEC = points->data<float>(extraAttrs[x], id);
                     AtVector vecVal;
@@ -574,7 +569,7 @@ proc_loader
     vtable->Cleanup  = MyCleanup;
     vtable->NumNodes = MyNumNodes;
     vtable->GetNode  = MyGetNode;
-    strcpy ( vtable->version, AI_VERSION );
+    strcpy(vtable->version, AI_VERSION);
     return true;
 }
 
