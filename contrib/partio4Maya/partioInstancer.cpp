@@ -29,6 +29,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include "partioInstancer.h"
 
+#include <maya/MQuaternion.h>
+#include <maya/MEulerRotation.h>
+
 static MGLFunctionTable *gGLFT = NULL;
 
 #define ID_PARTIOINSTANCER  0x00116ED5 // id is registered with autodesk no need to change
@@ -572,16 +575,14 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         bool computeMotionBlur =block.inputValue( aComputeVeloPos ).asBool();
         float veloMult      = block.inputValue ( aVeloMult ).asFloat();
 
-        int fps = (int)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
-        int integerTime = (int)floor((inputTime.value())+.52);
-        float deltaTime  = float(inputTime.value() - integerTime);
+        float fps = static_cast<float>((MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit())));
+        int integerTime = (int)floor((inputTime.value()) + .52);
+        float deltaTime  = inputTime.value() - (float)integerTime;
 
         bool motionBlurStep = false;
         // motion  blur rounding  frame logic
-        if ((deltaTime < 1 || deltaTime > -1)&& deltaTime !=0)  // motion blur step?
-        {
+        if (deltaTime != 0.0f)  // motion blur step?
             motionBlurStep = true;
-        }
 
         MString formatExt = "";
         int cachePadding = 0;
@@ -595,7 +596,6 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                                      cachePadding, formatExt,
                                      newCacheFile, renderCacheFile
                                   );
-
 
         if (renderCachePath != newCacheFile || renderCachePath != mLastFileLoaded )
         {
@@ -735,8 +735,8 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                     MVector velo(vel[0], vel[1], vel[2]);
                     if (motionBlurStep)
                     {
-                        int mFps = (int)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
-                        pos += ((velo * veloMult) / mFps) * deltaTime;
+                        //int mFps = (int)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
+                        pos += ((velo * veloMult) / fps) * deltaTime;
                     }
                 }
 
