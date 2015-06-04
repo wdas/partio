@@ -109,6 +109,8 @@ MObject partioInstancer::aLastScaleFrom;
 MObject partioInstancer::aLastRotationFrom;
 MObject partioInstancer::aLastAimDirectionFrom;
 MObject partioInstancer::aLastAimPositionFrom;
+MObject partioInstancer::aLastPositionFrom;
+MObject partioInstancer::aVelocityFrom;
 
 MObject partioInstancer::aIndexFrom;
 
@@ -120,6 +122,7 @@ MObject partioInstancer::aIndexFrom;
 //  output data to instancer
 MObject partioInstancer::aInstanceData;
 MObject partioInstancer::aExportAttributes;
+MObject partioInstancer::aVelocitySource;
 
 namespace {
     // these two functions  check and clean out the instance array members if they exist or make them if they don't
@@ -145,6 +148,12 @@ namespace {
         CHECK_MSTATUS(stat);
         arrayToCheck.setLength(numParticles);
     }
+
+    enum VelocitySource{
+        VS_BUILTIN = 0,
+        VS_CUSTOM_CHANNEL,
+        VS_LAST_POSITION
+    };
 }
 
 partioInstReaderCache::partioInstReaderCache():
@@ -400,6 +409,14 @@ MStatus partioInstancer::initialize()
     nAttr.setDefault(-1);
     nAttr.setKeyable(true);
 
+    aLastPositionFrom = nAttr.create("lastPositionFrom", "lpfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
+    aVelocityFrom = nAttr.create("velocityFrom", "velfrm", MFnNumericData::kInt, -1, &stat);
+    nAttr.setDefault(-1);
+    nAttr.setKeyable(true);
+
     aInstanceData = tAttr.create("instanceData", "instd", MFnArrayAttrsData::kDynArrayAttrs, &stat);
     tAttr.setKeyable(false);
     tAttr.setStorable(false);
@@ -416,6 +433,11 @@ MStatus partioInstancer::initialize()
     nAttr.setReadable(true);
 
     aExportAttributes = tAttr.create("exportAttributes", "expattr", MFnStringData::kString);
+
+    aVelocitySource = eAttr.create("velocitySource", "vsrc");
+    eAttr.addField("Built-in", 0);
+    eAttr.addField("Custom Channel", 1);
+    eAttr.addField("Last Position", 2);
 
 // add attributes
 
@@ -451,12 +473,15 @@ MStatus partioInstancer::initialize()
     addAttribute(aLastRotationFrom);
     addAttribute(aLastAimDirectionFrom);
     addAttribute(aLastAimPositionFrom);
+    addAttribute(aLastPositionFrom);
+    addAttribute(aVelocityFrom);
 
     addAttribute(aIndexFrom);
 
     addAttribute(aInstanceData);
 
     addAttribute(aExportAttributes);
+    addAttribute(aVelocitySource);
 
     addAttribute(aByFrame);
     addAttribute(time);
@@ -489,11 +514,14 @@ MStatus partioInstancer::initialize()
     attributeAffects(aAimUpAxisFrom, aUpdateCache);
     attributeAffects(aAimWorldUpFrom, aUpdateCache);
     attributeAffects(aExportAttributes, aUpdateCache);
+    attributeAffects(aVelocitySource, aUpdateCache);
 
     attributeAffects(aLastScaleFrom, aUpdateCache);
     attributeAffects(aLastRotationFrom, aUpdateCache);
     attributeAffects(aLastAimDirectionFrom, aUpdateCache);
     attributeAffects(aLastAimPositionFrom, aUpdateCache);
+    attributeAffects(aLastPositionFrom, aUpdateCache);
+    attributeAffects(aVelocityFrom, aUpdateCache);
 
     attributeAffects(aIndexFrom, aUpdateCache);
 
@@ -532,6 +560,8 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
     int aimUpAxisFromIndex          = block.inputValue(aAimUpAxisFrom).asInt();
     int aimWorldUpFromIndex         = block.inputValue(aAimWorldUpFrom).asInt();
     int indexFromIndex              = block.inputValue(aIndexFrom).asInt();
+    int lastPositionFromIndex       = block.inputValue(aLastPositionFrom).asInt();
+    int velocityFromIndex           = block.inputValue(aVelocityFrom).asInt();
     MString exportAttributes        = block.inputValue(aExportAttributes).asString();
 
     drawError = 0;
@@ -703,20 +733,34 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
             updateInstanceDataVector(pvCache, positionArray, "position", numParticles);
             updateInstanceDataDouble(pvCache, idArray, "id", numParticles);
 
+            const short velocitySource = block.inputValue(aVelocitySource).asShort();
 
             canMotionBlur = false;
             if (computeMotionBlur)
             {
-                if ((pvCache.particles->attributeInfo("velocity",pvCache.velocityAttr) ||
-                     pvCache.particles->attributeInfo("Velocity",pvCache.velocityAttr))||
-                     pvCache.particles->attributeInfo("V"       ,pvCache.velocityAttr))
+                if (velocitySource == VS_BUILTIN)
                 {
-                    canMotionBlur = true;
+                    if ((pvCache.particles->attributeInfo("velocity",pvCache.velocityAttr) ||
+                         pvCache.particles->attributeInfo("Velocity",pvCache.velocityAttr))||
+                         pvCache.particles->attributeInfo("V"       ,pvCache.velocityAttr))
+                    {
+                        if (pvCache.velocityAttr.type == Partio::VECTOR)
+                            canMotionBlur = true;
+                    }
+                }
+                else if (velocitySource == VS_CUSTOM_CHANNEL)
+                {
+                    if (pvCache.particles->attributeInfo(velocityFromIndex, pvCache.velocityAttr) && (pvCache.velocityAttr.type == Partio::VECTOR))
+                        canMotionBlur = true;
                 }
                 else
                 {
-                    MGlobal::displayWarning("PartioInstancer->Failed to find velocity attribute motion blur will be impaired ");
+                    if (pvCache.particles->attributeInfo(lastPositionFromIndex, pvCache.lastPosAttr) && (pvCache.lastPosAttr.type == Partio::VECTOR))
+                        canMotionBlur = true;
                 }
+
+                if (!canMotionBlur)
+                    MGlobal::displayWarning("PartioInstancer->Failed to find velocity attribute motion blur will be impaired ");
             }
 
             pvCache.bbox.clear();
@@ -730,13 +774,21 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
                 if (canMotionBlur)
                 {
-                    const float * vel = pvCache.particles->data<float>(pvCache.velocityAttr, i);
 
-                    MVector velo(vel[0], vel[1], vel[2]);
                     if (motionBlurStep)
                     {
-                        //int mFps = (int)(MTime(1.0, MTime::kSeconds).asUnits(MTime::uiUnit()));
-                        pos += ((velo * veloMult) / fps) * deltaTime;
+                        if (velocitySource == VS_LAST_POSITION)
+                        {
+                            const float* lastPos = pvCache.particles->data<float>(pvCache.lastPosAttr, i);
+                            const MVector lPos(lastPos[0], lastPos[1], lastPos[2]);
+                            pos += (pos - lastPos) * deltaTime;
+                        }
+                        else
+                        {
+                            const float* vel = pvCache.particles->data<float>(pvCache.velocityAttr, i);
+                            const MVector velo(vel[0], vel[1], vel[2]);
+                            pos += ((velo * veloMult) / fps) * deltaTime;
+                        }
                     }
                 }
 
@@ -1147,41 +1199,27 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
         MPlug zPlug (thisMObject(), aPartioAttributes);
 
         if ((rotationFromIndex+1) > (int)zPlug.numElements())
-        {
             block.outputValue(aRotationFrom).setInt(-1);
-        }
         if ((scaleFromIndex+1) > (int)zPlug.numElements())
-        {
             block.outputValue(aScaleFrom).setInt(-1);
-        }
         if ((lastRotFromIndex+1) > (int)zPlug.numElements())
-        {
             block.outputValue(aLastRotationFrom).setInt(-1);
-        }
         if ((lastScaleFromIndex+1) > (int)zPlug.numElements())
-        {
             block.outputValue(aLastScaleFrom).setInt(-1);
-        }
         if ((indexFromIndex+1) > (int)zPlug.numElements())
-        {
             block.outputValue(aIndexFrom).setInt(-1);
-        }
         if ((aimDirectionFromIndex+1) > (int)zPlug.numElements())
-        {
             block.outputValue(aAimDirectionFrom).setInt(-1);
-        }
         if ((aimPositionFromIndex+1) > (int)zPlug.numElements())
-        {
             block.outputValue(aAimPositionFrom).setInt(-1);
-        }
         if ((aimAxisFromIndex+1) > (int)zPlug.numElements())
-        {
             block.outputValue(aAimAxisFrom).setInt(-1);
-        }
         if ((aimWorldUpFromIndex+1) > (int)zPlug.numElements())
-        {
             block.outputValue(aAimWorldUpFrom).setInt(-1);
-        }
+        if ((lastPositionFromIndex + 1) > (int)zPlug.numElements())
+            block.outputValue(aLastPositionFrom).setInt(-1);
+        if ((velocityFromIndex + 1) > (int)zPlug.numElements())
+            block.outputValue(aVelocityFrom).setInt(-1);
 
         if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache
         {

@@ -36,6 +36,7 @@ global proc AEpartioInstancerTemplate( string $nodeName )
     editorTemplate -addControl "staticCache";
     //editorTemplate -addControl "flipYZ";
     editorTemplate -addControl "computeVeloPos";
+    editorTemplate -addControl "velocitySource";
     editorTemplate -addControl -l "Velocity Mult" "veloMult";
     editorTemplate -callCustom pioAEoutpathNew pioAEoutpathReplace cacheDir;
     editorTemplate -addControl "cachePrefix";
@@ -44,7 +45,6 @@ global proc AEpartioInstancerTemplate( string $nodeName )
     editorTemplate -addControl "cacheFormat";
     editorTemplate -addControl "iconSize";
     editorTemplate -callCustom pioInstForceUpdate pioInstForceUpdate $nodeName;
-
 
     editorTemplate -endLayout;
 
@@ -116,10 +116,12 @@ global proc pioInstCustomAttrsManage (string $nodeName)
     int $lastAimDirectionFrom = `getAttr ($nodeName+".lastAimDirectionFrom")` + 2;
     int $aimPositionFrom = `getAttr ($nodeName+".aimPositionFrom")` + 2;
     int $lastAimPositionFrom = `getAttr ($nodeName+".lastAimPositionFrom")` + 2;
+    int $lastPositionFrom = `getAttr ($nodeName+".lastPositionFrom")` + 2;
     int $aimAxisFrom = `getAttr ($nodeName+".aimAxisFrom")` + 2;
     int $aimUpAxisFrom = `getAttr ($nodeName+".aimUpAxisFrom")` + 2;
     int $aimWorldUpFrom = `getAttr ($nodeName+".aimWorldUpFrom")` + 2;
     int $indexFrom  = `getAttr ($nodeName+".indexFrom")` + 2;
+    int $velocityFrom = `getAttr ($nodeName+".velocityFrom")` + 2;
 
     ///  General attrs
     frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "General Channels" ;
@@ -335,6 +337,36 @@ global proc pioInstCustomAttrsManage (string $nodeName)
          menuItem -label $attr;
     }
     optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 12 + " " + $lastAimPosMenu)  $lastAimPosMenu;
+    
+/// LAST Position
+    string $lastPosMenu = `optionMenuGrp  -label "Last Position"`;
+    menuItem -l "None";
+
+    for ($multi in $multiList)
+    {
+        string $tok[];
+        tokenize $multi "[" $tok;
+        string $index = $tok[1];
+        $index = substituteAllString($index, "]", "");
+        string $attr = `getAttr ($nodeName+"."+$multi)`;
+         menuItem -label $attr;
+    }
+    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 13 + " " + $lastPosMenu)  $lastPosMenu;    
+    
+/// Velocity
+    string $velocityMenu = `optionMenuGrp  -label "Velocity"`;
+    menuItem -l "None";
+
+    for ($multi in $multiList)
+    {
+        string $tok[];
+        tokenize $multi "[" $tok;
+        string $index = $tok[1];
+        $index = substituteAllString($index, "]", "");
+        string $attr = `getAttr ($nodeName+"."+$multi)`;
+         menuItem -label $attr;
+    }
+    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 14 + " " + $velocityMenu)  $velocityMenu;
 
     setParent ..;
     setParent ..;
@@ -361,6 +393,8 @@ global proc pioInstCustomAttrsManage (string $nodeName)
         optionMenuGrp -e -sl $lastRotationFrom  $lastRotationMenu;
         optionMenuGrp -e -sl $lastAimDirectionFrom $lastAimDirMenu;
         optionMenuGrp -e -sl $lastAimPositionFrom $lastAimPosMenu;
+        optionMenuGrp -e -sl $lastPositionFrom $lastPosMenu;
+        optionMenuGrp -e -sl $velocityFrom $velocityMenu;
     }
 }
 

@@ -110,6 +110,7 @@ public:
     Partio::ParticleAttribute lastScaleAttr;
     Partio::ParticleAttribute lastAimDirAttr;
     Partio::ParticleAttribute lastAimPosAttr;
+    Partio::ParticleAttribute lastPosAttr;
     Partio::ParticleAttribute indexAttr;
 //    Partio::ParticleAttribute shaderIndexAttr;
     float* flipPos;
@@ -198,6 +199,8 @@ public:
     static MObject  aLastRotationFrom;
     static MObject  aLastAimDirectionFrom;
     static MObject  aLastAimPositionFrom;
+    static MObject  aLastPositionFrom;
+    static MObject  aVelocityFrom;
 
     static MObject  aIndexFrom;
 
@@ -211,7 +214,7 @@ public:
 //  output data to instancer
     static MObject  aInstanceData;
     static MObject  aExportAttributes;
-
+    static MObject  aVelocitySource;
 
     static  MTypeId         id;
     partioInstReaderCache   pvCache;
