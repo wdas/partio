@@ -37,10 +37,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 %module partio
 %include "std_string.i"
 
-
 %{
 #include <Partio.h>
 #include <PartioIterator.h>
+#include <sstream>
 namespace Partio{
 typedef uint64_t ParticleIndex;
 }
@@ -498,12 +498,47 @@ ParticlesDataMutable* create();
 %feature("autodoc");
 %feature("docstring","Reads a particle set from disk");
 %newobject read;
-ParticlesDataMutable* read(const char* filename);
+ParticlesDataMutable* read(const char* filename,bool verbose=true,std::ostream& error=std::cerr);
+
+%inline %{
+    template<class T> PyObject* readHelper(T* ptr,std::stringstream& ss){
+        PyObject* tuple=PyTuple_New(2);
+        PyObject* instance = SWIG_NewPointerObj(SWIG_as_voidptr(ptr), SWIGTYPE_p_ParticlesDataMutable, SWIG_POINTER_OWN);
+        PyTuple_SetItem(tuple,0,instance);
+        PyTuple_SetItem(tuple,1,PyString_FromString(ss.str().c_str()));
+        return tuple;
+    }
+%}
+%feature("docstring","Reads a particle set from disk and returns the tuple particleObject,errorMsg");
+%inline %{
+    PyObject* readVerbose(const char* filename){
+        std::stringstream ss;
+        ParticlesDataMutable* ptr=read(filename,true,ss); 
+        return readHelper(ptr,ss);
+    }
+%}
+%feature("docstring","Reads the header/attribute information from disk and returns the tuple particleObject,errorMsg");
+%inline %{
+    PyObject* readHeadersVerbose(const char* filename){
+        std::stringstream ss;
+        ParticlesInfo* ptr=readHeaders(filename,true,ss); 
+        return readHelper(ptr,ss);
+    }
+%}
+%feature("docstring","Reads the header/attribute information from disk and returns the tuple particleObject,errorMsg");
+%inline %{
+    PyObject* readCachedVerbose(const char* filename,bool sort){
+        std::stringstream ss;
+        ParticlesData* ptr=readCached(filename,sort,true,ss); 
+        return readHelper(ptr,ss);
+    }
+%}
+
 
 %feature("autodoc");
 %feature("docstring","Reads a particle set headers from disk");
 %newobject readHeaders;
-ParticlesInfo* readHeaders(const char* filename);
+ParticlesInfo* readHeaders(const char* filename,bool verbose=true,std::ostream& error=std::cerr);
 
 %feature("autodoc");
 %feature("docstring","Writes a particle set to disk");
