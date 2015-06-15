@@ -268,15 +268,15 @@ ParticlesDataMutable* createInterleave();
 
 //! Provides read/write access to a particle set stored in a file
 //! freed with p->release()
-ParticlesDataMutable* read(const char* filename,const bool verbose=true);
+ParticlesDataMutable* read(const char* filename,const bool verbose=true,std::ostream& errorStream=std::cerr);
 
 //! Provides read access to a particle headers (number of particles
 //! and attribute information, much cheapeer
-ParticlesInfo* readHeaders(const char* filename,const bool verbose=true);
+ParticlesInfo* readHeaders(const char* filename,const bool verbose=true,std::ostream& errorStream=std::cerr);
 
 //! Provides access to a particle set stored in a file
 //! if filename ends with .gz or forceCompressed is true, the file is compressed.
-void write(const char* filename,const ParticlesData&,const bool forceCompressed=false);
+void write(const char* filename,const ParticlesData&,const bool forceCompressed=false,bool verbose=true,std::ostream& errorStream=std::cerr);
 
 
 //! Cached (only one copy) read only way to read a particle file
@@ -286,7 +286,7 @@ void write(const char* filename,const ParticlesData&,const bool forceCompressed=
   p->release(); (will not be deleted if others are also holding).
   If you want to do finding neighbors give true to sort
 */
-ParticlesData* readCached(const char* filename,const bool sort,const bool verbose=true);
+ParticlesData* readCached(const char* filename,const bool sort,const bool verbose=true,std::ostream& errorStream=std::cerr);
 
 //! Begin accessing data in a cached file
 /*!

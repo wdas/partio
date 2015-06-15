@@ -49,7 +49,7 @@ namespace
 std::map<ParticlesData*,int> cachedParticlesCount;
 std::map<std::string,ParticlesData*> cachedParticles;
 
-ParticlesData* readCached(const char* filename,const bool sort,const bool verbose)
+ParticlesData* readCached(const char* filename,const bool sort,const bool verbose,std::ostream& error)
 {
     mutex.lock();
     std::map<std::string,ParticlesData*>::iterator i=cachedParticles.find(filename);

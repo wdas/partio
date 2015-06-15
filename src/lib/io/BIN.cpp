@@ -74,12 +74,12 @@ typedef struct{
 } BIN_HEADER;
 
 
-ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly,const bool verbose){
+ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly,std::ostream* errorStream){
 
     auto_ptr<istream> input(new ifstream(filename,ios::in|ios::binary));
 
     if(!*input){
-        if(verbose) cerr << "Partio: Unable to open file " << filename << endl;
+        if(errorStream) *errorStream << "Partio: Unable to open file " << filename << endl;
         return 0;
     }
 
@@ -87,7 +87,7 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly,const
     input->read((char*)&header, sizeof(header));
 
     if(BIN_MAGIC != header.verificationCode){
-        cerr << "Partio: Magic number '" << hex<<  header.verificationCode << "' of '" << filename << "' doesn't match BIN magic '" << BIN_MAGIC << "'" << endl;
+        if(errorStream) *errorStream<< "Partio: Magic number '" << hex<<  header.verificationCode << "' of '" << filename << "' doesn't match BIN magic '" << BIN_MAGIC << "'" << endl;
         return 0;
     }
 
@@ -219,14 +219,14 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly,const
     return simple;
 }
 
-bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compressed*/)
+bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compressed*/,std::ostream* errorStream)
 {
 
     auto_ptr<ostream> output(
     new ofstream(filename,ios::out|ios::binary));
 
     if (!*output) {
-        cerr<<"Partio Unable to open file "<<filename<<endl;
+        if(errorStream) *errorStream<<"Partio Unable to open file "<<filename<<endl;
         return false;
     }
 

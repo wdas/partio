@@ -42,8 +42,8 @@ namespace Partio{
 using namespace std;
 
 // reader and writer code
-typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool,const bool);
-typedef bool (*WRITER_FUNCTION)(const char*,const ParticlesData&,const bool);
+typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool,std::ostream*);
+typedef bool (*WRITER_FUNCTION)(const char*,const ParticlesData&,const bool,std::ostream*);
 
 PartioMutex initializationMutex;
 
@@ -108,12 +108,12 @@ writers()
 
 //! Gives extension of a file ignoring any trailing .gz
 //! i.e. for 'foo.pdb.gz' it gives 'pdb', for 'foo.pdb' it gives 'pdb'
-bool extensionIgnoringGz(const string& filename,string& ret,bool &endsWithGz)
+bool extensionIgnoringGz(const string& filename,string& ret,bool &endsWithGz,std::ostream& errorStream)
 {
     size_t period=filename.rfind('.');
     endsWithGz=false;
     if(period==string::npos){
-        cerr<<"Partio: No extension detected in filename"<<endl;
+        errorStream<<"Partio: No extension detected in filename"<<endl;
         return false;
     }
     string extension=filename.substr(period+1);
@@ -121,7 +121,7 @@ bool extensionIgnoringGz(const string& filename,string& ret,bool &endsWithGz)
         endsWithGz=true;
         size_t period2=filename.rfind('.',period-1);
         if(period2==string::npos){
-            cerr<<"Partio: No extension detected in filename"<<endl;
+            errorStream<<"Partio: No extension detected in filename"<<endl;
             return false;
         }
         string extension2=filename.substr(period2+1,period-period2-1);
@@ -133,48 +133,48 @@ bool extensionIgnoringGz(const string& filename,string& ret,bool &endsWithGz)
 }
 
 ParticlesDataMutable*
-read(const char* c_filename,bool verbose)
+read(const char* c_filename,bool verbose,std::ostream& errorStream)
 {
     string filename(c_filename);
     string extension;
     bool endsWithGz;
-    if(!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
+    if(!extensionIgnoringGz(filename,extension,endsWithGz,errorStream)) return 0;
     map<string,READER_FUNCTION>::iterator i=readers().find(extension);
     if(i==readers().end()){
-        cerr<<"Partio: No reader defined for extension "<<extension<<endl;
+        errorStream<<"Partio: No reader defined for extension "<<extension<<endl;
         return 0;
     }
-    return (*i->second)(c_filename,false,verbose);
+    return (*i->second)(c_filename,false,verbose ? &errorStream : 0);
 }
 
 ParticlesInfo*
-readHeaders(const char* c_filename,bool verbose)
+readHeaders(const char* c_filename,bool verbose,std::ostream& errorStream)
 {
     string filename(c_filename);
     string extension;
     bool endsWithGz;
-    if(!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
+    if(!extensionIgnoringGz(filename,extension,endsWithGz,errorStream)) return 0;
     map<string,READER_FUNCTION>::iterator i=readers().find(extension);
     if(i==readers().end()){
-        cerr<<"Partio: No reader defined for extension "<<extension<<endl;
+        errorStream<<"Partio: No reader defined for extension "<<extension<<endl;
         return 0;
     }
-    return (*i->second)(c_filename,true,verbose);
+    return (*i->second)(c_filename,true,verbose ? &errorStream : 0);
 }
 
 void
-write(const char* c_filename,const ParticlesData& particles,const bool forceCompressed)
+write(const char* c_filename,const ParticlesData& particles,const bool forceCompressed,bool verbose,std::ostream& errorStream)
 {
     string filename(c_filename);
     string extension;
     bool endsWithGz;
-    if(!extensionIgnoringGz(filename,extension,endsWithGz)) return;
+    if(!extensionIgnoringGz(filename,extension,endsWithGz,errorStream)) return;
     map<string,WRITER_FUNCTION>::iterator i=writers().find(extension);
     if(i==writers().end()){
-        cerr<<"Partio: No writer defined for extension "<<extension<<endl;
+        errorStream<<"Partio: No writer defined for extension "<<extension<<endl;
         return;
     }
-    (*i->second)(c_filename,particles,forceCompressed || endsWithGz);
+    (*i->second)(c_filename,particles,forceCompressed || endsWithGz,verbose ? &errorStream : 0);
 }
 
 } // namespace Partio

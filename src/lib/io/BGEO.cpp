@@ -88,7 +88,7 @@ struct DummyAccessor{
 };
 
 template<class TAttribute, class TAccessor>
-bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<TAttribute>& attrHandles, vector<TAccessor>& accessors, int nAttrib, istream* input, ParticlesDataMutable* simple, bool headersOnly)
+bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<TAttribute>& attrHandles, vector<TAccessor>& accessors, int nAttrib, istream* input, ParticlesDataMutable* simple, bool headersOnly, std::ostream* errorStream)
 {
     Helper<TAttribute> helper;
     for(int i=0;i<nAttrib;i++){
@@ -129,19 +129,19 @@ bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<TAttribut
                 if (!headersOnly) {
                     int id=helper.registerIndexedStr(simple,attribute,indexName);
                     if(id != ii){
-                        std::cerr<<"Partio: error on read, expected registerIndexStr to return index "<<ii<<" but got "<<id<<" for string "<<indexName<<std::endl;
+                        if(errorStream) *errorStream <<"Partio: error on read, expected registerIndexStr to return index "<<ii<<" but got "<<id<<" for string "<<indexName<<std::endl;
                     }
                 }
                 delete [] indexName;
             }
             particleSize+=size;
         }else if(houdiniType==2){
-            cerr<<"Partio: found attr of type 'string', aborting"<<endl;
+            if(errorStream) *errorStream <<"Partio: found attr of type 'string', aborting"<<endl;
             delete [] name;
             simple->release();
             return 0;
         }else{
-            cerr<<"Partio: unknown attribute "<<houdiniType<<" type... aborting"<<endl;
+            if(errorStream) *errorStream <<"Partio: unknown attribute "<<houdiniType<<" type... aborting"<<endl;
             delete [] name;
             simple->release();
             return 0;
@@ -165,13 +165,13 @@ void skip(istream *input, int numChars)
 }
 
 // ignore primitive attributes, only know about Particle Systems currently
-bool skipPrimitives(int nPoints, int nPrims, int nPrimAttrib, istream* input)
+bool skipPrimitives(int nPoints, int nPrims, int nPrimAttrib, istream* input,std::ostream* errorStream)
 {
     int particleSize=0;
     vector<int> primAttrOffsets; // offsets in # of 32 bit offsets
     vector<DummyAttribute> primAttrHandles;
     vector<DummyAccessor> primAccessors;
-    getAttributes(particleSize, primAttrOffsets, primAttrHandles, primAccessors, nPrimAttrib, input, 0, true);
+    getAttributes(particleSize, primAttrOffsets, primAttrHandles, primAccessors, nPrimAttrib, input, 0, true, errorStream);
 
     for(int i=0;i<nPrims;i++) {
         int primType;
@@ -185,23 +185,24 @@ bool skipPrimitives(int nPoints, int nPrims, int nPrimAttrib, istream* input)
                 skip(input,size*sizeof(unsigned short));
             skip(input,particleSize*sizeof(int));
         } else {
-            std::cerr << "Partio: Unrecognized Primitive Type: 0x" << std::hex << primType << " - Cannot process detail attributes" << std::endl;
+            if(errorStream) *errorStream << "Partio: Unrecognized Primitive Type: 0x" << std::hex << primType << " - Cannot process detail attributes" << std::endl;
             return false;
         }
     }
     return true;
 }
 
-ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const bool verbose)
+ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
     auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
-        if(verbose) cerr<<"Partio: Unable to open file "<<filename<<endl;
+        if(errorStream) *errorStream<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
     }
 
     // header values
-    int magic;
+    char magic[5];
+    magic[4]=0;
     char versionChar;
     int version;
     int nPoints;
@@ -212,18 +213,24 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const
     int nVertexAttrib;
     int nPrimAttrib;
     int nAttrib;
-    read<BIGEND>(*input,magic,versionChar,version,nPoints,nPrims,nPointGroups);
+    read<BIGEND>(*input,magic[0],magic[1],magic[2],magic[3]);
+    read<BIGEND>(*input,versionChar,version,nPoints,nPrims,nPointGroups);
     read<BIGEND>(*input,nPrimGroups,nPointAttrib,nVertexAttrib,nPrimAttrib,nAttrib);
 
 
     // Check header magic and version
-    const int bgeo_magic=((((('B'<<8)|'g')<<8)|'e')<<8)|'o';
-    if(magic!=bgeo_magic){
-        cerr<<"Partio: Magic number '"<<magic<<" of '"<<filename<<"' doesn't match bgeo magic '"<<bgeo_magic<<endl;
+    const char bgeo_magic[5]={'B','g','e','o',0};
+    if(strcmp(magic,bgeo_magic)){
+        const char new_bgeo_magic[5]={0x7f,0x4e,0x53,0x4a,0};
+        if(!strcmp(magic,new_bgeo_magic)){
+            if(errorStream) *errorStream<<"Partio: Attempting to read new BGEO format, we only support old BGEO format. Try writing .bhclassic from Houdini."<<std::endl;
+        }else{
+            if(errorStream) *errorStream<<"Partio: Magic number '"<<magic<<" of '"<<filename<<"' doesn't match bgeo magic '"<<bgeo_magic<<endl;
+        }
         return 0;
     }
     if(version!=5){
-        cerr<<"Partio: BGEO must be version 5"<<endl;
+        if(errorStream) *errorStream<<"Partio: BGEO must be version 5"<<endl;
         return 0;
     }
 
@@ -243,7 +250,7 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const
     attrOffsets.push_back(0); // pull values from byte offset
     attrHandles.push_back(simple->addAttribute("position",VECTOR,3)); // we always have one
     accessors.push_back(ParticleAccessor(attrHandles[0]));
-    getAttributes(particleSize, attrOffsets, attrHandles, accessors, nPointAttrib, input.get(), simple, headersOnly);
+    getAttributes(particleSize, attrOffsets, attrHandles, accessors, nPointAttrib, input.get(), simple, headersOnly, errorStream);
 
     if(headersOnly) {
         skip(input.get(),nPoints*particleSize*sizeof(int));
@@ -272,13 +279,13 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const
         delete [] buffer;
     }
 
-    if (!skipPrimitives(nPoints, nPrims, nPrimAttrib, input.get())) return simple;
+    if (!skipPrimitives(nPoints, nPrims, nPrimAttrib, input.get(),errorStream)) return simple;
 
     particleSize=0;
     vector<int> fixedAttrOffsets; // offsets in # of 32 bit offsets
     vector<FixedAttribute> fixedAttrHandles;
     vector<DummyAccessor> fixedAccessors;
-    getAttributes(particleSize, fixedAttrOffsets, fixedAttrHandles, fixedAccessors, nAttrib, input.get(), simple, headersOnly);
+    getAttributes(particleSize, fixedAttrOffsets, fixedAttrHandles, fixedAccessors, nAttrib, input.get(), simple, headersOnly, errorStream);
 
     if (headersOnly) return simple;
 
@@ -300,7 +307,7 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,const
     return simple;
 }
 
-bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed)
+bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream)
 {
     auto_ptr<ostream> output(
         compressed ? 
@@ -308,7 +315,7 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
         :new ofstream(filename,ios::out|ios::binary));
 
     if(!*output){
-        cerr<<"Partio Unable to open file "<<filename<<endl;
+        if(errorStream) *errorStream <<"Partio Unable to open file "<<filename<<endl;
         return false;
     }
 
@@ -371,7 +378,7 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
         accessors.push_back(ParticleAccessor(handles.back()));
     }
     if(!foundPosition){
-        cerr<<"Partio: didn't find attr 'position' while trying to write GEO"<<endl;
+        if(errorStream) *errorStream <<"Partio: didn't find attr 'position' while trying to write GEO"<<endl;
         return false;
     }
 
