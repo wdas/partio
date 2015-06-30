@@ -781,7 +781,7 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
                         {
                             const float* lastPos = pvCache.particles->data<float>(pvCache.lastPosAttr, i);
                             const MVector lPos(lastPos[0], lastPos[1], lastPos[2]);
-                            pos += (pos - lastPos) * deltaTime;
+                            pos += (pos - lPos) * deltaTime;
                         }
                         else
                         {

@@ -91,7 +91,7 @@ endmacro(MAYA_SET_PLUGIN_PROPERTIES)
 
 #SET(MAYA_FOUND FALSE)
 set(_maya_TEST_VERSIONS)
-set(_maya_KNOWN_VERSIONS "2008" "2009" "2010" "2011" "2012" "2013" "2014" "2015")
+set(_maya_KNOWN_VERSIONS "2008" "2009" "2010" "2011" "2012" "2013" "2014" "2015" "2016")
 
 if(APPLE)
     set(MAYA_PLUGIN_SUFFIX ".bundle")
@@ -191,6 +191,9 @@ elseif(${MAYA_VERSION} STREQUAL "2014")
 elseif("${MAYA_VERSION}" STREQUAL "2015")
     set(MAYA_QT_VERSION_SHORT  CACHE STRING "4.8")
     set(MAYA_QT_VERSION_LONG  CACHE STRING "4.8.2")
+elseif("${MAYA_VERSION}" STREQUAL "2016")
+    set(MAYA_QT_VERSION_SHORT  CACHE STRING "4.8")
+    set(MAYA_QT_VERSION_LONG  CACHE STRING "4.8.6")
 endif()
 
 # NOTE: the MAYA_LOCATION environment variable is often misunderstood.  On every OS it is expected to point
