@@ -54,18 +54,22 @@ def cppFiles(basePath):
 
 
 files=cppFiles(os.path.join(dir,"core"))+cppFiles(os.path.join(dir,"io"))
+sharedlib=env.SharedLibrary("partio",files)
 lib=env.Library("partio",files)
 foo=Dir(".").abspath+"../../include"
 
+#TODO: configurable lib64 or lib
 env.Install(variant_build_abs+"/include","Partio.h")
 env.Install(variant_build_abs+"/include","PartioIterator.h")
 env.Install(variant_build_abs+"/include","PartioAttribute.h")
+env.Install(variant_build_abs+"/lib",sharedlib)
 env.Install(variant_build_abs+"/lib",lib)
 
 core_targets = [
     env.Install(variant_install_abs+"/include","Partio.h"),
     env.Install(variant_install_abs+"/include","PartioIterator.h"),
     env.Install(variant_install_abs+"/include","PartioAttribute.h"),
+    env.Install(variant_install_abs+"/lib",sharedlib),
     env.Install(variant_install_abs+"/lib",lib)
 ]
 

@@ -59,15 +59,23 @@ public:
     ParticlesSimpleInterleave();
 
     int numAttributes() const;
+    int numFixedAttributes() const;
     int numParticles() const;
     bool attributeInfo(const char* attributeName,ParticleAttribute& attribute) const;
+    bool fixedAttributeInfo(const char* attributeName,FixedAttribute& attribute) const;
     bool attributeInfo(const int attributeInfo,ParticleAttribute& attribute) const;
+    bool fixedAttributeInfo(const int attributeInfo,FixedAttribute& attribute) const;
 
     virtual void dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
         const ParticleIndex* particleIndices,const bool sorted,float* values) const;
     int registerIndexedStr(const ParticleAttribute& attribute,const char* str);
+    int registerFixedIndexedStr(const FixedAttribute& attribute,const char* str);
+    void setIndexedStr(const ParticleAttribute& attribute,int indexedStringToken,const char* str);
+    void setFixedIndexedStr(const FixedAttribute& attribute,int indexedStringToken,const char* str);
     int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const;
+    int lookupFixedIndexedStr(const FixedAttribute& attribute,const char* str) const;
     const std::vector<std::string>& indexedStrs(const ParticleAttribute& attr) const;
+    const std::vector<std::string>& fixedIndexedStrs(const FixedAttribute& attr) const;
 
     void sort();
     void findPoints(const float bboxMin[3],const float bboxMax[3],std::vector<ParticleIndex>& points) const;
@@ -77,6 +85,7 @@ public:
         ParticleIndex *points, float *pointDistancesSquared, float *finalRadius2) const;
 
     ParticleAttribute addAttribute(const char* attribute,ParticleAttributeType type,const int count);
+    FixedAttribute addFixedAttribute(const char* attribute,ParticleAttributeType type,const int count);
     ParticleIndex addParticle();
     iterator addParticles(const int count);
 
@@ -89,6 +98,7 @@ public:
     void setupAccessor(Partio::ParticleIterator<true>& iterator,ParticleAccessor& accessor) const;
 private:
     void* dataInternal(const ParticleAttribute& attribute,const ParticleIndex particleIndex) const;
+    void* fixedDataInternal(const FixedAttribute& attribute) const;
     void dataInternalMultiple(const ParticleAttribute& attribute,const int indexCount,
         const ParticleIndex* particleIndices,const bool sorted,char* values) const;
 
@@ -96,6 +106,7 @@ private:
     int particleCount;
     int allocatedCount;
     char* data;
+    char* fixedData;
     int stride;
 	struct IndexedStrTable{
         std::map<std::string,int> stringToIndex; // TODO: this should be a hash table unordered_map
@@ -105,6 +116,10 @@ private:
     std::vector<size_t> attributeOffsets; // Inside is data of appropriate type
     std::vector<ParticleAttribute> attributes;
     std::map<std::string,int> nameToAttribute;
+    std::vector<IndexedStrTable> fixedAttributeIndexedStrs;
+    std::vector<size_t> fixedAttributeOffsets; // Inside is data of appropriate type
+    std::vector<FixedAttribute> fixedAttributes;
+    std::map<std::string,int> nameToFixedAttribute;
 
     PartioMutex kdtree_mutex;
     KdTree<3>* kdtree;

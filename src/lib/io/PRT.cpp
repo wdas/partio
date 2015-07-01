@@ -95,7 +95,7 @@ static f_ui half2float[65536] = {
 };
 #endif
 
-static bool read_buffer(std::istream& is, z_stream& z, char* in_buf, void* p, size_t size) {
+static bool read_buffer(std::istream& is, z_stream& z, char* in_buf, void* p, size_t size, std::ostream* errorStream) {
     z.next_out=(Bytef*)p;
     z.avail_out=(uInt)size;
 
@@ -105,7 +105,7 @@ static bool read_buffer(std::istream& is, z_stream& z, char* in_buf, void* p, si
                 z.next_in = (Bytef*)in_buf;
                 is.read((char*)z.next_in, OUT_BUFSIZE);
                 if (is.bad()) {
-                    std::cerr<<"read error "<<std::endl;;
+                    if(errorStream) *errorStream<<"read error "<<std::endl;;
                     return false;
                 }
                 z.avail_in = (uInt)is.gcount();
@@ -113,7 +113,7 @@ static bool read_buffer(std::istream& is, z_stream& z, char* in_buf, void* p, si
         }
         int ret = inflate( &z, Z_BLOCK  );
         if ( ret != Z_OK && ret != Z_STREAM_END ) {
-            std::cerr<<"Zlib error "<<z.msg<<std::endl;;
+            if(errorStream) *errorStream<<"Zlib error "<<z.msg<<std::endl;;
             return false;
         }
         if (ret == Z_STREAM_END && z.avail_out > 0) {
@@ -124,7 +124,7 @@ static bool read_buffer(std::istream& is, z_stream& z, char* in_buf, void* p, si
     return true;
 }
 
-static bool write_buffer(std::ostream& os, z_stream& z, char* out_buf, void* p, size_t size, bool flush) {
+static bool write_buffer(std::ostream& os, z_stream& z, char* out_buf, void* p, size_t size, bool flush,std::ostream* errorStream) {
     z.next_in=(Bytef*)p;
     z.avail_in=(uInt)size;
     while (z.avail_in!=0 || flush) {
@@ -132,7 +132,7 @@ static bool write_buffer(std::ostream& os, z_stream& z, char* out_buf, void* p, 
 	z.avail_out = OUT_BUFSIZE;
 	int ret=deflate(&z,flush?Z_FINISH:Z_NO_FLUSH);
 	if (!(ret!=Z_BUF_ERROR && ret!=Z_STREAM_ERROR)) {
-            std::cerr<<"Zlib error "<<z.msg<<std::endl;;
+            if(errorStream) *errorStream<<"Zlib error "<<z.msg<<std::endl;;
             return false;
         }
         int	generated_output=(int)(z.next_out-(Bytef*)out_buf);
@@ -144,11 +144,11 @@ static bool write_buffer(std::ostream& os, z_stream& z, char* out_buf, void* p, 
 
 
 
-ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
+ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
     std::auto_ptr<std::istream> input(new std::ifstream(filename,std::ios::in|std::ios::binary));
     if (!*input) {
-        std::cerr<<"Partio: Unable to open file "<<filename<<std::endl;
+        if(errorStream) *errorStream<<"Partio: Unable to open file "<<filename<<std::endl;
         return 0;
     }
 
@@ -161,7 +161,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
     input->read((char*)&header,sizeof(FileHeadder));
 
     if (memcmp(header.magic, magic, sizeof(magic))) {
-        std::cerr<<"Partio: failed to get PRT magic"<<std::endl;
+        if(errorStream) *errorStream<<"Partio: failed to get PRT magic"<<std::endl;
         return 0;
     }
     
@@ -236,7 +236,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
     z_stream z;
     z.zalloc = Z_NULL;z.zfree = Z_NULL;z.opaque = Z_NULL;
     if (inflateInit( &z ) != Z_OK) {
-        std::cerr<<"Zlib inflateInit error"<<std::endl;
+        if(errorStream) *errorStream<<"Zlib inflateInit error"<<std::endl;
         return 0;
     }
 
@@ -248,7 +248,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
 
     for (unsigned int particleIndex=0;particleIndex<(unsigned int )simple->numParticles();particleIndex++) {
         // Read the particle from the file, and decompress it into a single particle-sized buffer.
-        read_buffer(*input, z, (char*)in_buf, prt_buf, particleSize);
+        read_buffer(*input, z, (char*)in_buf, prt_buf, particleSize, errorStream);
         
         for (unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++) {
             if (attrs[attrIndex].type==Partio::INT) {
@@ -334,7 +334,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
     delete prt_buf;
     
     if (inflateEnd( &z ) != Z_OK) {
-        std::cerr<<"Zlib inflateEnd error"<<std::endl;
+        if(errorStream) *errorStream<<"Zlib inflateEnd error"<<std::endl;
         return 0;
     }
 
@@ -342,7 +342,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
     return simple;
 }
 
-bool writePRT(const char* filename,const ParticlesData& p,const bool /*compressed*/)
+bool writePRT(const char* filename,const ParticlesData& p,const bool /*compressed*/,std::ostream* errorStream)
 {
 	/// Krakatoa pukes on 0 particle files for some reason so don't export at all....
     int numParts = p.numParticles();
@@ -352,7 +352,7 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
         new std::ofstream(filename,std::ios::out|std::ios::binary));
 
         if (!*output) {
-            std::cerr<<"Partio Unable to open file "<<filename<<std::endl;
+            if(errorStream) *errorStream <<"Partio Unable to open file "<<filename<<std::endl;
             return false;
         }
 
@@ -399,7 +399,7 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
         z_stream z;
         z.zalloc = Z_NULL;z.zfree = Z_NULL;z.opaque = Z_NULL;
         if (deflateInit( &z, Z_DEFAULT_COMPRESSION ) != Z_OK) {
-            std::cerr<<"Zlib deflateInit error"<<std::endl;
+            if(errorStream) *errorStream<<"Zlib deflateInit error"<<std::endl;
             return false;
         }
 
@@ -408,18 +408,18 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
             for (unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++) {
                 if (attrs[attrIndex].type==Partio::INT) {
                     const int* data=p.data<int>(attrs[attrIndex],particleIndex);
-                    if (!write_buffer(*output, z, (char*)out_buf, (void*)data, sizeof(int)*attrs[attrIndex].count, false))
+                    if (!write_buffer(*output, z, (char*)out_buf, (void*)data, sizeof(int)*attrs[attrIndex].count, false, errorStream))
                         return false;
                 } else if (attrs[attrIndex].type==Partio::FLOAT || attrs[attrIndex].type==Partio::VECTOR) {
                     const float* data=p.data<float>(attrs[attrIndex],particleIndex);
-                    if (!write_buffer(*output, z, (char*)out_buf, (void*)data, sizeof(int)*attrs[attrIndex].count, false))
+                    if (!write_buffer(*output, z, (char*)out_buf, (void*)data, sizeof(int)*attrs[attrIndex].count, false, errorStream))
                         return false;
                 }
             }
         }
-        write_buffer(*output, z, (char*)out_buf, 0, 0, true);
+        write_buffer(*output, z, (char*)out_buf, 0, 0, true, errorStream);
         if (deflateEnd( &z ) != Z_OK) {
-            std::cerr<<"Zlib deflateEnd error"<<std::endl;
+            if(errorStream) *errorStream<<"Zlib deflateEnd error"<<std::endl;
             return false;
         }
         // success

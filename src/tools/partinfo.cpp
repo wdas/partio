@@ -79,7 +79,10 @@ int main(int argc,char *argv[])
                         for(int ii=0;ii<attr.count;ii++){
                             if(attr.type==Partio::INDEXEDSTR){
                                 int val=p->data<int>(attr,particleIndex)[ii];
-                                std::cout<<" "<<val<<" '"<<p->indexedStrs(attr)[val]<<"'";
+                                std::cout<<" "<<val;
+                                for(size_t index=0;index<p->indexedStrs(attr).size();index++){
+                                    std::cout<<std::endl<<" "<<index<<" '"<<p->indexedStrs(attr)[index]<<"'";
+                                }
                             }else if(attr.type==Partio::INT) std::cout<<" "<<p->data<int>(attr,particleIndex)[ii];
                             else std::cout<<" "<<p->data<float>(attr,particleIndex)[ii];
                         }
@@ -89,8 +92,40 @@ int main(int argc,char *argv[])
             }
         }
 
+        int numFixedAttr=p->numFixedAttributes();
+        if (numFixedAttr) {
+            std::cout<<"---------------------------"<<std::endl;
+            std::cout<<"Fixed Attributes"<<std::endl;
+            std::cout<<std::setw(12)<<"Type"<<std::setw(10)<<"Count"<<std::setw(30)<<"Name"<<std::endl;
+            std::cout<<std::setw(12)<<"----"<<std::setw(10)<<"-----"<<std::setw(30)<<"----"<<std::endl;
+            for(int i=0;i<numFixedAttr;i++){
+                Partio::FixedAttribute attr;
+                p->fixedAttributeInfo(i,attr);
+                std::cout<<std::setw(12)<<Partio::TypeName(attr.type)
+                         <<std::setw(10)<<attr.count
+                         <<std::setw(30)<<attr.name<<std::endl;;
+            }
+
+            for(int i=0;i<numFixedAttr;i++){
+                Partio::FixedAttribute attr;
+                p->fixedAttributeInfo(i,attr);
+                std::cout<<std::setw(10)<<Partio::TypeName(attr.type)<<" "<<std::setw(10)<<attr.name;
+                for(int ii=0;ii<attr.count;ii++){
+                    if(attr.type==Partio::INDEXEDSTR){
+                        int val=p->fixedData<int>(attr)[ii];
+                        std::cout<<" "<<val;
+                        for(size_t index=0;index<p->fixedIndexedStrs(attr).size();index++){
+                            std::cout<<std::endl<<" "<<index<<" '"<<p->fixedIndexedStrs(attr)[index]<<"'";
+                        }
+                    }else if(attr.type==Partio::INT) std::cout<<" "<<p->fixedData<int>(attr)[ii];
+                    else std::cout<<" "<<p->fixedData<float>(attr)[ii];
+                }
+                std::cout<<std::endl;
+            }
+        }
+
         p->release();
     }
-    
+
     return 0;
 }

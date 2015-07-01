@@ -129,18 +129,18 @@ bool IsStringInCharArray(std::string target, char** list){
 static const int MC_MAGIC = ((((('F'<<8)|'O')<<8)|'R')<<8)|'4';
 static const int HEADER_SIZE = 56;
 
-ParticlesDataMutable* readMC(const char* filename, const bool headersOnly){
+ParticlesDataMutable* readMC(const char* filename, const bool headersOnly,std::ostream* errorStream){
 
     std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){
-        std::cerr << "Partio: Unable to open file " << filename << std::endl;
+        if(errorStream) *errorStream << "Partio: Unable to open file " << filename << std::endl;
         return 0;
     }
 
     int magic;
     read<BIGEND>(*input, magic);
     if(MC_MAGIC != magic){
-        std::cerr << "Partio: Magic number '" << magic << "' of '" << filename << "' doesn't match mc magic '" << MC_MAGIC << "'" << std::endl;
+        if(errorStream) *errorStream  << "Partio: Magic number '" << magic << "' of '" << filename << "' doesn't match mc magic '" << MC_MAGIC << "'" << std::endl;
         return 0;
     }
 
@@ -205,7 +205,7 @@ ParticlesDataMutable* readMC(const char* filename, const bool headersOnly){
         else
 		{
             input->seekg((int)input->tellg() + attrHeader.blocksize);
-            std::cerr << "Partio: Attribute '" << attrHeader.name << " " << attrHeader.type << "' cannot map type" << std::endl;
+            if(errorStream) *errorStream << "Partio: Attribute '" << attrHeader.name << " " << attrHeader.type << "' cannot map type" << std::endl;
         }
     }
     simple->addParticles(numParticles);

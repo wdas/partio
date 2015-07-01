@@ -37,10 +37,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 %module partio
 %include "std_string.i"
 
-
 %{
 #include <Partio.h>
 #include <PartioIterator.h>
+#include <sstream>
 namespace Partio{
 typedef uint64_t ParticleIndex;
 }
@@ -139,6 +139,10 @@ public:
     %feature("autodoc");
     %feature("docstring","Returns the number of particles in the set");
     virtual int numAttributes() const=0;
+
+    %feature("autodoc");
+    %feature("docstring","Returns the number of fixed attributes");
+    virtual int numFixedAttributes() const=0;
 };
 
 
@@ -153,6 +157,9 @@ class ParticlesData:public ParticlesInfo
     %feature("docstring","Looks up a given indexed string given the index, returns -1 if not found");
     int lookupIndexedStr(const ParticleAttribute& attribute,const char* str) const=0;
 
+    %feature("autodoc");
+    %feature("docstring","Looks up a given fixed indexed string given the index, returns -1 if not found");
+    int lookupFixedIndexedStr(const FixedAttribute& attribute,const char* str) const=0;
 };
 
 %rename(ParticleIteratorFalse) ParticleIterator<false>;
@@ -173,6 +180,17 @@ public:
     %feature("docstring","Registers a string in the particular attribute");
     virtual int registerIndexedStr(const ParticleAttribute& attribute,const char* str)=0;
 
+    %feature("autodoc");
+    %feature("docstring","Registers a string in the particular fixed attribute");
+    virtual int registerFixedIndexedStr(const FixedAttribute& attribute,const char* str)=0;
+
+    %feature("autodoc");
+    %feature("docstring","Changes a given index's associated string (for all particles that use this index too)");
+    virtual void setIndexedStr(const ParticleAttribute& attribute,int particleAttributeHandle,const char* str)=0;
+
+    %feature("autodoc");
+    %feature("docstring","Changes a given fixed index's associated string");
+    virtual void setFixedIndexedStr(const FixedAttribute& attribute,int particleAttributeHandle,const char* str)=0;
 
     %feature("autodoc");
     %feature("docstring","Prepares data for N nearest neighbor searches using the\n"
@@ -183,6 +201,12 @@ public:
     %feature("docstring","Adds a new attribute of given name, type and count. If type is\n"
         "partio.VECTOR, then count must be 3");
     virtual ParticleAttribute addAttribute(const char* attribute,ParticleAttributeType type,
+        const int count)=0;
+
+    %feature("autodoc");
+    %feature("docstring","Adds a new fixed attribute of given name, type and count. If type is\n"
+        "partio.VECTOR, then count must be 3");
+    virtual FixedAttribute addFixedAttribute(const char* attribute,ParticleAttributeType type,
         const int count)=0;
 
     %feature("autodoc");
@@ -262,12 +286,40 @@ public:
         return tuple;
     }
 
+    %feature("autodoc");
+    %feature("docstring","Gets fixed attribute data");
+    PyObject* getFixed(const FixedAttribute& attr)
+    {
+        PyObject* tuple=PyTuple_New(attr.count);
+        if(attr.type==Partio::INT || attr.type==Partio::INDEXEDSTR){
+            const int* p=$self->fixedData<int>(attr);
+            for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple,k,PyInt_FromLong(p[k]));
+        }else if(attr.type==Partio::FLOAT || attr.type==Partio::VECTOR){
+            const float* p=$self->fixedData<float>(attr);
+            for(int k=0;k<attr.count;k++) PyTuple_SetItem(tuple,k,PyFloat_FromDouble(p[k]));
+        }else{
+            Py_XDECREF(tuple);
+            PyErr_SetString(PyExc_ValueError,"Internal error unexpected data type");
+            return NULL;
+        }
+        return tuple;
+    }
 
     %feature("autodoc");
     %feature("docstring","Gets a list of all indexed strings for the given attribute handle");
     PyObject* indexedStrs(const ParticleAttribute& attr) const
     {
         const std::vector<std::string>& indexes=self->indexedStrs(attr);
+        PyObject* list=PyList_New(indexes.size());
+        for(size_t k=0;k<indexes.size();k++) PyList_SetItem(list,k,PyString_FromString(indexes[k].c_str()));
+        return list;
+    }
+
+    %feature("autodoc");
+    %feature("docstring","Gets a list of all indexed strings for the given fixed attribute handle");
+    PyObject* fixedIndexedStrs(const FixedAttribute& attr) const
+    {
+        const std::vector<std::string>& indexes=self->fixedIndexedStrs(attr);
         PyObject* list=PyList_New(indexes.size());
         for(size_t k=0;k<indexes.size();k++) PyList_SetItem(list,k,PyString_FromString(indexes[k].c_str()));
         return list;
@@ -329,7 +381,58 @@ public:
         return Py_None;
     }
 
+    %feature("autodoc");
+    %feature("docstring","Sets data on a given fixed attribute.\n"
+        "Data must be specified as tuple.");
+    PyObject* setFixed(const FixedAttribute& attr,PyObject* tuple)
+    {
+        if(!PySequence_Check(tuple)){
+            PyErr_SetString(PyExc_TypeError,"Expecting a sequence");
+            return NULL;
+        }
+        int size=PyObject_Length(tuple);
+        if(size!=attr.count){
+            PyErr_SetString(PyExc_ValueError,"Invalid number of parameters");
+            return NULL;
+        }
 
+        if(attr.type==Partio::INT || attr.type==Partio::INDEXEDSTR){
+            int* p=$self->fixedDataWrite<int>(attr);
+            for(int i=0;i<size;i++){
+                PyObject* o=PySequence_GetItem(tuple,i);
+                if(PyInt_Check(o)){
+                    p[i]=PyInt_AsLong(o);
+                }else{
+                    Py_XDECREF(o);
+                    PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
+                    return NULL;
+                }
+                Py_XDECREF(o);
+            }
+        }else if(attr.type==Partio::FLOAT || attr.type==Partio::VECTOR){
+            float* p=$self->fixedDataWrite<float>(attr);
+            for(int i=0;i<size;i++){
+                PyObject* o=PySequence_GetItem(tuple,i);
+                //fprintf(stderr,"checking %d\n",i);
+                if(PyFloat_Check(o)){
+                    p[i]=PyFloat_AsDouble(o);
+                }else if(PyInt_Check(o)){
+                    p[i]=(float)PyInt_AsLong(o);
+                }else{
+                    Py_XDECREF(o);
+                    PyErr_SetString(PyExc_ValueError,"Expecting a sequence of floats or ints");
+                    return NULL;
+                }
+                Py_XDECREF(o);
+            }
+        }else{
+            PyErr_SetString(PyExc_ValueError,"Internal error: invalid attribute type");
+            return NULL;
+        }
+
+        Py_INCREF(Py_None);
+        return Py_None;
+    }
 }
 
 %extend ParticlesInfo {
@@ -342,6 +445,17 @@ public:
         ParticleAttribute a;
         bool valid=$self->attributeInfo(name,a);
         if(valid) return new ParticleAttribute(a);
+        else return 0;
+    }
+
+    %feature("autodoc");
+    %feature("docstring","Searches for and returns the attribute handle for a named fixed attribute");
+    %newobject attributeInfo;
+    FixedAttribute* fixedAttributeInfo(const char* name)
+    {
+        FixedAttribute a;
+        bool valid=$self->fixedAttributeInfo(name,a);
+        if(valid) return new FixedAttribute(a);
         else return 0;
     }
 
@@ -359,6 +473,21 @@ public:
         if(valid) return new ParticleAttribute(a);
         else return 0;
     }
+
+    %feature("autodoc");
+    %feature("docstring","Returns the fixed attribute handle by index");
+    %newobject attributeInfo;
+    FixedAttribute* fixedAttributeInfo(const int index)
+    {
+        if(index<0 || index>=$self->numFixedAttributes()){
+            PyErr_SetString(PyExc_IndexError,"Invalid attribute index");
+            return NULL;
+        }
+        FixedAttribute a;
+        bool valid=$self->fixedAttributeInfo(index,a);
+        if(valid) return new FixedAttribute(a);
+        else return 0;
+    }
 }
 
 %feature("autodoc");
@@ -369,12 +498,47 @@ ParticlesDataMutable* create();
 %feature("autodoc");
 %feature("docstring","Reads a particle set from disk");
 %newobject read;
-ParticlesDataMutable* read(const char* filename);
+ParticlesDataMutable* read(const char* filename,bool verbose=true,std::ostream& error=std::cerr);
+
+%inline %{
+    template<class T> PyObject* readHelper(T* ptr,std::stringstream& ss){
+        PyObject* tuple=PyTuple_New(2);
+        PyObject* instance = SWIG_NewPointerObj(SWIG_as_voidptr(ptr), SWIGTYPE_p_ParticlesDataMutable, SWIG_POINTER_OWN);
+        PyTuple_SetItem(tuple,0,instance);
+        PyTuple_SetItem(tuple,1,PyString_FromString(ss.str().c_str()));
+        return tuple;
+    }
+%}
+%feature("docstring","Reads a particle set from disk and returns the tuple particleObject,errorMsg");
+%inline %{
+    PyObject* readVerbose(const char* filename){
+        std::stringstream ss;
+        ParticlesDataMutable* ptr=read(filename,true,ss); 
+        return readHelper(ptr,ss);
+    }
+%}
+%feature("docstring","Reads the header/attribute information from disk and returns the tuple particleObject,errorMsg");
+%inline %{
+    PyObject* readHeadersVerbose(const char* filename){
+        std::stringstream ss;
+        ParticlesInfo* ptr=readHeaders(filename,true,ss); 
+        return readHelper(ptr,ss);
+    }
+%}
+%feature("docstring","Reads the header/attribute information from disk and returns the tuple particleObject,errorMsg");
+%inline %{
+    PyObject* readCachedVerbose(const char* filename,bool sort){
+        std::stringstream ss;
+        ParticlesData* ptr=readCached(filename,sort,true,ss); 
+        return readHelper(ptr,ss);
+    }
+%}
+
 
 %feature("autodoc");
 %feature("docstring","Reads a particle set headers from disk");
 %newobject readHeaders;
-ParticlesInfo* readHeaders(const char* filename);
+ParticlesInfo* readHeaders(const char* filename,bool verbose=true,std::ostream& error=std::cerr);
 
 %feature("autodoc");
 %feature("docstring","Writes a particle set to disk");

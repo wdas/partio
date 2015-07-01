@@ -36,7 +36,7 @@ namespace Partio
 
 using namespace std;
 
-bool writeRIB(const char* filename, const ParticlesData& p, const bool compressed)
+bool writeRIB(const char* filename, const ParticlesData& p, const bool compressed,std::ostream* errorStream)
 {
     auto_ptr<ostream> output(
         compressed ? Gzip_Out(filename, ios::out | ios::binary)
@@ -49,12 +49,12 @@ bool writeRIB(const char* filename, const ParticlesData& p, const bool compresse
 
     if (!foundP)
     {
-        cerr << "Partio: failed to find attr 'position' or 'P' for RIB output" << endl;
+        if(errorStream) *errorStream << "Partio: failed to find attr 'position' or 'P' for RIB output" << endl;
         return false;
     }
 
     if (!foundWidth)
-        cerr << "Partio: failed to find attr 'width','radius', or 'radiusPP' for RIB output, using constantwidth = 1" << endl;
+        if(errorStream) *errorStream << "Partio: failed to find attr 'width','radius', or 'radiusPP' for RIB output, using constantwidth = 1" << endl;
 
     *output << "version 3.04" << endl;
 
