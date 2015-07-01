@@ -538,8 +538,10 @@ void timer(int time)
 ///////////////////////////////////////////
 /// PROCESS Mouse / Keyboard functions
 
+static int mod=0;
 static void mouseFunc(int button,int state,int x,int y)
 {
+    mod = glutGetModifiers();
     if (state==GLUT_DOWN)
     {
         if (button==GLUT_LEFT_BUTTON) camera.startTumble(x,y);
@@ -568,8 +570,7 @@ static void mouseFunc(int button,int state,int x,int y)
 
 static void motionFunc(int x,int y)
 {
-    int mod = glutGetModifiers();
-    if (mod == GLUT_ACTIVE_ALT)
+//    if (mod == GLUT_ACTIVE_ALT)
     {
         camera.update(x,y);
         glutPostRedisplay();

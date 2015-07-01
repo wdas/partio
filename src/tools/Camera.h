@@ -36,6 +36,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifndef _Camera_h_
 #define _Camera_h_
 
+#ifdef PARTIO_WIN32
+#define M_PI 3.141592653589793238
+#endif
 
 class Vec3
 {
