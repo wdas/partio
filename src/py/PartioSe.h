@@ -77,6 +77,7 @@ struct SimpleVar:public SeExprVarRef{
 /// Class that maps back to the partio data
 template<class T> class VarToPartio;
 
+/// NOTE: This class is experimental and may be deleted/modified in future versions
 class PartioSe:public SeExpression{
     bool isPaired;
     int currentIndex;
