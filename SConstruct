@@ -5,6 +5,7 @@ def kernel_version():
     return os.popen("uname -r").read().strip().split('-')[0]
 
 default_cxx="g++"
+default_cxxflags=""
 
 options=Variables("SConstruct.options")
 
@@ -14,6 +15,7 @@ arch = platform.machine()
 
 options.AddVariables(
     ('CXX','C++ compiler',default_cxx),
+    ('CXXFLAGS','C++ compiler flags',default_cxxflags),
     ('mac','Is a mac', uos == 'Darwin'),
     EnumVariable("TYPE",
                "Type of build (e.g. optimize,debug)",

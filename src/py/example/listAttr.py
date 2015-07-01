@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 #
 # PARTIO SOFTWARE
 # Copyright 2010 Disney Enterprises, Inc. All rights reserved

@@ -74,18 +74,18 @@ string readName(istream& input){
     return result;
 }
 
-ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly){
+ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly,std::ostream* errorStream){
 
     auto_ptr<istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){
-        std::cerr << "Partio: Unable to open file " << filename << std::endl;
+        if(errorStream) *errorStream  << "Partio: Unable to open file " << filename << std::endl;
         return 0;
     }
 
     PDC_HEADER header;
     input->read((char*)&header, sizeof(header));
     if(PDC_MAGIC != header.magic){
-        std::cerr << "Partio: Magic number '" << header.magic << "' of '" << filename << "' doesn't match pdc magic '" << PDC_MAGIC << "'" << std::endl;
+        if(errorStream) *errorStream << "Partio: Magic number '" << header.magic << "' of '" << filename << "' doesn't match pdc magic '" << PDC_MAGIC << "'" << std::endl;
         return 0;
     }
 
@@ -127,14 +127,14 @@ ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly){
     return simple;
 }
 
-bool writePDC(const char* filename,const ParticlesData& p,const bool compressed){
+bool writePDC(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream){
     auto_ptr<ostream> output(
         compressed ?
         Gzip_Out(filename,ios::out|ios::binary)
         :new std::ofstream(filename,ios::out|ios::binary));
 
     if(!*output){
-        cerr << "Partio Unable to open file " << filename << endl;
+        if(errorStream) *errorStream << "Partio Unable to open file " << filename << endl;
         return false;
     }
 
