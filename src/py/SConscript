@@ -42,14 +42,16 @@ Import('env variant_build_abs variant_install_abs')
 envpy=env.Clone(CPPPATH=[variant_build_abs+"/include"]
               ,LIBPATH="%s/lib64"%variant_build_abs
               ,LIBS=["partio"])
-
+SeExpr_cpppath=os.environ["RP_SeExpr"]+"/include"
+SeExpr_libs=os.environ["RP_SeExpr"]+"/lib64"
 
 pythonDir=sys.prefix
 
 envpy.Append(CXXFLAGS=["-Wno-format"])
-envpy.Append(CPPPATH=[pythonDir+"/include/python%s" % python_ver
-                      ],
-             LIBPATH=["%s/lib64"%variant_build_abs],
+envpy.Append(CPPPATH=[pythonDir+"/include/python%s" % python_ver,
+                      Dir(".").abspath,
+                      SeExpr_cpppath],
+             LIBPATH=["%s/lib64"%variant_build_abs,"%s/lib64"%SeExpr_libs],
              LIBS=["partio"])
 
 envpy.Append(SWIGFLAGS=['-c++','-python','-Wall'])
@@ -57,8 +59,8 @@ envpy.Append(SWIGFLAGS=['-c++','-python','-Wall'])
 
 
 if env["mac"]:
-    envpy.Append(LINKFLAGS=["-framework","python"],LIBS=["z","partio"])
-lib=envpy.SharedLibrary("partio",["partio.i"],LIBS=["z","partio"])
+    envpy.Append(LINKFLAGS=["-framework","python"],LIBS=["z","partio","SeExpr"])
+lib=envpy.SharedLibrary("partio",["partio.i"],LIBS=["z","partio","SeExpr"])
 #print lib
 dp1=envpy.InstallAs(variant_install_abs+"/%s/_partio.so" % python_mod,lib)
 dp2=envpy.InstallAs(variant_install_abs+"/%s/partio.py" % python_mod,"partio.py")

@@ -38,6 +38,8 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 
 
 */
+#ifndef PARTIO_WIN32
+#ifdef PARTIO_USE_ZLIB
 #include "../Partio.h"
 #include "PartioEndian.h"
 #include "../core/ParticleHeaders.h"
@@ -56,7 +58,7 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 #include <string>
 #include <memory>
 #include <zlib.h>
-
+#endif
 namespace Partio{
 
 #define OUT_BUFSIZE		(4096)
@@ -114,6 +116,10 @@ static bool read_buffer(std::istream& is, z_stream& z, char* in_buf, void* p, si
         int ret = inflate( &z, Z_BLOCK  );
         if ( ret != Z_OK && ret != Z_STREAM_END ) {
             if(errorStream) *errorStream<<"Zlib error "<<z.msg<<std::endl;;
+            return false;
+        }
+        if (ret == Z_STREAM_END && z.avail_out > 0) {
+            std::cerr<<"Truncated prt file  "<<std::endl;;
             return false;
         }
     }
@@ -220,7 +226,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly,std::o
         }
         
         // The size of the particle is determined from the channel with largest offset. The channels are not required to be listed in order.
-        particleSize = (std::max)( particleSize, chans.back().offset + sizes[type] );
+        particleSize = (std::max)( particleSize, chans.back().offset + sizes[ch.type] );
         
         // The channel entry might have more data in other PRT versions.
         if ((unsigned)channelsize > sizeof(Channel))
@@ -424,4 +430,26 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
 }
 
 }
+#else
+#include "../Partio.h"
+#include <iostream>
+#include <fstream>
+
+
+namespace Partio{
+ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
+{
+    std::cerr<<"PRT not supported on windows"<<std::endl;
+    return 0;
+}
+
+
+bool writePRT(const char* filename,const ParticlesData& p,const bool /*compressed*/)
+{
+    std::cerr<<"PRT not supported on windows"<<std::endl;
+    return false;
+}
+}
+
+#endif
 

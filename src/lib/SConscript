@@ -58,6 +58,7 @@ sharedlib=env.SharedLibrary("partio",files)
 lib=env.Library("partio",files)
 foo=Dir(".").abspath+"../../include"
 
+#TODO: configurable lib64 or lib
 env.Install(variant_build_abs+"/include","Partio.h")
 env.Install(variant_build_abs+"/include","PartioIterator.h")
 env.Install(variant_build_abs+"/include","PartioAttribute.h")
