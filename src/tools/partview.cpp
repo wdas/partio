@@ -292,6 +292,24 @@ static void render()
 
     glEnd();
 
+    if(connectivity){
+        //std::cerr<<"drawing connect"<<std::endl;
+        glBegin(GL_LINES);
+        for(int i=0;i<connectivity->numParticles();i++){
+            int v1=connectivity->data<int>(attr1,i)[0];
+            int v2=connectivity->data<int>(attr2,i)[0];
+            //std::cerr<<"v1 "<<v1<<" v2 "<<v2<<std::endl;
+            if(v1 >= 0 && v2 >= 0 && v1<particles->numParticles() && v2<particles->numParticles()){
+                const float* p1=particles->data<float>(positionAttr,v1);
+                const float* p2=particles->data<float>(positionAttr,v2);
+                //std::cerr<<"p1 to p2 "<<p1[0]<<" "<<p1[1]<<" "<<p1[2]<<" -- "<<p2[0]<<" "<<p2[1]<<" "<<p2[2]<<std::endl;
+                glVertex3fv(p1);
+                glVertex3fv(p2);
+            }
+        }
+        glEnd();
+    }
+
     glutSwapBuffers();
 
 }
@@ -307,9 +325,10 @@ void  reloadParticleFile(int direction)
 {
 
     string currentFrame = particleFile;
-
+    string currentConnectivityFrame = connectivityFile;
     string fileName;
     string origFileName;
+    string origConnectivityFile;
     stringstream ss(currentFrame);
 
     while (getline(ss, fileName,'/'))
@@ -404,13 +423,18 @@ void  reloadParticleFile(int direction)
             }
             // now replace the number in the string with the new one
 			fileName.replace(fileName.rfind(numberString), numberString.length(), newFrameString);
+                        if(!currentConnectivityFrame.empty())
+                            currentConnectivityFrame.replace(currentConnectivityFrame.rfind(numberString),numberString.length(),newFrameString);
 
 			currentFrame.replace(currentFrame.find(origFileName), origFileName.length(), fileName);
+                        
 			particleFile = currentFrame;
+                        connectivityFile = currentConnectivityFrame;
         }
         else
         {
             particleFile = currentFrame;
+            connectivityFile = currentConnectivityFrame;
         }
     }
 
@@ -421,6 +445,15 @@ void  reloadParticleFile(int direction)
 		if (result >=0)
 		{
 			particles=read(particleFile.c_str());
+                        int result2 = stat(connectivityFile.c_str(),&statinfo);
+                        if(result2>=0){
+                            // std::cerr<<"reading connectivity "<<connectivityFile<<std::endl;
+                            connectivity=read(connectivityFile.c_str());
+                            if(connectivity){
+                                connectivity->attributeInfo("p1",attr1);
+                                connectivity->attributeInfo("p2",attr2);
+                            }
+                        }
 			//particles->attributeNames();
 			if (!glutGetWindow()) {
 				return;
@@ -464,7 +497,7 @@ void timer(int time)
         //cout << "any key pressed" << endl;
         if (keyStates[27])  // escape pressed,  just exit
         {
-            exit(0);
+//            exit(0);
         }
 
         static GLuint Clock=glutGet(GLUT_ELAPSED_TIME);
@@ -538,8 +571,10 @@ void timer(int time)
 ///////////////////////////////////////////
 /// PROCESS Mouse / Keyboard functions
 
+static int mod=0;
 static void mouseFunc(int button,int state,int x,int y)
 {
+    mod = glutGetModifiers();
     if (state==GLUT_DOWN)
     {
         if (button==GLUT_LEFT_BUTTON) camera.startTumble(x,y);
@@ -568,8 +603,7 @@ static void mouseFunc(int button,int state,int x,int y)
 
 static void motionFunc(int x,int y)
 {
-    int mod = glutGetModifiers();
-    if (mod == GLUT_ACTIVE_ALT)
+//    if (mod == GLUT_ACTIVE_ALT)
     {
         camera.update(x,y);
         glutPostRedisplay();
@@ -734,14 +768,18 @@ int main(int argc,char *argv[])
     alphaMissing = false;
 
     glutInit(&argc,argv);
-    if (argc!=2)
+    if (argc!=2 && argc != 3)
     {
-        std::cerr<<"Usage: "<<argv[0]<<" <particle file>"<<std::endl;
+        std::cerr<<"Usage: "<<argv[0]<<" <particle file> [connect]"<<std::endl;
         return 1;
     }
 
     particleFile = argv[1];
-
+    if(argc == 3){
+        connectivityFile = argv[2];
+    }else{
+        connectivityFile = "";
+    }
     reloadParticleFile(0);
 
     if (particles) {
