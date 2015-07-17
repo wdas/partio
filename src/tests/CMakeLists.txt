@@ -34,5 +34,5 @@
 foreach(item testiterator test testcache teststr makecircle makeline testkdtree)
     ADD_EXECUTABLE(${item} "${item}.cpp")
     target_link_libraries(${item} ${PARTIO_LIBRARIES})
-    install(TARGETS ${item} DESTINATION test)
+    install(TARGETS ${item} DESTINATION share/partio/test)
 endforeach(item)
