@@ -266,6 +266,10 @@ ParticlesDataMutable* create();
 
 ParticlesDataMutable* createInterleave();
 
+//! Clone a ParticlesData instance into a new ParticlesDataMutable instance.
+//! This does *not* copy data, it only copies the attribute schema.
+ParticlesDataMutable* cloneSchema(const ParticlesData&);
+
 //! Provides read/write access to a particle set stored in a file
 //! freed with p->release()
 ParticlesDataMutable* read(const char* filename,const bool verbose=true,std::ostream& errorStream=std::cerr);
@@ -277,7 +281,6 @@ ParticlesInfo* readHeaders(const char* filename,const bool verbose=true,std::ost
 //! Provides access to a particle set stored in a file
 //! if filename ends with .gz or forceCompressed is true, the file is compressed.
 void write(const char* filename,const ParticlesData&,const bool forceCompressed=false,bool verbose=true,std::ostream& errorStream=std::cerr);
-
 
 //! Cached (only one copy) read only way to read a particle file
 /*!
