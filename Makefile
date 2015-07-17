@@ -10,6 +10,11 @@ builddir ?= $(CURDIR)/build/$(platformdir)
 prefix ?= $(CURDIR)/$(platformdir)
 #DESTDIR =
 
+CMAKE_FLAGS ?= -DCMAKE_INSTALL_PREFIX=$(prefix)
+ifdef RP_SeExpr
+    CMAKE_FLAGS += -DSEEXPR_BASE=$(RP_SeExpr)
+endif
+
 # The default target in this Makefile is...
 all::
 
@@ -18,7 +23,7 @@ install: all
 
 $(builddir)/stamp:
 	mkdir -p $(builddir)
-	cd $(builddir) && cmake -DCMAKE_INSTALL_PREFIX=$(prefix) ../..
+	cd $(builddir) && cmake $(CMAKE_FLAGS) ../..
 	touch $@
 
 all:: $(builddir)/stamp
