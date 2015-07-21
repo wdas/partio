@@ -774,7 +774,6 @@ MStatus partioInstancer::compute( const MPlug& plug, MDataBlock& block )
 
                 if (canMotionBlur)
                 {
-
                     if (motionBlurStep)
                     {
                         if (velocitySource == VS_LAST_POSITION)
