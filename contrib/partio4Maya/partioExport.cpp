@@ -297,7 +297,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
         }
         else
         {
-            outFrame = (int)MAnimControl::currentTime().as(MTime::kFilm);
+            outFrame = (int)MAnimControl::currentTime().as(MTime::uiUnit());
         }
 
         char padNum [10];
