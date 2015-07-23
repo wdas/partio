@@ -68,6 +68,26 @@ createInterleave()
 }
 
 
+ParticlesDataMutable*
+cloneSchema(const ParticlesData& other)
+{
+    ParticlesDataMutable* p = create();
+
+    FixedAttribute detail;
+    for(int i=0;i<other.numFixedAttributes();++i) {
+        other.fixedAttributeInfo(i,detail);
+        p->addFixedAttribute(detail.name.c_str(), detail.type, detail.count);
+    }
+
+    ParticleAttribute attr;
+    for(int j=0;j<other.numAttributes();++j) {
+        other.attributeInfo(j,attr);
+        p->addAttribute(attr.name.c_str(), attr.type, attr.count);
+    }
+
+    return p;
+}
+
 
 
 template<ParticleAttributeType ETYPE> void

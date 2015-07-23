@@ -10,11 +10,11 @@ Nevertheless, python API remains useful for manipulating particles.
 
 To use Partio's python API first import partio as
 <pre>
-&rt;&rt;&rt; import partio
+&gt;&gt;&gt; import partio
 </pre>
 Help on functions that are available are shown in 
 <pre>
-&rt;&rt;&rt; help(partio)
+&gt;&gt;&gt; help(partio)
 </pre>
 
 

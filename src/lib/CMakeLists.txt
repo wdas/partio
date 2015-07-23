@@ -37,5 +37,5 @@ ADD_LIBRARY (partio ${io_cpp} ${core_cpp})
 
 FILE(GLOB public_includes "*.h")
 
-INSTALL (TARGETS partio DESTINATION lib)
+INSTALL (TARGETS partio DESTINATION ${CMAKE_INSTALL_LIBDIR})
 INSTALL (FILES ${public_includes} DESTINATION include)
