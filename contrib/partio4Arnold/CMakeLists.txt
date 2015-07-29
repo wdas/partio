@@ -1,8 +1,11 @@
-CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
-find_package(MtoA)
-if(MTOA_FOUND)
-	ADD_SUBDIRECTORY(plugin)
-endif()
-ADD_SUBDIRECTORY(procedurals)
-#ADD_SUBDIRECTORY(shaders)
+cmake_minimum_required(VERSION 2.4.6)
 
+if (BUILD_PARTIO_MTOA)
+	find_package(MtoA)
+endif ()
+
+if(MTOA_FOUND)
+	add_subdirectory(plugin)
+else()
+	add_subdirectory(procedurals)
+endif()

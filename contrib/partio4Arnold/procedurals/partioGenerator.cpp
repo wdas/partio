@@ -475,7 +475,7 @@ struct PartioData{
 
                 AiArraySetFlt(opacityArr, i, opac);
             }
-            for (int x = 0; x < extraAttrs.size(); ++x)
+            for (size_t x = 0; x < extraAttrs.size(); ++x)
             {
                 if (extraAttrs[x].type == Partio::FLOAT)
                 {
@@ -506,7 +506,7 @@ struct PartioData{
 
         AiNodeSetArray(currentInstance, "radius", radarr);
 
-        for (int x = 0; x < arnoldArrays.size(); ++x)
+        for (size_t x = 0; x < arnoldArrays.size(); ++x)
             AiNodeSetArray(currentInstance, extraAttrs[x].name.c_str(), arnoldArrays[x]);
 
         /// these  will always be here
