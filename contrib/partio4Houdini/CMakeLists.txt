@@ -44,63 +44,55 @@
 
 
 ## CMake compatibility issues: don't modify this, please!
-CMAKE_MINIMUM_REQUIRED( VERSION 2.8.0 )
+cmake_minimum_required( VERSION 2.8.0 )
 
-if(COMMAND cmake_policy)
+if (COMMAND cmake_policy)
      cmake_policy(SET CMP0003 NEW)
-	 cmake_policy(SET CMP0015 NEW)  # to supress relative library directory warnings
-	 cmake_policy(SET CMP0005 NEW)
-endif(COMMAND cmake_policy)
+     cmake_policy(SET CMP0015 NEW)  # to supress relative library directory warnings
+     cmake_policy(SET CMP0005 NEW)
+endif (COMMAND cmake_policy)
 
-SET(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
+set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 
-set (PLUGIN_NAME "partio4Houdini")
-set (CMAKE_PROJECT_NAME "partio4Houdini")
+set(PLUGIN_NAME "partio4Houdini")
+set(CMAKE_PROJECT_NAME "partio4Houdini")
 
-
-#  we want to override the  Compiler here to use a newer version because maya's compiler and  houdini's don't usually jive
-SET( CMAKE_CXX_COMPILER /usr/bin/g++)
-SET( CMAKE_C_COMPILER /usr/bin/gcc)
+# Fixed this by setting up the proper compiler in the rez config files
+##  we want to override the  Compiler here to use a newer version because maya's compiler and  houdini's don't usually jive
+##set( CMAKE_CXX_COMPILER /usr/bin/g++)
+##set( CMAKE_C_COMPILER /usr/bin/gcc)
 ## hardcoding this is bad.. don't know how to fix this yet... 
-SET( SYS_INCLUDE /usr/lib/gcc/x86_64-redhat-linux/4.8.2/include )
+##set( SYS_INCLUDE /usr/lib/gcc/x86_64-redhat-linux/4.8.2/include )
 
+# no need to find houdini here, it's taken care at a higher level
+message(STATUS "Found HOUDINI version ${HOUDINI_VERSION}")
+message(STATUS "running command ${PROJECT_SOURCE_DIR}/contrib/cmake/hdk-config.py")
 
-find_package(Houdini)
-
-if(HOUDINI_FOUND)
-
-	message(STATUS "Found HOUDINI version ${HOUDINI_VERSION}")
-	message(STATUS "running command ${PROJECT_SOURCE_DIR}/contrib/cmake/hdk-config.py")
-
-	add_custom_command(OUTPUT sesitag.C
-					DEPENDS src/ROP_partio.C
+add_custom_command(OUTPUT sesitag.C
+                   DEPENDS src/ROP_partio.C
                    COMMAND ${PROJECT_SOURCE_DIR}/contrib/cmake/hdk-config.py --tagfile=${CMAKE_BINARY_DIR}/contrib/partio4Houdini/sesitag.C)
-	SET (HOUDINI_INCS ${HOUDINI_INCLUDE_DIRS} ${SYS_INCLUDE})
-	SET (HOUDINI_LIBDIR ${HOUDINI_LIBRARY_DIRS})
-	SET (HOUDINI_LIBS HoudiniUI HoudiniOPZ HoudiniOP3 HoudiniOP2 HoudiniOP1 HoudiniSIM HoudiniGEO HoudiniPRM HoudiniUT)
-	ADD_DEFINITIONS (${HOUDINI_DEFINITIONS} -DHOUDINI_DEFINES -DHOUDINI_API_VERSION=$ENV{HOUDINI_VERSION}  -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DMAKING_DSO)
+set(HOUDINI_INCS ${HOUDINI_INCLUDE_DIRS} ${SYS_INCLUDE})
+set(HOUDINI_LIBDIR ${HOUDINI_LIBRARY_DIRS})
+set(HOUDINI_LIBS HoudiniUI HoudiniOPZ HoudiniOP3 HoudiniOP2 HoudiniOP1 HoudiniSIM HoudiniGEO HoudiniPRM HoudiniUT)
+add_definitions(${HOUDINI_DEFINITIONS} -DHOUDINI_DEFINES -DHOUDINI_API_VERSION=$ENV{HOUDINI_VERSION}  -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DMAKING_DSO)
 
 
-	LINK_DIRECTORIES( ${HOUDINI_LIBDIR} )
-	INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/contrib/partio4Houdini/include ${HOUDINI_INCS} )
+link_directories( ${HOUDINI_LIBDIR} )
+include_directories(${CMAKE_SOURCE_DIR}/contrib/partio4Houdini/include ${HOUDINI_INCS})
 
-	ADD_LIBRARY(${PLUGIN_NAME} SHARED src/partio_houdini.C src/SOP_partio.C src/ROP_partio.C sesitag.C )
-	set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
-	target_link_libraries(${PLUGIN_NAME} ${PARTIO_LIBRARIES} ${HOUDINI_LIBS} ${HOUDINI_SYS_LIBS})
+add_library(${PLUGIN_NAME} SHARED src/partio_houdini.C src/SOP_partio.C src/ROP_partio.C sesitag.C)
+set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
+target_link_libraries(${PLUGIN_NAME} ${PARTIO_LIBRARIES} ${HOUDINI_LIBS} ${HOUDINI_SYS_LIBS})
 
-	## install everything
-	SET (HOUDINI_OUTPUT_PATH houdini/dso)
-	SET (HOUDINI_ICONS_PATH  houdini/Icons)
-	IF (${LOCAL_INSTALL})
-		SET (HOUDINI_OUTPUT_PATH houdini/$ENV{HOUDINI_VERSION}/dso)
-		SET (HOUDINI_ICONS_PATH  houdini/$ENV{HOUDINI_VERSION}/Icons)
-	ENDIF(${LOCAL_INSTALL})
+## install everything
+set(HOUDINI_OUTPUT_PATH houdini/dso)
+set(HOUDINI_ICONS_PATH  houdini/Icons)
+if (${LOCAL_INSTALL})
+    set(HOUDINI_OUTPUT_PATH houdini/$ENV{HOUDINI_VERSION}/dso)
+    set(HOUDINI_ICONS_PATH  houdini/$ENV{HOUDINI_VERSION}/Icons)
+endif ()
 
-	INSTALL(TARGETS ${PLUGIN_NAME} DESTINATION ${HOUDINI_OUTPUT_PATH} )
+install(TARGETS ${PLUGIN_NAME} DESTINATION ${HOUDINI_OUTPUT_PATH})
 
-	FILE(GLOB PARTIO4HOUDINI_ICONS "icons/*")
-	INSTALL( FILES ${PARTIO4HOUDINI_ICONS} DESTINATION ${HOUDINI_ICONS_PATH})
-
-endif (HOUDINI_FOUND)
-
-
+file(GLOB PARTIO4HOUDINI_ICONS "icons/*")
+install(FILES ${PARTIO4HOUDINI_ICONS} DESTINATION ${HOUDINI_ICONS_PATH})
