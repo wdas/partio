@@ -19,7 +19,7 @@ else ()
     endif ()
 endif ()
 
-if (MAYA_FOUND)
+if (MAYA_FOUND AND BUILD_PARTIO_MAYA)
     add_subdirectory(partio4Maya)
 endif ()
 
