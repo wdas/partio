@@ -79,7 +79,7 @@ link_directories(${STD_LIB}
 # Maya CFLAGS
 if (APPLE)
     set(DEVKIT_LOCATION ${MAYA_LOCATION}/../../devkit)
-    ADD_DEFINITIONS (
+    add_definitions(
         -DMAC_PLUGIN
         -D_BOOL
         -DCC_GNU_
@@ -94,7 +94,7 @@ if (APPLE)
         -D_DARWIN # required by MtoA
     )
 else ()
-    ADD_DEFINITIONS (
+    add_definitions(
         -DBits64_
         -m64
         -DUNIX
