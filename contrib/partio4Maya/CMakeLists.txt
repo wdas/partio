@@ -98,11 +98,14 @@ TARGET_LINK_LIBRARIES(${PLUGIN_NAME}
 file(GLOB PARTIO4MAYA_SCRIPTS "scripts/*.mel")
 file(GLOB PARTIO4MAYA_ICONS "icons/*")
 
-set(MAYA_INST_DIR "maya")
+set(MAYA_INST_DIR "maya/")
 set(MAYA_PLUGIN_DIR "maya/plug-ins")
 
-if (${LOCAL_INSTALL})
-    set(MAYA_INST_DIR "maya/${MAYA_VERSION}")
+if (BUILD_PARTIO_MAYA)
+    set(MAYA_INST_DIR "")
+    set(MAYA_PLUGIN_DIR "plug-ins")
+elseif (${LOCAL_INSTALL})
+    set(MAYA_INST_DIR "maya/${MAYA_VERSION}/")
     set(MAYA_PLUGIN_DIR "maya/${MAYA_VERSION}/plug-ins/${PARTIO_BUILD_PLATFORM}")
 endif (${LOCAL_INSTALL})
 
@@ -110,7 +113,7 @@ install(TARGETS ${PLUGIN_NAME}
     DESTINATION ${MAYA_PLUGIN_DIR})
 
 install(FILES ${PARTIO4MAYA_SCRIPTS}
-    DESTINATION ${MAYA_INST_DIR}/scripts)
+    DESTINATION ${MAYA_INST_DIR}scripts)
 
 install(FILES ${PARTIO4MAYA_ICONS}
-    DESTINATION ${MAYA_INST_DIR}/icons)
+    DESTINATION ${MAYA_INST_DIR}icons)
