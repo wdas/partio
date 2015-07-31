@@ -41,15 +41,13 @@
 # implied warranties of merchantability, fitness for a particular purpose and non-
 # infringement.
 
-
-
 ## CMake compatibility issues: don't modify this, please!
 cmake_minimum_required( VERSION 2.8.0 )
 
 if (COMMAND cmake_policy)
-     cmake_policy(SET CMP0003 NEW)
-     cmake_policy(SET CMP0015 NEW)  # to supress relative library directory warnings
-     cmake_policy(SET CMP0005 NEW)
+    cmake_policy(SET CMP0003 NEW)
+    cmake_policy(SET CMP0015 NEW)  # to supress relative library directory warnings
+    cmake_policy(SET CMP0005 NEW)
 endif (COMMAND cmake_policy)
 
 set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
@@ -57,14 +55,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/../cmake)
 set(PLUGIN_NAME "partio4Houdini")
 set(CMAKE_PROJECT_NAME "partio4Houdini")
 
-# Fixed this by setting up the proper compiler in the rez config files
-##  we want to override the  Compiler here to use a newer version because maya's compiler and  houdini's don't usually jive
-##set( CMAKE_CXX_COMPILER /usr/bin/g++)
-##set( CMAKE_C_COMPILER /usr/bin/gcc)
-## hardcoding this is bad.. don't know how to fix this yet... 
-##set( SYS_INCLUDE /usr/lib/gcc/x86_64-redhat-linux/4.8.2/include )
-
+# no need to setup the compiler by hand, rez takes care of that
 # no need to find houdini here, it's taken care at a higher level
+
 message(STATUS "Found HOUDINI version ${HOUDINI_VERSION}")
 message(STATUS "running command ${PROJECT_SOURCE_DIR}/contrib/cmake/hdk-config.py")
 
@@ -76,7 +69,6 @@ set(HOUDINI_LIBDIR ${HOUDINI_LIBRARY_DIRS})
 set(HOUDINI_LIBS HoudiniUI HoudiniOPZ HoudiniOP3 HoudiniOP2 HoudiniOP1 HoudiniSIM HoudiniGEO HoudiniPRM HoudiniUT)
 add_definitions(${HOUDINI_DEFINITIONS} -DHOUDINI_DEFINES -DHOUDINI_API_VERSION=$ENV{HOUDINI_VERSION}  -D_REENTRANT -D_FILE_OFFSET_BITS=64 -DMAKING_DSO)
 
-
 link_directories( ${HOUDINI_LIBDIR} )
 include_directories(${CMAKE_SOURCE_DIR}/contrib/partio4Houdini/include ${HOUDINI_INCS})
 
@@ -87,7 +79,10 @@ target_link_libraries(${PLUGIN_NAME} ${PARTIO_LIBRARIES} ${HOUDINI_LIBS} ${HOUDI
 ## install everything
 set(HOUDINI_OUTPUT_PATH houdini/dso)
 set(HOUDINI_ICONS_PATH  houdini/Icons)
-if (${LOCAL_INSTALL})
+if (BUILD_PARTIO_HOUDINI)
+	set(HOUDINI_OUTPUT_PATH dso)
+	set(HOUDINI_ICONS_PATH  Icons)
+elseif (${LOCAL_INSTALL})
     set(HOUDINI_OUTPUT_PATH houdini/$ENV{HOUDINI_VERSION}/dso)
     set(HOUDINI_ICONS_PATH  houdini/$ENV{HOUDINI_VERSION}/Icons)
 endif ()
