@@ -142,7 +142,9 @@ target_link_libraries(${PLUGIN_NAME}
                       ${MTOA_mtoa_api_LIBRARY})
 
 set(PARTIO4ARNOLD_OUTPUT_PATH "arnold/mtoa/extensions")
-if (${LOCAL_install}) # TODO : ask Johnc if this is still needed
+if (BUILD_PARTIO_MTOA)
+    set (PARTIO4ARNOLD_OUTPUT_PATH "extensions")
+elseif (${LOCAL_install}) # TODO : ask Johnc if this is still needed
     set (PARTIO4ARNOLD_OUTPUT_PATH "arnold/mtoa-$ENV{MTOA_VERSION}/${PARTIO_BUILD_PLATFORM}/extensions")
 endif ()
 
