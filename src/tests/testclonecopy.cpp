@@ -37,6 +37,36 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <Partio.h>
 #include <iostream>
 #include <cstdlib>
+#include <sstream>
+
+// TODO grab a copy of some header-only MIT/BSD tap library
+void success(int& test, const std::string& msg)
+{
+    std::cout << "ok " << test++ << " - " << msg << std::endl;
+}
+
+void fail(int& test, const std::string& msg)
+{
+    std::cerr << "not ok " << test++ << " - " << msg << std::endl;
+    exit(EXIT_FAILURE);
+}
+
+void check(int& test, bool ok, const std::string& msg, const std::string& err)
+{
+    if (ok) {
+        success(test, msg);
+    } else {
+        fail(test, msg + ": " + err);
+    }
+}
+
+template<typename T>
+std::string to_string(T value)
+{
+    std::stringstream ss;
+    ss << value;
+    return ss.str();
+}
 
 Partio::ParticlesDataMutable* makeData()
 {
@@ -73,15 +103,9 @@ void testCloneParticleFixedAttributes(Partio::ParticlesData* other, int& test)
     Partio::ParticlesData* p=Partio::cloneSchema(*other);
 
     int numFixedAttributes = p->numFixedAttributes();
-    if (numFixedAttributes == 3) {
-        std::cout << "ok " << test++
-                  << " - Partio::cloneSchema() numFixedAttributes()" << std::endl;
-    } else {
-        std::cerr << "not ok " << test++
-                  << " - Partio::cloneSchema() fixed attribute count is "
-                  << numFixedAttributes << ", expected 3" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    check(test, numFixedAttributes == 3,
+          "cloneSchema()->numFixedAttributes()",
+          "expected 3, got "+to_string(numFixedAttributes));
 
     std::vector<std::string> expectedName(numFixedAttributes);
     std::vector<Partio::ParticleAttributeType> expectedType(numFixedAttributes);
@@ -102,40 +126,22 @@ void testCloneParticleFixedAttributes(Partio::ParticlesData* other, int& test)
     // Test attributes
     for (int i=0;i<numFixedAttributes;++i) {
         Partio::FixedAttribute attr;
-        p->fixedAttributeInfo(i,attr);
+        p->fixedAttributeInfo(i, attr);
 
-        if (attr.name == expectedName[i]) {
-            std::cout << "ok " << test++
-                      << " - Partio::cloneSchema() fixed attribute name for "
-                      << attr.name << std::endl;
-        } else {
-            std::cerr << "not ok " << test++
-                      << " - Partio::cloneSchema() fixed attribute name is "
-                      << attr.name << ", expected " << expectedName[i] << std::endl;
-            exit(EXIT_FAILURE);
-        }
+        check(test, attr.name == expectedName[i],
+              "attribute name for " + attr.name,
+              "expected " + expectedName[i] +
+              ", got " + attr.name);
 
-        if (attr.type == expectedType[i]) {
-            std::cout << "ok " << test++
-                      << " - Partio::cloneSchema() fixed attribute type for "
-                      << attr.name << std::endl;
-        } else {
-            std::cerr << "not ok " << test++
-                      << " - Partio::cloneSchema() fixed attribute type for "
-                      << attr.name << ", expected "
-                      << expectedType[i] << ", got " << attr.type << std::endl;
-        }
+        check(test, attr.type == expectedType[i],
+              "attribute type for " + attr.name,
+              "expected " + Partio::TypeName(expectedType[i]) +
+              ", got " + Partio::TypeName(attr.type));
 
-        if (attr.count == expectedCount[i]) {
-            std::cout << "ok " << test++
-                      << " - Partio::cloneSchema() fixed attribute count for "
-                      << attr.name << std::endl;
-        } else {
-            std::cerr << "not ok " << test++
-                      << " - Partio::cloneSchema() fixed attribute count for "
-                      << attr.name << ", expected "
-                      << expectedCount[i] << ", got " << attr.count << std::endl;
-        }
+        check(test, attr.count == expectedCount[i],
+              "fixed attribute count for " + attr.name,
+              "expected " + to_string(expectedCount[i]) +
+              ", got " + to_string(attr.count));
     }
 
     p->release();
@@ -147,27 +153,12 @@ void testCloneParticleDataAttributes(Partio::ParticlesData* other, int& test)
     Partio::ParticlesData* p=Partio::cloneSchema(*other);
 
     int numAttributes = p->numAttributes();
-    if (numAttributes == 3) {
-        std::cout << "ok " << test++
-                  << " - Partio::cloneSchema() numAttributes()" << std::endl;
-    } else {
-        std::cerr << "not ok " << test++
-                  << " - Partio::cloneSchema() attribute count is "
-                  << numAttributes << ", expected 3" << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    check(test, numAttributes == 3, "cloneSchema()->numAttributes()",
+          "expected 3, got " + to_string(numAttributes));
 
     int numParticles = p->numParticles();
-    if (numParticles == 0) {
-        std::cout << "ok " << test++
-                  << " - Partio::cloneSchema() contains no particles" << std::endl;
-    } else {
-        std::cerr << "not ok " << test++
-                  << " - Partio::cloneSchema() contains particles, "
-                  << "expected 0, got " << numParticles
-                  << std::endl;
-        exit(EXIT_FAILURE);
-    }
+    check(test, numParticles == 0, "clone contains no particles",
+          "expected 0, got " + to_string(numParticles));
 
     std::vector<std::string> expectedName(numAttributes);
     std::vector<Partio::ParticleAttributeType> expectedType(numAttributes);
@@ -185,43 +176,23 @@ void testCloneParticleDataAttributes(Partio::ParticlesData* other, int& test)
     expectedType[2] = Partio::INT;
     expectedCount[2] = 1;
 
-    // Test attributes
     for (int i=0;i<numAttributes;++i) {
         Partio::ParticleAttribute attr;
         p->attributeInfo(i,attr);
 
-        if (attr.name == expectedName[i]) {
-            std::cout << "ok " << test++
-                      << " - Partio::cloneSchema() attribute name for "
-                      << attr.name << std::endl;
-        } else {
-            std::cerr << "not ok " << test++
-                      << " - Partio::cloneSchema() attribute name is " << attr.name
-                      << ", expected " << expectedName[i] << std::endl;
-            exit(EXIT_FAILURE);
-        }
+        check(test, attr.name == expectedName[i],
+              "attribute name for " + attr.name,
+              "expected " + expectedName[i] + ", got " + attr.name);
 
-        if (attr.type == expectedType[i]) {
-            std::cout << "ok " << test++
-                      << " - Partio::cloneSchema() attribute type for "
-                      << attr.name << std::endl;
-        } else {
-            std::cerr << "not ok " << test++
-                      << " - Partio::cloneSchema() attribute type for " << attr.name
-                      << ", expected " << expectedType[i]
-                      << ", got " << attr.type << std::endl;
-        }
+        check(test, attr.type == expectedType[i],
+              "attribute type for " + attr.name,
+              "expected " + to_string(expectedType[i]) +
+              ", got " + to_string(attr.type));
 
-        if (attr.count == expectedCount[i]) {
-            std::cout << "ok " << test++
-                      << " - Partio::cloneSchema() attribute count for "
-                      << attr.name << std::endl;
-        } else {
-            std::cerr << "not ok " << test++
-                      << " - Partio::cloneSchema() attribute count for " << attr.name
-                      << ", expected " << expectedCount[i]
-                      << ", got " << attr.count << std::endl;
-        }
+        check(test, attr.count == expectedCount[i],
+              "attribute count for " + attr.name,
+              "expected " + to_string(expectedCount[i]) +
+              ", got " + to_string(attr.count));
     }
 
     p->release();
