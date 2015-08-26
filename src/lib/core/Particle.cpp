@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "ParticleSimpleInterleave.h"
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <cassert>
 namespace Partio{
 
@@ -88,6 +89,66 @@ cloneSchema(const ParticlesData& other)
     return p;
 }
 
+ParticlesDataMutable*
+clone(const ParticlesData& other, bool particles)
+{
+    ParticlesDataMutable* p = create();
+    // Fixed attributes
+    FixedAttribute srcFixedAttr, dstFixedAttr;
+    for (int i(0), iend(other.numFixedAttributes()); i < iend; ++i) {
+        other.fixedAttributeInfo(i, srcFixedAttr);
+
+        dstFixedAttr = p->addFixedAttribute(
+            srcFixedAttr.name.c_str(), srcFixedAttr.type, srcFixedAttr.count);
+        assert(srcFixedAttr.type == dstFixedAttr.type);
+        assert(srcFixedAttr.count == dstFixedAttr.count);
+        // Register indexed strings
+        if (srcFixedAttr.type == Partio::INDEXEDSTR) {
+            const std::vector<std::string>& values = other.fixedIndexedStrs(srcFixedAttr);
+            for (int j = 0, jend = values.size(); j < jend; ++j) {
+                p->registerFixedIndexedStr(dstFixedAttr, values[j].c_str());
+            }
+        }
+        // Copy fixed data
+        const void* src = other.fixedData<void>(srcFixedAttr);
+        void* dst = p->fixedDataWrite<void>(dstFixedAttr);
+        size_t size = Partio::TypeSize(dstFixedAttr.type) * dstFixedAttr.count;
+        std::memcpy(dst, src, size);
+    }
+    if (!particles) {
+        return p;
+    }
+    // Particle data
+    Partio::ParticleAttribute srcAttr, dstAttr;
+    const int numAttributes = other.numAttributes();
+    const size_t numParticles = other.numParticles();
+    std::vector<Partio::ParticleAttribute> dstAttrs;
+
+    p->addParticles(numParticles);
+
+    // We can't assume that the particle backend stores data contiguously, so
+    // we copy one particle at a time.  A bulk memcpy would be faster.
+    for (int i = 0; i < numAttributes; ++i) {
+        other.attributeInfo(i, srcAttr);
+        // Register indexed strings
+        if (srcAttr.type == Partio::INDEXEDSTR) {
+            const std::vector<std::string>& values = other.indexedStrs(srcAttr);
+            for (int m = 0, mend = values.size(); m < mend; ++m) {
+                p->registerIndexedStr(dstAttr, values[m].c_str());
+            }
+        }
+        size_t size = Partio::TypeSize(srcAttr.type) * srcAttr.count;
+        dstAttr = p->addAttribute(srcAttr.name.c_str(), srcAttr.type, srcAttr.count);
+
+        for (Partio::ParticleIndex j = 0; j < numParticles; ++j) {
+            const void *src = other.data<void>(srcAttr, j);
+            void *dst = p->dataWrite<void>(dstAttr, j);
+            std::memcpy(dst, src, size);
+        }
+    }
+
+    return p;
+}
 
 
 template<ParticleAttributeType ETYPE> void

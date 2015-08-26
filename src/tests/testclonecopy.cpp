@@ -198,15 +198,102 @@ void testCloneParticleDataAttributes(Partio::ParticlesData* other, int& test)
     p->release();
 }
 
+void testCloneParticleDataFullCopy(int& test)
+{
+    Partio::ParticlesDataMutable* other = makeData();
+
+    // Add fixed string attributes
+    Partio::FixedAttribute str = other->addFixedAttribute("str", Partio::INDEXEDSTR, 2);
+    int value0 = other->registerFixedIndexedStr(str, "value 0");
+    int value1 = other->registerFixedIndexedStr(str, "value 1");
+    int* strdata = other->fixedDataWrite<int>(str);
+    strdata[0] = value0;
+    strdata[1] = value1;
+
+    Partio::FixedAttribute fattr = other->addFixedAttribute("float", Partio::FLOAT, 2);
+    float* fdata = other->fixedDataWrite<float>(fattr);
+    fdata[0] = 1.0;
+    fdata[1] = 2.0;
+
+    Partio::ParticlesData* p = Partio::clone(*other);
+
+    check(test, p->numFixedAttributes() == other->numFixedAttributes(),
+          "clone() preserves fixed attribute count",
+          "expected " + to_string(other->numFixedAttributes()) +
+          ", got " + to_string(p->numFixedAttributes()));
+
+    Partio::FixedAttribute cloneStr;
+    check(test, p->fixedAttributeInfo("str", cloneStr),
+          "str attribute lookup returns true", "expected true, got false");
+
+    check(test, cloneStr.count == 2, "fixed strings are cloned",
+          "expected 2, got " + to_string(cloneStr.count));
+
+    const std::vector<std::string>& strings = p->fixedIndexedStrs(cloneStr);
+    check(test, strings[0] == "value 0",
+          "indexed string value 1", "expected value 1, got " + strings[0]);
+    check(test, strings[1] == "value 1",
+          "indexed string value 2", "expected value 2, got " + strings[1]);
+
+    const int* stringvals = p->fixedData<int>(cloneStr);
+    check(test, stringvals[0] == value0 && stringvals[1] == value1,
+          "fixed string data", "expected 0, 1, got " +
+          to_string(stringvals[0]) + ", " + to_string(stringvals[1]));
+
+    Partio::FixedAttribute cfloat;
+    check(test, p->fixedAttributeInfo("float", cfloat),
+          "float attribute lookup returns true", "expected true, got false");
+
+    const float* cfdata = p->fixedData<float>(cfloat);
+    check(test, cfdata[0] == 1.0 && cfdata[1] == 2.0,
+          "fixed float data", "expected (1.0, 2.0), got " +
+          to_string(cfdata[0]) + ", " + to_string(cfdata[1]));
+
+    check(test, p->numAttributes() == 3,
+          "attributes are cloned", "expected 3, got " +
+          to_string(p->numAttributes()));
+
+    check(test, p->numParticles() == 5,
+          "particles are cloned", "expected 5, got " +
+          to_string(p->numParticles()));
+
+    Partio::ParticleAttribute id;
+    check(test, p->attributeInfo("id", id),
+          "id attribute exists", "expected true, got false");
+
+    Partio::ParticleAttribute life;
+    check(test, p->attributeInfo("life", life),
+          "life attribute exists", "expected true, got false");
+
+    for (int i = 0; i < 5; ++i) {
+        const int* idvals = p->data<int>(id, i);
+        check(test, idvals[0] == i,
+              "particle id " + to_string(i) + " is copied",
+              "expected " + to_string(i) +
+              ", got " + to_string(idvals[0]));
+
+        const float* lifevals = p->data<float>(life, i);
+        check(test, lifevals[1] == 10.,
+              "particle life " + to_string(i) + " is copied",
+              "expected 10.0, got " + to_string(lifevals[1]));
+    }
+
+    p->release();
+}
+
 
 int main(int argc,char *argv[])
 {
     int test = 1;
 
+    // Expected number of tests
+    std::cout << "1..43" << std::endl;
+
     Partio::ParticlesDataMutable* foo=makeData();
     {
         testCloneParticleFixedAttributes(foo, test);
         testCloneParticleDataAttributes(foo, test);
+        testCloneParticleDataFullCopy(test);
     }
     foo->release();
 
