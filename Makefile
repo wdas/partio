@@ -1,8 +1,8 @@
 #!/usr/bin/env make
 SH ?= sh
-uname_S := $(shell $(SH) -c 'uname -s || system')
-uname_R := $(shell $(SH) -c 'uname -r | sed -r "s/-.*//" || release')
-uname_M := $(shell $(SH) -c 'uname -m || machine')
+uname_S := $(shell $(SH) -c 'uname -s || echo kernel')
+uname_R := $(shell $(SH) -c 'uname -r | cut -d- -f1 || echo release')
+uname_M := $(shell $(SH) -c 'uname -m || echo machine')
 FLAVOR ?= optimize
 platformdir ?= $(uname_S)-$(uname_R)-$(uname_M)-$(FLAVOR)
 builddir ?= $(CURDIR)/build/$(platformdir)
