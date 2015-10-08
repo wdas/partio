@@ -31,8 +31,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-foreach(item testiterator test testcache teststr makecircle makeline testkdtree)
+foreach(item testiterator test testcache testclonecopy teststr makecircle makeline testkdtree)
     ADD_EXECUTABLE(${item} "${item}.cpp")
     target_link_libraries(${item} ${PARTIO_LIBRARIES})
-    install(TARGETS ${item} DESTINATION test)
+    install(TARGETS ${item} DESTINATION share/partio/test)
 endforeach(item)

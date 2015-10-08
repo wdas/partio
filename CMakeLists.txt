@@ -48,8 +48,16 @@ SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
 SET( ${PROJECT_NAME}_PATCH_LEVEL 0 )
 
 # output executable and library path
+# The library directory is configured by setting CMAKE_INSTALL_LIBDIR.
+# Otherwise, the defaults set here are used.
+IF(EXISTS "/usr/lib64" AND NOT IS_SYMLINK "/usr/lib64")
+    SET(CMAKE_INSTALL_LIBDIR "lib64" CACHE STRING "Library Directory Basename")
+ELSE()
+    SET(CMAKE_INSTALL_LIBDIR "lib" CACHE STRING "Library Directory Basename")
+ENDIF()
+
 SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/lib)
+SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
 
 ## Setup platform specific helper defines build variants
 IF(WIN32)
@@ -99,7 +107,8 @@ INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/lib )
 
 SET(SEEXPR_BASE "c:/aselle/seexpr-inst" CACHE STRING "path to SeExpr")
 SET(SEEXPR_INCLUDE_PATH ${SEEXPR_BASE}/include)
-SET(SEEXPR_LINK_PATH ${SEEXPR_BASE}/lib64)
+SET(SEEXPR_LIBDIR ${CMAKE_INSTALL_LIBDIR})
+SET(SEEXPR_LINK_PATH ${SEEXPR_BASE}/${SEEXPR_LIBDIR})
 SET(SEEXPR_LIBS "SeExpr")
 
 
