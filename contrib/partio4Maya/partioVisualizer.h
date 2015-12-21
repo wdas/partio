@@ -99,7 +99,6 @@ public:
     Partio::ParticleAttribute opacityAttr;
     Partio::ParticleAttribute radiusAttr;
 	Partio::ParticleAttribute incandescenceAttr;
-    std::vector<float> rgb;
     std::vector<float> rgba;
     MFloatArray radius;
 };
