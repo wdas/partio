@@ -83,6 +83,62 @@ MObject partioVisualizer::aDrawStyle;
 MObject partioVisualizer::aForceReload;
 MObject partioVisualizer::aRenderCachePath;
 
+namespace {
+    void drawBillboardCircleAtPoint(const float* position, float radius, int num_segments, int drawType)
+    {
+        glPushMatrix();
+        glTranslatef(position[0], position[1], position[2]);
+        glMatrixMode(GL_MODELVIEW_MATRIX);
+        float m[16];
+        glGetFloatv(GL_MODELVIEW_MATRIX, m);
+        m[0] = 1.0f; m[1] = 0.0f; m[2] = 0.0f;
+        m[4] = 0.0f; m[5] = 1.0f; m[6] = 0.0f;
+        m[8] = 0.0f; m[9] = 0.0f; m[10] = 1.0f;
+        glLoadMatrixf(m);
+
+        float theta =(float)(  2 * 3.1415926 / float(num_segments)  );
+        float tangetial_factor = tanf(theta);//calculate the tangential factor
+
+        float radial_factor = cosf(theta);//calculate the radial factor
+
+        float x = radius;//we start at angle = 0
+        float y = 0;
+
+        if (drawType == 1)
+        {
+            glBegin(GL_LINE_LOOP);
+        }
+        else if (drawType == 2)
+        {
+            glBegin(GL_POLYGON);
+        }
+        for (int ii = 0; ii < num_segments; ii++)
+        {
+            glVertex2f(x, y);//output vertex
+
+            //calculate the tangential vector
+            //remember, the radial vector is (x, y)
+            //to get the tangential vector we flip those coordinates and negate one of them
+
+            float tx = -y;
+            float ty = x;
+
+            //add the tangential vector
+
+            x += tx * tangetial_factor;
+            y += ty * tangetial_factor;
+
+            //correct using the radial factor
+
+            x *= radial_factor;
+            y *= radial_factor;
+        }
+        glEnd();
+        glTranslatef(-position[0], -position[1], -position[2]);
+        glPopMatrix();
+    }
+}
+
 
 partioVizReaderCache::partioVizReaderCache():
         bbox(MBoundingBox(MPoint(0,0,0,0),MPoint(0,0,0,0))),
@@ -650,7 +706,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
                         for (int i = 0; i < pvCache.particles->numParticles(); ++i)
                         {
                             const float* attrVal = pvCache.particles->data<float>(pvCache.opacityAttr, i);
-                            pvCache.rgba[(i * 4) + 3] = invertAlpha ? 1.0f - attrVal[0] : attrVal[0];
+                            pvCache.rgba[i * 4 + 3] = invertAlpha ? 1.0f - attrVal[0] : attrVal[0];
                         }
                     }
                     else
@@ -660,7 +716,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
                             for (int i = 0; i < pvCache.particles->numParticles(); ++i)
                             {
                                 const float* attrVal = pvCache.particles->data<float>(pvCache.opacityAttr, i);
-                                pvCache.rgba[(i * 4) + 3] = invertAlpha ? 1.0f - attrVal[3] : attrVal[3];
+                                pvCache.rgba[i * 4 + 3] = invertAlpha ? 1.0f - attrVal[3] : attrVal[3];
                             }
                         }
                         else
@@ -669,7 +725,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
                             {
                                 const float* attrVal = pvCache.particles->data<float>(pvCache.opacityAttr, i);
                                 const float lum = attrVal[0] * 0.2126f + attrVal[1] * 0.7152f + attrVal[2] * .0722f;
-                                pvCache.rgba[(i * 4) + 3] = invertAlpha ? 1.0f - lum : lum;
+                                pvCache.rgba[i * 4 + 3] = invertAlpha ? 1.0f - lum : lum;
                             }
                         }
                     }
@@ -678,7 +734,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
                 {
                     mLastAlpha = invertAlpha ? 1.0f - defaultAlpha : defaultAlpha;
                     for (int i = 0; i < pvCache.particles->numParticles(); ++i)
-                        pvCache.rgba[(i*4)+3] = mLastAlpha;
+                        pvCache.rgba[i * 4 + 3] = mLastAlpha;
                 }
                 mLastAlpha = defaultAlpha;
                 mLastAlphaFromIndex = opacityFromIndex;
@@ -1035,11 +1091,7 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
                 const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
                 if (draw_billboards) // unfilled circles, disks, or spheres
-                {
-                    MVector position(partioPositions[0], partioPositions[1], partioPositions[2]);
-                    float radius = pvCache->radius[i];
-                    drawBillboardCircleAtPoint(position,  radius, 10, drawStyle);
-                }
+                    drawBillboardCircleAtPoint(partioPositions, pvCache->radius[i], 10, drawStyle);
                 else // points
                     glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
             }
@@ -1104,58 +1156,4 @@ void partioVisualizerUI::getDrawRequests(const MDrawInfo & info,
     }
     request.setIsTransparent( true );
     queue.add(request);
-}
-
-void partioVisualizerUI::drawBillboardCircleAtPoint(MVector position, float radius, int num_segments, int drawType) const
-{
-    glPushMatrix();
-    glTranslatef((GLfloat)position.x, (GLfloat)position.y, (GLfloat)position.z);
-    glMatrixMode(GL_MODELVIEW_MATRIX);
-    float m[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX, m);
-    m[0] = 1.0f; m[1] = 0.0f; m[2] = 0.0f;
-    m[4] = 0.0f; m[5] = 1.0f; m[6] = 0.0f;
-    m[8] = 0.0f; m[9] = 0.0f; m[10] = 1.0f;
-    glLoadMatrixf(m);
-
-    float theta =(float)(  2 * 3.1415926 / float(num_segments)  );
-    float tangetial_factor = tanf(theta);//calculate the tangential factor
-
-    float radial_factor = cosf(theta);//calculate the radial factor
-
-    float x = radius;//we start at angle = 0
-    float y = 0;
-
-    if (drawType == 1)
-    {
-        glBegin(GL_LINE_LOOP);
-    }
-    else if (drawType == 2)
-    {
-        glBegin(GL_POLYGON);
-    }
-    for (int ii = 0; ii < num_segments; ii++)
-    {
-        glVertex2f(x, y);//output vertex
-
-        //calculate the tangential vector
-        //remember, the radial vector is (x, y)
-        //to get the tangential vector we flip those coordinates and negate one of them
-
-        float tx = -y;
-        float ty = x;
-
-        //add the tangential vector
-
-        x += tx * tangetial_factor;
-        y += ty * tangetial_factor;
-
-        //correct using the radial factor
-
-        x *= radial_factor;
-        y *= radial_factor;
-    }
-    glEnd();
-    glTranslatef((GLfloat)-position.x, (GLfloat)-position.y, (GLfloat)-position.z);
-    glPopMatrix();
 }

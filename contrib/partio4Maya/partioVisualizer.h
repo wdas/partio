@@ -109,15 +109,14 @@ public:
 
     partioVisualizerUI();
     virtual ~partioVisualizerUI();
-    virtual void draw(const MDrawRequest & request, M3dView & view) const;
-    virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
-    void 	drawBoundingBox() const;
-    void    drawBillboardCircleAtPoint(MVector position, float radius, int num_segments, int drawType) const;
-    void 	drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
-    static void * creator();
-    virtual bool	select( MSelectInfo &selectInfo,
-                         MSelectionList &selectionList,
-                         MPointArray &worldSpaceSelectPts ) const;
+    virtual void draw(const MDrawRequest& request, M3dView& view) const;
+    virtual void getDrawRequests(const MDrawInfo& info, bool objectAndActiveOnly, MDrawRequestQueue& requests);
+    void drawBoundingBox() const;
+    void drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
+    static void* creator();
+    virtual bool select(MSelectInfo &selectInfo,
+                        MSelectionList &selectionList,
+                        MPointArray &worldSpaceSelectPts) const;
 };
 
 class partioVisualizer : public MPxSurfaceShape
