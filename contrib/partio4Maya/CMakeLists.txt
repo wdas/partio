@@ -101,13 +101,13 @@ file(GLOB PARTIO4MAYA_ICONS "icons/*")
 set(MAYA_INST_DIR "maya/")
 set(MAYA_PLUGIN_DIR "maya/plug-ins")
 
-if (BUILD_PARTIO_MAYA)
-    set(MAYA_INST_DIR "")
-    set(MAYA_PLUGIN_DIR "plug-ins")
-elseif (${LOCAL_INSTALL})
+if (${LOCAL_INSTALL})
     set(MAYA_INST_DIR "maya/${MAYA_VERSION}/")
     set(MAYA_PLUGIN_DIR "maya/${MAYA_VERSION}/plug-ins/${PARTIO_BUILD_PLATFORM}")
-endif (${LOCAL_INSTALL})
+else ()
+    set(MAYA_INST_DIR "")
+    set(MAYA_PLUGIN_DIR "plug-ins")
+endif ()
 
 install(TARGETS ${PLUGIN_NAME}
     DESTINATION ${MAYA_PLUGIN_DIR})
