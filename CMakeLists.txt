@@ -87,7 +87,6 @@ IF(WIN32)
 	SET( SWIG_EXECUTABLE "${PARTIO_HOME}/winReqLibs/swigwin-2.0.4/swig.exe")
 	SET( PARTIO_BUILD_PLATFORM "windows_x86_64")
 	set(CMAKE_MODULE_PATH ${PARTIO_HOME}/cmake)
-
 ELSE(WIN32)
 	ADD_DEFINITIONS (-Wextra -Wno-unused-parameter)
 	SET( CMAKE_CXX_FLAGS "-fPIC")

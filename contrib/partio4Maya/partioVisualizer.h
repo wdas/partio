@@ -99,13 +99,10 @@ public:
     Partio::ParticleAttribute opacityAttr;
     Partio::ParticleAttribute radiusAttr;
 	Partio::ParticleAttribute incandescenceAttr;
-    float* rgb;
-    float* rgba;
+    std::vector<float> rgb;
+    std::vector<float> rgba;
     MFloatArray radius;
-    float* flipPos;
-
 };
-
 
 class partioVisualizerUI : public MPxSurfaceShapeUI
 {
@@ -122,7 +119,6 @@ public:
     virtual bool	select( MSelectInfo &selectInfo,
                          MSelectionList &selectionList,
                          MPointArray &worldSpaceSelectPts ) const;
-
 };
 
 class partioVisualizer : public MPxSurfaceShape
@@ -201,15 +197,11 @@ private:
     float mLastRadius;
     bool mLastFlipStatus;
     bool mFlipped;
-    bool  frameChanged;
+    bool mFrameChanged;
     MStringArray attributeList;
-
-
 protected:
-
     int dUpdate;
     GLuint dList;
-
 };
 
 #endif
