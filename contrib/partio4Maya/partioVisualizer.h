@@ -176,6 +176,7 @@ public:
     bool 					cacheChanged;
     partioVizReaderCache  	pvCache;
 	int drawError;
+	static MString drawDbClassification;
 
 
 private:

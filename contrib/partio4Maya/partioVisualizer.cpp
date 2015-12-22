@@ -83,6 +83,8 @@ MObject partioVisualizer::aDrawStyle;
 MObject partioVisualizer::aForceReload;
 MObject partioVisualizer::aRenderCachePath;
 
+MString partioVisualizer::drawDbClassification("drawdb/geometry/partio/visualizer");
+
 namespace {
     void drawBillboardCircleAtPoint(const float* position, float radius, int num_segments, int drawType)
     {
