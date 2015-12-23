@@ -16,48 +16,48 @@
 #include <vector>
 #include <sys/stat.h>
 
-template <typename T>
+template<typename T>
 void getParam(T& param, AtNode* node, const char* paramName)
 {
     // do nothing
 }
 
-template <>
+template<>
 void getParam<int>(int& param, AtNode* node, const char* paramName)
 {
     if (AiNodeLookUpUserParameter(node, paramName) != 0)
         param = AiNodeGetInt(node, paramName);
 }
 
-template <>
+template<>
 void getParam<float>(float& param, AtNode* node, const char* paramName)
 {
     if (AiNodeLookUpUserParameter(node, paramName) != 0)
         param = AiNodeGetFlt(node, paramName);
 }
 
-template <>
+template<>
 void getParam<bool>(bool& param, AtNode* node, const char* paramName)
 {
     if (AiNodeLookUpUserParameter(node, paramName) != 0)
         param = AiNodeGetBool(node, paramName);
 }
 
-template <>
+template<>
 void getParam<std::string>(std::string& param, AtNode* node, const char* paramName)
 {
     if (AiNodeLookUpUserParameter(node, paramName) != 0)
         param = AiNodeGetStr(node, paramName);
 }
 
-template <>
+template<>
 void getParam<AtRGB>(AtRGB& param, AtNode* node, const char* paramName)
 {
     if (AiNodeLookUpUserParameter(node, paramName) != 0)
         param = AiNodeGetRGB(node, paramName);
 }
 
-struct PartioData{
+struct PartioData {
     Partio::ParticlesData* points;
     AtNode* mynode;
 
@@ -68,6 +68,7 @@ struct PartioData{
     Partio::ParticleAttribute radiusAttr;
     Partio::ParticleAttribute incandAttr;
 
+    std::string arg_velFrom;
     std::string arg_rgbFrom;
     std::string arg_incandFrom;
     std::string arg_opacFrom;
@@ -86,8 +87,8 @@ struct PartioData{
     float arg_motionBlurMult;
     float arg_filterSmallParticles;
     float global_motionByFrame;
-    float global_fps;    
-    
+    float global_fps;
+
     int arg_renderType;
     int global_motionBlurSteps;
 
@@ -98,10 +99,10 @@ struct PartioData{
     bool hasRgbPP;
     bool hasOpacPP;
     bool hasIncandPP;
-    
+
 
     PartioData() : arg_rgbFrom(""), arg_incandFrom(""), arg_opacFrom(""),
-            arg_radFrom(""), arg_extraPPAttrs(""), arg_file("")
+                   arg_radFrom(""), arg_extraPPAttrs(""), arg_file("")
     {
         points = 0;
         mynode = 0;
@@ -114,11 +115,11 @@ struct PartioData{
         arg_radiusMult = 1.0f;
         arg_defaultOpac = 1.0f;
         arg_stepSize = 0.0f;
-        arg_motionBlurMult = 1.0f;    
+        arg_motionBlurMult = 1.0f;
         arg_filterSmallParticles = 8.0f;
         global_motionByFrame = 0.5f;
         global_fps = 24.0f;
-        
+
         arg_renderType = 0;
         global_motionBlurSteps = 1;
 
@@ -149,6 +150,7 @@ struct PartioData{
         getParam(arg_radiusMult, mynode, "arg_radiusMult");
         getParam(arg_renderType, mynode, "arg_renderType");
         getParam(arg_motionBlurMult, mynode, "arg_motionBlurMult");
+        getParam(arg_velFrom, mynode, "arg_velFrom");
         getParam(arg_rgbFrom, mynode, "arg_rgbFrom");
         getParam(arg_incandFrom, mynode, "arg_incandFrom");
         getParam(arg_opacFrom, mynode, "arg_opacFrom");
@@ -175,7 +177,7 @@ struct PartioData{
             else
             {
                 AiMsgInfo("[partioGenerator] skipping, no points");
-                return  false;
+                return false;
             }
         }
         else
@@ -217,7 +219,7 @@ struct PartioData{
                 AiMsgInfo("[partioGenerator] found radius attr...%s", arg_radFrom.c_str());
                 hasRadiusPP = true;
             }
-            else if ((points->attributeInfo( "radiusPP",radiusAttr) || points->attributeInfo("radius",radiusAttr)))
+            else if ((points->attributeInfo("radiusPP", radiusAttr) || points->attributeInfo("radius", radiusAttr)))
             {
                 AiMsgInfo("[partioGenerator] found radius attr...");
                 hasRadiusPP = true;
@@ -252,11 +254,13 @@ struct PartioData{
                     if (radiusAttr.count == 1)
                         rad = partioRadius[0];
                     else
-                        rad = ABS(float((partioRadius[0] * 0.2126f) + (partioRadius[1] * 0.7152f) + (partioRadius[2] * .0722f)));
+                        rad = ABS(float((partioRadius[0] * 0.2126f) + (partioRadius[1] * 0.7152f) +
+                                        (partioRadius[2] * .0722f)));
 
-                    rad *= arg_radius * arg_radiusMult;                    
+                    rad *= arg_radius * arg_radiusMult;
                 }
-                else rad = singleRadius;
+                else
+                    rad = singleRadius;
 
                 // clamp the radius to maxParticleRadius just in case we have rogue particles
                 rad = CLAMP(rad, arg_minParticleRadius, arg_maxParticleRadius);
@@ -291,8 +295,9 @@ struct PartioData{
 
         ////////////////
         /// Velocity
-        if ((points->attributeInfo("velocity",velocityAttr) || points->attributeInfo("Velocity",velocityAttr))
-            && (global_motionBlurSteps > 1))
+        if ((global_motionBlurSteps > 1) &&
+            ((arg_velFrom.length() > 0) && points->attributeInfo(arg_velFrom.c_str(), velocityAttr)) ||
+            points->attributeInfo("velocity", velocityAttr) || points->attributeInfo("Velocity", velocityAttr))
         {
             AiMsgInfo("[partioGenerator] found velocity attr,  motion blur is a GO!!");
             canMotionBlur = true;
@@ -310,7 +315,7 @@ struct PartioData{
         else
         {
             AiNodeDeclare(currentInstance, "rgbPP", "constant RGB");
-            AiNodeSetRGB(currentInstance , "rgbPP", arg_defaultColor.r, arg_defaultColor.g, arg_defaultColor.b);
+            AiNodeSetRGB(currentInstance, "rgbPP", arg_defaultColor.r, arg_defaultColor.g, arg_defaultColor.b);
         }
 
         ////////////
@@ -325,9 +330,8 @@ struct PartioData{
         else
         {
             AiNodeDeclare(currentInstance, "incandescencePP", "constant RGB");
-            AiNodeSetRGB(currentInstance , "incandescencePP", 0.0f, 0.0f, 0.0f);
+            AiNodeSetRGB(currentInstance, "incandescencePP", 0.0f, 0.0f, 0.0f);
         }
-
 
         //////////////
         /// OPACITY
@@ -341,7 +345,7 @@ struct PartioData{
         else
         {
             AiNodeDeclare(currentInstance, "opacityPP", "constant Float");
-            AiNodeSetFlt(currentInstance , "opacityPP", arg_defaultOpac);
+            AiNodeSetFlt(currentInstance, "opacityPP", arg_defaultOpac);
         }
 
         if (canMotionBlur)
@@ -354,7 +358,7 @@ struct PartioData{
         else
         {
             radarr = AiArrayAllocate(1, 1, AI_TYPE_FLOAT);
-            AiArraySetFlt(radarr, 0,  singleRadius);
+            AiArraySetFlt(radarr, 0, singleRadius);
         }
 
 
@@ -369,16 +373,16 @@ struct PartioData{
         parts[index] = strtok(extraAttrStr, " ");
         while (parts[index] != 0)
         {
-        	Partio::ParticleAttribute user;
-            if (points->attributeInfo(parts[index],user))
+            Partio::ParticleAttribute user;
+            if (points->attributeInfo(parts[index], user))
             {
                 // we don't want to double export these 
-                if(user.name != "position" &&
-                   user.name != "velocity" &&
-                   user.name != "rgbPP" &&
-                   user.name != "incandescencePP" &&
-                   user.name != "opacityPP" && 
-                   user.name != "radiusPP")
+                if (user.name != "position" &&
+                    user.name != "velocity" &&
+                    user.name != "rgbPP" &&
+                    user.name != "incandescencePP" &&
+                    user.name != "opacityPP" &&
+                    user.name != "radiusPP")
                 {
                     if (user.type == Partio::FLOAT || user.count == 1)
                     {
@@ -398,10 +402,11 @@ struct PartioData{
                     AiMsgWarning("[partioGenerator] caught double export call for %s, skipping....", parts[index]);
             }
             else
-                AiMsgWarning( "[partioGenerator] export ppAttr %s skipped, it doesn't exist  in the cache", parts[index]);
+                AiMsgWarning("[partioGenerator] export ppAttr %s skipped, it doesn't exist  in the cache",
+                             parts[index]);
 
             ++index;
-            parts[index] = strtok(0," ");
+            parts[index] = strtok(0, " ");
         }
 
         ///////////////////////////////////////////////
@@ -415,7 +420,7 @@ struct PartioData{
                 const AtVector point = pointsVector[i];
                 const float* partioVelo = points->data<float>(velocityAttr, id);
                 AtVector velocity = {partioVelo[0], partioVelo[1], partioVelo[2]};
-                velocity *= (1.0f / global_fps) * global_motionByFrame * arg_motionBlurMult * 0.5f; 
+                velocity *= (1.0f / global_fps) * global_motionByFrame * arg_motionBlurMult * 0.5f;
                 // global fps inverse, motion by frame
                 // motion blur multiplier and half to have the original
                 // particle position as center
@@ -479,14 +484,14 @@ struct PartioData{
             {
                 if (extraAttrs[x].type == Partio::FLOAT)
                 {
-                        
+
                     const float* partioFLOAT = points->data<float>(extraAttrs[x], id);
                     float floatVal = partioFLOAT[0];
                     AiArraySetFlt(arnoldArrays[x], i, floatVal);
                 }
                 else if (extraAttrs[x].type == Partio::VECTOR)
                 {
-                    const float * partioVEC = points->data<float>(extraAttrs[x], id);
+                    const float* partioVEC = points->data<float>(extraAttrs[x], id);
                     AtVector vecVal;
                     vecVal.x = partioVEC[0];
                     vecVal.y = partioVEC[0];
@@ -552,7 +557,7 @@ static int MyCleanup(void* user_ptr)
 
 static int MyNumNodes(void* user_ptr)
 {
-    return  1;
+    return 1;
 }
 
 
@@ -565,10 +570,10 @@ static AtNode* MyGetNode(void* user_ptr, int i)
 // vtable passed in by proc_loader macro define
 proc_loader
 {
-    vtable->Init     = MyInit;
-    vtable->Cleanup  = MyCleanup;
+    vtable->Init = MyInit;
+    vtable->Cleanup = MyCleanup;
     vtable->NumNodes = MyNumNodes;
-    vtable->GetNode  = MyGetNode;
+    vtable->GetNode = MyGetNode;
     strcpy(vtable->version, AI_VERSION);
     return true;
 }
