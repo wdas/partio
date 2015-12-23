@@ -373,55 +373,55 @@ MStatus partioVisualizer::initialize()
     nAttr.setHidden(true);
 
 
-    addAttribute ( aUpdateCache );
-    addAttribute ( aSize );
-    addAttribute ( aFlipYZ );
-    addAttribute ( aDrawSkip );
-    addAttribute ( aCacheDir );
-    addAttribute ( aCacheFile );
-    addAttribute ( aCacheOffset );
-    addAttribute ( aCacheStatic );
-    addAttribute ( aCacheActive );
-    addAttribute ( aCacheFormat );
-    addAttribute ( aPartioAttributes );
-    addAttribute ( aColorFrom );
-	addAttribute ( aIncandFrom );
-    addAttribute ( aAlphaFrom );
-    addAttribute ( aRadiusFrom );
-    addAttribute ( aPointSize );
-    addAttribute ( aDefaultPointColor );
-    addAttribute ( aDefaultAlpha );
-    addAttribute ( aInvertAlpha );
-    addAttribute ( aDefaultRadius );
-    addAttribute ( aDrawStyle );
-    addAttribute ( aForceReload );
-    addAttribute ( aRenderCachePath );
-	addAttribute ( aByFrame );
-    addAttribute ( time );
+    addAttribute(aUpdateCache);
+    addAttribute(aSize);
+    addAttribute(aFlipYZ);
+    addAttribute(aDrawSkip);
+    addAttribute(aCacheDir);
+    addAttribute(aCacheFile);
+    addAttribute(aCacheOffset);
+    addAttribute(aCacheStatic);
+    addAttribute(aCacheActive);
+    addAttribute(aCacheFormat);
+    addAttribute(aPartioAttributes);
+    addAttribute(aColorFrom);
+	addAttribute(aIncandFrom);
+    addAttribute(aAlphaFrom);
+    addAttribute(aRadiusFrom);
+    addAttribute(aPointSize);
+    addAttribute(aDefaultPointColor);
+    addAttribute(aDefaultAlpha);
+    addAttribute(aInvertAlpha);
+    addAttribute(aDefaultRadius);
+    addAttribute(aDrawStyle);
+    addAttribute(aForceReload);
+    addAttribute(aRenderCachePath);
+	addAttribute(aByFrame);
+    addAttribute(time);
 
-	attributeAffects ( aCacheActive, aUpdateCache);
-    attributeAffects ( aCacheDir, aUpdateCache );
-    attributeAffects ( aSize, aUpdateCache );
-    attributeAffects ( aFlipYZ, aUpdateCache );
-    attributeAffects ( aCacheFile, aUpdateCache );
-    attributeAffects ( aCacheOffset, aUpdateCache );
-    attributeAffects ( aCacheStatic, aUpdateCache );
-    attributeAffects ( aCacheFormat, aUpdateCache );
-    attributeAffects ( aColorFrom, aUpdateCache );
-	attributeAffects ( aIncandFrom, aUpdateCache );
-    attributeAffects ( aAlphaFrom, aUpdateCache );
-    attributeAffects ( aRadiusFrom, aUpdateCache );
-    attributeAffects ( aPointSize, aUpdateCache );
-    attributeAffects ( aDefaultPointColor, aUpdateCache );
-    attributeAffects ( aDefaultAlpha, aUpdateCache );
-    attributeAffects ( aInvertAlpha, aUpdateCache );
-    attributeAffects ( aDefaultRadius, aUpdateCache );
-    attributeAffects ( aDrawStyle, aUpdateCache );
-    attributeAffects ( aForceReload, aUpdateCache );
-	attributeAffects ( aByFrame, aUpdateCache );
-	attributeAffects ( aByFrame, aRenderCachePath );
-	attributeAffects (time, aUpdateCache);
-    attributeAffects (time,aRenderCachePath);
+	attributeAffects(aCacheActive, aUpdateCache);
+    attributeAffects(aCacheDir, aUpdateCache);
+    attributeAffects(aSize, aUpdateCache);
+    attributeAffects(aFlipYZ, aUpdateCache);
+    attributeAffects(aCacheFile, aUpdateCache);
+    attributeAffects(aCacheOffset, aUpdateCache);
+    attributeAffects(aCacheStatic, aUpdateCache);
+    attributeAffects(aCacheFormat, aUpdateCache);
+    attributeAffects(aColorFrom, aUpdateCache);
+	attributeAffects(aIncandFrom, aUpdateCache);
+    attributeAffects(aAlphaFrom, aUpdateCache);
+    attributeAffects(aRadiusFrom, aUpdateCache);
+    attributeAffects(aPointSize, aUpdateCache);
+    attributeAffects(aDefaultPointColor, aUpdateCache);
+    attributeAffects(aDefaultAlpha, aUpdateCache);
+    attributeAffects(aInvertAlpha, aUpdateCache);
+    attributeAffects(aDefaultRadius, aUpdateCache);
+    attributeAffects(aDrawStyle, aUpdateCache);
+    attributeAffects(aForceReload, aUpdateCache);
+	attributeAffects(aByFrame, aUpdateCache);
+	attributeAffects(aByFrame, aRenderCachePath);
+	attributeAffects(time, aUpdateCache);
+    attributeAffects(time,aRenderCachePath);
 
 
     return MS::kSuccess;
@@ -665,13 +665,13 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
                 {
                     pvCache.particles->attributeInfo(colorFromIndex,pvCache.colorAttr);
                     // VECTOR or  4+ element float attrs
-                    if (pvCache.colorAttr.type == VECTOR || pvCache.colorAttr.count > 3) // assuming first 3 elements are rgb
+                    if (pvCache.colorAttr.type == VECTOR || pvCache.colorAttr.count > 2) // assuming first 3 elements are rgb
                     {
-                        for (int i=0;i<pvCache.particles->numParticles();i++)
+                        for (int i = 0;i < pvCache.particles->numParticles(); ++i)
                         {
                             const float * attrVal = pvCache.particles->data<float>(pvCache.colorAttr, i);
                             pvCache.rgba[i * 4]     = attrVal[0];
-                            pvCache.rgba[i * 4 +1] 	= attrVal[1];
+                            pvCache.rgba[i * 4 + 1] = attrVal[1];
                             pvCache.rgba[i * 4 + 2] = attrVal[2];
                         }
                     }

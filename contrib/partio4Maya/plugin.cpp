@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partioEmitter.h"
 #include "partioExport.h"
 #include "partioImport.h"
-#include "partio4MayaShared.h"
+#include "partioVisualizerGeometryOverride.h"
 #include "partioVisualizerOverride.h"
 #include <maya/MFnPlugin.h>
 #include <maya/MDrawRegistry.h>
@@ -59,17 +59,23 @@ MStatus initializePlugin ( MObject obj )
                                    &partioVisualizerUI::creator,
                                    &partioVisualizer::drawDbClassification);
 
-
     if (!status)
     {
         status.perror("registerNode partioVisualizer failed");
         return status;
     }
 
+    /*status = MHWRender::MDrawRegistry::registerSubSceneOverrideCreator(
+            partioVisualizer::drawDbClassification,
+            MHWRender::partioVisualizerOverride::registrantId,
+            MHWRender::partioVisualizerOverride::creator
+    );*/
+
     status = MHWRender::MDrawRegistry::registerGeometryOverrideCreator(
             partioVisualizer::drawDbClassification,
-            partioVisualizerOverride::registrantId,
-            partioVisualizerOverride::creator);
+            MHWRender::partioVisualizerGeometryOverride::registrantId,
+            MHWRender::partioVisualizerGeometryOverride::creator
+    );
 
     if (!status)
     {
@@ -82,20 +88,19 @@ MStatus initializePlugin ( MObject obj )
                                    &partioInstancer::initialize,
                                    &partioInstancerUI::creator);
 
-
-    if ( !status )
+    if (!status)
     {
-        status.perror ( "registerNode partioInstancer failed" );
+        status.perror("registerNode partioInstancer failed");
         return status;
     }
 
 
-    status = plugin.registerNode ( "partioEmitter", partioEmitter::id,
-                                   &partioEmitter::creator, &partioEmitter::initialize,
-                                   MPxNode::kEmitterNode );
-    if ( !status )
+    status = plugin.registerNode("partioEmitter", partioEmitter::id,
+                                 &partioEmitter::creator, &partioEmitter::initialize,
+                                 MPxNode::kEmitterNode);
+    if (!status)
     {
-        status.perror ( "registerNode partioEmitter failed" );
+        status.perror("registerNode partioEmitter failed");
         return status;
     }
 
@@ -147,9 +152,12 @@ MStatus uninitializePlugin ( MObject obj )
         return status;
     }
 
+    /*status = MHWRender::MDrawRegistry::deregisterSubSceneOverrideCreator(
+            partioVisualizer::drawDbClassification,
+            MHWRender::partioVisualizerOverride::registrantId);*/
     status = MHWRender::MDrawRegistry::deregisterGeometryOverrideCreator(
             partioVisualizer::drawDbClassification,
-            partioVisualizerOverride::registrantId);
+            MHWRender::partioVisualizerGeometryOverride::registrantId);
 
     if (!status)
     {
