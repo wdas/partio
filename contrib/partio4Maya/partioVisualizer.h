@@ -141,35 +141,35 @@ public:
     MCallbackId partioVisualizerImportCallback;
     MCallbackId partioVisualizerReferenceCallback;
 
-    static MObject  time;
-	static MObject  aByFrame;
-    static MObject  aSize;         // The size of the logo
-    static MObject  aDrawSkip;
-    static MObject  aFlipYZ;
-    static MObject 	aUpdateCache;
-    static MObject 	aCacheDir;
-    static MObject 	aCacheFile;
-    static MObject 	aUseTransform;
-    static MObject 	aCacheActive;
-    static MObject 	aCacheOffset;
-    static MObject  aCacheStatic;
-    static MObject 	aCacheFormat;
-    static MObject 	aJitterPos;
-    static MObject 	aJitterFreq;
-    static MObject 	aPartioAttributes;
-    static MObject  aColorFrom;
-    static MObject  aAlphaFrom;
-	static MObject  aIncandFrom;
-    static MObject  aRadiusFrom;
-    static MObject  aPointSize;
-    static MObject  aDefaultPointColor;
-    static MObject  aDefaultAlpha;
-    static MObject  aDefaultRadius;
-    static MObject  aInvertAlpha;
-    static MObject  aDrawStyle;
-    static MObject  aForceReload;
-    static MObject  aRenderCachePath;
-
+    static MObject time;
+	static MObject aByFrame;
+    static MObject aSize;         // The size of the logo
+    static MObject aDrawSkip;
+    static MObject aFlipYZ;
+    static MObject aUpdateCache;
+    static MObject aCacheDir;
+    static MObject aCacheFile;
+    static MObject aUseTransform;
+    static MObject aCacheActive;
+    static MObject aCacheOffset;
+    static MObject aCacheStatic;
+    static MObject aCacheFormat;
+    static MObject aJitterPos;
+    static MObject aJitterFreq;
+    static MObject aPartioAttributes;
+	static MObject aVelocityFrom;
+    static MObject aColorFrom;
+    static MObject aAlphaFrom;
+	static MObject aIncandFrom;
+    static MObject aRadiusFrom;
+    static MObject aPointSize;
+    static MObject aDefaultPointColor;
+    static MObject aDefaultAlpha;
+    static MObject aDefaultRadius;
+    static MObject aInvertAlpha;
+    static MObject aDrawStyle;
+    static MObject aForceReload;
+    static MObject aRenderCachePath;
 
     static	MTypeId			id;
     float 					multiplier;
@@ -177,19 +177,16 @@ public:
     partioVizReaderCache  	pvCache;
 	int drawError;
 	static MString drawDbClassification;
-
-
 private:
-
     MString mLastFileLoaded;
     MString mLastPath;
     MString mLastFile;
     MString mLastExt;
     bool mLastStatic;
-    int mLastColorFromIndex;
-    int mLastAlphaFromIndex;
-    int mLastRadiusFromIndex;
-	int mLastIncandFromIndex;
+    MString mLastColorFromIndex;
+    MString mLastAlphaFromIndex;
+    MString mLastRadiusFromIndex;
+	MString mLastIncandFromIndex;
     MFloatVector mLastColor;
     float mLastAlpha;
     bool mLastInvertAlpha;
