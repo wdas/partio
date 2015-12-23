@@ -1027,9 +1027,8 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
     const bool flipYZVal = MPlug(thisNode, shapeNode->aFlipYZ).asBool();
 
-    const int stride_3 = 3 * (int)sizeof(float) * (drawSkipVal);
-    const int stride_color_3 = 4 * (int)sizeof(float) * (drawSkipVal) + sizeof(float);
-    const int stride_color_4 = 4 * (int)sizeof(float) * (drawSkipVal);
+    const int stride_position = 3 * (int)sizeof(float) * (drawSkipVal);
+    const int stride_color = 4 * (int)sizeof(float) * (drawSkipVal);
 
     const float pointSizeVal = MPlug(thisNode, shapeNode->aPointSize).asFloat();
     const int alphaFromVal = MPlug(thisNode, shapeNode->aAlphaFrom).asInt();
@@ -1066,12 +1065,8 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
                 const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,0);
 
-                glVertexPointer(3, GL_FLOAT, stride_3, partioPositions);
-
-                if (use_per_particle_alpha)  // use transparency switch
-                    glColorPointer(4, GL_FLOAT, stride_color_4, pvCache->rgba.data());
-                else
-                    glColorPointer(3, GL_FLOAT, stride_color_3, pvCache->rgba.data());
+                glVertexPointer(3, GL_FLOAT, stride_position, partioPositions);
+                glColorPointer(4, GL_FLOAT, stride_color, pvCache->rgba.data());
                 glDrawArrays( GL_POINTS, 0, (pvCache->particles->numParticles()/(drawSkipVal+1)) );
             }
             glDisableClientState(GL_VERTEX_ARRAY);

@@ -33,7 +33,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partioExport.h"
 #include "partioImport.h"
 #include "partioVisualizerGeometryOverride.h"
-#include "partioVisualizerOverride.h"
 #include <maya/MFnPlugin.h>
 #include <maya/MDrawRegistry.h>
 
@@ -64,12 +63,6 @@ MStatus initializePlugin ( MObject obj )
         status.perror("registerNode partioVisualizer failed");
         return status;
     }
-
-    /*status = MHWRender::MDrawRegistry::registerSubSceneOverrideCreator(
-            partioVisualizer::drawDbClassification,
-            MHWRender::partioVisualizerOverride::registrantId,
-            MHWRender::partioVisualizerOverride::creator
-    );*/
 
     status = MHWRender::MDrawRegistry::registerGeometryOverrideCreator(
             partioVisualizer::drawDbClassification,
@@ -152,9 +145,6 @@ MStatus uninitializePlugin ( MObject obj )
         return status;
     }
 
-    /*status = MHWRender::MDrawRegistry::deregisterSubSceneOverrideCreator(
-            partioVisualizer::drawDbClassification,
-            MHWRender::partioVisualizerOverride::registrantId);*/
     status = MHWRender::MDrawRegistry::deregisterGeometryOverrideCreator(
             partioVisualizer::drawDbClassification,
             MHWRender::partioVisualizerGeometryOverride::registrantId);
