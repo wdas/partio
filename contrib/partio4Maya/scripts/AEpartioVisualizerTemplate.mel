@@ -60,12 +60,12 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
             //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
         editorTemplate -endLayout;
         editorTemplate -beginLayout "Channel Control" -collapse 0;
-        //editorTemplate -callCustom "pioVizCustomAttrsManage" "pioVizCustomAttrsManage" $nodeName;
-        editorTemplate -addControl "velocityFrom";
-        editorTemplate -addControl "colorFrom";
-        editorTemplate -addControl "incandescenceFrom";
-        editorTemplate -addControl "opacityFrom";
-        editorTemplate -addControl "radiusFrom";
+        editorTemplate -callCustom "pioVizCustomAttrsManage" "pioVizCustomAttrsManage" $nodeName;
+        //editorTemplate -addControl "velocityFrom";
+        //editorTemplate -addControl "colorFrom";
+        //editorTemplate -addControl "incandescenceFrom";
+        //editorTemplate -addControl "opacityFrom";
+        //editorTemplate -addControl "radiusFrom";
         editorTemplate -endLayout;
 
     // include/call base class/node attributes
@@ -114,77 +114,27 @@ global proc pioVizCustomAttrsManage (string $nodeName)
     columnLayout  foobar;
 
     string $multiList[] = `listAttr -multi ($nodeName+".partioCacheAttributes")`;
-
-    int $colorFrom = `getAttr ($nodeName+".colorFrom")` + 2;
-    int $opacityFrom = `getAttr ($nodeName+".opacityFrom")` + 2;
-    int $radiusFrom  = `getAttr ($nodeName+".radiusFrom")` + 2;
-    int $incandFrom = `getAttr ($nodeName+".incandescenceFrom")` + 2;
-
-    string $colorMenu = `optionMenuGrp -label "Color from->"`;
-    menuItem -l "None";
-
+    string $attrNameList[] = {};
+    int $id = 0;
     for ($multi in $multiList)
     {
-        string $tok[];
-        tokenize $multi "[" $tok;
-        string $index = $tok[1];
-        $index = substituteAllString($index, "]", "");
-        string $attr = `getAttr ($nodeName+"."+$multi)`;
-         menuItem -label $attr;
+        $attrNameList[$id] = `getAttr ($nodeName + "." + $multi)`;
+        $id = $id + 1;
     }
-    optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 0 + " " + $colorMenu)  $colorMenu;
-    
-    string $incandMenu = `optionMenuGrp -label "Incandescence from->"`;
-    menuItem -l "None";
 
-    for ($multi in $multiList)
+    string $attributes[] = {"velocityFrom", "colorFrom", "opacityFrom", "radiusFrom", "incandescenceFrom"};
+    string $labels[] = {"Velocity from ->", "Color from ->", "Opacity from ->", "Radius from ->", "Incandescence from ->"};
+
+    int $i = 0;
+    for ($i = 0; $i < size($attributes); ++$i)
     {
-        string $tok[];
-        tokenize $multi "[" $tok;
-        string $index = $tok[1];
-        $index = substituteAllString($index, "]", "");
-        string $attr = `getAttr ($nodeName+"."+$multi)`;
-         menuItem -label $attr;
+        attrControlGrp -annotation $labels[$i] -attribute ($nodeName + "." + $attributes[$i]);
+        popupMenu;
+        for ($attr in $attrNameList)
+        {
+            menuItem -label $attr -c ("setAttr -type \"string\" " + $nodeName + "." + $attributes[$i] + " " + $attr);
+        }
     }
-    optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $incandMenu)  $incandMenu;
-
-
-    string $opacMenu = `optionMenuGrp -label "Opacity from->"`;
-    menuItem -l "None";
-    for ($multi in $multiList)
-    {
-        string $tok[];
-        tokenize $multi "[" $tok;
-        string $index = $tok[1];
-        $index = substituteAllString($index, "]", "");
-        string $attr = `getAttr ($nodeName+"."+$multi)`;
-        menuItem -label $attr;
-    }
-    optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $opacMenu)  $opacMenu;
-
-
-    string $radiusMenu = `optionMenuGrp -label "Radius from->"`;
-    menuItem -l "None";
-    for ($multi in $multiList)
-    {
-        string $tok[];
-        tokenize $multi "[" $tok;
-        string $index = $tok[1];
-        $index = substituteAllString($index, "]", "");
-        string $attr = `getAttr ($nodeName+"."+$multi)`;
-         menuItem -label $attr;
-    }
-    optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 3 + " " + $radiusMenu)  $radiusMenu;
-
-
-    if (`size($multiList)`)
-    {
-        optionMenuGrp -e -sl $colorFrom  $colorMenu;
-        optionMenuGrp -e -sl $incandFrom $incandMenu;
-        optionMenuGrp -e -sl $opacityFrom $opacMenu;
-        optionMenuGrp -e -sl $radiusFrom $radiusMenu;
-    }
-
 }
 
 global proc pioVizSwitchAttributeFrom(string $nodeName, int $attr, string $menu)
