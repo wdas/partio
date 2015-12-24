@@ -103,8 +103,6 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
     editorTemplate -endScrollLayout;
 }
 
-
-
 global proc pioVizCustomAttrsManage (string $nodeName)
 {
     $nodeName = pioStripNodeName ($nodeName);

@@ -518,7 +518,7 @@ partioInstReaderCache* partioInstancer::updateParticleCache()
 MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
 {
     MStatus stat;
-    int rotationType = block.inputValue(aRotationType).asInt();
+    MString rotationType = block.inputValue(aRotationType).asString();
     MString rotationFromIndex = block.inputValue(aRotationFrom).asString();
     MString lastRotFromIndex = block.inputValue(aLastRotationFrom).asString();
     MString scaleFromIndex = block.inputValue(aScaleFrom).asString();
