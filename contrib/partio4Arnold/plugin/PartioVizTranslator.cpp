@@ -334,6 +334,7 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
         AiNodeSetFlt(procedural, "arg_radiusMult", m_DagNode.findPlug("aiRadiusMultiplier").asFloat());
 
         AiNodeDeclare(procedural, "arg_velFrom", "constant STRING");
+        AiNodeDeclare(procedural, "arg_accFrom", "constant STRING");
         AiNodeDeclare(procedural, "arg_rgbFrom", "constant STRING");
         AiNodeDeclare(procedural, "arg_opacFrom", "constant STRING");
         AiNodeDeclare(procedural, "arg_radFrom", "constant STRING");
@@ -342,6 +343,7 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
         MPlug partioAttrs = m_DagNode.findPlug("partioCacheAttributes");
 
         AiNodeSetStr(procedural, "arg_velFrom", m_DagNode.findPlug("velocityFrom").asString().asChar());
+        AiNodeSetStr(procedural, "arg_accFrom", m_DagNode.findPlug("accelerationFrom").asString().asChar());
         AiNodeSetStr(procedural, "arg_rgbFrom", m_DagNode.findPlug("colorFrom").asString().asChar());
         AiNodeSetStr(procedural, "arg_opacFrom", m_DagNode.findPlug("opacityFrom").asString().asChar());
         AiNodeSetStr(procedural, "arg_radFrom", m_DagNode.findPlug("radiusFrom").asString().asChar());
