@@ -120,8 +120,8 @@ global proc pioVizCustomAttrsManage (string $nodeName)
         $id = $id + 1;
     }
 
-    string $attributes[] = {"velocityFrom", "colorFrom", "opacityFrom", "radiusFrom", "incandescenceFrom"};
-    string $labels[] = {"Velocity from ->", "Color from ->", "Opacity from ->", "Radius from ->", "Incandescence from ->"};
+    string $attributes[] = {"velocityFrom", "accelerationFrom", "colorFrom", "opacityFrom", "radiusFrom", "incandescenceFrom"};
+    string $labels[] = {"Velocity from ->", "Acceleration from ->", "Color from ->", "Opacity from ->", "Radius from ->", "Incandescence from ->"};
 
     int $i = 0;
     for ($i = 0; $i < size($attributes); ++$i)

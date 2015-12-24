@@ -71,6 +71,7 @@ MObject partioVisualizer::aJitterPos;
 MObject partioVisualizer::aJitterFreq;
 MObject partioVisualizer::aPartioAttributes;
 MObject partioVisualizer::aVelocityFrom;
+MObject partioVisualizer::aAccelerationFrom;
 MObject partioVisualizer::aColorFrom;
 MObject partioVisualizer::aRadiusFrom;
 MObject partioVisualizer::aAlphaFrom;
@@ -314,6 +315,9 @@ MStatus partioVisualizer::initialize()
     aVelocityFrom = tAttr.create("velocityFrom", "vfrm", MFnStringData::kString);
     nAttr.setKeyable(true);
 
+    aAccelerationFrom = tAttr.create("accelerationFrom", "afrm", MFnStringData::kString);
+    nAttr.setKeyable(true);
+
     aColorFrom = tAttr.create("colorFrom", "cfrm", MFnStringData::kString);
     nAttr.setKeyable(true);
 
@@ -372,6 +376,7 @@ MStatus partioVisualizer::initialize()
     addAttribute(aCacheFormat);
     addAttribute(aPartioAttributes);
     addAttribute(aVelocityFrom);
+    addAttribute(aAccelerationFrom);
     addAttribute(aColorFrom);
     addAttribute(aIncandFrom);
     addAttribute(aAlphaFrom);

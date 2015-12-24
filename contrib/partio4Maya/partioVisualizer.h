@@ -158,6 +158,7 @@ public:
     static MObject aJitterFreq;
     static MObject aPartioAttributes;
 	static MObject aVelocityFrom;
+	static MObject aAccelerationFrom;
     static MObject aColorFrom;
     static MObject aAlphaFrom;
 	static MObject aIncandFrom;
