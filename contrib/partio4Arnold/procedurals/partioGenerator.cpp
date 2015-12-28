@@ -302,14 +302,15 @@ struct PartioData {
         ////////////////
         /// Velocity
         if ((global_motionBlurSteps > 1) && (arg_velFrom.length() > 0) && (points->attributeInfo(arg_velFrom.c_str(), velocityAttr) ||
-            points->attributeInfo("velocity", velocityAttr) || points->attributeInfo("Velocity", velocityAttr)))
+            points->attributeInfo("velocity", velocityAttr) || points->attributeInfo("Velocity", velocityAttr)) && (velocityAttr.count > 2) &&
+            (velocityAttr.count > 2))
         {
             AiMsgInfo("[partioGenerator] found velocity attr, motion blur is a GO!!");
             canMotionBlur = true;
 
             ////////////////////
             /// Acceleration
-            if (points->attributeInfo(arg_accFrom.c_str(), accelerationAttr))
+            if (points->attributeInfo(arg_accFrom.c_str(), accelerationAttr) && (accelerationAttr.count > 2) && (accelerationAttr.type == Partio::FLOAT))
             {
                 AiMsgInfo("[partioGenerator] found acceleration attr, motion blur is a GO!!");
                 canMotionBlur = true;
@@ -483,7 +484,7 @@ struct PartioData {
             {
                 const float* partioRGB = points->data<float>(rgbAttr, id);
                 AtRGB color;
-                if (rgbAttr.count > 1)
+                if (rgbAttr.count > 2)
                 {
                     color.r = partioRGB[0];
                     color.g = partioRGB[1];
@@ -502,7 +503,7 @@ struct PartioData {
             {
                 const float* partioRGB = points->data<float>(incandAttr, id);
                 AtRGB incand;
-                if (incandAttr.count > 1)
+                if (incandAttr.count > 2)
                 {
                     incand.r = partioRGB[0];
                     incand.g = partioRGB[1];
@@ -522,10 +523,11 @@ struct PartioData {
             {
                 const float* partioOpac = points->data<float>(opacityAttr, id);
                 float opac;
-                if (opacityAttr.count == 1)
-                    opac = partioOpac[0];
-                else
+                if (opacityAttr.count > 2)
                     opac = float((partioOpac[0] * 0.2126f) + (partioOpac[1] * 0.7152f) + (partioOpac[2] * .0722f));
+                else
+                    opac = partioOpac[0];
+
 
                 AiArraySetFlt(opacityArr, i, opac);
             }
