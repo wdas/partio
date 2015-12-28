@@ -299,16 +299,13 @@ struct PartioData {
         AtArray* floatArr = 0;
         AtArray* vecArr = 0;
 
-        if ((global_motionBlurSteps > 1))
+        ////////////////
+        /// Velocity
+        if ((global_motionBlurSteps > 1) && (arg_velFrom.length() > 0) && (points->attributeInfo(arg_velFrom.c_str(), velocityAttr) ||
+            points->attributeInfo("velocity", velocityAttr) || points->attributeInfo("Velocity", velocityAttr)))
         {
-            ////////////////
-            /// Velocity
-            if ((arg_velFrom.length() > 0) && points->attributeInfo(arg_velFrom.c_str(), velocityAttr) ||
-                points->attributeInfo("velocity", velocityAttr) || points->attributeInfo("Velocity", velocityAttr))
-            {
-                AiMsgInfo("[partioGenerator] found velocity attr, motion blur is a GO!!");
-                canMotionBlur = true;
-            }
+            AiMsgInfo("[partioGenerator] found velocity attr, motion blur is a GO!!");
+            canMotionBlur = true;
 
             ////////////////////
             /// Acceleration
@@ -318,6 +315,7 @@ struct PartioData {
                 canMotionBlur = true;
             }
         }
+
 
         ////////////
         /// RGB
@@ -364,11 +362,11 @@ struct PartioData {
             AiNodeSetFlt(currentInstance, "opacityPP", arg_defaultOpac);
         }
 
-        const bool acc_and_vel = accelerationAttr.type != Partio::NONE && velocityAttr.type != Partio::NONE;
+        const bool can_accelerate = accelerationAttr.type != Partio::NONE;
 
         if (canMotionBlur)
         {
-            if (acc_and_vel)
+            if (can_accelerate)
                 pointarr = AiArrayAllocate(pointCount, global_motionBlurSteps, AI_TYPE_POINT);
             else
                 pointarr = AiArrayAllocate(pointCount, 2, AI_TYPE_POINT);
@@ -432,8 +430,17 @@ struct PartioData {
             parts[index] = strtok(0, " ");
         }
 
-
         const float motion_blur_time = (1.0f / global_fps) * global_motionByFrame * arg_motionBlurMult;
+        std::vector<double> motion_step_times;
+        if (can_accelerate)
+        {
+            motion_step_times.resize(global_motionBlurSteps, 0.0f);
+            for (int st = 0; st < global_motionBlurSteps; ++st)
+            {
+                motion_step_times[st] = static_cast<float>(-0.5 + ((double)st / ((double)global_motionBlurSteps - 1.0))) * motion_blur_time;
+            }
+        }
+
         ///////////////////////////////////////////////
         /// LOOP particles
         for (int i = 0; i < pointCount; ++i)
@@ -442,7 +449,7 @@ struct PartioData {
 
             if (canMotionBlur)
             {
-                if (acc_and_vel)
+                if (can_accelerate)
                 {
                     const AtVector point = pointsVector[i];
                     const float* partioAcc = points->data<float>(accelerationAttr, id);
@@ -452,29 +459,9 @@ struct PartioData {
 
                     for (int st = 0; st < global_motionBlurSteps; ++st)
                     {
-                        float current_time = static_cast<float>(-0.5 + ((double)st / ((double)global_motionBlurSteps - 1.0)));
-                        bool is_negative = false;
-                        if (current_time < 0.0)
-                        {
-                            is_negative = true;
-                            current_time = -current_time;
-                        }
-                        AtVector off = velocity * current_time + acceleration * current_time * current_time / 2.0;
-                        AiArraySetPnt(pointarr, i + st * pointCount, is_negative ? (point - off) : (point + off));
+                        const float current_time = motion_step_times[st];
+                        AiArraySetPnt(pointarr, i + st * pointCount, point + velocity * current_time + acceleration * current_time * current_time / 2.0);
                     }
-                }
-                else if (accelerationAttr.type != Partio::NONE)
-                {
-                    const AtVector point = pointsVector[i];
-                    const float* partioAcc = points->data<float>(accelerationAttr, id);
-                    AtVector acceleration = {partioAcc[0], partioAcc[1], partioAcc[2]};
-                    acceleration *= (motion_blur_time * 0.5f) * (motion_blur_time * 0.5f) / 2.0;
-                    // global fps inverse, motion by frame
-                    // motion blur multiplier and half to have the original
-                    // particle position as center
-
-                    AiArraySetPnt(pointarr, i, point - acceleration);
-                    AiArraySetPnt(pointarr, i + pointCount, point + acceleration);
                 }
                 else
                 {
