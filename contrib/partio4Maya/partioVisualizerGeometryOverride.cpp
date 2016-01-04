@@ -1,7 +1,6 @@
 #include "partioVisualizerGeometryOverride.h"
 
 #include <maya/MFnDependencyNode.h>
-#include <maya/MGeometry.h>
 
 #include <iostream>
 namespace MHWRender{

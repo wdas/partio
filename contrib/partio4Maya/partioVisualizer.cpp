@@ -88,7 +88,19 @@ MObject partioVisualizer::aRenderCachePath;
 MString partioVisualizer::drawDbClassification("drawdb/geometry/partio/visualizer");
 
 namespace {
-    void drawBillboardCircleAtPoint(const float* position, float radius, int num_segments, int drawType)
+    struct BillboardDrawData{
+        std::vector<float> vertices;
+        const size_t num_segments;
+        float last_radius;
+
+        BillboardDrawData(size_t _num_segments) : num_segments(_num_segments), last_radius(-1.0f)
+        {
+            vertices.resize(num_segments * 2);
+
+        }
+    };
+
+    void drawBillboardCircleAtPoint(const float* position, float radius, int drawType, BillboardDrawData& data)
     {
         glPushMatrix();
         glTranslatef(position[0], position[1], position[2]);
@@ -100,41 +112,43 @@ namespace {
         m[8] = 0.0f; m[9] = 0.0f; m[10] = 1.0f;
         glLoadMatrixf(m);
 
-        const float theta = 2.0f * 3.1415926f / float(num_segments);
-        const float tangetial_factor = tanf(theta);//calculate the tangential factor
+        if (radius != data.last_radius)
+        {
+            data.last_radius = radius;
 
-        const float radial_factor = cosf(theta);//calculate the radial factor
+            const float theta = 2.0f * 3.1415926f / float(data.num_segments);
+            const float tangetial_factor = tanf(theta);//calculate the tangential factor
 
-        float x = radius;//we start at angle = 0
-        float y = 0;
+            const float radial_factor = cosf(theta);//calculate the radial factor
+
+            float x = radius;//we start at angle = 0
+            float y = 0;
+
+            for (size_t i = 0, vid = 0; i < data.num_segments; ++i)
+            {
+                data.vertices[vid++] = x;
+                data.vertices[vid++] = y;
+
+                const float tx = -y;
+                const float ty = x;
+
+                //add the tangential vector
+
+                x += tx * tangetial_factor;
+                y += ty * tangetial_factor;
+
+                //correct using the radial factor
+
+                x *= radial_factor;
+                y *= radial_factor;
+            }
+        }
 
         if (drawType == 1)
-            glBegin(GL_LINE_LOOP);
-        else if (drawType == 2)
-            glBegin(GL_POLYGON);
-        for (int ii = 0; ii < num_segments; ii++)
-        {
-            glVertex2f(x, y);//output vertex
+            glDrawArrays(GL_LINE_LOOP, 0, data.num_segments);
+        else
+            glDrawArrays(GL_POLYGON, 0, data.num_segments);
 
-            //calculate the tangential vector
-            //remember, the radial vector is (x, y)
-            //to get the tangential vector we flip those coordinates and negate one of them
-
-            float tx = -y;
-            float ty = x;
-
-            //add the tangential vector
-
-            x += tx * tangetial_factor;
-            y += ty * tangetial_factor;
-
-            //correct using the radial factor
-
-            x *= radial_factor;
-            y *= radial_factor;
-        }
-        glEnd();
-        glTranslatef(-position[0], -position[1], -position[2]);
         glPopMatrix();
     }
 }
@@ -741,7 +755,7 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
 
     if (pvCache.particles) // update the AE Controls for attrs in the cache
     {
-        const int numAttr = pvCache.particles->numAttributes();
+        const unsigned int numAttr = static_cast<unsigned int>(pvCache.particles->numAttributes());
         MPlug zPlug (thisMObject(), aPartioAttributes);
 
         // no need to reset attributes as not all attributes are guaranteed to be
@@ -754,21 +768,12 @@ MStatus partioVisualizer::compute( const MPlug& plug, MDataBlock& block )
             for (unsigned int i = 0; i < numAttr; ++i)
             {
                 ParticleAttribute attr;
-                pvCache.particles->attributeInfo(i,attr);
+                pvCache.particles->attributeInfo(i, attr);
 
-                // crazy casting string to  char
-                char *temp;
-                temp = new char[(attr.name).length()+1];
-                strcpy(temp, attr.name.c_str());
-
-                MString mStringAttrName("");
-                mStringAttrName += MString(temp);
-
-                zPlug.selectAncestorLogicalIndex(i,aPartioAttributes);
-                zPlug.setValue(MString(temp));
-                attributeList.append(mStringAttrName);
-
-                delete[] temp;
+                const MString mstring_attr_name(attr.name.c_str());
+                zPlug.selectAncestorLogicalIndex(i, aPartioAttributes);
+                zPlug.setValue(mstring_attr_name);
+                attributeList.append(mstring_attr_name);
             }
 
             MArrayDataHandle hPartioAttrs = block.inputArrayValue(aPartioAttributes);
@@ -1020,21 +1025,45 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
             /// looping thru particles one by one...
             glPointSize(pointSizeVal);
 
-            const bool draw_billboards = drawStyle == 1 || drawStyle == 2;
 
-            for (int i = 0; i < pvCache->particles->numParticles(); i += (drawSkipVal + 1))
+            if (drawStyle == 1 || drawStyle == 2)
             {
-                if (use_per_particle_alpha)  // use transparency switch
-                    glColor4f(pvCache->rgba[i * 4], pvCache->rgba[(i * 4) + 1], pvCache->rgba[(i * 4) + 2], pvCache->rgba[(i * 4) + 3]);
-                else
-                    glColor3f(pvCache->rgba[i * 4], pvCache->rgba[i * 4 + 1], pvCache->rgba[i * 4 + 2]);
+                BillboardDrawData billboard_data(10);
 
-                const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
-                if (draw_billboards) // unfilled circles, disks, or spheres
-                    drawBillboardCircleAtPoint(partioPositions, pvCache->radius[i], 10, drawStyle);
-                else // points
-                    glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
+                glEnableClientState(GL_VERTEX_ARRAY);
+                glVertexPointer(2, GL_FLOAT, 0, &billboard_data.vertices[0]);
+
+                for (int i = 0; i < pvCache->particles->numParticles(); i += (drawSkipVal + 1))
+                {
+                    if (use_per_particle_alpha)  // use transparency switch
+                        glColor4f(pvCache->rgba[i * 4], pvCache->rgba[(i * 4) + 1], pvCache->rgba[(i * 4) + 2], pvCache->rgba[(i * 4) + 3]);
+                    else
+                        glColor3f(pvCache->rgba[i * 4], pvCache->rgba[i * 4 + 1], pvCache->rgba[i * 4 + 2]);
+
+                    const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
+                    drawBillboardCircleAtPoint(partioPositions, pvCache->radius[i], drawStyle, billboard_data);
+                }
+
+                glDisableClientState(GL_VERTEX_ARRAY);
             }
+            else
+            {
+                for (int i = 0; i < pvCache->particles->numParticles(); i += (drawSkipVal + 1))
+                {
+                    if (use_per_particle_alpha)  // use transparency switch
+                        glColor4f(pvCache->rgba[i * 4], pvCache->rgba[(i * 4) + 1], pvCache->rgba[(i * 4) + 2], pvCache->rgba[(i * 4) + 3]);
+                    else
+                        glColor3f(pvCache->rgba[i * 4], pvCache->rgba[i * 4 + 1], pvCache->rgba[i * 4 + 2]);
+
+                    const float * partioPositions = pvCache->particles->data<float>(pvCache->positionAttr,i);
+                    glVertex3f(partioPositions[0], partioPositions[1], partioPositions[2]);
+                }
+
+            }
+
+
+
+
         }
         glDisable(GL_BLEND);
         glDisable(GL_POINT_SMOOTH);
