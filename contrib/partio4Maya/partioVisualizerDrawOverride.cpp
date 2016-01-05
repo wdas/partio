@@ -21,23 +21,74 @@
 
 namespace {
     struct DrawData : public MUserData {
-        partioVizReaderCache* p_reader_cache;
+    private:
         MObject m_object;
-        DrawData() : MUserData(false)
+        partioVizReaderCache* p_reader_cache;
+        int m_draw_skip;
+        int m_draw_style;
+        float m_point_size;
+
+    public:
+        DrawData() : MUserData(false), p_reader_cache(0)
         {
 
         }
 
+        // FIXME: mostly likely we don't need to update the m_object and p_reader_cache
+        // because these are constant values, so move these to the constructor
         void update_data(const MObject& object, partioVizReaderCache* pv_cache)
         {
             clear();
             m_object = object;
             p_reader_cache = pv_cache;
+            m_draw_skip = MPlug(m_object, partioVisualizer::aDrawSkip).asInt();
+            m_draw_style = MPlug(m_object, partioVisualizer::aDrawStyle).asShort();
+            m_point_size = MPlug(m_object, partioVisualizer::aPointSize).asFloat();
         }
 
         void clear()
         {
 
+        }
+
+        void draw() const
+        {
+            if (p_reader_cache == 0 || p_reader_cache->particles == 0 || p_reader_cache->positionAttr.attributeIndex == -1)
+                return;
+
+            glPushAttrib(GL_ALL_ATTRIB_BITS);
+
+            // check for viewport draw mode
+            if (m_draw_style == PARTIO_DRAW_STYLE_BOUNDING_BOX)
+            {
+
+            }
+            else if (m_draw_style == PARTIO_DRAW_STYLE_POINTS)
+            {
+                const int stride_position = 3 * static_cast<int>(sizeof(float)) * m_draw_skip;
+                const int stride_color = 4 * static_cast<int>(sizeof(float)) * m_draw_skip;
+
+                glDisable(GL_POINT_SMOOTH);
+                glEnableClientState(GL_VERTEX_ARRAY);
+                glEnableClientState(GL_COLOR_ARRAY);
+
+                glPointSize(m_point_size);
+                if (p_reader_cache->particles->numParticles() > 0)
+                {
+                    // now setup the position/color/alpha output pointers
+                    const float* partioPositions = p_reader_cache->particles->data<float>(p_reader_cache->positionAttr, 0);
+
+                    glVertexPointer(3, GL_FLOAT, stride_position, partioPositions);
+                    glColorPointer(4, GL_FLOAT, stride_color, p_reader_cache->rgba.data());
+                    glDrawArrays(GL_POINTS, 0, (p_reader_cache->particles->numParticles() / (m_draw_skip + 1)));
+                }
+            }
+            else if (m_draw_style == PARTIO_DRAW_STYLE_RADIUS || m_draw_style == PARTIO_DRAW_STYLE_DISK)
+            {
+
+            }
+
+            glPopAttrib();
         }
     };
 }
@@ -69,7 +120,12 @@ namespace MHWRender {
 
     void partioVisualizerDrawOverride::DrawCallback(const MDrawContext& context, const MUserData* data)
     {
+        const DrawData* draw_data = reinterpret_cast<const DrawData*>(data);
 
+        if (draw_data == 0)
+            return;
+
+        draw_data->draw();
     }
 
     MBoundingBox partioVisualizerDrawOverride::boundingBox(const MDagPath& objPath, const MDagPath& cameraPath) const

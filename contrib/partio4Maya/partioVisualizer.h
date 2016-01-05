@@ -87,12 +87,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partio4MayaShared.h"
 #include "iconArrays.h"
 
+enum {
+	PARTIO_DRAW_STYLE_POINTS = 0,
+	PARTIO_DRAW_STYLE_RADIUS,
+	PARTIO_DRAW_STYLE_DISK,
+    PARTIO_DRAW_STYLE_BOUNDING_BOX,
+	PARTIO_DRAW_STYLE_SPHERE,
+	PARTIO_DRAW_STYLE_VELOCITY
+};
+
 class partioVizReaderCache
 {
 public:
     partioVizReaderCache();
+	void clear();
     MBoundingBox bbox;
-    int dList;
     Partio::ParticlesDataMutable* particles;
     Partio::ParticleAttribute positionAttr;
     Partio::ParticleAttribute colorAttr;
@@ -198,7 +207,6 @@ private:
     MStringArray attributeList;
 protected:
     int dUpdate;
-    GLuint dList;
 };
 
 #endif
