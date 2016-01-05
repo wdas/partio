@@ -33,11 +33,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partioExport.h"
 #include "partioImport.h"
 #include "partioVisualizerGeometryOverride.h"
+#include "partioVisualizerDrawOverride.h"
 #include <maya/MFnPlugin.h>
 #include <maya/MDrawRegistry.h>
-
-
-
 
 MStatus initializePlugin ( MObject obj )
 {
@@ -64,11 +62,22 @@ MStatus initializePlugin ( MObject obj )
         return status;
     }
 
-    status = MHWRender::MDrawRegistry::registerGeometryOverrideCreator(
+    /*status = MHWRender::MDrawRegistry::registerGeometryOverrideCreator(
             partioVisualizer::drawDbClassification,
             MHWRender::partioVisualizerGeometryOverride::registrantId,
             MHWRender::partioVisualizerGeometryOverride::creator
     );
+
+    if (!status)
+    {
+        status.perror("registerGeometryOverride partioVisualizerOverride failed");
+        return status;
+    }*/
+
+    status = MHWRender::MDrawRegistry::registerDrawOverrideCreator(
+            partioVisualizer::drawDbClassification,
+            MHWRender::partioVisualizerDrawOverride::registrantId,
+            MHWRender::partioVisualizerDrawOverride::creator);
 
     if (!status)
     {
@@ -86,7 +95,6 @@ MStatus initializePlugin ( MObject obj )
         status.perror("registerNode partioInstancer failed");
         return status;
     }
-
 
     status = plugin.registerNode("partioEmitter", partioEmitter::id,
                                  &partioEmitter::creator, &partioEmitter::initialize,
@@ -145,13 +153,23 @@ MStatus uninitializePlugin ( MObject obj )
         return status;
     }
 
-    status = MHWRender::MDrawRegistry::deregisterGeometryOverrideCreator(
+    /*status = MHWRender::MDrawRegistry::deregisterGeometryOverrideCreator(
             partioVisualizer::drawDbClassification,
             MHWRender::partioVisualizerGeometryOverride::registrantId);
 
     if (!status)
     {
         status.perror("deregisterGeometryOverride partioVisualizerOverride failed");
+        return status;
+    }*/
+
+    status = MHWRender::MDrawRegistry::deregisterDrawOverrideCreator(
+            partioVisualizer::drawDbClassification,
+            MHWRender::partioVisualizerDrawOverride::registrantId);
+
+    if (!status)
+    {
+        status.perror("deregisterDrawOverride partioVisualizerDrawOverride failed");
         return status;
     }
 

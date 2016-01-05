@@ -2,6 +2,8 @@
 
 #include <maya/MPxDrawOverride.h>
 
+#include "partioVisualizer.h"
+
 namespace MHWRender{
     class partioVisualizerDrawOverride : public MPxDrawOverride {
     public:
@@ -14,10 +16,19 @@ namespace MHWRender{
 
         static void DrawCallback(const MDrawContext& context, const MUserData* data);
 
+        // this is pure virtual in Maya 2015
+        virtual MBoundingBox boundingBox(
+                const MDagPath& objPath,
+                const MDagPath& cameraPath) const;
+
         virtual MUserData* prepareForDraw(
                 const MDagPath& objPath,
                 const MDagPath& cameraPath,
                 const MFrameContext& frameContext,
                 MUserData* oldData);
+
+        const MObject m_object;
+        partioVisualizer* p_visualizer;
+        MBoundingBox m_bbox;
     };
 }

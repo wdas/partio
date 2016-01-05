@@ -100,7 +100,7 @@ public:
     Partio::ParticleAttribute radiusAttr;
 	Partio::ParticleAttribute incandescenceAttr;
     std::vector<float> rgba;
-    MFloatArray radius;
+    std::vector<float> radius;
 };
 
 class partioVisualizerUI : public MPxSurfaceShapeUI
