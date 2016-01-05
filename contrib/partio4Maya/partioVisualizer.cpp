@@ -944,20 +944,19 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
     MObject thisNode = shapeNode->thisMObject();
     const int drawSkipVal = MPlug(thisNode, shapeNode->aDrawSkip).asInt();
 
-    const int stride_position = 3 * (int)sizeof(float) * (drawSkipVal);
-    const int stride_color = 4 * (int)sizeof(float) * (drawSkipVal);
-
-    const float pointSizeVal = MPlug(thisNode, shapeNode->aPointSize).asFloat();
-    const float defaultAlphaVal = MPlug(thisNode, shapeNode->aDefaultAlpha).asFloat();
-    const MString alphaFromVal = MPlug(thisNode, shapeNode->aAlphaFrom).asString();
-
-    // these three are not used
-    // const int colorFromVal = MPlug(thisNode, shapeNode->aColorFrom).asInt();
-    // const int incandFromVal = MPlug(thisNode, shapeNode->aIncandFrom).asInt();
-    // const bool flipYZVal = MPlug(thisNode, shapeNode->aFlipYZ).asBool();
-
     if (pvCache->particles && pvCache->positionAttr.attributeIndex != -1)
     {
+        const int stride_position = 3 * (int)sizeof(float) * (drawSkipVal);
+        const int stride_color = 4 * (int)sizeof(float) * (drawSkipVal);
+
+        const float pointSizeVal = MPlug(thisNode, shapeNode->aPointSize).asFloat();
+        const float defaultAlphaVal = MPlug(thisNode, shapeNode->aDefaultAlpha).asFloat();
+
+        // these three are not used
+        // const int colorFromVal = MPlug(thisNode, shapeNode->aColorFrom).asInt();
+        // const int incandFromVal = MPlug(thisNode, shapeNode->aIncandFrom).asInt();
+        // const bool flipYZVal = MPlug(thisNode, shapeNode->aFlipYZ).asBool();
+
         const bool use_per_particle_alpha = pvCache->opacityAttr.attributeIndex != -1 || defaultAlphaVal < 1.0f;
         // no need to disable anything, we are pushing ALL the bits
         glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -987,10 +986,17 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
                 glColorPointer(4, GL_FLOAT, stride_color, pvCache->rgba.data());
                 glDrawArrays(GL_POINTS, 0, (pvCache->particles->numParticles() / (drawSkipVal + 1)));
             }
+
+            glDisableClientState(GL_VERTEX_ARRAY);
+            glDisableClientState(GL_COLOR_ARRAY); // even though we are pushing and popping
+            // attribs disabling the color array is required or else it will freak out maya
+            // interestingly it's not needed for VP2...
         }
         else if (drawStyle == PARTIO_DRAW_STYLE_DISK || drawStyle == PARTIO_DRAW_STYLE_RADIUS)
         {
-            BillboardDrawData billboard_data(10);
+            // if this is accessed from multiple threads
+            // we already screwed because of OpenGL
+            static BillboardDrawData billboard_data(10);
 
             glEnableClientState(GL_VERTEX_ARRAY);
             glVertexPointer(2, GL_FLOAT, 0, &billboard_data.vertices[0]);
@@ -1001,6 +1007,8 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
                 const float* partioPositions = pvCache->particles->data<float>(pvCache->positionAttr, i);
                 drawBillboardCircleAtPoint(partioPositions, pvCache->radius[i], drawStyle, billboard_data);
             }
+
+            glDisableClientState(GL_VERTEX_ARRAY);
         }
         glPopAttrib();
     }
