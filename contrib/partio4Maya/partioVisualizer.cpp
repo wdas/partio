@@ -939,79 +939,78 @@ void  partioVisualizerUI::drawBoundingBox() const
 /// DRAW PARTIO
 void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle) const
 {
+    if (pvCache->particles == 0 || pvCache->positionAttr.attributeIndex == -1)
+        return;
     partioVisualizer* shapeNode = (partioVisualizer*)surfaceShape();
 
     MObject thisNode = shapeNode->thisMObject();
     const int drawSkipVal = MPlug(thisNode, shapeNode->aDrawSkip).asInt();
 
-    if (pvCache->particles && pvCache->positionAttr.attributeIndex != -1)
+    const int stride_position = 3 * (int)sizeof(float) * (drawSkipVal);
+    const int stride_color = 4 * (int)sizeof(float) * (drawSkipVal);
+
+    const float pointSizeVal = MPlug(thisNode, shapeNode->aPointSize).asFloat();
+    const float defaultAlphaVal = MPlug(thisNode, shapeNode->aDefaultAlpha).asFloat();
+
+    // these three are not used
+    // const int colorFromVal = MPlug(thisNode, shapeNode->aColorFrom).asInt();
+    // const int incandFromVal = MPlug(thisNode, shapeNode->aIncandFrom).asInt();
+    // const bool flipYZVal = MPlug(thisNode, shapeNode->aFlipYZ).asBool();
+
+    const bool use_per_particle_alpha = pvCache->opacityAttr.attributeIndex != -1 || defaultAlphaVal < 1.0f;
+    // no need to disable anything, we are pushing ALL the bits
+    glPushAttrib(GL_ALL_ATTRIB_BITS);
+    if (use_per_particle_alpha) //testing settings
     {
-        const int stride_position = 3 * (int)sizeof(float) * (drawSkipVal);
-        const int stride_color = 4 * (int)sizeof(float) * (drawSkipVal);
-
-        const float pointSizeVal = MPlug(thisNode, shapeNode->aPointSize).asFloat();
-        const float defaultAlphaVal = MPlug(thisNode, shapeNode->aDefaultAlpha).asFloat();
-
-        // these three are not used
-        // const int colorFromVal = MPlug(thisNode, shapeNode->aColorFrom).asInt();
-        // const int incandFromVal = MPlug(thisNode, shapeNode->aIncandFrom).asInt();
-        // const bool flipYZVal = MPlug(thisNode, shapeNode->aFlipYZ).asBool();
-
-        const bool use_per_particle_alpha = pvCache->opacityAttr.attributeIndex != -1 || defaultAlphaVal < 1.0f;
-        // no need to disable anything, we are pushing ALL the bits
-        glPushAttrib(GL_ALL_ATTRIB_BITS);
-        if (use_per_particle_alpha) //testing settings
-        {
-            // TESTING AROUND with depth/transparency  sorting issues..
-            glDepthMask(true);
-            glEnable(GL_DEPTH_TEST);
-            glEnable(GL_BLEND);
-            glEnable(GL_POINT_SMOOTH);
-            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        }
-
-        if (drawStyle == PARTIO_DRAW_STYLE_POINTS)
-        {
-            glDisable(GL_POINT_SMOOTH);
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glEnableClientState(GL_COLOR_ARRAY);
-
-            glPointSize(pointSizeVal);
-            if (pvCache->particles->numParticles() > 0)
-            {
-                // now setup the position/color/alpha output pointers
-                const float* partioPositions = pvCache->particles->data<float>(pvCache->positionAttr, 0);
-
-                glVertexPointer(3, GL_FLOAT, stride_position, partioPositions);
-                glColorPointer(4, GL_FLOAT, stride_color, pvCache->rgba.data());
-                glDrawArrays(GL_POINTS, 0, (pvCache->particles->numParticles() / (drawSkipVal + 1)));
-            }
-
-            glDisableClientState(GL_VERTEX_ARRAY);
-            glDisableClientState(GL_COLOR_ARRAY); // even though we are pushing and popping
-            // attribs disabling the color array is required or else it will freak out maya
-            // interestingly it's not needed for VP2...
-        }
-        else if (drawStyle == PARTIO_DRAW_STYLE_DISK || drawStyle == PARTIO_DRAW_STYLE_RADIUS)
-        {
-            // if this is accessed from multiple threads
-            // we already screwed because of OpenGL
-            static BillboardDrawData billboard_data(10);
-
-            glEnableClientState(GL_VERTEX_ARRAY);
-            glVertexPointer(2, GL_FLOAT, 0, &billboard_data.vertices[0]);
-
-            for (int i = 0; i < pvCache->particles->numParticles(); i += (drawSkipVal + 1))
-            {
-                glColor4fv(&pvCache->rgba[i * 4]);
-                const float* partioPositions = pvCache->particles->data<float>(pvCache->positionAttr, i);
-                drawBillboardCircleAtPoint(partioPositions, pvCache->radius[i], drawStyle, billboard_data);
-            }
-
-            glDisableClientState(GL_VERTEX_ARRAY);
-        }
-        glPopAttrib();
+        // TESTING AROUND with depth/transparency  sorting issues..
+        glDepthMask(true);
+        glEnable(GL_DEPTH_TEST);
+        glEnable(GL_BLEND);
+        glEnable(GL_POINT_SMOOTH);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     }
+
+    if (drawStyle == PARTIO_DRAW_STYLE_POINTS)
+    {
+        glDisable(GL_POINT_SMOOTH);
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glEnableClientState(GL_COLOR_ARRAY);
+
+        glPointSize(pointSizeVal);
+        if (pvCache->particles->numParticles() > 0)
+        {
+            // now setup the position/color/alpha output pointers
+            const float* partioPositions = pvCache->particles->data<float>(pvCache->positionAttr, 0);
+
+            glVertexPointer(3, GL_FLOAT, stride_position, partioPositions);
+            glColorPointer(4, GL_FLOAT, stride_color, pvCache->rgba.data());
+            glDrawArrays(GL_POINTS, 0, (pvCache->particles->numParticles() / (drawSkipVal + 1)));
+        }
+
+        glDisableClientState(GL_VERTEX_ARRAY);
+        glDisableClientState(GL_COLOR_ARRAY); // even though we are pushing and popping
+        // attribs disabling the color array is required or else it will freak out maya
+        // interestingly it's not needed for VP2...
+    }
+    else if (drawStyle == PARTIO_DRAW_STYLE_DISK || drawStyle == PARTIO_DRAW_STYLE_RADIUS)
+    {
+        // if this is accessed from multiple threads
+        // we already screwed because of OpenGL
+        static BillboardDrawData billboard_data(10);
+
+        glEnableClientState(GL_VERTEX_ARRAY);
+        glVertexPointer(2, GL_FLOAT, 0, &billboard_data.vertices[0]);
+
+        for (int i = 0; i < pvCache->particles->numParticles(); i += (drawSkipVal + 1))
+        {
+            glColor4fv(&pvCache->rgba[i * 4]);
+            const float* partioPositions = pvCache->particles->data<float>(pvCache->positionAttr, i);
+            drawBillboardCircleAtPoint(partioPositions, pvCache->radius[i], drawStyle, billboard_data);
+        }
+
+        glDisableClientState(GL_VERTEX_ARRAY);
+    }
+    glPopAttrib();
 }
 
 partioVisualizerUI::partioVisualizerUI()
