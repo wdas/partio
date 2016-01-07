@@ -32,9 +32,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #define TABLE_SIZE 256
 
 
-using namespace Partio;
-using namespace std;
-
 //////////////////////////////////
 MVector partio4Maya::jitterPoint(int id, float freq, float offset, float jitterMag)
 ///* generate a constant noise offset for this  ID
@@ -270,7 +267,7 @@ void partio4Maya::updateFileName (MString cacheFile, MString cacheDir,
 
     if (cacheStatic)
     {
-        stringstream s_str;
+        std::stringstream s_str;
         s_str << origFrameString.asChar();
         s_str >> cacheFrame;
     }

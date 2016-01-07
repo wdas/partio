@@ -192,9 +192,6 @@ namespace {
             if (p_reader_cache == 0 || p_reader_cache->particles == 0 || p_reader_cache->positionAttr.attributeIndex == -1)
                 return;
 
-            // TODO: optimize attrib pushes, and use scoped utilities
-            glPushAttrib(GL_ALL_ATTRIB_BITS);
-
             // check for viewport draw mode
             if (m_draw_style == PARTIO_DRAW_STYLE_BOUNDING_BOX || as_bounding_box)
                 draw_bounding_box();
@@ -250,8 +247,6 @@ namespace {
                     }
                 }
             }
-
-            glPopAttrib();
         }
     };
 }
@@ -288,7 +283,18 @@ namespace MHWRender {
         if (draw_data == 0)
             return;
 
+        glPushAttrib(GL_ALL_ATTRIB_BITS);
+        float world_view[4][4];
+        context.getMatrix(MHWRender::MDrawContext::kWorldViewMtx).get(world_view);
+
+        glMatrixMode(GL_MODELVIEW);
+        glPushMatrix();
+        glLoadMatrixf(&world_view[0][0]);
+
         draw_data->draw(context.getDisplayStyle() & MHWRender::MFrameContext::kBoundingBox);
+
+        glPopMatrix();
+        glPopAttrib();
     }
 
     MBoundingBox partioVisualizerDrawOverride::boundingBox(const MDagPath& objPath, const MDagPath& cameraPath) const

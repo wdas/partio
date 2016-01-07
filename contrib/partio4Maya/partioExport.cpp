@@ -62,16 +62,16 @@ MSyntax PartioExport::createSyntax()
 
     MSyntax syntax;
 
-    syntax.addFlag(kHelpFlagS, kHelpFlagL,  MSyntax::kNoArg);
-    syntax.addFlag(kPathFlagS, kPathFlagL,  MSyntax::kString);
+    syntax.addFlag(kHelpFlagS, kHelpFlagL, MSyntax::kNoArg);
+    syntax.addFlag(kPathFlagS, kPathFlagL, MSyntax::kString);
     syntax.addFlag(kAttributeFlagS, kAttributeFlagL, MSyntax::kString);
-    syntax.makeFlagMultiUse( kAttributeFlagS );
+    syntax.makeFlagMultiUse(kAttributeFlagS);
     syntax.addFlag(kFlipFlagS, kFlipFlagL, MSyntax::kNoArg);
     syntax.addFlag(kFormatFlagS, kFormatFlagL, MSyntax::kString);
-    syntax.addFlag(kMinFrameFlagS,kMinFrameFlagL, MSyntax::kLong);
+    syntax.addFlag(kMinFrameFlagS, kMinFrameFlagL, MSyntax::kLong);
     syntax.addFlag(kMaxFrameFlagS, kMaxFrameFlagL, MSyntax::kLong);
-    syntax.addFlag(kFilePrefixFlagS,kFilePrefixFlagL, MSyntax::kString);
-    syntax.addFlag(kPerFrameFlagS,kPerFrameFlagL, MSyntax::kString);
+    syntax.addFlag(kFilePrefixFlagS, kFilePrefixFlagL, MSyntax::kString);
+    syntax.addFlag(kPerFrameFlagS, kPerFrameFlagL, MSyntax::kString);
     syntax.addArg(MSyntax::kString);
     syntax.enableQuery(false);
     syntax.enableEdit(false);
@@ -97,7 +97,8 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
     if (Args.length() < 3)
     {
-        MGlobal::displayError("PartioExport-> need the EXPORT PATH and a PARTICLESHAPE's NAME, and at least one ATTRIBUTE's NAME you want to export." );
+        MGlobal::displayError(
+                "PartioExport-> need the EXPORT PATH and a PARTICLESHAPE's NAME, and at least one ATTRIBUTE's NAME you want to export.");
         printUsage();
         return MStatus::kFailure;
     }
@@ -123,21 +124,21 @@ MStatus PartioExport::doIt(const MArgList& Args)
     Format = Format.toLowerCase();
 
     if (Format != "pda" &&
-            Format != "pdb" &&
-            Format != "pdc" &&
-            Format != "prt" &&
-            Format != "bin" &&
-            Format != "bgeo" &&
-            Format != "geo" &&
-            Format != "ptc" &&
-            Format != "mc" &&
-            Format != "rib" &&
-            Format != "pts" &&
-            Format != "xyz" &&
-            Format != "pcd" &&
-            Format != "rpc" &&
-            //Format != "icecache" &&
-            Format != "rib" )
+        Format != "pdb" &&
+        Format != "pdc" &&
+        Format != "prt" &&
+        Format != "bin" &&
+        Format != "bgeo" &&
+        Format != "geo" &&
+        Format != "ptc" &&
+        Format != "mc" &&
+        Format != "rib" &&
+        Format != "pts" &&
+        Format != "xyz" &&
+        Format != "pcd" &&
+        Format != "rpc" &&
+        //Format != "icecache" &&
+        Format != "rib")
     {
         //MGlobal::displayError("PartioExport-> format is one of: pda,pdb,pdc,prt,bin,bgeo,geo,ptc,mc,icecache,rib,ass");
         MGlobal::displayError("PartioExport-> format is one of: pda,pdb,pdc,prt,bin,rpc,bgeo,geo,ptc,mc,rib,ass");
@@ -146,7 +147,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
     bool startFrameSet = false;
     bool endFrameSet = false;
-    int  startFrame, endFrame;
+    int startFrame, endFrame;
     if (argData.isFlagSet(kMinFrameFlagL))
     {
         argData.getFlagArgument(kMinFrameFlagL, 0, startFrame);
@@ -178,32 +179,36 @@ MStatus PartioExport::doIt(const MArgList& Args)
     list.getDependNode(0, objNode);
     MFnDependencyNode depNode(objNode, &status);
 
-    if ( objNode.apiType() != MFn::kParticle && objNode.apiType() != MFn::kNParticle )
+    if (objNode.apiType() != MFn::kParticle && objNode.apiType() != MFn::kNParticle)
     {
         MGlobal::displayError("PartioExport-> can't find your PARTICLESHAPE.");
         return MStatus::kFailure;
     }
 
     /// parse attribute flags
-    unsigned int numUses = argData.numberOfFlagUses( kAttributeFlagL );
+    unsigned int numUses = argData.numberOfFlagUses(kAttributeFlagL);
 
     /// loop thru the rest of the attributes given
-    MStringArray  attrNames;
+    MStringArray attrNames;
     attrNames.append(MString("id"));
     attrNames.append(MString("position"));
 
     bool worldVeloCheck = false;
 
-    for ( unsigned int i = 0; i < numUses; i++ )
+    for (unsigned int i = 0; i < numUses; i++)
     {
         MArgList argList;
-        status = argData.getFlagArgumentList( kAttributeFlagL, i, argList );
-        if (!status) return status;
+        status = argData.getFlagArgumentList(kAttributeFlagL, i, argList);
+        if (!status)
+            return status;
 
-        MString AttrName = argList.asString( 0, &status );
-        if (!status) return status;
+        MString AttrName = argList.asString(0, &status);
+        if (!status)
+            return status;
 
-        if (AttrName == "position" || AttrName == "worldPosition"  || AttrName == "id" || AttrName == "particleId") {}
+        if (AttrName == "position" || AttrName == "worldPosition" || AttrName == "id" || AttrName == "particleId")
+        {
+        }
         else if (AttrName == "worldVelocity" || AttrName == "velocity")
         {
             if (!worldVeloCheck)
@@ -236,26 +241,27 @@ MStatus PartioExport::doIt(const MArgList& Args)
         DPS.setObject(defObj);
         isDeformed = true;
     }
-    //cout <<  "Orig Particle system -> "  <<  PS.name() << endl;
-    //cout <<  "Deformed Particle system -> " <<  DPS.name() << endl;
+
+    std::cout << "Orig Particle system -> " << PS.name() << std::endl;
+    std::cout << "Deformed Particle system -> " << DPS.name() << std::endl;
 
     int outFrame = -123456;
 
-    for  (int frame = startFrame; frame<=endFrame; frame++)
+    for (int frame = startFrame; frame <= endFrame; frame++)
     {
         MTime dynTime;
         dynTime.setValue(frame);
         if (frame == startFrame && startFrame < endFrame)
         {
-            PS.evaluateDynamics(dynTime,true);
+            PS.evaluateDynamics(dynTime, true);
             if (isDeformed)
-                DPS.evaluateDynamics(dynTime,true);
+                DPS.evaluateDynamics(dynTime, true);
         }
         else
         {
-            PS.evaluateDynamics(dynTime,false);
+            PS.evaluateDynamics(dynTime, false);
             if (isDeformed)
-                DPS.evaluateDynamics(dynTime,false);
+                DPS.evaluateDynamics(dynTime, false);
         }
 
         /// why is this being done AFTER the evaluate dynamics stuff?
@@ -267,7 +273,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
         else
             outFrame = (int)MAnimControl::currentTime().as(MTime::uiUnit());
 
-        char padNum [10];
+        char padNum[10];
 
         // temp usage for this..  PDC's  are counted by 250s..  TODO:  implement  "substeps"  setting
 
@@ -280,7 +286,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
         else
             sprintf(padNum, "%04d", outFrame);
 
-        MString  outputPath =  Path;
+        MString outputPath = Path;
         outputPath += "/";
 
         // if we have supplied a fileName prefix, then use it instead of the particle shape name
@@ -293,7 +299,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
         outputPath += ".";
         outputPath += Format;
 
-        MGlobal::displayInfo("PartioExport-> exporting: "+ outputPath);
+        MGlobal::displayInfo("PartioExport-> exporting: " + outputPath);
         const unsigned int particleCount = PS.count();
 
         const unsigned int numAttributes = attrNames.length();
@@ -310,7 +316,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
         // used for an instancer.
         if ((particleCount > 0) && (numAttributes > 0))
         {
-            Partio::ParticlesDataMutable* p = Partio::createInterleave();            
+            Partio::ParticlesDataMutable* p = Partio::createInterleave();
 
             std::vector<std::pair<MIntArray*, Partio::ParticleAttribute> > intAttributes;
             std::vector<std::pair<MDoubleArray*, Partio::ParticleAttribute> > doubleAttributes;
@@ -340,12 +346,12 @@ MStatus PartioExport::doIt(const MArgList& Args)
                     Partio::ParticleAttribute intAttribute = p->addAttribute(attrName.asChar(), Partio::INT, 1);
                     intAttributes.push_back(std::make_pair(IA, intAttribute));
                     minParticleCount = std::min(minParticleCount, IA->length());
-                }                
+                }
                 else if (PS.isPerParticleDoubleAttribute(attrName)) // DOUBLE Attribute found
                 {
                     MDoubleArray* DA = new MDoubleArray();
 
-                    if (attrName == "radius" || attrName  == "radiusPP")
+                    if (attrName == "radius" || attrName == "radiusPP")
                     {
                         attrName = "radiusPP";
                         PS.radius(*DA);
@@ -396,7 +402,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
             // check if directory exists, and if not, create it
             struct stat st;
-            if (stat(Path.asChar(),&st) < 0)
+            if (stat(Path.asChar(), &st) < 0)
             {
 #ifdef WIN32
                 HWND hwnd = NULL;
@@ -406,7 +412,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
                 mode_t userMask = umask(0);
                 umask(userMask);
                 mode_t DIR_MODE = ((0777) ^ userMask);
-                mkdir (Path.asChar(), DIR_MODE );
+                mkdir(Path.asChar(), DIR_MODE);
 #endif
             }
 
@@ -431,7 +437,8 @@ MStatus PartioExport::doIt(const MArgList& Args)
                     Partio::ParticleAccessor doubleAccessor(it->second);
                     pit.addAccessor(doubleAccessor);
                     for (int id = 0; pit != p->end(); ++pit)
-                        doubleAccessor.data<Partio::Data<float, 1> >(pit)[0] = static_cast<float>(it->first->operator[](id++));
+                        doubleAccessor.data<Partio::Data<float, 1> >(pit)[0] = static_cast<float>(it->first->operator[](
+                                id++));
                 }
 
                 for (std::vector<std::pair<MVectorArray*, Partio::ParticleAttribute> >::iterator it = vectorAttributes.begin();
@@ -441,10 +448,11 @@ MStatus PartioExport::doIt(const MArgList& Args)
                     Partio::ParticleAccessor vectorAccessor(it->second);
                     pit.addAccessor(vectorAccessor);
                     const bool doSwap = swapUP &&
-                                        ((it->second.name == "position") || (it->second.name == "velocity") || (it->second.name == "acceleration"));
+                                        ((it->second.name == "position") || (it->second.name == "velocity") ||
+                                         (it->second.name == "acceleration"));
                     for (int id = 0; pit != p->end(); ++pit)
                     {
-                        Partio::Data<float,3>& vecAttr = vectorAccessor.data<Partio::Data<float,3> >(pit);
+                        Partio::Data<float, 3>& vecAttr = vectorAccessor.data<Partio::Data<float, 3> >(pit);
                         const MVector& P = it->first->operator[](id++);
                         vecAttr[0] = static_cast<float>(P.x);
 
@@ -477,13 +485,13 @@ MStatus PartioExport::doIt(const MArgList& Args)
             for (std::vector<std::pair<MVectorArray*, Partio::ParticleAttribute> >::iterator it = vectorAttributes.begin();
                  it != vectorAttributes.end(); ++it)
                 delete it->first;
-            
+
             p->release();
         }
 
         // support escaping early  in export command
         if (computation.isInterruptRequested())
-        {   
+        {
             MGlobal::displayWarning("PartioExport detected escape being pressed, ending export early!");
             break;
         }
