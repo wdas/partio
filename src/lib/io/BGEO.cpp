@@ -153,9 +153,9 @@ bool getAttributes(int& particleSize, vector<int>& attrOffsets, vector<TAttribut
 }
 
 // read buffer, seekg doesn't work with gzip
-void skip(istream *input, int numChars)
+void skip(istream *input, size_t numChars)
 {
-    static const int bufferSize = 4096;
+    static const size_t bufferSize = 4096;
     static char buffer[bufferSize];
     while (numChars>0) {
         int toRead=std::min(numChars,bufferSize);
