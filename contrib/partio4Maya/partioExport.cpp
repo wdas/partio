@@ -227,23 +227,20 @@ MStatus PartioExport::doIt(const MArgList& Args)
 
     MFnParticleSystem PS(objNode);
     MFnParticleSystem DPS(objNode);
-    bool isDeformed = false;
 
     if (PS.isDeformedParticleShape())
     {
         MObject origObj = PS.originalParticleShape();
         PS.setObject(origObj);
-        isDeformed = true;
     }
     else
     {
         MObject defObj = PS.deformedParticleShape(&status);
         DPS.setObject(defObj);
-        isDeformed = true;
     }
 
-    std::cout << "Orig Particle system -> " << PS.name() << std::endl;
-    std::cout << "Deformed Particle system -> " << DPS.name() << std::endl;
+    //std::cout << "Orig Particle system -> " << PS.name() << std::endl;
+    //std::cout << "Deformed Particle system -> " << DPS.name() << std::endl;
 
     int outFrame = -123456;
 
@@ -254,14 +251,12 @@ MStatus PartioExport::doIt(const MArgList& Args)
         if (frame == startFrame && startFrame < endFrame)
         {
             PS.evaluateDynamics(dynTime, true);
-            if (isDeformed)
-                DPS.evaluateDynamics(dynTime, true);
+            DPS.evaluateDynamics(dynTime, true);
         }
         else
         {
             PS.evaluateDynamics(dynTime, false);
-            if (isDeformed)
-                DPS.evaluateDynamics(dynTime, false);
+            DPS.evaluateDynamics(dynTime, false);
         }
 
         /// why is this being done AFTER the evaluate dynamics stuff?
@@ -374,15 +369,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
                 {
                     MVectorArray* VA = new MVectorArray();
                     if (attrName == "position")
-                    {
-                        if (isDeformed)
-                            DPS.position(*VA);
-                        else
-                        {
-                            std::cout << " using undeformed position attr" << std::endl;
-                            PS.position(*VA);
-                        }
-                    }
+                        DPS.position(*VA);
                     else if (attrName == "velocity")
                         PS.velocity(*VA);
                     else if (attrName == "acceleration")
