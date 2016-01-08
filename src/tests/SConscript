@@ -34,7 +34,7 @@ import os
 Import('env variant_build_abs variant_install_abs')
 
 envtests=env.Clone(CPPPATH=[variant_build_abs+"/include"]
-              ,LIBPATH=["%s/lib"%variant_build_abs]
+              ,LIBPATH=["%s/lib64"%variant_build_abs]
               ,LIBS=["partio","z"])
 
 # Find all .cpp's and make them into programs with same names as cpp
