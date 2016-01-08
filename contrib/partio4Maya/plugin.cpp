@@ -27,6 +27,8 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
+#include <GL/glew.h>
+
 #include "partioVisualizer.h"
 #include "partioInstancer.h"
 #include "partioEmitter.h"
@@ -36,10 +38,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partioVisualizerDrawOverride.h"
 #include <maya/MFnPlugin.h>
 #include <maya/MDrawRegistry.h>
+#include <maya/MGlobal.h>
 
 MStatus initializePlugin ( MObject obj )
 {
-
+    if (MGlobal::mayaState() == MGlobal::kInteractive)
+        glewInit();
     // source  mel scripts this way if they're missing from the script path it will alert the user...
     MGlobal::executeCommand("source AEpartioEmitterTemplate.mel");
     MGlobal::executeCommand("source AEpartioVisualizerTemplate.mel");

@@ -19,6 +19,8 @@
  * - Pal
  */
 
+#include <GL/glew.h>
+
 #include "partioVisualizerDrawOverride.h"
 
 #include <maya/MUserData.h>
@@ -290,6 +292,8 @@ namespace MHWRender {
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadMatrixf(&world_view[0][0]);
+
+        glUseProgram(0);
 
         draw_data->draw(context.getDisplayStyle() & MHWRender::MFrameContext::kBoundingBox);
 
