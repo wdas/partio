@@ -225,7 +225,7 @@ addAttribute(const char* attribute,ParticleAttributeType type,const int count)
 
     int stride=TypeSize(type)*count;
     attributeStrides.push_back(stride);
-    char* dataPointer=(char*)malloc(allocatedCount*stride);
+    char* dataPointer=(char*)malloc((size_t)allocatedCount*(size_t)stride);
     attributeData.push_back(dataPointer);
     attributeOffsets.push_back(dataPointer-(char*)0);
     attributeIndexedStrs.push_back(IndexedStrTable());
