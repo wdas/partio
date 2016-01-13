@@ -58,16 +58,16 @@ void getParam<AtRGB>(AtRGB& param, AtNode* node, const char* paramName)
 }
 
 struct PartioData {
-    Partio::ParticlesData* points;
+    PARTIO::ParticlesData* points;
     AtNode* mynode;
 
-    Partio::ParticleAttribute positionAttr;
-    Partio::ParticleAttribute velocityAttr;
-    Partio::ParticleAttribute accelerationAttr;
-    Partio::ParticleAttribute rgbAttr;
-    Partio::ParticleAttribute opacityAttr;
-    Partio::ParticleAttribute radiusAttr;
-    Partio::ParticleAttribute incandAttr;
+    PARTIO::ParticleAttribute positionAttr;
+    PARTIO::ParticleAttribute velocityAttr;
+    PARTIO::ParticleAttribute accelerationAttr;
+    PARTIO::ParticleAttribute rgbAttr;
+    PARTIO::ParticleAttribute opacityAttr;
+    PARTIO::ParticleAttribute radiusAttr;
+    PARTIO::ParticleAttribute incandAttr;
 
     std::string arg_velFrom;
     std::string arg_accFrom;
@@ -133,8 +133,8 @@ struct PartioData {
         hasOpacPP = false;
         hasIncandPP = false;
 
-        positionAttr.type = Partio::NONE;
-        accelerationAttr.type = Partio::NONE;
+        positionAttr.type = PARTIO::NONE;
+        accelerationAttr.type = PARTIO::NONE;
     }
 
     ~PartioData()
@@ -177,7 +177,7 @@ struct PartioData {
         if (partioCacheExists(arg_file))
         {
             cacheExists = true;
-            points = Partio::read(arg_file.c_str());
+            points = PARTIO::read(arg_file.c_str());
             if (points)
                 return true;
             else
@@ -303,14 +303,14 @@ struct PartioData {
         /// Velocity
         if ((global_motionBlurSteps > 1) && (arg_velFrom.length() > 0) && (points->attributeInfo(arg_velFrom.c_str(), velocityAttr) ||
             points->attributeInfo("velocity", velocityAttr) || points->attributeInfo("Velocity", velocityAttr)) && (velocityAttr.count > 2) &&
-            (velocityAttr.type == Partio::FLOAT))
+            (velocityAttr.type == PARTIO::FLOAT))
         {
             AiMsgInfo("[partioGenerator] found velocity attr, motion blur is a GO!!");
             canMotionBlur = true;
 
             ////////////////////
             /// Acceleration
-            if (points->attributeInfo(arg_accFrom.c_str(), accelerationAttr) && (accelerationAttr.count > 2) && (accelerationAttr.type == Partio::FLOAT))
+            if (points->attributeInfo(arg_accFrom.c_str(), accelerationAttr) && (accelerationAttr.count > 2) && (accelerationAttr.type == PARTIO::FLOAT))
             {
                 AiMsgInfo("[partioGenerator] found acceleration attr, motion blur is a GO!!");
                 canMotionBlur = true;
@@ -363,7 +363,7 @@ struct PartioData {
             AiNodeSetFlt(currentInstance, "opacityPP", arg_defaultOpac);
         }
 
-        const bool can_accelerate = accelerationAttr.type != Partio::NONE;
+        const bool can_accelerate = accelerationAttr.type != PARTIO::NONE;
 
         if (canMotionBlur)
         {
@@ -385,7 +385,7 @@ struct PartioData {
 
 
         // now parse and include any extra attrs
-        std::vector<Partio::ParticleAttribute> extraAttrs;
+        std::vector<PARTIO::ParticleAttribute> extraAttrs;
         std::vector<AtArray*> arnoldArrays;
 
         char extraAttrStr[1000];
@@ -395,7 +395,7 @@ struct PartioData {
         parts[index] = strtok(extraAttrStr, " ");
         while (parts[index] != 0)
         {
-            Partio::ParticleAttribute user;
+            PARTIO::ParticleAttribute user;
             if (points->attributeInfo(parts[index], user))
             {
                 // we don't want to double export these 
@@ -406,13 +406,13 @@ struct PartioData {
                     user.name != "opacityPP" &&
                     user.name != "radiusPP")
                 {
-                    if (user.type == Partio::FLOAT || user.count == 1)
+                    if (user.type == PARTIO::FLOAT || user.count == 1)
                     {
                         AiNodeDeclare(currentInstance, parts[index], "uniform Float");
                         floatArr = AiArrayAllocate(pointCount, 1, AI_TYPE_FLOAT);
                         arnoldArrays.push_back(floatArr);
                     }
-                    else if (user.type == Partio::VECTOR || user.count == 3)
+                    else if (user.type == PARTIO::VECTOR || user.count == 3)
                     {
                         AiNodeDeclare(currentInstance, parts[index], "uniform Vector");
                         vecArr = AiArrayAllocate(pointCount, 1, AI_TYPE_VECTOR);
@@ -533,14 +533,14 @@ struct PartioData {
             }
             for (size_t x = 0; x < extraAttrs.size(); ++x)
             {
-                if (extraAttrs[x].type == Partio::FLOAT)
+                if (extraAttrs[x].type == PARTIO::FLOAT)
                 {
 
                     const float* partioFLOAT = points->data<float>(extraAttrs[x], id);
                     float floatVal = partioFLOAT[0];
                     AiArraySetFlt(arnoldArrays[x], i, floatVal);
                 }
-                else if (extraAttrs[x].type == Partio::VECTOR)
+                else if (extraAttrs[x].type == PARTIO::VECTOR)
                 {
                     const float* partioVEC = points->data<float>(extraAttrs[x], id);
                     AtVector vecVal;
