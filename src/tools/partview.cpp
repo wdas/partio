@@ -515,7 +515,7 @@ void  reloadParticleFile(int direction)
         if (result >=0)
         {
 
-			ParticlesData* newParticles;
+            PARTIO::ParticlesData* newParticles;
 			newParticles = particles;
 			particles = NULL;
 			if (newParticles != NULL)
@@ -524,7 +524,7 @@ void  reloadParticleFile(int direction)
 				//particles = particles->reset();
 				newParticles->release();
 			}
-			particles = read(particleFile.c_str());
+			particles = PARTIO::read(particleFile.c_str());
 
             if (!glutGetWindow()) {
                 return;
@@ -757,7 +757,7 @@ int buildPopupMenu()
     glutAddMenuEntry("None", -1);
     for (int i = 0; i < numAttr; i++)
     {
-        Partio::ParticleAttribute attr;
+        PARTIO::ParticleAttribute attr;
         particles->attributeInfo(i,attr);
         glutAddMenuEntry(attr.name.c_str(), i);
     }
@@ -766,7 +766,7 @@ int buildPopupMenu()
     glutAddMenuEntry("None", -1);
     for (int i = 0; i < numAttr; i++)
     {
-        Partio::ParticleAttribute attr;
+        PARTIO::ParticleAttribute attr;
         particles->attributeInfo(i,attr);
         glutAddMenuEntry(attr.name.c_str(), i);
     }

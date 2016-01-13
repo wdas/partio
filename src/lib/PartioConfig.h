@@ -33,44 +33,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#include <Partio.h>
-#include <iostream>
-#ifdef PARTIO_WIN32
-#define M_PI (3.14159265359893238)
+#ifndef _PartioConfig_h_
+#define _PartioConfig_h_
+
+#ifdef PARTIO_NAMESPACE
+#define PARTIO PARTIO_NAMESPACE::Partio
+#define ENTER_PARTIO_NAMESPACE namespace PARTIO_NAMESPACE { namespace Partio {
+#define EXIT_PARTIO_NAMESPACE } }
+#else
+#define PARTIO Partio
+#define ENTER_PARTIO_NAMESPACE namespace Partio {
+#define EXIT_PARTIO_NAMESPACE }
 #endif
 
-#include <cmath>
-
-int main(int argc,char *argv[])
-{
-    PARTIO::ParticlesDataMutable* p=PARTIO::create();
-    PARTIO::ParticleAttribute positionAttr=p->addAttribute("position",PARTIO::VECTOR,3);
-    PARTIO::ParticleAttribute normalAttr=p->addAttribute("normal",PARTIO::VECTOR,3);
-    int n=30;
-    for(int i=0;i<n;i++){
-        int particle=p->addParticle();
-        float* pos=p->dataWrite<float>(positionAttr,particle);
-        float* norm=p->dataWrite<float>(normalAttr,particle);
-        float theta=i*2*M_PI/(float)n;
-        pos[2]=cos(theta);
-        pos[0]=sin(theta);
-        pos[1]=0;
-        norm[0]=cos(theta);
-        norm[2]=-sin(theta);
-        norm[1]=0;
-        
-    }
-    write("circle.00001.bgeo",*p);
-    write("circle.00001.geo",*p);
-    write("circle.00001.bin",*p);
-    write("circle.00001.pdc",*p);
-    write("circle.00001.pdb",*p);
-    write("circle.00001.pda",*p);
-    write("circle.00001.ptc",*p);
-    write("circle.00001.rib",*p);
-    write("circle.00001.mc",*p);
-
-   
-    p->release();
-    return 0;
-}
+#endif

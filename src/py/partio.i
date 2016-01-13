@@ -42,20 +42,21 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <numpy/arrayobject.h> 
 #endif
 
+#include <PartioConfig.h>
 #include <Partio.h>
 #include <PartioIterator.h>
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 typedef uint64_t ParticleIndex;
-}
+EXIT_PARTIO_NAMESPACE
 
-using namespace Partio;
+using namespace PARTIO;
 
 
 // This is for passing fixed sized arrays
 struct fixedFloatArray
 {
     int count;
-    Partio::ParticleAttributeType type; // should be float or VECTOR
+    ParticleAttributeType type; // should be float or VECTOR
     union{
         float f[16];
         int i[16];

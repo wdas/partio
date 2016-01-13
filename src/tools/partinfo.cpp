@@ -43,21 +43,21 @@ int main(int argc,char *argv[])
         std::cerr<<"Usage is: "<<argv[0]<<" <filename> { particle indices to print full info } "<<std::endl;
         return 1;
     }
-    Partio::ParticlesDataMutable* p=Partio::read(argv[1]);
+    PARTIO::ParticlesDataMutable* p = PARTIO::read(argv[1]);
     if(p){
         std::cout<<std::setiosflags(std::ios::left)<<"Number of particles:  "<<p->numParticles()<<std::endl;
         int numAttr=p->numAttributes();
         std::cout<<std::setw(12)<<"Type"<<std::setw(10)<<"Count"<<std::setw(30)<<"Name"<<std::endl;
         std::cout<<std::setw(12)<<"----"<<std::setw(10)<<"-----"<<std::setw(30)<<"----"<<std::endl;
         for(int i=0;i<numAttr;i++){
-            Partio::ParticleAttribute attr;
+            PARTIO::ParticleAttribute attr;
             p->attributeInfo(i,attr);
-            std::cout<<std::setw(12)<<Partio::TypeName(attr.type)
+            std::cout<<std::setw(12)<<PARTIO::TypeName(attr.type)
                      <<std::setw(10)<<attr.count
                      <<std::setw(30)<<attr.name<<std::endl;;
         }
 
-        Partio::ParticleAttribute positionhandle;
+        PARTIO::ParticleAttribute positionhandle;
         p->attributeInfo("position",positionhandle);
         if(argc==2){
             for(int i=0;i<std::min(10,p->numParticles());i++){
@@ -73,14 +73,14 @@ int main(int argc,char *argv[])
                     std::cout<<"OUT OF RANGE"<<std::endl;
                 }else{
                     for(int i=0;i<numAttr;i++){
-                        Partio::ParticleAttribute attr;
+                        PARTIO::ParticleAttribute attr;
                         p->attributeInfo(i,attr);
-                        std::cout<<std::setw(10)<<Partio::TypeName(attr.type)<<" "<<std::setw(10)<<attr.name;
+                        std::cout<<std::setw(10)<<PARTIO::TypeName(attr.type)<<" "<<std::setw(10)<<attr.name;
                         for(int ii=0;ii<attr.count;ii++){
-                            if(attr.type==Partio::INDEXEDSTR){
+                            if(attr.type==PARTIO::INDEXEDSTR){
                                 int val=p->data<int>(attr,particleIndex)[ii];
                                 std::cout<<" "<<val<<" '"<<p->indexedStrs(attr)[val]<<"'";
-                            }else if(attr.type==Partio::INT) std::cout<<" "<<p->data<int>(attr,particleIndex)[ii];
+                            }else if(attr.type==PARTIO::INT) std::cout<<" "<<p->data<int>(attr,particleIndex)[ii];
                             else std::cout<<" "<<p->data<float>(attr,particleIndex)[ii];
                         }
                         std::cout<<std::endl;

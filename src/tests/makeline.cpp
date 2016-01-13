@@ -40,35 +40,35 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 int main(int argc,char *argv[])
 {
 
-    Partio::ParticlesDataMutable* particles=Partio::createInterleave();
+    PARTIO::ParticlesDataMutable* particles=PARTIO::createInterleave();
 
 	particles->addParticles(10);
 
-    Partio::ParticleAttribute position=particles->addAttribute("position",Partio::VECTOR,3);
-    Partio::ParticleAttribute id=particles->addAttribute("id",Partio::INT,1);
+    PARTIO::ParticleAttribute position=particles->addAttribute("position",PARTIO::VECTOR,3);
+    PARTIO::ParticleAttribute id=particles->addAttribute("id",PARTIO::INT,1);
 
 
 	// before adding  additional  attrs. you must ->begin() the iterator
 
-    Partio::ParticlesDataMutable::iterator it=particles->begin();
-    Partio::ParticleAccessor positionAccess(position);
+    PARTIO::ParticlesDataMutable::iterator it=particles->begin();
+    PARTIO::ParticleAccessor positionAccess(position);
     it.addAccessor(positionAccess);
-    Partio::ParticleAccessor idAccess(id);
+    PARTIO::ParticleAccessor idAccess(id);
     it.addAccessor(idAccess);
 
     float x=0;
     int idCounter=0;
     for(;it!=particles->end();++it){
-        Partio::Data<float,3>& P=positionAccess.data<Partio::Data<float,3> >(it);
-        Partio::Data<int,1>& id=idAccess.data<Partio::Data<int,1> >(it);
+        PARTIO::Data<float,3>& P=positionAccess.data<PARTIO::Data<float,3> >(it);
+        PARTIO::Data<int,1>& id=idAccess.data<PARTIO::Data<int,1> >(it);
         P[0]=x;P[1]=-x;P[2]=0;
         id[0]=idCounter;
         x+=1.;
         idCounter++;
     }
 
-    Partio::write("test.bgeo",*particles);
-    Partio::write("test.geo",*particles);
+    PARTIO::write("test.bgeo",*particles);
+    PARTIO::write("test.geo",*particles);
 
 
 }

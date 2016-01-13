@@ -48,7 +48,7 @@ Some code for this format  was helped along  by referring to the official nextli
 #include <memory>
 
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
 using namespace std;
 
@@ -288,5 +288,4 @@ bool writeRPC(const char* filename,const ParticlesData& p,const bool /*compresse
 	return true;
 }
 
-
-}// end of namespace Partio
+EXIT_PARTIO_NAMESPACE

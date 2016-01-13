@@ -41,10 +41,10 @@ int main(int argc,char *argv[])
         std::cerr<<"Usage is: "<<argv[0]<<" <filename in> <filename out>"<<std::endl;
         return 1;
     }
-    Partio::ParticlesData* p=Partio::read(argv[1]);
+    PARTIO::ParticlesData* p=PARTIO::read(argv[1]);
     if(p){
-        Partio::print(p);
-        Partio::write(argv[2],*p);
+        PARTIO::print(p);
+        PARTIO::write(argv[2],*p);
         p->release();
     }
     

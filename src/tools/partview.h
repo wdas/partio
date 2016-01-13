@@ -51,16 +51,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <Partio.h>
 #include "Camera.h"
 
-using namespace Partio;
 using namespace std;
 
 
 // global vars
-ParticlesData* particles;
+PARTIO::ParticlesData* particles;
 Camera camera;
-ParticleAttribute positionAttr;
-ParticleAttribute colorAttr;
-ParticleAttribute alphaAttr;
+PARTIO::ParticleAttribute positionAttr;
+PARTIO::ParticleAttribute colorAttr;
+PARTIO::ParticleAttribute alphaAttr;
 
 int numPoints;
 int frameNumberOGL;

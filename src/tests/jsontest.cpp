@@ -50,10 +50,10 @@ int main(int argc,char *argv[]){
         std::cerr<<"Usage: "<<argv[0]<<" <filename>"<<std::endl;
         return 1;
     }
-    Partio::ParticlesDataMutable* parts=Partio::testRead(argv[1]);
+    PARTIO::ParticlesDataMutable* parts=PARTIO::testRead(argv[1]);
     if(parts){
         // write old format
-        Partio::write("testdump.bgeo",*parts);
+        PARTIO::write("testdump.bgeo",*parts);
     }
     return 0;
 }

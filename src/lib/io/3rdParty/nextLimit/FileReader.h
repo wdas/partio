@@ -11,9 +11,13 @@
 #define ZLIB_CONST
 #include "zlib.h"
 
+#include "../../../PartioConfig.h"
+
 #define HandleBufferEndianness16(buf, num)
 #define HandleBufferEndianness32(buf, num)
 #define HandleBufferEndianness64(buf, num)
+
+ENTER_PARTIO_NAMESPACE
 
 class FileReader
 {
@@ -123,5 +127,7 @@ private:
 	int64_t				m_readPos;
 	int64_t				m_fileSize;
 };
+
+EXIT_PARTIO_NAMESPACE
 
 #endif

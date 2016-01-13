@@ -47,10 +47,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <cstdio>
 #include <cstring>
 #include <stdint.h>
+#include "PartioConfig.h"
 #include "PartioAttribute.h"
 #include "PartioIterator.h"
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
 //! Opaque random access method to a single particle. No number is implied or guaranteed.
 typedef uint64_t ParticleIndex;
@@ -288,5 +289,6 @@ void print(const ParticlesData* particles);
 //! TODO: this is a temporary hack to develop binary json support
 Partio::ParticlesDataMutable*  testRead(const char* filename);
 
-}
+EXIT_PARTIO_NAMESPACE
+
 #endif

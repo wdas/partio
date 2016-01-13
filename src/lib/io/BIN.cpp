@@ -49,7 +49,7 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 #include <memory>
 
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
 using namespace std;
 
@@ -488,4 +488,4 @@ bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compresse
     return true;
 }
 
-}// end of namespace Partio
+EXIT_PARTIO_NAMESPACE

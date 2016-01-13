@@ -39,9 +39,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifndef PARTIO_WIN32
 
 #include <pthread.h>
+#include "../PartioConfig.h"
 
-namespace Partio
-{
+ENTER_PARTIO_NAMESPACE
 
 #ifndef PARTIO_USE_SPINLOCK
 
@@ -100,7 +100,7 @@ namespace Partio
     };
     
 #endif // USE_PTHREAD_SPINLOCK
-}
+EXIT_PARTIO_NAMESPACE
 
 #else
 #include <windows.h>

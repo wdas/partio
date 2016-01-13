@@ -38,9 +38,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <cassert>
 #include <vector>
 #include <iostream>
+#include "PartioConfig.h"
 #include "PartioAttribute.h"
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
 class  ParticlesData;
 struct ParticleAccessor;
@@ -216,7 +217,6 @@ std::ostream& operator<<(std::ostream& output,const Data<T,d>& v)
     return output;
 }
 
-
-}
+EXIT_PARTIO_NAMESPACE
 
 #endif

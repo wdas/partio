@@ -36,9 +36,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #define _ParticlesHeaders_h_
 
 #include "../Partio.h"
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
-class ParticleHeaders:public ParticlesDataMutable
+class ParticleHeaders : public ParticlesDataMutable
 {
 public:
     ParticleHeaders();
@@ -88,5 +88,7 @@ private:
     std::map<std::string,int> nameToAttribute;
 
 };
-}
+
+EXIT_PARTIO_NAMESPACE
+
 #endif

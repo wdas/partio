@@ -35,7 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifndef _READERS_h_
 #define _READERS_h_
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
+
 ParticlesDataMutable* readBGEO		(const char* filename,const bool headersOnly);
 ParticlesDataMutable* readGEO		(const char* filename,const bool headersOnly);
 ParticlesDataMutable* readPDB		(const char* filename,const bool headersOnly);
@@ -65,6 +66,7 @@ bool writePRT		(const char* filename,const ParticlesData& p,const bool compresse
 bool writeBIN		(const char* filename,const ParticlesData& p,const bool compressed);
 bool writePCD		(const char* filename,const ParticlesData& p,const bool compressed);
 //bool writeRPC		(const char* filename,const ParticlesData& p,const bool compressed);
-}
+
+EXIT_PARTIO_NAMESPACE
 
 #endif

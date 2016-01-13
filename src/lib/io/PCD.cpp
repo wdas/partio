@@ -63,8 +63,7 @@ DATA ascii
 
 */
 
-namespace Partio
-{
+ENTER_PARTIO_NAMESPACE
 
 using namespace std;
 
@@ -430,4 +429,4 @@ bool writePCD(const char* filename,const ParticlesData& p,const bool compressed)
 
 }
 
-} // namespace
+EXIT_PARTIO_NAMESPACE

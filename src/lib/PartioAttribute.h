@@ -41,7 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #ifndef _PartioParticleAttribute_h_
 #define _PartioParticleAttribute_h_
-namespace Partio{
+
+#include "PartioConfig.h"
+
+ENTER_PARTIO_NAMESPACE
 
 // Particle Types
 enum ParticleAttributeType {NONE=0,VECTOR=1,FLOAT=2,INT=3,INDEXEDSTR=4};
@@ -112,5 +115,7 @@ public:
     //! for example for a PTC file to read and write this could be "color" or "point"
     // std::string comment;
 };
-}
+
+EXIT_PARTIO_NAMESPACE
+
 #endif

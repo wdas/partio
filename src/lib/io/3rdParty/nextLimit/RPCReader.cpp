@@ -5,6 +5,8 @@
 #define RPC_MIN_SUPPORTED_VERSION		3
 #define RPC_MAX_SUPPORTED_VERSION		3
 
+ENTER_PARTIO_NAMESPACE
+
 RPCFile::ChannelInfo::ChannelInfo()
 {
 	m_name = NULL;
@@ -346,3 +348,5 @@ void* RPCFile::ReadWholeChannel(const char* name) const
 	int idx = FindChannelIndex(name);
 	return (idx >= 0) ? ReadWholeChannel(idx) : NULL;
 }
+
+EXIT_PARTIO_NAMESPACE
