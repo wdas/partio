@@ -196,12 +196,12 @@ MStatus PartioImport::doIt(const MArgList& Args)
 
     if (stat == MStatus::kSuccess) // particle object was found and attached to
     {
-        Partio::ParticlesDataMutable* particles;
-        Partio::ParticleAttribute positionAttr;
-        Partio::ParticleAttribute velocityAttr;
+        PARTIO::ParticlesDataMutable* particles;
+        PARTIO::ParticleAttribute positionAttr;
+        PARTIO::ParticleAttribute velocityAttr;
 
         MGlobal::displayInfo(MString("PartioImport-> LOADING: ") + particleCache);
-        particles = Partio::read(particleCache.asChar());
+        particles = PARTIO::read(particleCache.asChar());
         bool hasVelo = true;
 
         if (!particles || particles->numParticles() <= 0)
@@ -239,7 +239,7 @@ MStatus PartioImport::doIt(const MArgList& Args)
 
         for (unsigned int i = 0; i < attrNames.length(); i++)
         {
-            Partio::ParticleAttribute testAttr;
+            PARTIO::ParticleAttribute testAttr;
             if (particles->attributeInfo(attrNames[i].asChar(), testAttr))
             {
 
@@ -310,7 +310,7 @@ MStatus PartioImport::doIt(const MArgList& Args)
             {
                 for (vecIt = vectorAttrArrays.begin(); vecIt != vectorAttrArrays.end(); vecIt++)
                 {
-                    Partio::ParticleAttribute vectorAttr;
+                    PARTIO::ParticleAttribute vectorAttr;
                     particles->attributeInfo(vecIt->first.c_str(), vectorAttr);
                     const float* vecVal = particles->data<float>(vectorAttr, i);
                     vectorAttrArrays[vecIt->first][i] = MVector(vecVal[0], vecVal[1], vecVal[2]);
@@ -320,7 +320,7 @@ MStatus PartioImport::doIt(const MArgList& Args)
             {
                 for (doubleIt = doubleAttrArrays.begin(); doubleIt != doubleAttrArrays.end(); doubleIt++)
                 {
-                    Partio::ParticleAttribute doubleAttr;
+                    PARTIO::ParticleAttribute doubleAttr;
                     particles->attributeInfo(doubleIt->first.c_str(), doubleAttr);
                     const float* doubleVal = particles->data<float>(doubleAttr, i);
                     doubleAttrArrays[doubleIt->first][i] = doubleVal[0];

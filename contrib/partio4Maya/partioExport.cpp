@@ -311,11 +311,11 @@ MStatus PartioExport::doIt(const MArgList& Args)
         // used for an instancer.
         if ((particleCount > 0) && (numAttributes > 0))
         {
-            Partio::ParticlesDataMutable* p = Partio::createInterleave();
+            PARTIO::ParticlesDataMutable* p = PARTIO::createInterleave();
 
-            std::vector<std::pair<MIntArray*, Partio::ParticleAttribute> > intAttributes;
-            std::vector<std::pair<MDoubleArray*, Partio::ParticleAttribute> > doubleAttributes;
-            std::vector<std::pair<MVectorArray*, Partio::ParticleAttribute> > vectorAttributes;
+            std::vector<std::pair<MIntArray*, PARTIO::ParticleAttribute> > intAttributes;
+            std::vector<std::pair<MDoubleArray*, PARTIO::ParticleAttribute> > doubleAttributes;
+            std::vector<std::pair<MVectorArray*, PARTIO::ParticleAttribute> > vectorAttributes;
 
             unsigned int minParticleCount = particleCount;
             intAttributes.reserve(numAttributes);
@@ -338,7 +338,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
                     }
                     else
                         PS.getPerParticleAttribute(attrName, *IA, &status);
-                    Partio::ParticleAttribute intAttribute = p->addAttribute(attrName.asChar(), Partio::INT, 1);
+                    PARTIO::ParticleAttribute intAttribute = p->addAttribute(attrName.asChar(), PARTIO::INT, 1);
                     intAttributes.push_back(std::make_pair(IA, intAttribute));
                     minParticleCount = std::min(minParticleCount, IA->length());
                 }
@@ -361,7 +361,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
                     else
                         PS.getPerParticleAttribute(attrName, *DA, &status);
 
-                    Partio::ParticleAttribute floatAttribute = p->addAttribute(attrName.asChar(), Partio::FLOAT, 1);
+                    PARTIO::ParticleAttribute floatAttribute = p->addAttribute(attrName.asChar(), PARTIO::FLOAT, 1);
                     doubleAttributes.push_back(std::make_pair(DA, floatAttribute));
                     minParticleCount = std::min(minParticleCount, DA->length());
                 } // add double attr                
@@ -381,7 +381,7 @@ MStatus PartioExport::doIt(const MArgList& Args)
                     else
                         PS.getPerParticleAttribute(attrName, *VA, &status);
 
-                    Partio::ParticleAttribute vectorAttribute = p->addAttribute(attrName.asChar(), Partio::VECTOR, 3);
+                    PARTIO::ParticleAttribute vectorAttribute = p->addAttribute(attrName.asChar(), PARTIO::VECTOR, 3);
                     vectorAttributes.push_back(std::make_pair(VA, vectorAttribute));
                     minParticleCount = std::min(minParticleCount, VA->length());
                 }
@@ -407,39 +407,39 @@ MStatus PartioExport::doIt(const MArgList& Args)
             {
                 p->addParticles(minParticleCount);
 
-                for (std::vector<std::pair<MIntArray*, Partio::ParticleAttribute> >::iterator it = intAttributes.begin();
+                for (std::vector<std::pair<MIntArray*, PARTIO::ParticleAttribute> >::iterator it = intAttributes.begin();
                      it != intAttributes.end(); ++it)
                 {
-                    Partio::ParticleIterator<false> pit = p->begin();
-                    Partio::ParticleAccessor intAccessor(it->second);
+                    PARTIO::ParticleIterator<false> pit = p->begin();
+                    PARTIO::ParticleAccessor intAccessor(it->second);
                     pit.addAccessor(intAccessor);
                     for (int id = 0; pit != p->end(); ++pit)
-                        intAccessor.data<Partio::Data<int, 1> >(pit)[0] = it->first->operator[](id++);
+                        intAccessor.data<PARTIO::Data<int, 1> >(pit)[0] = it->first->operator[](id++);
                 }
 
-                for (std::vector<std::pair<MDoubleArray*, Partio::ParticleAttribute> >::iterator it = doubleAttributes.begin();
+                for (std::vector<std::pair<MDoubleArray*, PARTIO::ParticleAttribute> >::iterator it = doubleAttributes.begin();
                      it != doubleAttributes.end(); ++it)
                 {
-                    Partio::ParticleIterator<false> pit = p->begin();
-                    Partio::ParticleAccessor doubleAccessor(it->second);
+                    PARTIO::ParticleIterator<false> pit = p->begin();
+                    PARTIO::ParticleAccessor doubleAccessor(it->second);
                     pit.addAccessor(doubleAccessor);
                     for (int id = 0; pit != p->end(); ++pit)
-                        doubleAccessor.data<Partio::Data<float, 1> >(pit)[0] = static_cast<float>(it->first->operator[](
+                        doubleAccessor.data<PARTIO::Data<float, 1> >(pit)[0] = static_cast<float>(it->first->operator[](
                                 id++));
                 }
 
-                for (std::vector<std::pair<MVectorArray*, Partio::ParticleAttribute> >::iterator it = vectorAttributes.begin();
+                for (std::vector<std::pair<MVectorArray*, PARTIO::ParticleAttribute> >::iterator it = vectorAttributes.begin();
                      it != vectorAttributes.end(); ++it)
                 {
-                    Partio::ParticleIterator<false> pit = p->begin();
-                    Partio::ParticleAccessor vectorAccessor(it->second);
+                    PARTIO::ParticleIterator<false> pit = p->begin();
+                    PARTIO::ParticleAccessor vectorAccessor(it->second);
                     pit.addAccessor(vectorAccessor);
                     const bool doSwap = swapUP &&
                                         ((it->second.name == "position") || (it->second.name == "velocity") ||
                                          (it->second.name == "acceleration"));
                     for (int id = 0; pit != p->end(); ++pit)
                     {
-                        Partio::Data<float, 3>& vecAttr = vectorAccessor.data<Partio::Data<float, 3> >(pit);
+                        PARTIO::Data<float, 3>& vecAttr = vectorAccessor.data<PARTIO::Data<float, 3> >(pit);
                         const MVector& P = it->first->operator[](id++);
                         vecAttr[0] = static_cast<float>(P.x);
 
@@ -456,20 +456,20 @@ MStatus PartioExport::doIt(const MArgList& Args)
                     }
                 }
 
-                Partio::write(outputPath.asChar(), *p);
+                PARTIO::write(outputPath.asChar(), *p);
             }
             else
                 std::cout << "[partioExport] There are no particles with valid data." << std::endl;
 
-            for (std::vector<std::pair<MIntArray*, Partio::ParticleAttribute> >::iterator it = intAttributes.begin();
+            for (std::vector<std::pair<MIntArray*, PARTIO::ParticleAttribute> >::iterator it = intAttributes.begin();
                  it != intAttributes.end(); ++it)
                 delete it->first;
 
-            for (std::vector<std::pair<MDoubleArray*, Partio::ParticleAttribute> >::iterator it = doubleAttributes.begin();
+            for (std::vector<std::pair<MDoubleArray*, PARTIO::ParticleAttribute> >::iterator it = doubleAttributes.begin();
                  it != doubleAttributes.end(); ++it)
                 delete it->first;
 
-            for (std::vector<std::pair<MVectorArray*, Partio::ParticleAttribute> >::iterator it = vectorAttributes.begin();
+            for (std::vector<std::pair<MVectorArray*, PARTIO::ParticleAttribute> >::iterator it = vectorAttributes.begin();
                  it != vectorAttributes.end(); ++it)
                 delete it->first;
 

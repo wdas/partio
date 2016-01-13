@@ -571,7 +571,7 @@ MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
 
             pvCache.clear();
 
-            pvCache.particles = Partio::read(newCacheFile.asChar());
+            pvCache.particles = PARTIO::read(newCacheFile.asChar());
             ///////////////////////////////////////
 
             mLastFileLoaded = newCacheFile;
@@ -628,7 +628,7 @@ MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
                 if (pvCache.particles->attributeInfo(colorFromIndex.asChar(), pvCache.colorAttr))
                 {
                     // VECTOR or 3+ element float attrs
-                    if (pvCache.colorAttr.type != Partio::INT &&
+                    if (pvCache.colorAttr.type != PARTIO::INT &&
                         pvCache.colorAttr.count > 2) // assuming first 3 elements are rgb
                     {
                         for (int i = 0; i < pvCache.particles->numParticles(); ++i)
@@ -760,7 +760,7 @@ MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
 
             for (unsigned int i = 0; i < numAttr; ++i)
             {
-                Partio::ParticleAttribute attr;
+                PARTIO::ParticleAttribute attr;
                 pvCache.particles->attributeInfo(i, attr);
 
                 const MString mstring_attr_name(attr.name.c_str());

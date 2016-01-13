@@ -406,13 +406,13 @@ MStatus partioEmitter::compute(const MPlug& plug, MDataBlock& block)
     if (newCacheFile != "" && partio4Maya::partioCacheExists(newCacheFile.asChar()))
     {
         MGlobal::displayInfo(MString("partioEmitter->Loading: " + newCacheFile));
-        Partio::ParticlesDataMutable* particles = NULL;
-        Partio::ParticleAttribute IdAttribute;
-        Partio::ParticleAttribute posAttribute;
-        Partio::ParticleAttribute velAttribute;
+        PARTIO::ParticlesDataMutable* particles = NULL;
+        PARTIO::ParticleAttribute IdAttribute;
+        PARTIO::ParticleAttribute posAttribute;
+        PARTIO::ParticleAttribute velAttribute;
 
 
-        particles = Partio::read(newCacheFile.asChar());
+        particles = PARTIO::read(newCacheFile.asChar());
         if (particles)
         {
             //mLastFileLoaded = cacheFile;
@@ -501,7 +501,7 @@ MStatus partioEmitter::compute(const MPlug& plug, MDataBlock& block)
 
                 for (unsigned int i = 0; i < numAttr; i++)
                 {
-                    Partio::ParticleAttribute attr;
+                    PARTIO::ParticleAttribute attr;
                     particles->attributeInfo(i, attr);
 
                     // crazy casting string to char
@@ -571,7 +571,7 @@ MStatus partioEmitter::compute(const MPlug& plug, MDataBlock& block)
 
             for (unsigned int i = 0; i < numAttr; i++)
             {
-                Partio::ParticleAttribute attr;
+                PARTIO::ParticleAttribute attr;
                 particles->attributeInfo(i, attr);
 
                 yPlug.selectAncestorLogicalIndex(i, aMayaPPAttributes);
@@ -696,14 +696,14 @@ MStatus partioEmitter::compute(const MPlug& plug, MDataBlock& block)
 
                     for (doubleIt = doubleAttrArrays.begin(); doubleIt != doubleAttrArrays.end(); doubleIt++)
                     {
-                        Partio::ParticleAttribute doubleAttr;
+                        PARTIO::ParticleAttribute doubleAttr;
                         particles->attributeInfo(userPPMapping[doubleIt->first].c_str(), doubleAttr);
                         const float* doubleVal = particles->data<float>(doubleAttr, it->second);
                         doubleAttrArrays[doubleIt->first][x] = doubleVal[0];
                     }
                     for (vecIt = vectorAttrArrays.begin(); vecIt != vectorAttrArrays.end(); vecIt++)
                     {
-                        Partio::ParticleAttribute vectorAttr;
+                        PARTIO::ParticleAttribute vectorAttr;
                         particles->attributeInfo(userPPMapping[vecIt->first].c_str(), vectorAttr);
                         const float* vecVal = particles->data<float>(vectorAttr, it->second);
                         vectorAttrArrays[vecIt->first][x] = MVector(vecVal[0], vecVal[1], vecVal[2]);
@@ -770,7 +770,7 @@ MStatus partioEmitter::compute(const MPlug& plug, MDataBlock& block)
 
                 for (doubleIt = doubleAttrArrays.begin(); doubleIt != doubleAttrArrays.end(); doubleIt++)
                 {
-                    Partio::ParticleAttribute doubleAttr;
+                    PARTIO::ParticleAttribute doubleAttr;
                     particles->attributeInfo(userPPMapping[doubleIt->first].c_str(), doubleAttr);
                     const float* doubleVal = particles->data<float>(doubleAttr, it->second);
                     doubleAttrArrays[doubleIt->first].append(doubleVal[0]);
@@ -778,7 +778,7 @@ MStatus partioEmitter::compute(const MPlug& plug, MDataBlock& block)
 
                 for (vecIt = vectorAttrArrays.begin(); vecIt != vectorAttrArrays.end(); vecIt++)
                 {
-                    Partio::ParticleAttribute vectorAttr;
+                    PARTIO::ParticleAttribute vectorAttr;
                     particles->attributeInfo(userPPMapping[vecIt->first].c_str(), vectorAttr);
                     const float* vecVal = particles->data<float>(vectorAttr, it->second);
                     vectorAttrArrays[vecIt->first].append(MVector(vecVal[0], vecVal[1], vecVal[2]));
