@@ -29,6 +29,42 @@
 #include <maya/MHWGeometryUtilities.h>
 
 namespace {
+    const char* vertex_shader_code = "#version 110\n" \
+            "void main(void) { gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; }\n";
+    const char* pixel_shader_code = "#version 110\n" \
+            "void main(void) { gl_FragColor = gl_Color; }\n";
+
+    GLuint INVALID_GL_OBJECT = static_cast<GLuint>(-1);
+    GLuint vertex_shader = INVALID_GL_OBJECT;
+    GLuint pixel_shader = INVALID_GL_OBJECT;
+    GLuint shader_program = INVALID_GL_OBJECT;
+
+    template <GLint shader_type>
+    bool create_shader(GLuint& shader, const char* shader_code)
+    {
+        shader = glCreateShader(shader_type);
+
+        GLint code_size = static_cast<GLint>(strlen(shader_code));
+        glShaderSource(shader, 1, &shader_code, &code_size);
+        glCompileShader(shader);
+        GLint success = 0;
+        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
+        if (success == GL_FALSE)
+        {
+            std::cout << "[partioVisualizer] Error building shader : " << std::endl;
+            std::cout << shader_code << std::endl;
+            GLint max_length = 0;
+            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
+            std::vector<GLchar> info_log(max_length);
+            glGetShaderInfoLog(shader, max_length, &max_length, &info_log[0]);
+            std::cout << &info_log[0] << std::endl;
+            glDeleteShader(shader); shader = INVALID_GL_OBJECT;
+            return false;
+        }
+        else
+            return true;
+    }
+
     // TODO: make partioVisualizer use the code from here
     struct DrawData : public MUserData {
     private:
@@ -282,7 +318,7 @@ namespace MHWRender {
     {
         const DrawData* draw_data = reinterpret_cast<const DrawData*>(data);
 
-        if (draw_data == 0)
+        if (draw_data == 0 || shader_program == INVALID_GL_OBJECT)
             return;
 
         glPushAttrib(GL_ALL_ATTRIB_BITS);
@@ -293,9 +329,11 @@ namespace MHWRender {
         glPushMatrix();
         glLoadMatrixf(&world_view[0][0]);
 
-        glUseProgram(0);
+        glUseProgram(shader_program);
 
         draw_data->draw(context.getDisplayStyle() & MHWRender::MFrameContext::kBoundingBox);
+
+        glUseProgram(0);
 
         glPopMatrix();
         glPopAttrib();
@@ -323,5 +361,52 @@ namespace MHWRender {
             draw_data->m_wireframe_color[3] = color.a;
         }
         return draw_data;
+    }
+
+    void partioVisualizerDrawOverride::init_shaders()
+    {
+        if (!create_shader<GL_VERTEX_SHADER>(vertex_shader, vertex_shader_code))
+            return;
+        if (!create_shader<GL_FRAGMENT_SHADER>(pixel_shader, pixel_shader_code))
+        {
+            glDeleteShader(vertex_shader); vertex_shader = INVALID_GL_OBJECT;
+            return;
+        }
+
+        glAttachShader(shader_program, vertex_shader);
+        glAttachShader(shader_program, pixel_shader);
+        glLinkProgram(shader_program);
+
+        GLint success = 0;
+        glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
+        if (success == GL_FALSE)
+        {
+            std::cout << "[partioVisualizer] Error linking shader." << std::endl;
+
+            GLint max_length = 0;
+            glGetProgramiv(shader_program, GL_INFO_LOG_LENGTH, &max_length);
+            std::vector<GLchar> info_log(max_length);
+            glGetProgramInfoLog(shader_program, max_length, &max_length, &info_log[0]);
+
+            std::cout << &info_log[0] << std::endl;
+
+            glDeleteShader(vertex_shader); vertex_shader = INVALID_GL_OBJECT;
+            glDeleteShader(pixel_shader); pixel_shader = INVALID_GL_OBJECT;
+            glDeleteProgram(shader_program); shader_program = INVALID_GL_OBJECT;
+            return;
+        }
+
+        glDetachShader(shader_program, vertex_shader);
+        glDetachShader(shader_program, pixel_shader);
+    }
+
+    void partioVisualizerDrawOverride::free_shaders()
+    {
+        if (vertex_shader != INVALID_GL_OBJECT)
+            glDeleteShader(vertex_shader);
+        if (pixel_shader != INVALID_GL_OBJECT)
+            glDeleteShader(pixel_shader);
+        if (shader_program != INVALID_GL_OBJECT)
+            glDeleteProgram(shader_program);
     }
 }
