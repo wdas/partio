@@ -30,6 +30,8 @@ namespace MHWRender{
                 const MFrameContext& frameContext,
                 MUserData* oldData);
 
+        virtual MHWRender::DrawAPI supportedDrawAPIs() const;
+
         const MObject m_object;
         partioVisualizer* p_visualizer;
         MBoundingBox m_bbox;

@@ -30,7 +30,7 @@
 
 namespace {
     const char* vertex_shader_code = "#version 110\n" \
-            "void main(void) { gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; }\n";
+            "void main(void) { gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; gl_FrontColor = gl_Color; gl_BackColor = gl_Color; }\n";
     const char* pixel_shader_code = "#version 110\n" \
             "void main(void) { gl_FragColor = gl_Color; }\n";
 
@@ -363,8 +363,14 @@ namespace MHWRender {
         return draw_data;
     }
 
+    DrawAPI partioVisualizerDrawOverride::supportedDrawAPIs() const
+    {
+        return kOpenGL;
+    }
+
     void partioVisualizerDrawOverride::init_shaders()
     {
+
         if (!create_shader<GL_VERTEX_SHADER>(vertex_shader, vertex_shader_code))
             return;
         if (!create_shader<GL_FRAGMENT_SHADER>(pixel_shader, pixel_shader_code))
@@ -372,6 +378,8 @@ namespace MHWRender {
             glDeleteShader(vertex_shader); vertex_shader = INVALID_GL_OBJECT;
             return;
         }
+
+        shader_program = glCreateProgram();
 
         glAttachShader(shader_program, vertex_shader);
         glAttachShader(shader_program, pixel_shader);

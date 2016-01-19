@@ -43,8 +43,12 @@ MStatus initializePlugin ( MObject obj )
 {
     if (MGlobal::mayaState() == MGlobal::kInteractive)
     {
-        glewInit();
-        MHWRender::partioVisualizerDrawOverride::init_shaders();
+        MHWRender::MRenderer* renderer = MHWRender::MRenderer::theRenderer();
+        if (renderer != 0 && renderer->drawAPIIsOpenGL())
+        {
+            glewInit();
+            MHWRender::partioVisualizerDrawOverride::init_shaders();
+        }
     }
 
     // source  mel scripts this way if they're missing from the script path it will alert the user...
