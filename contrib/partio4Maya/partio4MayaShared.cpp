@@ -28,6 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
 #include "partio4MayaShared.h"
+#include "iconArrays.h"
 
 #define TABLE_SIZE 256
 
@@ -454,7 +455,61 @@ void partio4Maya::drawPartioLogo(float multiplier)
         }
     }
     glEnd();
+}
 
+MBoundingBox partio4Maya::partioLogoBoundingBox()
+{
+    MBoundingBox bbox;
+
+    int i,d;
+
+    int last = P1Count - 1;
+    for (i = 0; i < last; ++i)
+        bbox.expand(MPoint(P1[i][0], P1[i][1], P1[i][2], 1.0));
+
+    last = P2Count - 1;
+    for (i = 0; i < last; ++i)
+        bbox.expand(MPoint(P2[i][0], P2[i][1], P2[i][2], 1.0));
+
+    last = a1Count - 1;
+    for (i = 0; i < last; ++i)
+        bbox.expand(MPoint(a1[i][0], a1[i][1], a1[i][2], 1.0));
+
+    last = a2Count - 1;
+    for (i = 0; i < last; ++i)
+        bbox.expand(MPoint(a2[i][0], a2[i][1], a2[i][2], 1.0));
+
+    last = rCount - 1;
+    for (i = 0; i < last; ++i)
+        bbox.expand(MPoint(r[i][0], r[i][1], r[i][2], 1.0));
+
+    last = tCount - 1;
+    for (i = 0; i < last; ++i)
+        bbox.expand(MPoint(t[i][0], t[i][1], t[i][2], 1.0));
+
+    last = i1Count - 1;
+    for (i = 0; i < last; ++i)
+        bbox.expand(MPoint(i1[i][0], i1[i][1], i1[i][2], 1.0));
+
+    last = i2Count - 1;
+    for (i = 0; i < last; ++i)
+        bbox.expand(MPoint(i2[i][0], i2[i][1], i2[i][2], 1.0));
+
+    last = o1Count - 1;
+    for (i = 0; i < last; ++i)
+        bbox.expand(MPoint(o1[i][0], o1[i][1], o1[i][2], 1.0));
+
+    last = o2Count - 1;
+    for (i = 0; i < last; ++i)
+        bbox.expand(MPoint(o2[i][0], o2[i][1], o2[i][2], 1.0));
+
+
+    for (d = 0; d < debrisCount; d++)
+    {
+        for (i = 0; i < (debrisPointCount - 1); ++i)
+            bbox.expand(MPoint(circles[d][i][0], circles[d][i][1], circles[d][i][2]));
+    }
+    return bbox;
 }
 
 ////////////////////////////////////////////////////

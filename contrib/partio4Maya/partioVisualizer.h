@@ -85,7 +85,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <PartioIterator.h>
 
 #include "partio4MayaShared.h"
-#include "iconArrays.h"
 
 enum {
 	PARTIO_DRAW_STYLE_POINTS = 0,

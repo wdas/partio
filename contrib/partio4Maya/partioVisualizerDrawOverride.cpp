@@ -74,6 +74,7 @@ namespace {
         int m_draw_style;
         float m_point_size;
         float m_default_alpha;
+        float m_icon_size;
 
         struct BillboardDrawData {
             std::vector<float> vertices;
@@ -205,7 +206,11 @@ namespace {
         }
     public:
         // attributes below are configured differently for VP1 and VP2
+        MBoundingBox m_cache_bbox;
+        MBoundingBox m_logo_bbox;
         float m_wireframe_color[4];
+        int m_draw_error;
+
 
         DrawData() : MUserData(false), p_reader_cache(0)
         {
@@ -223,6 +228,15 @@ namespace {
             m_draw_style = MPlug(m_object, partioVisualizer::aDrawStyle).asShort();
             m_point_size = MPlug(m_object, partioVisualizer::aPointSize).asFloat();
             m_default_alpha = MPlug(m_object, partioVisualizer::aDefaultAlpha).asFloat();
+            m_icon_size = MPlug(m_object, partioVisualizer::aSize).asFloat();
+
+            if (p_reader_cache)
+                m_cache_bbox = p_reader_cache->bbox;
+
+            static const MBoundingBox logo_bbox = partio4Maya::partioLogoBoundingBox();
+            m_logo_bbox.clear();
+            m_logo_bbox.expand(logo_bbox.min() * m_icon_size);
+            m_logo_bbox.expand(logo_bbox.max() * m_icon_size);
         }
 
         void draw(bool as_bounding_box = false) const
@@ -283,8 +297,18 @@ namespace {
                         const float* partioPositions = p_reader_cache->particles->data<float>(p_reader_cache->positionAttr, i);
                         drawBillboardCircleAtPoint(partioPositions, p_reader_cache->radius[i], m_draw_style, billboard_data);
                     }
+
+                    glDisableClientState(GL_VERTEX_ARRAY);
+                    glDisableClientState(GL_COLOR_ARRAY);
                 }
             }
+
+            return;
+        }
+
+        void draw_icon() const
+        {
+            partio4Maya::drawPartioLogo(m_icon_size);
         }
     };
 }
@@ -302,11 +326,7 @@ namespace MHWRender {
         MStatus status;
         MFnDependencyNode dnode(m_object, &status);
         if (status)
-        {
             p_visualizer = dynamic_cast<partioVisualizer*>(dnode.userNode());
-            if (p_visualizer)
-                m_bbox = p_visualizer->updateParticleCache()->bbox;
-        }
     }
 
     partioVisualizerDrawOverride::~partioVisualizerDrawOverride()
@@ -321,6 +341,20 @@ namespace MHWRender {
         if (draw_data == 0 || shader_program == INVALID_GL_OBJECT)
             return;
 
+        const bool draw_bounding_box = context.getDisplayStyle() & MHWRender::MFrameContext::kBoundingBox;
+
+        bool draw_cache = true;
+        bool draw_logo = true;
+        MStatus status;
+        MBoundingBox frustrum_box = context.getFrustumBox(&status);
+        if (status)
+        {
+            if (!frustrum_box.intersects(draw_data->m_cache_bbox))
+                draw_cache = false;
+            if (draw_bounding_box || !frustrum_box.intersects(draw_data->m_logo_bbox))
+                draw_logo = false;
+        }
+
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         float world_view[4][4];
         context.getMatrix(MHWRender::MDrawContext::kWorldViewMtx).get(world_view);
@@ -331,7 +365,19 @@ namespace MHWRender {
 
         glUseProgram(shader_program);
 
-        draw_data->draw(context.getDisplayStyle() & MHWRender::MFrameContext::kBoundingBox);
+        draw_data->draw(draw_bounding_box);
+
+        if (draw_logo)
+        {
+            if (draw_data->m_draw_error == 0)
+                glColor3fv(draw_data->m_wireframe_color);
+            if (draw_data->m_draw_error == 1)
+                glColor3f(.75f, 0.0f, 0.0f);
+            else if (draw_data->m_draw_error == 2)
+                glColor3f(0.0f, 0.0f, 0.0f);
+
+            draw_data->draw_icon();
+        }
 
         glUseProgram(0);
 
@@ -341,7 +387,15 @@ namespace MHWRender {
 
     MBoundingBox partioVisualizerDrawOverride::boundingBox(const MDagPath& objPath, const MDagPath& cameraPath) const
     {
-        return m_bbox;
+        return MBoundingBox();
+    }
+
+    bool partioVisualizerDrawOverride::isBounded(const MDagPath& objPath, const MDagPath& cameraPath) const
+    {
+        // the cache and the bounding box can change at any time
+        // plus calling the prepareForDraw also updates the data, so we always have to draw
+        // then manually do the frustum culling in the draw function
+        return false;
     }
 
     MUserData* partioVisualizerDrawOverride::prepareForDraw(const MDagPath& objPath, const MDagPath& cameraPath,
@@ -352,13 +406,13 @@ namespace MHWRender {
         {
             // TODO: debate if the the bbox queries should be moved to the bounding box function
             partioVizReaderCache* p_cache = p_visualizer->updateParticleCache();
-            m_bbox = p_cache->bbox;
             draw_data->update_data(m_object, p_cache);
             MColor color = MHWRender::MGeometryUtilities::wireframeColor(objPath);
             draw_data->m_wireframe_color[0] = color.r;
             draw_data->m_wireframe_color[1] = color.g;
             draw_data->m_wireframe_color[2] = color.b;
             draw_data->m_wireframe_color[3] = color.a;
+            draw_data->m_draw_error = p_visualizer->drawError;
         }
         return draw_data;
     }

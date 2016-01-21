@@ -30,10 +30,13 @@ namespace MHWRender{
                 const MFrameContext& frameContext,
                 MUserData* oldData);
 
+        virtual bool isBounded(
+                const MDagPath& objPath,
+                const MDagPath& cameraPath) const;
+
         virtual MHWRender::DrawAPI supportedDrawAPIs() const;
 
         const MObject m_object;
         partioVisualizer* p_visualizer;
-        MBoundingBox m_bbox;
     };
 }
