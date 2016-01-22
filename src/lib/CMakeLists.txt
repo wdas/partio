@@ -33,7 +33,7 @@
 
 FILE(GLOB io_cpp "io/*.cpp")
 FILE(GLOB core_cpp "core/*.cpp")
-ADD_LIBRARY (partio ${io_cpp} ${core_cpp})
+ADD_LIBRARY (partio SHARED ${io_cpp} ${core_cpp})
 
 FILE(GLOB public_includes "*.h")
 
