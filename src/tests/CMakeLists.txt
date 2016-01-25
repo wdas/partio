@@ -31,6 +31,8 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
+link_directories(${CMAKE_BINARY_DIR}/src/lib)
+
 foreach(item testiterator test testcache testclonecopy teststr makecircle makeline testkdtree)
     ADD_EXECUTABLE(${item} "${item}.cpp")
     target_link_libraries(${item} ${PARTIO_LIBRARIES})

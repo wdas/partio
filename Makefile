@@ -10,6 +10,11 @@ builddir ?= $(CURDIR)/build/$(platformdir)
 prefix ?= $(CURDIR)/$(platformdir)
 #DESTDIR =
 
+ifdef V
+    VERBOSE=1
+    export VERBOSE
+endif
+
 CMAKE_FLAGS ?= -DCMAKE_INSTALL_PREFIX=$(prefix)
 ifdef RP_SeExpr
     CMAKE_FLAGS += -DSEEXPR_BASE=$(RP_SeExpr)

@@ -35,6 +35,8 @@ include_directories(
    ${CMAKE_SOURCE_DIR}/src/lib
 )
 
+link_directories(${CMAKE_BINARY_DIR}/src/lib)
+
 IF(GLUT_FOUND AND OPENGL_FOUND)
     INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
     ADD_EXECUTABLE(partview partview.cpp)
@@ -52,4 +54,3 @@ ADD_EXECUTABLE(partattr partattr.cpp)
 target_link_libraries(partattr ${PARTIO_LIBRARIES})
 
 install(TARGETS partattr partconv partinfo DESTINATION bin)
-
