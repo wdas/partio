@@ -56,9 +56,6 @@ ELSE()
     SET(CMAKE_INSTALL_LIBDIR "lib" CACHE STRING "Library Directory Basename")
 ENDIF()
 
-SET(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/${CMAKE_INSTALL_LIBDIR})
-
 ## Setup platform specific helper defines build variants
 IF(WIN32)
   ADD_DEFINITIONS (-DPARTIO_WIN32 -D_USE_MATH_DEFINES)
@@ -102,6 +99,7 @@ ENDIF(ZLIB_FOUND)
 ## Make modules able to see partio library
 # Setup environment variable to link partio
 SET( PARTIO_LIBRARIES partio ${ZLIB_LIBRARY} )
+
 # make it so partio can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/lib )
 
