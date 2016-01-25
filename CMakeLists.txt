@@ -36,9 +36,6 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 ## allow more human readable "if then else" constructs
 SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
-## Use verbose make file
-SET ( CMAKE_VERBOSE_MAKEFILE TRUE )
-
 
 
 ## project name & version
