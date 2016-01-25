@@ -36,6 +36,8 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
 MARK_AS_ADVANCED(CMAKE_BACKWARDS_COMPATIBILITY)
 ## allow more human readable "if then else" constructs
 SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
+## disable rpath when linking
+SET( CMAKE_SKIP_RPATH TRUE )
 
 
 ## project name & version
