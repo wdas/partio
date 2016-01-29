@@ -412,7 +412,7 @@ struct PartioData {
                         floatArr = AiArrayAllocate(pointCount, 1, AI_TYPE_FLOAT);
                         arnoldArrays.push_back(floatArr);
                     }
-                    else if (user.type == PARTIO::VECTOR || user.count == 3)
+                    else if (user.type == PARTIO::VECTOR || (user.type == PARTIO::FLOAT && user.count == 3))
                     {
                         AiNodeDeclare(currentInstance, parts[index], "uniform Vector");
                         vecArr = AiArrayAllocate(pointCount, 1, AI_TYPE_VECTOR);
@@ -540,13 +540,13 @@ struct PartioData {
                     float floatVal = partioFLOAT[0];
                     AiArraySetFlt(arnoldArrays[x], i, floatVal);
                 }
-                else if (extraAttrs[x].type == PARTIO::VECTOR)
+                else if (extraAttrs[x].type == PARTIO::VECTOR || (extraAttrs[x].type == PARTIO::FLOAT && extraAttrs[x].count == 3))
                 {
                     const float* partioVEC = points->data<float>(extraAttrs[x], id);
                     AtVector vecVal;
                     vecVal.x = partioVEC[0];
-                    vecVal.y = partioVEC[0];
-                    vecVal.z = partioVEC[0];
+                    vecVal.y = partioVEC[1];
+                    vecVal.z = partioVEC[2];
                     AiArraySetVec(arnoldArrays[x], i, vecVal);
                 }
             }
