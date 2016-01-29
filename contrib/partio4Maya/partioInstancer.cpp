@@ -949,43 +949,27 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                     // ROTATION
                     if (pvCache.rotationAttr.type == PARTIO::FLOAT)  // single float value for rotation
                     {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.rotationAttr, i);
-                        float rot = attrVal[0];
-                        if (canMotionBlur && lastRotFromIndex.length() > 0)
-                        {
-                            if (pvCache.lastRotationAttr.type == PARTIO::FLOAT)
-                            {
-                                const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastRotationAttr, i);
-                                rot += (attrVal[0] - lastAttrVal[0]) * deltaTime;
-                            }
-                        }
-                        rotationArray[i] = MVector(rot, rot, rot);
-                    }
-                    else if (pvCache.rotationAttr.type == PARTIO::VECTOR)   // we have a 4 float attribute ?
-                    {
-                        if (pvCache.rotationAttr.count == 3) // EULER
+                        if (pvCache.rotationAttr.count == 1)
                         {
                             const float* attrVal = pvCache.particles->data<float>(pvCache.rotationAttr, i);
-                            MVector rot = MVector(attrVal[0], attrVal[1], attrVal[2]);
+                            float rot = attrVal[0];
                             if (canMotionBlur && lastRotFromIndex.length() > 0)
                             {
-                                if (pvCache.lastRotationAttr.type == PARTIO::VECTOR && pvCache.lastRotationAttr.count == 3)
+                                if (pvCache.lastRotationAttr.type == PARTIO::FLOAT)
                                 {
                                     const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastRotationAttr, i);
-                                    rot.x += (attrVal[0] - lastAttrVal[0]) * deltaTime;
-                                    rot.y += (attrVal[1] - lastAttrVal[1]) * deltaTime;
-                                    rot.z += (attrVal[2] - lastAttrVal[2]) * deltaTime;
+                                    rot += (attrVal[0] - lastAttrVal[0]) * deltaTime;
                                 }
                             }
-                            rotationArray[i] = rot;
+                            rotationArray[i] = MVector(rot, rot, rot);
                         }
-                        else if (pvCache.rotationAttr.count == 4) // quaternion
+                        else if (pvCache.rotationAttr.count == 4)
                         {
                             const float* attrVal = pvCache.particles->data<float>(pvCache.rotationAttr, i);
                             MQuaternion rotQ(attrVal[0], attrVal[1], attrVal[2], attrVal[3]);
                             if (canMotionBlur && lastRotFromIndex.length() > 0)
                             {
-                                if (pvCache.lastRotationAttr.type == PARTIO::VECTOR && pvCache.lastRotationAttr.count == 4)
+                                if (pvCache.lastRotationAttr.type == PARTIO::FLOAT && pvCache.lastRotationAttr.count == 4)
                                 {
                                     const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastRotationAttr, i);
                                     MQuaternion lastRotQ(lastAttrVal[0], lastAttrVal[1], lastAttrVal[2], lastAttrVal[3]);
@@ -998,12 +982,27 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                                     else
                                         rotQ = slerp(rotQ, rotQ + rotQ - lastRotQ, deltaTime);
 #endif
-
                                 }
                             }
                             rotationArray[i] = rotQ.asEulerRotation().asVector();
                         }
 
+                    }
+                    else if (pvCache.rotationAttr.type == PARTIO::VECTOR)   // we have a 4 float attribute ?
+                    {
+                        const float* attrVal = pvCache.particles->data<float>(pvCache.rotationAttr, i);
+                        MVector rot = MVector(attrVal[0], attrVal[1], attrVal[2]);
+                        if (canMotionBlur && lastRotFromIndex.length() > 0)
+                        {
+                            if (pvCache.lastRotationAttr.type == PARTIO::VECTOR && pvCache.lastRotationAttr.count == 3)
+                            {
+                                const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastRotationAttr, i);
+                                rot.x += (attrVal[0] - lastAttrVal[0]) * deltaTime;
+                                rot.y += (attrVal[1] - lastAttrVal[1]) * deltaTime;
+                                rot.z += (attrVal[2] - lastAttrVal[2]) * deltaTime;
+                            }
+                        }
+                        rotationArray[i] = rot;
                     }
 
                     // AIM DIRECTION
