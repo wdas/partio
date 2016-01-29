@@ -44,6 +44,7 @@ static MGLFunctionTable* gGLFT = NULL;
 #define DRAW_STYLE_POINTS 0
 #define DRAW_STYLE_LABEL 1
 #define DRAW_STYLE_BOUNDING_BOX 3
+#define USE_SLERP_FOR_QUATERIONS
 
 
 /// PARTIO INSTANCER
@@ -962,19 +963,47 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                     }
                     else if (pvCache.rotationAttr.type == PARTIO::VECTOR)   // we have a 4 float attribute ?
                     {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.rotationAttr, i);
-                        MVector rot = MVector(attrVal[0], attrVal[1], attrVal[2]);
-                        if (canMotionBlur && lastRotFromIndex.length() > 0)
+                        if (pvCache.rotationAttr.count == 3) // EULER
                         {
-                            if (pvCache.lastRotationAttr.type == PARTIO::VECTOR)
+                            const float* attrVal = pvCache.particles->data<float>(pvCache.rotationAttr, i);
+                            MVector rot = MVector(attrVal[0], attrVal[1], attrVal[2]);
+                            if (canMotionBlur && lastRotFromIndex.length() > 0)
                             {
-                                const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastRotationAttr, i);
-                                rot.x += (attrVal[0] - lastAttrVal[0]) * deltaTime;
-                                rot.y += (attrVal[1] - lastAttrVal[1]) * deltaTime;
-                                rot.z += (attrVal[2] - lastAttrVal[2]) * deltaTime;
+                                if (pvCache.lastRotationAttr.type == PARTIO::VECTOR && pvCache.lastRotationAttr.count == 3)
+                                {
+                                    const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastRotationAttr, i);
+                                    rot.x += (attrVal[0] - lastAttrVal[0]) * deltaTime;
+                                    rot.y += (attrVal[1] - lastAttrVal[1]) * deltaTime;
+                                    rot.z += (attrVal[2] - lastAttrVal[2]) * deltaTime;
+                                }
                             }
+                            rotationArray[i] = rot;
                         }
-                        rotationArray[i] = rot;
+                        else if (pvCache.rotationAttr.count == 4) // quaternion
+                        {
+                            const float* attrVal = pvCache.particles->data<float>(pvCache.rotationAttr, i);
+                            MQuaternion rotQ(attrVal[0], attrVal[1], attrVal[2], attrVal[3]);
+                            if (canMotionBlur && lastRotFromIndex.length() > 0)
+                            {
+                                if (pvCache.lastRotationAttr.type == PARTIO::VECTOR && pvCache.lastRotationAttr.count == 4)
+                                {
+                                    const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastRotationAttr, i);
+                                    MQuaternion lastRotQ(lastAttrVal[0], lastAttrVal[1], lastAttrVal[2], lastAttrVal[3]);
+                                    //slerp has input params between 0 and 1, while our delta time is -1 .. 1
+#ifndef USE_SLERP_FOR_QUATERIONS
+                                    rotQ = rotQ + deltaTime * (rotQ - lastRotQ);
+#else
+                                    if (deltaTime < 0.0f)
+                                        rotQ = slerp(lastRotQ, rotQ, 1.0 - deltaTime);
+                                    else
+                                        rotQ = slerp(rotQ, rotQ + rotQ - lastRotQ, deltaTime);
+#endif
+
+                                }
+                            }
+                            rotationArray[i] = rotQ.asEulerRotation().asVector();
+                        }
+
                     }
 
                     // AIM DIRECTION
