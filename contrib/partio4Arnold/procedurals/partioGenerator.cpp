@@ -303,7 +303,7 @@ struct PartioData {
         /// Velocity
         if ((global_motionBlurSteps > 1) && (arg_velFrom.length() > 0) && (points->attributeInfo(arg_velFrom.c_str(), velocityAttr) ||
             points->attributeInfo("velocity", velocityAttr) || points->attributeInfo("Velocity", velocityAttr)) && (velocityAttr.count > 2) &&
-            (velocityAttr.type == PARTIO::FLOAT))
+            (velocityAttr.type == PARTIO::FLOAT || velocityAttr.type == PARTIO::VECTOR))
         {
             AiMsgInfo("[partioGenerator] found velocity attr, motion blur is a GO!!");
             canMotionBlur = true;
