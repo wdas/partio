@@ -131,10 +131,10 @@ global proc pioInstCustomAttrsManage (string $nodeName)
     ///  General attrs
     frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "General Channels" ;
     /// SCALE
-        columnLayout;
-        string $scaleAttributes[] = {"scaleFrom"};
-        string $scaleLabels[] = {"Scale"};
-        generateAttributesMenu($nodeName, $attrNameList, $scaleLabels, $scaleAttributes);
+    columnLayout;
+    string $scaleAttributes[] = {"scaleFrom"};
+    string $scaleLabels[] = {"Scale"};
+    generateAttributesMenu($nodeName, $attrNameList, $scaleLabels, $scaleAttributes);
     setParent ..;
     setParent ..;
     /// ROTATION stuff
@@ -150,6 +150,7 @@ global proc pioInstCustomAttrsManage (string $nodeName)
 
     ///  INDEX
     frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "Index Channels" ;
+    columnLayout;
     string $indexAttributes[] = {"indexFrom"};
     string $indexLabels[] = {"Index"};
     generateAttributesMenu($nodeName, $attrNameList, $indexLabels, $indexAttributes);
