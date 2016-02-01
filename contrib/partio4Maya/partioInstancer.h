@@ -213,6 +213,7 @@ public:
     static MObject aLastPositionFrom;
     static MObject aVelocityFrom;
     static MObject aAngularVelocityFrom;
+    static MObject aAngularVelocityMult;
 
     static MObject aIndexFrom;
 
@@ -252,6 +253,7 @@ private:
     MString m_lastLastScaleFrom;
     MString m_lastIndexFrom;
     MString m_lastAngularVelocityFrom;
+    float m_lastAngularVelocityMult;
     short m_lastAngularVelocitySource;
     bool m_lastFlipStatus;
     bool m_flipped;

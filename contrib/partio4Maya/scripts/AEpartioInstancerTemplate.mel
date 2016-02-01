@@ -42,6 +42,7 @@ global proc AEpartioInstancerTemplate( string $nodeName )
     editorTemplate -addControl "velocitySource";
     editorTemplate -addControl "angularVelocitySource";
     editorTemplate -addControl -l "Velocity Mult" "veloMult";
+    editorTemplate -addControl -l "Angular Velocity Mult" "angVeloMult";
     editorTemplate -callCustom pioAEoutpathNew pioAEoutpathReplace cacheDir;
     editorTemplate -addControl "cachePrefix";
     editorTemplate -addControl "cacheOffset";

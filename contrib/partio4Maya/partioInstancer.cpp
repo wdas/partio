@@ -111,6 +111,7 @@ MObject partioInstancer::aLastAimPositionFrom;
 MObject partioInstancer::aLastPositionFrom;
 MObject partioInstancer::aVelocityFrom;
 MObject partioInstancer::aAngularVelocityFrom;
+MObject partioInstancer::aAngularVelocityMult;
 
 MObject partioInstancer::aIndexFrom;
 
@@ -295,6 +296,7 @@ partioInstancer::partioInstancer() :
         m_lastLastScaleFrom(""),
         m_lastIndexFrom(""),
         m_lastAngularVelocityFrom(""),
+        m_lastAngularVelocityMult(-1.0f),
         m_lastAngularVelocitySource(-1),
         m_lastFlipStatus(false),
         m_flipped(false),
@@ -521,6 +523,12 @@ MStatus partioInstancer::initialize()
     nAttr.setHidden(false);
     nAttr.setReadable(true);
 
+    aAngularVelocityMult = nAttr.create("angVeloMult", "avmul", MFnNumericData::kFloat, 1.0, &stat);
+    nAttr.setKeyable(true);
+    nAttr.setStorable(true);
+    nAttr.setHidden(false);
+    nAttr.setReadable(true);
+
     aExportAttributes = tAttr.create("exportAttributes", "expattr", MFnStringData::kString);
 
     aVelocitySource = eAttr.create("velocitySource", "vsrc");
@@ -568,6 +576,7 @@ MStatus partioInstancer::initialize()
     addAttribute(aLastPositionFrom);
     addAttribute(aVelocityFrom);
     addAttribute(aAngularVelocityFrom);
+    addAttribute(aAngularVelocityMult);
 
     addAttribute(aIndexFrom);
 
@@ -596,6 +605,7 @@ MStatus partioInstancer::initialize()
 
     attributeAffects(aComputeVeloPos, aUpdateCache);
     attributeAffects(aVelocityMult, aUpdateCache);
+    attributeAffects(aAngularVelocityMult, aUpdateCache);
 
     attributeAffects(aScaleFrom, aUpdateCache);
     attributeAffects(aRotationType, aUpdateCache);
@@ -948,6 +958,7 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
             const MString indexFrom = block.inputValue(aIndexFrom).asString();
             const MString angularVelocityFrom = block.inputValue(aAngularVelocityFrom).asString();
 
+            const float angularVelocityMult = block.inputValue(aAngularVelocityMult).asFloat();
             const short angularVelocitySource = block.inputValue(aAngularVelocitySource).asShort();
 
             if (motionBlurStep || m_cacheChanged ||
@@ -964,6 +975,7 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                 lastAimDirectionFrom != m_lastLastAimDirectionFrom ||
                 lastAimPositionFrom != m_lastLastAimPositionFrom ||
                 angularVelocityFrom != m_lastAngularVelocityFrom ||
+                angularVelocityMult != m_lastAngularVelocityMult ||
                 angularVelocitySource != m_lastAngularVelocitySource)
             {
                 m_lastScaleFrom = scaleFrom;
@@ -979,6 +991,7 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                 m_lastLastAimDirectionFrom = lastAimDirectionFrom;
                 m_lastLastAimPositionFrom = lastAimPositionFrom;
                 m_lastAngularVelocityFrom = angularVelocityFrom;
+                m_lastAngularVelocityMult = angularVelocityMult;
                 m_lastAngularVelocitySource = angularVelocitySource;
 
                 MDoubleArray indexArray;
@@ -1063,8 +1076,8 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                 const FloatTupleSize angularVelocityTupleSize = getFloatTupleSize(pvCache.angularVelocityAttr);
 
                 // usually this comes in radians... because reasons
-                const float angularVelocityMultiplierDegrees = (180.0f * deltaTime) / (fps * M_PI);
-                const float angularVelocityMultiplierRadians = deltaTime / fps;
+                const float angularVelocityMultiplierDegrees = (angularVelocityMult * 180.0f * deltaTime) / (fps * static_cast<float>(M_PI));
+                const float angularVelocityMultiplierRadians = (angularVelocityMult * deltaTime) / fps;
 
                 writeOutVectorAttribute(pvCache.particles, pvCache.aimAxisAttr, aimAxisArray);
                 writeOutVectorAttribute(pvCache.particles, pvCache.aimUpAttr, aimUpAxisArray);
