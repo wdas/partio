@@ -154,7 +154,6 @@ public:
     virtual void            postConstructor();
 
     bool GetPlugData();
-    void addParticleAttr(int attrIndex, MString attrName );
     partioInstReaderCache* updateParticleCache();
 
     MCallbackId partioInstancerOpenCallback;
