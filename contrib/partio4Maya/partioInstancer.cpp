@@ -186,6 +186,84 @@ namespace {
         else
             return FLOAT_TUPLE_NONE;
     }
+
+    void writeOutVectorAttribute(PARTIO::ParticlesDataMutable* particles, const PARTIO::ParticleAttribute& attr, MVectorArray& outArray)
+    {
+        const int numParticles = particles->numParticles();
+        const FloatTupleSize tupleSize = getFloatTupleSize(attr);
+
+        if (tupleSize == FLOAT_TUPLE_SINGLE) // single float value for aimDirection
+        {
+            for (int i = 0; i < numParticles; ++i)
+            {
+                const float* attrVal = particles->data<float>(attr, i);
+                float valVec = attrVal[0];
+                outArray[i] = MVector(valVec, valVec, valVec);
+            }
+        }
+        else if (tupleSize == FLOAT_TUPLE_TRIPLE)
+        {
+            for (int i = 0; i < numParticles; ++i)
+            {
+                const float* attrVal = particles->data<float>(attr, i);
+                MVector valVec = MVector(attrVal[0], attrVal[1], attrVal[2]);
+                outArray[i] = valVec;
+            }
+        }
+    }
+
+    void writeOutBlurredVectorAttribute(PARTIO::ParticlesDataMutable* particles, const PARTIO::ParticleAttribute& attr,
+                                        const PARTIO::ParticleAttribute& lastAttr, MVectorArray& outArray, float deltaTime)
+    {
+        const int numParticles = particles->numParticles();
+        const FloatTupleSize tupleSize = getFloatTupleSize(attr);
+        const FloatTupleSize lastTupleSize = getFloatTupleSize(attr);
+        if (tupleSize == FLOAT_TUPLE_SINGLE)
+        {
+            if (lastTupleSize == FLOAT_TUPLE_SINGLE)
+            {
+                for (int i = 0; i < numParticles; ++i)
+                {
+                    const float* attrVal = particles->data<float>(attr, i);
+                    const float* lastAttrVal = particles->data<float>(attr, i);
+                    float val = attrVal[0];
+                    val += (val - lastAttrVal[0]) * deltaTime;
+                    outArray[i] = MVector(val, val, val);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < numParticles; ++i)
+                {
+                    const float* attrVal = particles->data<float>(attr, i);
+                    float val = attrVal[0];
+                    outArray[i] = MVector(val, val, val);
+                }
+            }
+        }
+        else if (tupleSize == FLOAT_TUPLE_TRIPLE)
+        {
+            if (lastTupleSize == FLOAT_TUPLE_TRIPLE)
+            {
+                for (int i = 0; i < numParticles; ++i)
+                {
+                    const float* attrVal = particles->data<float>(attr, i);
+                    const float* lastAttrVal = particles->data<float>(attr, i);
+                    outArray[i] = MVector(attrVal[0] + (attrVal[0] - lastAttrVal[0]) * deltaTime,
+                                          attrVal[1] + (attrVal[1] - lastAttrVal[1]) * deltaTime,
+                                          attrVal[2] + (attrVal[2] - lastAttrVal[2]) * deltaTime);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < numParticles; ++i)
+                {
+                    const float* attrVal = particles->data<float>(attr, i);
+                    outArray[i] = MVector(attrVal[0], attrVal[1], attrVal[2]);
+                }
+            }
+        }
+    }
 }
 
 partioInstReaderCache::partioInstReaderCache() :
@@ -935,31 +1013,37 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                 if (pvCache.particles->attributeInfo(scaleFrom.asChar(), pvCache.scaleAttr))
                 {
                     updateInstanceDataVector(pvCache, scaleArray, "scale", numParticles);
-                    pvCache.particles->attributeInfo(lastScaleFrom.asChar(), pvCache.lastScaleAttr);
+                    if (m_canMotionBlur)
+                        pvCache.particles->attributeInfo(lastScaleFrom.asChar(), pvCache.lastScaleAttr);
                 }
 
                 // Rotation
                 if (pvCache.particles->attributeInfo(rotationFrom.asChar(), pvCache.rotationAttr))
                 {
                     updateInstanceDataVector(pvCache, rotationArray, "rotation", numParticles);
-                    if (angularVelocitySource == AVS_LAST_ROTATION)
-                        pvCache.particles->attributeInfo(lastRotFrom.asChar(), pvCache.lastRotationAttr);
-                    else if (angularVelocitySource == AVS_ANGULAR_VELOCITY)
-                        pvCache.particles->attributeInfo(angularVelocityFrom.asChar(), pvCache.angularVelocityAttr);
+                    if (m_canMotionBlur)
+                    {
+                        if (angularVelocitySource == AVS_LAST_ROTATION)
+                            pvCache.particles->attributeInfo(lastRotFrom.asChar(), pvCache.lastRotationAttr);
+                        else if (angularVelocitySource == AVS_ANGULAR_VELOCITY)
+                            pvCache.particles->attributeInfo(angularVelocityFrom.asChar(), pvCache.angularVelocityAttr);
+                    }
                 }
 
                 // Aim Direction
                 if (pvCache.particles->attributeInfo(aimDirectionFrom.asChar(), pvCache.aimDirAttr))
                 {
                     updateInstanceDataVector(pvCache, aimDirectionArray, "aimDirection", numParticles);
-                    pvCache.particles->attributeInfo(lastAimDirectionFrom.asChar(), pvCache.lastAimDirAttr);
+                    if (m_canMotionBlur)
+                        pvCache.particles->attributeInfo(lastAimDirectionFrom.asChar(), pvCache.lastAimDirAttr);
                 }
 
                 // Aim Position
                 if (pvCache.particles->attributeInfo(aimPositionFrom.asChar(), pvCache.aimPosAttr))
                 {
                     updateInstanceDataVector(pvCache, aimPositionArray, "aimPosition", numParticles);
-                    pvCache.particles->attributeInfo(lastAimPositionFrom.asChar(), pvCache.lastAimPosAttr);
+                    if (m_canMotionBlur)
+                        pvCache.particles->attributeInfo(lastAimPositionFrom.asChar(), pvCache.lastAimPosAttr);
                 }
 
                 // Aim Axis
@@ -975,50 +1059,25 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                     updateInstanceDataVector(pvCache, aimWorldUpArray, "aimWorldUp", numParticles);
 
                 const FloatTupleSize rotationTupleSize = getFloatTupleSize(pvCache.rotationAttr);
-                const FloatTupleSize aimDirTupleSize = getFloatTupleSize(pvCache.aimDirAttr);
-                const FloatTupleSize aimPosTupleSize = getFloatTupleSize(pvCache.aimPosAttr);
-                const FloatTupleSize aimAxisTupleSize = getFloatTupleSize(pvCache.aimAxisAttr);
-                const FloatTupleSize aimUpTupleSize = getFloatTupleSize(pvCache.aimUpAttr);
-                const FloatTupleSize aimWorldUpTupleSize = getFloatTupleSize(pvCache.aimWorldUpAttr);
                 const FloatTupleSize lastRotationTupleSize = getFloatTupleSize(pvCache.lastRotationAttr);
-                const FloatTupleSize scaleAttrTupleSize = getFloatTupleSize(pvCache.scaleAttr);
-                const FloatTupleSize lastScaleAttrTupleSize = getFloatTupleSize(pvCache.lastScaleAttr);
-                const FloatTupleSize lastAimDirTupleSize = getFloatTupleSize(pvCache.lastAimDirAttr);
-                const FloatTupleSize lastAimPosTupleSize = getFloatTupleSize(pvCache.lastAimPosAttr);
                 const FloatTupleSize angularVelocityTupleSize = getFloatTupleSize(pvCache.angularVelocityAttr);
 
-                const float angularVelocityMultiplier = deltaTime / fps;
+                // usually this comes in radians... because reasons
+                const float angularVelocityMultiplierDegrees = (180.0f * deltaTime) / (fps * M_PI);
+                const float angularVelocityMultiplierRadians = deltaTime / fps;
+
+                writeOutVectorAttribute(pvCache.particles, pvCache.aimAxisAttr, aimAxisArray);
+                writeOutVectorAttribute(pvCache.particles, pvCache.aimUpAttr, aimUpAxisArray);
+                writeOutVectorAttribute(pvCache.particles, pvCache.aimWorldUpAttr, aimWorldUpArray);
+
+                writeOutBlurredVectorAttribute(pvCache.particles, pvCache.scaleAttr, pvCache.lastScaleAttr, scaleArray, deltaTime);
+                writeOutBlurredVectorAttribute(pvCache.particles, pvCache.aimDirAttr, pvCache.lastAimDirAttr, aimDirectionArray, deltaTime);
+                writeOutBlurredVectorAttribute(pvCache.particles, pvCache.aimPosAttr, pvCache.lastAimPosAttr, aimPositionArray, deltaTime);
 
                 // TODO: break into smaller loops because this is ugly and we rely on the compiler's mercy to optimize!
                 // MAIN LOOP ON PARTICLES
                 for (int i = 0; i < numParticles; ++i)
                 {
-                    // SCALE
-                    if (scaleAttrTupleSize == FLOAT_TUPLE_SINGLE)  // single float value for scale
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.scaleAttr, i);
-                        float scale = attrVal[0];
-                        if (m_canMotionBlur && lastScaleAttrTupleSize == FLOAT_TUPLE_SINGLE)
-                        {
-                            const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastScaleAttr, i);
-                            scale += (attrVal[0] - lastAttrVal[0]) * deltaTime;
-                        }
-                        scaleArray[i] = MVector(scale, scale, scale);
-                    }
-                    else if (scaleAttrTupleSize == FLOAT_TUPLE_TRIPLE)   // we have a 4 float attribute ?
-                    {
-
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.scaleAttr, i);
-                        MVector scale = MVector(attrVal[0], attrVal[1], attrVal[2]);
-                        if (m_canMotionBlur && lastScaleAttrTupleSize == FLOAT_TUPLE_TRIPLE)
-                        {
-                            const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastScaleAttr, i);
-                            scale.x += (attrVal[0] - lastAttrVal[0]) * deltaTime;
-                            scale.y += (attrVal[1] - lastAttrVal[1]) * deltaTime;
-                            scale.z += (attrVal[2] - lastAttrVal[2]) * deltaTime;
-                        }
-                        scaleArray[i] = scale;
-                    }
                     // ROTATION
                     if (rotationTupleSize == FLOAT_TUPLE_SINGLE)  // single float value for rotation
                     {
@@ -1046,10 +1105,10 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                             }
                             else if (angularVelocitySource == AVS_ANGULAR_VELOCITY && angularVelocityTupleSize == FLOAT_TUPLE_TRIPLE)
                             {
-                                const float* lastAttrVal = pvCache.particles->data<float>(pvCache.angularVelocityAttr, i);
-                                rot.x += attrVal[0] * angularVelocityMultiplier;
-                                rot.y += attrVal[1] * angularVelocityMultiplier;
-                                rot.z += attrVal[2] * angularVelocityMultiplier;
+                                const float* attrValBlur = pvCache.particles->data<float>(pvCache.angularVelocityAttr, i);
+                                rot.x += attrValBlur[0] * angularVelocityMultiplierDegrees;
+                                rot.y += attrValBlur[1] * angularVelocityMultiplierDegrees;
+                                rot.z += attrValBlur[2] * angularVelocityMultiplierDegrees;
                             }
                         }
                         rotationArray[i] = rot;
@@ -1073,115 +1132,23 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                                 else
                                     rotQ = slerp(rotQ, rotQ + rotQ - lastRotQ, deltaTime);
 #endif
-                                rotationArray[i] = rotQ.asEulerRotation().asVector();
+                                rotationArray[i] = rotQ.asEulerRotation().asVector() * 180.0 / M_PI;
                             }
                             // angular velocity is always eulers ATM
                             else if (angularVelocitySource == AVS_ANGULAR_VELOCITY && angularVelocityTupleSize == FLOAT_TUPLE_TRIPLE)
                             {
                                 MVector rot = rotQ.asEulerRotation().asVector();
-                                const float* attrVal = pvCache.particles->data<float>(pvCache.angularVelocityAttr, i);
-                                rot.x += attrVal[0] * angularVelocityMultiplier;
-                                rot.y += attrVal[1] * angularVelocityMultiplier;
-                                rot.z += attrVal[2] * angularVelocityMultiplier;
-                                rotationArray[i] = rot;
+                                const float* attrValBlur = pvCache.particles->data<float>(pvCache.angularVelocityAttr, i);
+                                rot.x += attrValBlur[0] * angularVelocityMultiplierRadians;
+                                rot.y += attrValBlur[1] * angularVelocityMultiplierRadians;
+                                rot.z += attrValBlur[2] * angularVelocityMultiplierRadians;
+                                rotationArray[i] = rot * 180.0 / M_PI;
                             }
                             else
-                                rotationArray[i] = rotQ.asEulerRotation().asVector();
+                                rotationArray[i] = rotQ.asEulerRotation().asVector() * 180.0 / M_PI;
                         }
                         else
-                            rotationArray[i] = rotQ.asEulerRotation().asVector();
-                    }
-
-                    // AIM DIRECTION
-                    if (aimDirTupleSize == FLOAT_TUPLE_SINGLE)  // single float value for aimDirection
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.aimDirAttr, i);
-                        float aimDir = attrVal[0];
-                        if (m_canMotionBlur && lastAimDirTupleSize == FLOAT_TUPLE_SINGLE)
-                        {
-                            const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastAimDirAttr, i);
-                            aimDir += (attrVal[0] - lastAttrVal[0]) * deltaTime;
-                        }
-                        aimDirectionArray[i] = MVector(aimDir, aimDir, aimDir);
-                    }
-                    else if (aimDirTupleSize == FLOAT_TUPLE_TRIPLE)
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.aimDirAttr, i);
-                        MVector aimDir = MVector(attrVal[0], attrVal[1], attrVal[2]);
-                        if (m_canMotionBlur && lastAimDirTupleSize == FLOAT_TUPLE_SINGLE)
-                        {
-                            const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastAimDirAttr, i);
-                            aimDir.x += (attrVal[0] - lastAttrVal[0]) * deltaTime;
-                            aimDir.y += (attrVal[1] - lastAttrVal[1]) * deltaTime;
-                            aimDir.z += (attrVal[2] - lastAttrVal[2]) * deltaTime;
-                            // TODO: figure out why this is not working on subframes correctly
-                        }
-                        aimDirectionArray[i] = aimDir;
-                    }
-                    // AIM POSITION
-                    if (aimPosTupleSize == FLOAT_TUPLE_SINGLE) // single float value for aimDirection
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.aimPosAttr, i);
-                        float aimPos = attrVal[0];
-                        if (m_canMotionBlur && lastAimPosTupleSize == FLOAT_TUPLE_SINGLE)
-                        {
-                            const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastAimPosAttr, i);
-                            aimPos += (attrVal[0] - lastAttrVal[0]) * deltaTime;
-                        }
-                        aimPositionArray[i] = MVector(aimPos, aimPos, aimPos);
-                    }
-                    else if (aimPosTupleSize == FLOAT_TUPLE_TRIPLE)
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.aimPosAttr, i);
-                        MVector aimPos = MVector(attrVal[0], attrVal[1], attrVal[2]);
-                        if (m_canMotionBlur && lastAimPosTupleSize == FLOAT_TUPLE_TRIPLE)
-                        {
-                            const float* lastAttrVal = pvCache.particles->data<float>(pvCache.lastAimPosAttr, i);
-                            aimPos.x += (attrVal[0] - lastAttrVal[0]) * deltaTime;
-                            aimPos.y += (attrVal[1] - lastAttrVal[1]) * deltaTime;
-                            aimPos.z += (attrVal[2] - lastAttrVal[2]) * deltaTime;
-                        }
-                        aimPositionArray[i] = aimPos;
-                    }
-                    // AIM Axis
-                    if (aimAxisTupleSize == FLOAT_TUPLE_SINGLE) // single float value for aimDirection
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.aimAxisAttr, i);
-                        float aimAxis = attrVal[0];
-                        aimAxisArray[i] = MVector(aimAxis, aimAxis, aimAxis);
-                    }
-                    else if (aimAxisTupleSize == FLOAT_TUPLE_TRIPLE)
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.aimAxisAttr, i);
-                        MVector aimAxis = MVector(attrVal[0], attrVal[1], attrVal[2]);
-                        aimAxisArray[i] = aimAxis;
-                    }
-
-                    // AIM Up Axis
-                    if (aimUpTupleSize == FLOAT_TUPLE_SINGLE) // single float value for aimDirection
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.aimUpAttr, i);
-                        float aimUp = attrVal[0];
-                        aimUpAxisArray[i] = MVector(aimUp, aimUp, aimUp);
-                    }
-                    else if (aimUpTupleSize == FLOAT_TUPLE_TRIPLE)
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.aimUpAttr, i);
-                        MVector aimUp = MVector(attrVal[0], attrVal[1], attrVal[2]);
-                        aimUpAxisArray[i] = aimUp;
-                    }
-                    // World Up Axis
-                    if (aimWorldUpTupleSize == FLOAT_TUPLE_SINGLE) // single float value for aimDirection
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.aimWorldUpAttr, i);
-                        float worldUp = attrVal[0];
-                        aimWorldUpArray[i] = MVector(worldUp, worldUp, worldUp);
-                    }
-                    else if (aimWorldUpTupleSize == FLOAT_TUPLE_TRIPLE)
-                    {
-                        const float* attrVal = pvCache.particles->data<float>(pvCache.aimWorldUpAttr, i);
-                        MVector worldUp = MVector(attrVal[0], attrVal[1], attrVal[2]);
-                        aimWorldUpArray[i] = worldUp;
+                            rotationArray[i] = rotQ.asEulerRotation().asVector() * 180.0 / M_PI;
                     }
                     // INDEX
                     if (pvCache.indexAttr.type == PARTIO::FLOAT ||
