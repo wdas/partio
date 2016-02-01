@@ -31,6 +31,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 global proc AEpartioInstancerTemplate( string $nodeName )
 {
     editorTemplate -callCustom pioInstLogoHeader pioInstLogoHeader $nodeName;
+
+    editorTemplate -beginScrollLayout;
+
     editorTemplate -beginLayout "Global" -collapse 0;
     editorTemplate -addControl "cacheActive";
     editorTemplate -addControl "staticCache";
@@ -47,8 +50,6 @@ global proc AEpartioInstancerTemplate( string $nodeName )
     editorTemplate -callCustom pioInstForceUpdate pioInstForceUpdate $nodeName;
 
     editorTemplate -endLayout;
-
-    editorTemplate -beginScrollLayout;
 
         editorTemplate -beginLayout "General Parameters" -collapse 0;
             editorTemplate -addControl "pointSize";

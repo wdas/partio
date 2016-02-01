@@ -30,6 +30,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 global proc AEpartioVisualizerTemplate( string $nodeName )
 {
     editorTemplate -callCustom pioVizLogoHeader pioVizLogoHeader $nodeName;
+
+    editorTemplate -beginScrollLayout;
+
     editorTemplate -beginLayout "Global" -collapse 0;
     editorTemplate -addControl "cacheActive";
     editorTemplate -addControl "staticCache";
@@ -44,8 +47,6 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
 
 
     editorTemplate -endLayout;
-
-    editorTemplate -beginScrollLayout;
 
         editorTemplate -beginLayout "General Parameters" -collapse 0;
             editorTemplate -addControl "pointSize";
