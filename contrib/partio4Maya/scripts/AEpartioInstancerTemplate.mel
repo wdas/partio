@@ -40,6 +40,7 @@ global proc AEpartioInstancerTemplate( string $nodeName )
     //editorTemplate -addControl "flipYZ";
     editorTemplate -addControl "computeVeloPos";
     editorTemplate -addControl "velocitySource";
+    editorTemplate -addControl "angularVelocitySource";
     editorTemplate -addControl -l "Velocity Mult" "veloMult";
     editorTemplate -callCustom pioAEoutpathNew pioAEoutpathReplace cacheDir;
     editorTemplate -addControl "cachePrefix";
@@ -161,8 +162,8 @@ global proc pioInstCustomAttrsManage (string $nodeName)
     /// LAST ATTRIBUTES
     frameLayout -collapse 1 -collapsable 1 -borderVisible 0 -w 450 -l "Motion blur Channels (if left blank they will inherit above channels)" ;
     columnLayout;
-    string $lastAttributes[] = {"velocityFrom", "lastPositionFrom", "lastRotationFrom", "lastAimDirectionFrom", "lastAimPositionFrom"};
-    string $lastLabels[] = {"Velocity", "Last Position", "Last Rotation", "Last Aim Direction", "Last Aim Position"};
+    string $lastAttributes[] = {"velocityFrom", "lastPositionFrom", "angularVelocityFrom", "lastRotationFrom", "lastAimDirectionFrom", "lastAimPositionFrom"};
+    string $lastLabels[] = {"Velocity", "Last Position", "Angular Velocity", "Last Rotation", "Last Aim Direction", "Last Aim Position"};
     generateAttributesMenu($nodeName, $attrNameList, $lastLabels, $lastAttributes);
     setParent ..;
     setParent ..;
