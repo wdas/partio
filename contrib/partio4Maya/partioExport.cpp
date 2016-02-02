@@ -248,21 +248,35 @@ MStatus PartioExport::doIt(const MArgList& Args)
     {
         MTime dynTime;
         dynTime.setValue(frame);
-        if (frame == startFrame && startFrame < endFrame)
+        // for some reason nParticles have started to not eval properly using lifespan unless you turn this off. 
+        if (objNode.apiType() != MFn::kNParticle)
         {
-            PS.evaluateDynamics(dynTime, true);
-            DPS.evaluateDynamics(dynTime, true);
+            if (frame == startFrame && startFrame < endFrame)
+            {
+                PS.evaluateDynamics(dynTime,true);
+            	DPS.evaluateDynamics(dynTime, true);
+            }
+            else
+            {
+                PS.evaluateDynamics(dynTime,false);
+            	DPS.evaluateDynamics(dynTime, false);
+            }
         }
         else
         {
-            PS.evaluateDynamics(dynTime, false);
-            DPS.evaluateDynamics(dynTime, false);
+            // NParticles needs to frame advance and update a different way
+            // neither of these work with NParticles+viewport2.0 for some reason
+
+            MGlobal::viewFrame(dynTime);
+
+            //char frameNum[10];
+            //sprintf(frameNum, "%i", frame);
+            //MGlobal::executeCommand(MString("currentTime ")+frameNum, true, false );
         }
 
         /// why is this being done AFTER the evaluate dynamics stuff?
         if (startFrameSet && endFrameSet && startFrame < endFrame)
         {
-            MGlobal::viewFrame(frame);
             outFrame = frame;
         }
         else
