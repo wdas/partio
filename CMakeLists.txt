@@ -145,7 +145,7 @@ IF (WIN32)
 ELSEIF(APPLE)
 	SET( PARTIO_LIBRARIES ${GLUT_glut_LIBRARY} ${GLUT_cocoa_LIBRARY} ${ZLIB_LIBRARY} partio )
 ELSEIF (UNIX)
-	SET( PARTIO_LIBRARIES glut z partio )
+	SET( PARTIO_LIBRARIES partio glut z  )
 ENDIF()
 # make it so partio can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/lib )
