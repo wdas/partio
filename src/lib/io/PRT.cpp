@@ -82,6 +82,8 @@ static unsigned char signature[32] = {
     0x63,0x6c,0x65,0x20,0x46,0x6f,0x72,0x6d,0x61,0x74,0x00,0x00,0x00,0x00,0x00,0x00
     };
 
+static unsigned int sizes[11] = {2, 4, 8, 2, 4, 8, 2, 4, 8, 1, 1};
+    
 #ifndef USE_ILMHALF
 union f_ui {
     unsigned int ui;
@@ -112,6 +114,10 @@ static bool read_buffer(std::istream& is, z_stream& z, char* in_buf, void* p, si
         int ret = inflate( &z, Z_BLOCK  );
         if ( ret != Z_OK && ret != Z_STREAM_END ) {
             std::cerr<<"Zlib error "<<z.msg<<std::endl;;
+            return false;
+        }
+        if (ret == Z_STREAM_END && z.avail_out > 0) {
+            std::cerr<<"Truncated prt file  "<<std::endl;;
             return false;
         }
     }
@@ -158,6 +164,11 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
         std::cerr<<"Partio: failed to get PRT magic"<<std::endl;
         return 0;
     }
+    
+    // The header may be a different size in other PRT versions
+    if (header.headersize > sizeof(FileHeader))
+        input->seekg(header.headersize);
+    
     int reserve=0;
     int channels=0;
     int channelsize=0;
@@ -169,7 +180,9 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
 
     std::vector<Channel> chans;
     std::vector<ParticleAttribute> attrs;
-
+    
+    unsigned particleSize = 0;
+    
     for (int i=0; i<channels; i++) {
         Channel ch;
         input->read((char*)&ch, sizeof(Channel));
@@ -209,6 +222,13 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
             chans.push_back(ch);
             attrs.push_back(attrHandle);
         }
+        
+        // The size of the particle is determined from the channel with largest offset. The channels are not required to be listed in order.
+        particleSize = (std::max)( particleSize, chans.back().offset + sizes[ch.type] );
+        
+        // The channel entry might have more data in other PRT versions.
+        if ((unsigned)channelsize > sizeof(Channel))
+            input->seekg(channelsize - sizeof(Channel), std::ios::cur);
     }
 
     if (headersOnly) return simple;
@@ -223,8 +243,13 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
     char in_buf[OUT_BUFSIZE];
     z.next_in = 0;
     z.avail_in = 0;
+    
+    char* prt_buf = new char[particleSize];
 
     for (unsigned int particleIndex=0;particleIndex<(unsigned int )simple->numParticles();particleIndex++) {
+        // Read the particle from the file, and decompress it into a single particle-sized buffer.
+        read_buffer(*input, z, (char*)in_buf, prt_buf, particleSize);
+        
         for (unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++) {
             if (attrs[attrIndex].type==Partio::INT) {
                 int* data=simple->dataWrite<int>(attrs[attrIndex],particleIndex);
@@ -233,56 +258,42 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
                     switch (chans[attrIndex].type) {
                     case 0:	// int16
                         {
-                            short val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(short));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<short*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(short) ] );
                         }
                         break;
                     case 1:	// int32
                         {
-                            read_buffer(*input, z, (char*)in_buf, &ival, sizeof(int));
+                            ival = (int)*reinterpret_cast<int*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(int) ] );
                         }
                         break;
                     case 2:	// int64
                         {
-                            long long val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(long long));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<long long*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(long long) ] );
                         }
                         break;
                     case 6:	// uint16
                         {
-                            unsigned short val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned short));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<unsigned short*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(unsigned short) ] );
                         }
                         break;
                     case 7:	// uint32
                         {
-                            unsigned int val;
-                            read_buffer(*input, z, (char*)in_buf,  &val, sizeof(unsigned int));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<unsigned int*>( &prt_buf[ chans[attrIndex].offset +  + count * sizeof(unsigned int) ] );
                         }
                         break;
                     case 8:	// uint64
                         {
-                            unsigned long long val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned long long));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<unsigned long long*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(unsigned long long) ] );
                         }
                         break;
                     case 9:	// int8
                         {
-                            char val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(char));
-                            ival = (int)val;
+                            ival = (int)prt_buf[ chans[attrIndex].offset + count ];
                         }
                         break;
                     case 10:// uint8
                         {
-                            unsigned char val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(unsigned char));
-                            ival = (int)val;
+                            ival = (int)*reinterpret_cast<unsigned char*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(unsigned char) ] );
                         }
                         break;
                     }
@@ -291,31 +302,26 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
             }else if (attrs[attrIndex].type==Partio::FLOAT || attrs[attrIndex].type==Partio::VECTOR) {
                 float* data=simple->dataWrite<float>(attrs[attrIndex],particleIndex);
                 for (int count=0;count<attrs[attrIndex].count;count++) {
-                    float fval;
+                    float fval = 0;
                     switch (chans[attrIndex].type) {
                     case 3:	// float16
                         {
 #ifdef USE_ILMHALF
-                            half val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(half));
-                            fval = (float)(val);
+                            fval = (float)*reinterpret_cast<half*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(half) ] );
 #else
-                            unsigned short val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(val));
+                            unsigned short val = *reinterpret_cast<unsigned short*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(unsigned short) ] );
                             fval = half2float[val].f;
 #endif
                         }
                         break;
                     case 4:	// float32
                         {
-                            read_buffer(*input, z, (char*)in_buf, &fval, sizeof(float));
+                            fval = (float)*reinterpret_cast<float*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(float) ] );
                         }
                         break;
                     case 5:	// float64
                         {
-                            double val;
-                            read_buffer(*input, z, (char*)in_buf, &val, sizeof(double));
-                            fval = (float)val;
+                            fval = (float)*reinterpret_cast<double*>( &prt_buf[ chans[attrIndex].offset + count * sizeof(double) ] );
                         }
                         break;
                     }
@@ -324,6 +330,9 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly)
             }
 		}
 	}
+    
+    delete prt_buf;
+    
     if (inflateEnd( &z ) != Z_OK) {
         std::cerr<<"Zlib inflateEnd error"<<std::endl;
         return 0;
