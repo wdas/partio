@@ -281,25 +281,23 @@ addParticles(const int countToAdd)
             attributeOffsets[i]=attributeData[i]-(char*)0;
         }
     }
-    //int offset=particleCount;
+    int offset=particleCount;
     particleCount+=countToAdd;
-    iterator it=setupIterator();
-    // TODO: this needs to advance the iterator to the appropriate spot
-    return it;
+    return setupIterator(offset);
 }
 
 ParticlesDataMutable::iterator ParticlesSimple::
-setupIterator()
+setupIterator(const int index)
 {
     if(numParticles()==0) return ParticlesDataMutable::iterator();
-    return ParticlesDataMutable::iterator(this,0,numParticles()-1);
+    return ParticlesDataMutable::iterator(this,index,numParticles()-1);
 }
 
 ParticlesData::const_iterator ParticlesSimple::
-setupConstIterator() const
+setupConstIterator(const int index) const
 {
     if(numParticles()==0) return ParticlesDataMutable::const_iterator();
-    return ParticlesData::const_iterator(this,0,numParticles()-1);
+    return ParticlesData::const_iterator(this,index,numParticles()-1);
 }
 
 void ParticlesSimple::

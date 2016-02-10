@@ -90,8 +90,8 @@ public:
     iterator addParticles(const int count);
 
 
-    iterator setupIterator();
-    const_iterator setupConstIterator() const;
+    iterator setupIterator(const int index=0);
+    const_iterator setupConstIterator(const int index=0) const;
     void setupIteratorNextBlock(Partio::ParticleIterator<false>& iterator);
     void setupIteratorNextBlock(Partio::ParticleIterator<true>& iterator) const;
     void setupAccessor(Partio::ParticleIterator<false>& iterator,ParticleAccessor& accessor);

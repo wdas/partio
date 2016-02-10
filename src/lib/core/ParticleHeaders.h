@@ -79,10 +79,10 @@ protected:
     ParticleIndex addParticle();
     iterator addParticles(const int count);
 
-    const_iterator setupConstIterator() const
+    const_iterator setupConstIterator(const int index=0) const
     {return const_iterator();}
 
-    iterator setupIterator()
+    iterator setupIterator(const int index=0)
     {return iterator();}
 
 private:

@@ -167,7 +167,7 @@ public:
         ParticleIndex *points, float *pointDistancesSquared, float *finalRadius2) const=0;
 
     //! Produce a const iterator
-    virtual const_iterator setupConstIterator() const=0;
+    virtual const_iterator setupConstIterator(const int index=0) const=0;
 
     //! Produce a beginning iterator for the particles
     const_iterator begin() const
@@ -254,7 +254,7 @@ public:
     {return iterator();}
 
     //! Produce a const iterator
-    virtual iterator setupIterator()=0;
+    virtual iterator setupIterator(const int index=0)=0;
 
 private:
     virtual void* dataInternal(const ParticleAttribute& attribute,const ParticleIndex particleIndex) const=0;
