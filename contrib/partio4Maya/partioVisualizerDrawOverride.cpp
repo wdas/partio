@@ -357,11 +357,17 @@ namespace MHWRender {
 
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         float world_view[4][4];
+        float proj[4][4];
         context.getMatrix(MHWRender::MDrawContext::kWorldViewMtx).get(world_view);
+        context.getMatrix(MHWRender::MDrawContext::kProjectionMtx).get(proj);
 
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glLoadMatrixf(&world_view[0][0]);
+        glMatrixMode(GL_PROJECTION);
+        glPushMatrix();
+        glLoadMatrixf(&proj[0][0]);
+
 
         glUseProgram(shader_program);
 
@@ -381,6 +387,7 @@ namespace MHWRender {
 
         glUseProgram(0);
 
+        glPopMatrix();
         glPopMatrix();
         glPopAttrib();
     }
