@@ -39,7 +39,7 @@ namespace {
     GLuint vertex_shader = INVALID_GL_OBJECT;
     GLuint pixel_shader = INVALID_GL_OBJECT;
     GLuint shader_program = INVALID_GL_OBJECT;
-    GLuint world_view_proj_location = INVALID_GL_OBJECT;
+    GLint world_view_proj_location = INVALID_GL_OBJECT;
 
     template <GLint shader_type>
     bool create_shader(GLuint& shader, const char* shader_code)
@@ -246,8 +246,6 @@ namespace {
             if (p_reader_cache == 0 || p_reader_cache->particles == 0 || p_reader_cache->positionAttr.attributeIndex == -1)
                 return;
 
-            std::cerr << "Trying to draw the cache.\n";
-
             // check for viewport draw mode
             if (m_draw_style == PARTIO_DRAW_STYLE_BOUNDING_BOX || as_bounding_box)
                 draw_bounding_box();
@@ -370,9 +368,9 @@ namespace MHWRender {
         GLint current_program = 0;
         glGetIntegerv(GL_CURRENT_PROGRAM, &current_program);
 
-        glUniformMatrix4fv(world_view_proj_location, 1, true, &world_view_proj[0][0]);
-
         glUseProgram(shader_program);
+
+        glUniformMatrix4fv(world_view_proj_location, 1, false, &world_view_proj[0][0]);
 
         draw_data->draw(draw_bounding_box);
 
