@@ -30,7 +30,8 @@
 
 namespace {
     const char* vertex_shader_code = "#version 110\n" \
-            "void main(void) { gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex; gl_FrontColor = gl_Color; gl_BackColor = gl_Color; }\n";
+            "uniform mat4 world_view_proj;\n" \
+            "void main(void) { gl_Position = world_view_proj * gl_Vertex; gl_FrontColor = gl_Color; gl_BackColor = gl_Color; }\n";
     const char* pixel_shader_code = "#version 110\n" \
             "void main(void) { gl_FragColor = gl_Color; }\n";
 
@@ -38,6 +39,7 @@ namespace {
     GLuint vertex_shader = INVALID_GL_OBJECT;
     GLuint pixel_shader = INVALID_GL_OBJECT;
     GLuint shader_program = INVALID_GL_OBJECT;
+    GLuint world_view_proj_location = INVALID_GL_OBJECT;
 
     template <GLint shader_type>
     bool create_shader(GLuint& shader, const char* shader_code)
@@ -244,6 +246,8 @@ namespace {
             if (p_reader_cache == 0 || p_reader_cache->particles == 0 || p_reader_cache->positionAttr.attributeIndex == -1)
                 return;
 
+            std::cerr << "Trying to draw the cache.\n";
+
             // check for viewport draw mode
             if (m_draw_style == PARTIO_DRAW_STYLE_BOUNDING_BOX || as_bounding_box)
                 draw_bounding_box();
@@ -355,19 +359,18 @@ namespace MHWRender {
                 draw_logo = false;
         }
 
+        if (!(draw_logo || draw_cache))
+            return;
+
         glPushAttrib(GL_ALL_ATTRIB_BITS);
-        float world_view[4][4];
-        float proj[4][4];
-        context.getMatrix(MHWRender::MDrawContext::kWorldViewMtx).get(world_view);
-        context.getMatrix(MHWRender::MDrawContext::kProjectionMtx).get(proj);
+        glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
+        float world_view_proj[4][4];
+        context.getMatrix(MHWRender::MDrawContext::kWorldViewProjMtx).get(world_view_proj);
 
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadMatrixf(&world_view[0][0]);
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadMatrixf(&proj[0][0]);
+        GLint current_program = 0;
+        glGetIntegerv(GL_CURRENT_PROGRAM, &current_program);
 
+        glUniformMatrix4fv(world_view_proj_location, 1, true, &world_view_proj[0][0]);
 
         glUseProgram(shader_program);
 
@@ -385,10 +388,9 @@ namespace MHWRender {
             draw_data->draw_icon();
         }
 
-        glUseProgram(0);
+        glUseProgram(current_program);
 
-        glPopMatrix();
-        glPopMatrix();
+        glPopClientAttrib();
         glPopAttrib();
     }
 
@@ -467,6 +469,8 @@ namespace MHWRender {
 
         glDetachShader(shader_program, vertex_shader);
         glDetachShader(shader_program, pixel_shader);
+
+        world_view_proj_location = glGetUniformLocation(shader_program, "world_view_proj");
     }
 
     void partioVisualizerDrawOverride::free_shaders()
