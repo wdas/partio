@@ -93,7 +93,7 @@ namespace {
 
         static void drawBillboardCircleAtPoint(const float* position, float radius, int drawType, BillboardDrawData& data, const MMatrix& world_view_matrix)
         {
-            static __thread MMatrix world_view_source = MMatrix::identity;
+            static MMatrix world_view_source = MMatrix::identity;
             world_view_source[3][0] = position[0];
             world_view_source[3][1] = position[1];
             world_view_source[3][2] = position[2];
