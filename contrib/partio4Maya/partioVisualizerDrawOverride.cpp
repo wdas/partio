@@ -30,8 +30,9 @@
 
 namespace {
     const char* vertex_shader_code = "#version 110\n" \
-            "uniform mat4 world_view_proj;\n" \
-            "void main(void) { gl_Position = world_view_proj * gl_Vertex; gl_FrontColor = gl_Color; gl_BackColor = gl_Color; }\n";
+            "uniform mat4 world_view;\n" \
+            "uniform mat4 proj;\n" \
+            "void main(void) { gl_Position = proj * world_view * gl_Vertex; gl_FrontColor = gl_Color; gl_BackColor = gl_Color; }\n";
     const char* pixel_shader_code = "#version 110\n" \
             "void main(void) { gl_FragColor = gl_Color; }\n";
 
@@ -39,7 +40,8 @@ namespace {
     GLuint vertex_shader = INVALID_GL_OBJECT;
     GLuint pixel_shader = INVALID_GL_OBJECT;
     GLuint shader_program = INVALID_GL_OBJECT;
-    GLint world_view_proj_location = INVALID_GL_OBJECT;
+    GLint world_view_location = INVALID_GL_OBJECT;
+    GLint proj_location = INVALID_GL_OBJECT;
 
     template <GLint shader_type>
     bool create_shader(GLuint& shader, const char* shader_code)
@@ -89,27 +91,29 @@ namespace {
             }
         };
 
-        static void drawBillboardCircleAtPoint(const float* position, float radius, int drawType, BillboardDrawData& data)
+        static void drawBillboardCircleAtPoint(const float* position, float radius, int drawType, BillboardDrawData& data, const MMatrix& world_view_matrix)
         {
-            glPushMatrix();
-            glTranslatef(position[0], position[1], position[2]);
-            glMatrixMode(GL_MODELVIEW_MATRIX);
-            float m[16];
-            glGetFloatv(GL_MODELVIEW_MATRIX, m);
-            m[0] = 1.0f;
-            m[1] = 0.0f;
-            m[2] = 0.0f;
-            m[4] = 0.0f;
-            m[5] = 1.0f;
-            m[6] = 0.0f;
-            m[8] = 0.0f;
-            m[9] = 0.0f;
-            m[10] = 1.0f;
-            glLoadMatrixf(m);
+            static __thread MMatrix world_view_source = MMatrix::identity;
+            world_view_source[3][0] = position[0];
+            world_view_source[3][1] = position[1];
+            world_view_source[3][2] = position[2];
+            static __thread float world_view[4][4];
+            (world_view_source * world_view_matrix).get(world_view);
+            world_view[0][0] = 1.0f;
+            world_view[0][1] = 0.0f;
+            world_view[0][2] = 0.0f;
+            world_view[1][0] = 0.0f;
+            world_view[1][1] = 1.0f;
+            world_view[1][2] = 0.0f;
+            world_view[2][0] = 0.0f;
+            world_view[2][1] = 0.0f;
+            world_view[2][2] = 1.0f;
+
+            MPoint world_view_pos = world_view_matrix * MPoint(position[0], position[1], position[2], 1.0);
+
+            glUniformMatrix4fv(world_view_location, 1, false, &world_view[0][0]);
 
             // TODO: setup radius using the scale of the Matrix
-            // also get rid of all this gl matrix tingamagic, and do it manually
-
             if (radius != data.last_radius)
             {
                 data.last_radius = radius;
@@ -213,7 +217,6 @@ namespace {
         float m_wireframe_color[4];
         int m_draw_error;
 
-
         DrawData() : MUserData(false), p_reader_cache(0)
         {
 
@@ -241,7 +244,7 @@ namespace {
             m_logo_bbox.expand(logo_bbox.max() * m_icon_size);
         }
 
-        void draw(bool as_bounding_box = false) const
+        void draw(bool as_bounding_box, const MMatrix& world_view_matrix) const
         {
             if (p_reader_cache == 0 || p_reader_cache->particles == 0 || p_reader_cache->positionAttr.attributeIndex == -1)
                 return;
@@ -297,7 +300,7 @@ namespace {
                     {
                         glColor4fv(&p_reader_cache->rgba[i * 4]);
                         const float* partioPositions = p_reader_cache->particles->data<float>(p_reader_cache->positionAttr, i);
-                        drawBillboardCircleAtPoint(partioPositions, p_reader_cache->radius[i], m_draw_style, billboard_data);
+                        drawBillboardCircleAtPoint(partioPositions, p_reader_cache->radius[i], m_draw_style, billboard_data, world_view_matrix);
                     }
 
                     glDisableClientState(GL_VERTEX_ARRAY);
@@ -362,17 +365,21 @@ namespace MHWRender {
 
         glPushAttrib(GL_ALL_ATTRIB_BITS);
         glPushClientAttrib(GL_CLIENT_ALL_ATTRIB_BITS);
-        float world_view_proj[4][4];
-        context.getMatrix(MHWRender::MDrawContext::kWorldViewProjMtx).get(world_view_proj);
+        float world_view[4][4];
+        MMatrix world_view_matrix = context.getMatrix(MHWRender::MDrawContext::kWorldViewMtx);
+        world_view_matrix.get(world_view);
+        float proj[4][4];
+        context.getMatrix(MHWRender::MDrawContext::kProjectionMtx).get(proj);
 
         GLint current_program = 0;
         glGetIntegerv(GL_CURRENT_PROGRAM, &current_program);
 
         glUseProgram(shader_program);
 
-        glUniformMatrix4fv(world_view_proj_location, 1, false, &world_view_proj[0][0]);
+        glUniformMatrix4fv(world_view_location, 1, false, &world_view[0][0]);
+        glUniformMatrix4fv(proj_location, 1, false, &proj[0][0]);
 
-        draw_data->draw(draw_bounding_box);
+        draw_data->draw(draw_bounding_box, world_view_matrix);
 
         if (draw_logo)
         {
@@ -468,7 +475,8 @@ namespace MHWRender {
         glDetachShader(shader_program, vertex_shader);
         glDetachShader(shader_program, pixel_shader);
 
-        world_view_proj_location = glGetUniformLocation(shader_program, "world_view_proj");
+        world_view_location = glGetUniformLocation(shader_program, "world_view");
+        proj_location = glGetUniformLocation(shader_program, "proj");
     }
 
     void partioVisualizerDrawOverride::free_shaders()
