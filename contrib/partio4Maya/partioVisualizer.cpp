@@ -468,18 +468,16 @@ partioVizReaderCache* partioVisualizer::updateParticleCache()
 // COMPUTE FUNCTION
 MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
 {
-    MString colorFromIndex = block.inputValue(aColorFrom).asString();
-    MString incandFromIndex = block.inputValue(aIncandFrom).asString();
-    MString opacityFromIndex = block.inputValue(aAlphaFrom).asString();
-    MString radiusFromIndex = block.inputValue(aRadiusFrom).asString();
-    bool cacheActive = block.inputValue(aCacheActive).asBool();
-
     // Determine if we are requesting the output plug for this node.
     //
-    if (plug != aUpdateCache)
-        return MS::kUnknownParameter;
-    else
+    if (plug == aUpdateCache)
     {
+        MString colorFromIndex = block.inputValue(aColorFrom).asString();
+        MString incandFromIndex = block.inputValue(aIncandFrom).asString();
+        MString opacityFromIndex = block.inputValue(aAlphaFrom).asString();
+        MString radiusFromIndex = block.inputValue(aRadiusFrom).asString();
+        bool cacheActive = block.inputValue(aCacheActive).asBool();
+
         MString cacheDir = block.inputValue(aCacheDir).asString();
         MString cacheFile = block.inputValue(aCacheFile).asString();
 
@@ -744,47 +742,84 @@ MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
                 incandFromIndex != mLastIncandFromIndex) // incandescence does not affect viewport draw for now
                 mLastIncandFromIndex = incandFromIndex;
         }
-    }
 
-    if (pvCache.particles) // update the AE Controls for attrs in the cache
-    {
-        const unsigned int numAttr = static_cast<unsigned int>(pvCache.particles->numAttributes());
-        MPlug zPlug(thisMObject(), aPartioAttributes);
-
-        // no need to reset attributes as not all attributes are guaranteed to be
-        // on all frames
-
-        if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache
+        if (pvCache.particles) // update the AE Controls for attrs in the cache
         {
-            attributeList.clear();
+            const unsigned int numAttr = static_cast<unsigned int>(pvCache.particles->numAttributes());
+            MPlug zPlug(thisMObject(), aPartioAttributes);
 
-            for (unsigned int i = 0; i < numAttr; ++i)
+            // no need to reset attributes as not all attributes are guaranteed to be
+            // on all frames
+
+            if (cacheChanged || zPlug.numElements() != numAttr) // update the AE Controls for attrs in the cache
             {
-                PARTIO::ParticleAttribute attr;
-                pvCache.particles->attributeInfo(i, attr);
+                attributeList.clear();
 
-                const MString mstring_attr_name(attr.name.c_str());
-                zPlug.selectAncestorLogicalIndex(i, aPartioAttributes);
-                zPlug.setValue(mstring_attr_name);
-                attributeList.append(mstring_attr_name);
-            }
-
-            MArrayDataHandle hPartioAttrs = block.inputArrayValue(aPartioAttributes);
-            MArrayDataBuilder bPartioAttrs = hPartioAttrs.builder();
-            // do we need to clean up some attributes from our array?
-            if (bPartioAttrs.elementCount() > numAttr)
-            {
-                unsigned int current = bPartioAttrs.elementCount();
-                //unsigned int attrArraySize = current - 1;
-
-                // remove excess elements from the end of our attribute array
-                for (unsigned int x = numAttr; x < current; x++)
+                for (unsigned int i = 0; i < numAttr; ++i)
                 {
-                    bPartioAttrs.removeElement(x);
+                    PARTIO::ParticleAttribute attr;
+                    pvCache.particles->attributeInfo(i, attr);
+
+                    const MString mstring_attr_name(attr.name.c_str());
+                    zPlug.selectAncestorLogicalIndex(i, aPartioAttributes);
+                    zPlug.setValue(mstring_attr_name);
+                    attributeList.append(mstring_attr_name);
+                }
+
+                MArrayDataHandle hPartioAttrs = block.inputArrayValue(aPartioAttributes);
+                MArrayDataBuilder bPartioAttrs = hPartioAttrs.builder();
+                // do we need to clean up some attributes from our array?
+                if (bPartioAttrs.elementCount() > numAttr)
+                {
+                    unsigned int current = bPartioAttrs.elementCount();
+                    //unsigned int attrArraySize = current - 1;
+
+                    // remove excess elements from the end of our attribute array
+                    for (unsigned int x = numAttr; x < current; x++)
+                    {
+                        bPartioAttrs.removeElement(x);
+                    }
                 }
             }
         }
     }
+    else if (plug == aRenderCachePath)
+    {
+        MString cacheDir = block.inputValue(aCacheDir).asString();
+        MString cacheFile = block.inputValue(aCacheFile).asString();
+
+        if (cacheDir == "" || cacheFile == "")
+            return (MS::kFailure);
+
+        const bool cacheStatic = block.inputValue(aCacheStatic).asBool();
+        const int cacheOffset = block.inputValue(aCacheOffset).asInt();
+        const short cacheFormat = block.inputValue(aCacheFormat).asShort();
+        const MFloatVector defaultColor = block.inputValue(aDefaultPointColor).asFloatVector();
+        const float defaultAlpha = block.inputValue(aDefaultAlpha).asFloat();
+        const bool invertAlpha = block.inputValue(aInvertAlpha).asBool();
+        const float defaultRadius = block.inputValue(aDefaultRadius).asFloat();
+        const int integerTime = block.inputValue(time).asInt();
+        const int byFrame = block.inputValue(aByFrame).asInt();
+        const bool flipYZ = block.inputValue(aFlipYZ).asBool();
+        
+        bool forceReload = block.inputValue(aForceReload).asBool();
+        MString formatExt = "";
+        int cachePadding = 0;
+
+        MString newCacheFile = "";
+        MString renderCacheFile = "";
+
+        partio4Maya::updateFileName(cacheFile, cacheDir,
+                                    cacheStatic, cacheOffset,
+                                    cacheFormat, integerTime, byFrame,
+                                    cachePadding, formatExt,
+                                    newCacheFile, renderCacheFile);
+
+        block.outputValue(aRenderCachePath).setString(renderCacheFile);
+    }
+    else
+        return MS::kUnknownParameter;
+    
     block.setClean(plug);
     return MS::kSuccess;
 }
