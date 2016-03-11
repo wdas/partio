@@ -248,9 +248,12 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
 
         int finalFrame = (frameNum + frameOffset) * byFrame;
 
+        const int dotPosition = formattedName.rindexW('.');
+        if (dotPosition == -1)
+            return 0;
         /// TODO:  this is only temporary
         /// need to make the node actually update itself properly
-        MString formatExt = formattedName.substring((formattedName.length() - 3), (formattedName.length() - 1));
+        MString formatExt = formattedName.substring(dotPosition + 1, (formattedName.length() - 1));
         int cachePadding = 4;
 
         MString formatString = "%0";
