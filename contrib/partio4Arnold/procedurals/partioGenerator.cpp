@@ -272,7 +272,7 @@ struct PartioData {
                 rad = CLAMP(rad, arg_minParticleRadius, arg_maxParticleRadius);
 
                 // According to Thiago Ize, we have to filter particles
-                // where the ratio of the position form the origin
+                // where the ratio of the position from the origin
                 // and radius is bigger than 10^7
                 if ((AiV3Length(position) / rad) > filterSmallParticles)
                     continue;
@@ -443,6 +443,8 @@ struct PartioData {
             }
         }
 
+        AiMsgDebug("[partioGenerator] about to final loop thru the particles");
+
         ///////////////////////////////////////////////
         /// LOOP particles
         for (int i = 0; i < pointCount; ++i)
@@ -553,21 +555,38 @@ struct PartioData {
             }
         } // for loop per particle
 
+        AiMsgDebug("[partioGenerator] Done looping thru particles");
 
         if (hasRgbPP)
+        {
             AiNodeSetArray(currentInstance, "rgbPP", rgbArr);
+            AiMsgDebug("[partioGenerator] rgbPP array set");
+        }
+
         if (hasIncandPP)
+        {
             AiNodeSetArray(currentInstance, "incandescencePP", incandArr);
+            AiMsgDebug("[partioGenerator] incandescencePP array set");
+        }
+
         if (hasOpacPP)
+        {
             AiNodeSetArray(currentInstance, "opacityPP", opacityArr);
+            AiMsgDebug("[partioGenerator] OpacityPP array set");
+        }
 
         AiNodeSetArray(currentInstance, "radius", radarr);
+        AiMsgDebug("[partioGenerator] radiusPP array set");
 
         for (size_t x = 0; x < arnoldArrays.size(); ++x)
+        {
             AiNodeSetArray(currentInstance, extraAttrs[x].name.c_str(), arnoldArrays[x]);
+            AiMsgDebug("[partioGenerator] %s array set", extraAttrs[x].name.c_str() );
+        }
 
         /// these  will always be here
         AiNodeSetArray(currentInstance, "points", pointarr);
+        AiMsgDebug("[partioGenerator] Points array set with %i points", pointarr->nelements );
         //AiNodeSetArray ( currentInstance, "position",pointarr );  // we want to enable this when they fix some stuff on particles
 
         AiNodeSetInt(currentInstance, "mode", arg_renderType);
@@ -576,6 +595,7 @@ struct PartioData {
         if (arg_stepSize > 0.0f)
             AiNodeSetFlt(currentInstance, "step_size", arg_stepSize);
 
+        AiMsgDebug("[partioGenerator] Done with partioGeneration! ");
         return currentInstance;
     }
 
