@@ -233,7 +233,7 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
         //MString envProcPath =envProcFilePath.resolvedPath();
         //MString dso = envProcPath+(MString("/partioGenerator.so"));
 
-        MString dso = "partioGenerator.so";
+        MString dso = "[PARTIO_ARNOLD_PROCEDURAL]";
 
         // we add this here so we can add in a custom   particle reading procedural instead of the default one
         MString overrideProc = m_DagNode.findPlug("aiOverrideProcedural").asString();
