@@ -54,6 +54,7 @@ namespace Partio{
 typedef uint64_t ParticleIndex;
 
 class ParticlesData;
+class ParticlesDataMutable;
 // Particle Collection Interface
 //!  Particle Collection Interface
 /*!
@@ -165,6 +166,8 @@ public:
     //! square of the final search radius used
     virtual int findNPoints(const float center[3],int nPoints,const float maxRadius,
         ParticleIndex *points, float *pointDistancesSquared, float *finalRadius2) const=0;
+
+    virtual ParticlesDataMutable* computeClustering(const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density)=0;
 
     //! Produce a const iterator
     virtual const_iterator setupConstIterator(const int index=0) const=0;

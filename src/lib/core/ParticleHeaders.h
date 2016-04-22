@@ -73,6 +73,8 @@ protected:
         std::vector<ParticleIndex>& points,std::vector<float>& pointDistancesSquared) const;
     int findNPoints(const float center[3],int nPoints,const float maxRadius,
         ParticleIndex *points, float *pointDistancesSquared, float *finalRadius2) const;
+    ParticlesDataMutable* computeClustering(const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density)
+    {assert(false);}
 
     ParticleAttribute addAttribute(const char* attribute,ParticleAttributeType type,const int count);
     FixedAttribute addFixedAttribute(const char* attribute,ParticleAttributeType type,const int count);
