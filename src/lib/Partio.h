@@ -88,9 +88,9 @@ public:
     virtual bool fixedAttributeInfo(const char* attributeName,FixedAttribute& attribute) const=0;
 
     //! Lookup an attribute by index and store a handle to the attribute.
-    virtual bool attributeInfo(const int attributeInfo,ParticleAttribute& attribute) const=0;
+    virtual bool attributeInfo(const int index,ParticleAttribute& attribute) const=0;
     //! Lookup an attribute by index and store a handle to the attribute.
-    virtual bool fixedAttributeInfo(const int attributeInfo,FixedAttribute& attribute) const=0;
+    virtual bool fixedAttributeInfo(const int index,FixedAttribute& attribute) const=0;
 };
 
 // Particle Data Interface

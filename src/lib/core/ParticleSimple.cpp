@@ -272,20 +272,78 @@ struct IdAndIndex {
 
 template<class T> T smoothstep(T t){return (3.-2.*t)*t*t;}
 
+void addClusterAttribute(ParticlesDataMutable* cluster, ParticleAttribute& clusterAttribute, const ParticlesDataMutable* particle, const int index, const ParticleAttribute& attribute, const int neighborIndex, const std::vector<std::pair<ParticleIndex,float> >& indexAndInterp)
+{
+    switch(attribute.type){
+    case Partio::VECTOR:
+    case Partio::FLOAT:
+        {
+            float* data = particle->dataWrite<float>(attribute,index);
+            float* neighborData = particle->dataWrite<float>(attribute,neighborIndex);
+            for (size_t i=0; i<indexAndInterp.size(); i++) {
+                float* clusterData = cluster->dataWrite<float>(clusterAttribute,indexAndInterp[i].first);
+                for (int j=0; j<attribute.count; j++) {
+                    clusterData[j] = indexAndInterp[i].second ? data[j]+indexAndInterp[i].second*(neighborData[j]-data[j]) : data[j];
+                }
+            }
+            break;
+        }
+    case Partio::INT:
+    case Partio::INDEXEDSTR:
+        {
+            int* data = particle->dataWrite<int>(attribute,index);
+            for (size_t i=0; i<indexAndInterp.size(); i++) {
+                int* clusterData = cluster->dataWrite<int>(clusterAttribute,indexAndInterp[i].first);
+                for (int j=0; j<attribute.count; j++) {
+                    clusterData[j] = data[j];
+                }
+            }
+            break;
+        }
+    }
+}
+
 ParticlesDataMutable* ParticlesSimple::
 computeClustering(const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density)
 {
     ParticleAttribute posAttr;
-    if (!attributeInfo("position", posAttr)) return 0;
-    if (posAttr.type != VECTOR && posAttr.type != FLOAT) return 0;
-    if (posAttr.count != 3) return 0;
+    bool hasPosAttr = false;
     ParticleAttribute idAttr;
-    if (!attributeInfo("id", idAttr)) return 0;
-    if (idAttr.type != INT) return 0;
-    if (idAttr.count != 1) return 0;
-    sort();
+    bool hasIdAttr = false;
     ParticlesDataMutable* cluster = create();
-    ParticleAttribute clusterPosAttr = cluster->addAttribute("position",VECTOR,3);
+    std::vector<ParticleAttribute> attributes;
+    std::vector<ParticleAttribute> clusterAttributes;
+    for (int i=0; i<numAttributes(); i++) {
+        ParticleAttribute attr;
+        if (attributeInfo(i,attr)) {
+            if (attr.type == Partio::NONE) continue;
+            attributes.push_back(attr);
+            clusterAttributes.push_back(cluster->addAttribute(attributes[i].name.c_str(),attributes[i].type,attributes[i].count));
+            if (attr.type == Partio::INDEXEDSTR) {
+                const std::vector<std::string>& strings = indexedStrs(attr);
+                for (size_t j=0; j<strings.size(); j++) {
+                    cluster->registerIndexedStr(clusterAttributes.back(),strings[j].c_str());
+                }
+            }
+            if (attr.name == "position") {
+                posAttr = attr;
+                hasPosAttr = true;
+            } else if (attr.name == "id") {
+                idAttr = attr;
+                hasIdAttr = true;
+            }
+        }
+    }
+    if (!hasPosAttr || posAttr.type != VECTOR && posAttr.type != FLOAT || posAttr.count !=3) {
+        cluster->release();
+        return 0;
+    }
+    if (!hasIdAttr ||idAttr.type != INT || idAttr.count != 1) {
+        cluster->release();
+        return 0;
+    }
+    sort();
+    ParticleAttribute clusterIdAttr = cluster->addAttribute("clusterId", Partio::INT, 1);
     for (int index=0; index<numParticles(); index++) {
         const float* center=data<float>(posAttr,index);
         Vec3 position(center[0], center[1], center[2]);
@@ -308,6 +366,14 @@ computeClustering(const int numNeighbors,const double radiusSearch,const double 
         }
         std::sort(++idAndIndex.begin(), idAndIndex.end());
 
+        std::vector<std::pair<ParticleIndex,float> > originalPoint;
+        originalPoint.push_back(std::make_pair(cluster->addParticle(),0));
+        int clusterId = 0;
+        cluster->dataWrite<int>(clusterIdAttr,originalPoint.back().first)[0] = clusterId++;
+        for (size_t j = 0; j < attributes.size(); j++) {
+            addClusterAttribute(cluster, clusterAttributes[j], this, index, attributes[j], 0, originalPoint);
+        }
+
         double hashArgs[3];
         hashArgs[0] = id;
 
@@ -325,15 +391,15 @@ computeClustering(const int numNeighbors,const double radiusSearch,const double 
             } else {
                 numInstances = density * len * smoothstep(1.-(len-innerRadius)*invRadius);
             }
+            std::vector<std::pair<ParticleIndex,float> > indexAndInterp;
             for (int j = 0; j < numInstances; j++) {
                 hashArgs[1] = idAndIndex[i]._id;
                 hashArgs[2] = j;
-                Vec3 randpos = position + hash(3, hashArgs) * dir;
-                ParticleIndex clusterIndex = cluster->addParticle();
-                float* pos = cluster->dataWrite<float>(clusterPosAttr,clusterIndex);
-                pos[0]=randpos.x;
-                pos[1]=randpos.y;
-                pos[2]=randpos.z;
+                indexAndInterp.push_back(std::make_pair(cluster->addParticle(),hash(3,hashArgs)));
+                cluster->dataWrite<int>(clusterIdAttr,indexAndInterp.back().first)[0] = clusterId++;
+            }
+            for (size_t j = 0; j < attributes.size(); j++) {
+                addClusterAttribute(cluster, clusterAttributes[j], this, index, attributes[j], idAndIndex[i]._index, indexAndInterp);
             }
         }
     }

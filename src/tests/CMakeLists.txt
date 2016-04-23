@@ -33,7 +33,7 @@
 
 link_directories(${CMAKE_BINARY_DIR}/src/lib)
 
-foreach(item testiterator test testcache testclonecopy teststr makecircle makeline testkdtree)
+foreach(item testiterator test testcache testclonecopy testcluster teststr makecircle makeline testkdtree)
     ADD_EXECUTABLE(${item} "${item}.cpp")
     target_link_libraries(${item} ${PARTIO_LIBRARIES})
     install(TARGETS ${item} DESTINATION share/partio/test)

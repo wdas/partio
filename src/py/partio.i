@@ -161,6 +161,10 @@ class ParticlesData:public ParticlesInfo
     %feature("autodoc");
     %feature("docstring","Looks up a given fixed indexed string given the index, returns -1 if not found");
     int lookupFixedIndexedStr(const FixedAttribute& attribute,const char* str) const=0;
+
+    %feature("autodoc");
+    %feature("docstring","Creates a clustered particle set");
+    ParticlesDataMutable* computeClustering(const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density)=0;
 };
 
 %rename(ParticleIteratorFalse) ParticleIterator<false>;
