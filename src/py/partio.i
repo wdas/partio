@@ -549,6 +549,10 @@ void write(const char* filename,const ParticlesData&,const bool=false);
 %feature("docstring","Print a summary of particle file");
 void print(const ParticlesData* particles);
 
+%feature("autodoc");
+%feature("docstring","Creates a clustered particle set");
+ParticlesDataMutable* computeClustering(ParticlesDataMutable* particles,const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density)=0;
+
 class PartioSe{
   public:
     PartioSe(ParticlesDataMutable* parts,const char* expr);

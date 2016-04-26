@@ -54,6 +54,7 @@ namespace Partio{
 typedef uint64_t ParticleIndex;
 
 class ParticlesData;
+class ParticlesDataMutable;
 // Particle Collection Interface
 //!  Particle Collection Interface
 /*!
@@ -87,9 +88,9 @@ public:
     virtual bool fixedAttributeInfo(const char* attributeName,FixedAttribute& attribute) const=0;
 
     //! Lookup an attribute by index and store a handle to the attribute.
-    virtual bool attributeInfo(const int attributeInfo,ParticleAttribute& attribute) const=0;
+    virtual bool attributeInfo(const int index,ParticleAttribute& attribute) const=0;
     //! Lookup an attribute by index and store a handle to the attribute.
-    virtual bool fixedAttributeInfo(const int attributeInfo,FixedAttribute& attribute) const=0;
+    virtual bool fixedAttributeInfo(const int index,FixedAttribute& attribute) const=0;
 };
 
 // Particle Data Interface
@@ -167,7 +168,7 @@ public:
         ParticleIndex *points, float *pointDistancesSquared, float *finalRadius2) const=0;
 
     //! Produce a const iterator
-    virtual const_iterator setupConstIterator() const=0;
+    virtual const_iterator setupConstIterator(const int index=0) const=0;
 
     //! Produce a beginning iterator for the particles
     const_iterator begin() const
@@ -254,7 +255,7 @@ public:
     {return iterator();}
 
     //! Produce a const iterator
-    virtual iterator setupIterator()=0;
+    virtual iterator setupIterator(const int index=0)=0;
 
 private:
     virtual void* dataInternal(const ParticleAttribute& attribute,const ParticleIndex particleIndex) const=0;
@@ -316,5 +317,6 @@ void endCachedAccess(ParticlesData* particles);
 //! Prints a subset of particle data in a textual form
 void print(const ParticlesData* particles);
 
+ParticlesDataMutable* computeClustering(ParticlesDataMutable* particles, const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density);
 }
 #endif

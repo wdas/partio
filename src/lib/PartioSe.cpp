@@ -211,13 +211,13 @@ bool PartioSe::runRandom(){
         return false;
     }
     std::vector<int> order(parts->numParticles());
-    for(int i=0;i<order.size();i++) order[i]=i;
-    for(int i=0;i<order.size();i++){
-        int other=float(rand())/RAND_MAX*order.size();
+    for(size_t i=0;i<order.size();i++) order[i]=i;
+    for(size_t i=0;i<order.size();i++){
+        size_t other=float(rand())/RAND_MAX*order.size();
         if(other>=order.size()) other=order.size()-1;
         std::swap(order[i],order[other]);
     }
-    for(int i=0;i<order.size();i++){
+    for(size_t i=0;i<order.size();i++){
         run(order[i]);
     }
     return true;

@@ -79,6 +79,7 @@ public:
         std::vector<ParticleIndex>& points,std::vector<float>& pointDistancesSquared) const;
     int findNPoints(const float center[3],int nPoints,const float maxRadius,
         ParticleIndex *points, float *pointDistancesSquared, float *finalRadius2) const;
+    ParticlesDataMutable* computeClustering(const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density);
 
     ParticleAttribute addAttribute(const char* attribute,ParticleAttributeType type,const int count);
     FixedAttribute addFixedAttribute(const char* attribute,ParticleAttributeType type,const int count);
@@ -86,8 +87,8 @@ public:
     iterator addParticles(const int count);
 
 
-    iterator setupIterator();
-    const_iterator setupConstIterator() const;
+    iterator setupIterator(const int index=0);
+    const_iterator setupConstIterator(const int index=0) const;
     void setupIteratorNextBlock(Partio::ParticleIterator<false>& iterator);
     void setupIteratorNextBlock(Partio::ParticleIterator<true>& iterator) const;
     void setupAccessor(Partio::ParticleIterator<false>& iterator,ParticleAccessor& accessor);

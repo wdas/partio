@@ -291,25 +291,23 @@ addParticles(const int countToAdd)
             allocatedCount=std::max(10,std::max(allocatedCount*3/2,particleCount));
         data=(char*)realloc(data,(size_t)stride*(size_t)allocatedCount);
     }
-    // int offset=particleCount;
+    int offset=particleCount;
     particleCount+=countToAdd;
-    // TODO: make this return the right stuff
-    return begin();
-    //return offset;
+    return setupIterator(offset);
 }
 
 ParticlesDataMutable::iterator ParticlesSimpleInterleave::
-setupIterator()
+setupIterator(const int index)
 {
     if(numParticles()==0) return ParticlesDataMutable::iterator();
-    return ParticlesDataMutable::iterator(this,0,numParticles()-1);
+    return ParticlesDataMutable::iterator(this,index,numParticles()-1);
 }
 
 ParticlesData::const_iterator ParticlesSimpleInterleave::
-setupConstIterator() const
+setupConstIterator(const int index) const
 {
     if(numParticles()==0) return ParticlesDataMutable::const_iterator();
-    return ParticlesData::const_iterator(this,0,numParticles()-1);
+    return ParticlesData::const_iterator(this,index,numParticles()-1);
 }
 
 void ParticlesSimpleInterleave::
