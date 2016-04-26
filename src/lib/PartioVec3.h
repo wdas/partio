@@ -35,6 +35,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #pragma once
 
+#include <algorithm>
+#include <iostream>
 #include <cmath>
 
 namespace Partio{

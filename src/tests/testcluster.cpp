@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 int main(int argc,char *argv[])
 {
     Partio::ParticlesDataMutable* p=Partio::read("/tmp/scatter.bgeo");
-    Partio::ParticlesDataMutable* c=p->computeClustering(5,1.5,100,2,5);
+    Partio::ParticlesDataMutable* c=Partio::computeClustering(p,5,1.5,100,2,5);
     Partio::write("/tmp/cluster.bgeo",*c);
     return 0;
 }

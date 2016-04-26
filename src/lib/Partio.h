@@ -167,8 +167,6 @@ public:
     virtual int findNPoints(const float center[3],int nPoints,const float maxRadius,
         ParticleIndex *points, float *pointDistancesSquared, float *finalRadius2) const=0;
 
-    virtual ParticlesDataMutable* computeClustering(const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density)=0;
-
     //! Produce a const iterator
     virtual const_iterator setupConstIterator(const int index=0) const=0;
 
@@ -319,5 +317,6 @@ void endCachedAccess(ParticlesData* particles);
 //! Prints a subset of particle data in a textual form
 void print(const ParticlesData* particles);
 
+ParticlesDataMutable* computeClustering(ParticlesDataMutable* particles, const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density);
 }
 #endif
