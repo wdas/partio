@@ -95,19 +95,24 @@ MObject partioInstancer::aVelocityMult;
 /// attributes
 MObject partioInstancer::aPartioAttributes;
 MObject partioInstancer::aScaleFrom;
+MObject partioInstancer::aLastScaleFrom;
+
 MObject partioInstancer::aRotationType;
 
 MObject partioInstancer::aRotationFrom;
+MObject partioInstancer::aLastRotationFrom;
+
 MObject partioInstancer::aAimDirectionFrom;
+MObject partioInstancer::aLastAimDirectionFrom;
+
 MObject partioInstancer::aAimPositionFrom;
+MObject partioInstancer::aLastAimPositionFrom;
+
 MObject partioInstancer::aAimAxisFrom;
 MObject partioInstancer::aAimUpAxisFrom;
 MObject partioInstancer::aAimWorldUpFrom;
 
-MObject partioInstancer::aLastScaleFrom;
-MObject partioInstancer::aLastRotationFrom;
-MObject partioInstancer::aLastAimDirectionFrom;
-MObject partioInstancer::aLastAimPositionFrom;
+
 MObject partioInstancer::aLastPositionFrom;
 MObject partioInstancer::aVelocityFrom;
 MObject partioInstancer::aAngularVelocityFrom;
@@ -398,6 +403,21 @@ MStatus partioInstancer::initialize()
     nAttr.setDefault(false);
     nAttr.setKeyable(true);
 
+    aDrawStyle = eAttr.create("drawStyle", "drwStyl");
+    eAttr.addField("points", 0);
+    eAttr.addField("index#", 1);
+    //eAttr.addField("spheres", 2);
+    eAttr.addField("boundingBox", 3);
+    eAttr.setDefault(0);
+    eAttr.setChannelBox(true);
+
+    aPointSize = nAttr.create("pointSize", "ptsz", MFnNumericData::kInt, 2, &stat);
+    nAttr.setDefault(2);
+    nAttr.setKeyable(true);
+
+    aUpdateCache = nAttr.create("updateCache", "upc", MFnNumericData::kInt, 0);
+    nAttr.setHidden(true);
+
     aCacheDir = tAttr.create("cacheDir", "cachD", MFnStringData::kString);
     tAttr.setReadable(true);
     tAttr.setWritable(true);
@@ -412,13 +432,13 @@ MStatus partioInstancer::initialize()
     tAttr.setConnectable(true);
     tAttr.setStorable(true);
 
+    aCacheActive = nAttr.create("cacheActive", "cAct", MFnNumericData::kBoolean, 1, &stat);
+    nAttr.setKeyable(true);
+
     aCacheOffset = nAttr.create("cacheOffset", "coff", MFnNumericData::kInt, 0, &stat);
     nAttr.setKeyable(true);
 
     aCacheStatic = nAttr.create("staticCache", "statC", MFnNumericData::kBoolean, false, &stat);
-    nAttr.setKeyable(true);
-
-    aCacheActive = nAttr.create("cacheActive", "cAct", MFnNumericData::kBoolean, 1, &stat);
     nAttr.setKeyable(true);
 
     aCacheFormat = eAttr.create("cacheFormat", "cachFmt");
@@ -432,32 +452,26 @@ MStatus partioInstancer::initialize()
     eAttr.setDefault(4);  // PDC
     eAttr.setChannelBox(true);
 
-    aDrawStyle = eAttr.create("drawStyle", "drwStyl");
-    eAttr.addField("points", 0);
-    eAttr.addField("index#", 1);
-    //eAttr.addField("spheres", 2);
-    eAttr.addField("boundingBox", 3);
-    eAttr.setDefault(0);
-    eAttr.setChannelBox(true);
+    aForceReload = nAttr.create("forceReload", "frel", MFnNumericData::kBoolean, false, &stat);
+    nAttr.setDefault(false);
+    nAttr.setKeyable(false);
 
+    aRenderCachePath = tAttr.create("renderCachePath", "rcp", MFnStringData::kString);
+    tAttr.setHidden(true);
+
+    aComputeVeloPos = nAttr.create("computeVeloPos", "cvp", MFnNumericData::kBoolean, false, &stat);
+    nAttr.setKeyable(false);
+
+    aVelocityMult = nAttr.create("veloMult", "vmul", MFnNumericData::kFloat, 1.0, &stat);
+    nAttr.setKeyable(true);
+    nAttr.setStorable(true);
+    nAttr.setHidden(false);
+    nAttr.setReadable(true);
 
     aPartioAttributes = tAttr.create("partioCacheAttributes", "pioCAts", MFnStringData::kString);
     tAttr.setArray(true);
     tAttr.setUsesArrayDataBuilder(true);
 
-    aPointSize = nAttr.create("pointSize", "ptsz", MFnNumericData::kInt, 2, &stat);
-    nAttr.setDefault(2);
-    nAttr.setKeyable(true);
-
-    aForceReload = nAttr.create("forceReload", "frel", MFnNumericData::kBoolean, false, &stat);
-    nAttr.setDefault(false);
-    nAttr.setKeyable(false);
-
-    aUpdateCache = nAttr.create("updateCache", "upc", MFnNumericData::kInt, 0);
-    nAttr.setHidden(true);
-
-    aRenderCachePath = tAttr.create("renderCachePath", "rcp", MFnStringData::kString);
-    tAttr.setHidden(true);
 
     aScaleFrom = tAttr.create("scaleFrom", "sfrm", MFnStringData::kString);
     nAttr.setKeyable(true);
@@ -496,9 +510,6 @@ MStatus partioInstancer::initialize()
     aAimWorldUpFrom = tAttr.create("aimWorldUpFrom", "awufrm", MFnStringData::kString);
     nAttr.setKeyable(true);
 
-    aIndexFrom = tAttr.create("indexFrom", "ifrm", MFnStringData::kString);
-    nAttr.setKeyable(true);
-
     aLastPositionFrom = tAttr.create("lastPositionFrom", "lpfrm", MFnStringData::kString);
     nAttr.setKeyable(true);
 
@@ -508,26 +519,20 @@ MStatus partioInstancer::initialize()
     aAngularVelocityFrom = tAttr.create("angularVelocityFrom", "avelfrm", MFnStringData::kString);
     nAttr.setKeyable(true);
 
-    aInstanceData = tAttr.create("instanceData", "instd", MFnArrayAttrsData::kDynArrayAttrs, &stat);
-    tAttr.setKeyable(false);
-    tAttr.setStorable(false);
-    tAttr.setHidden(false);
-    tAttr.setReadable(true);
-
-    aComputeVeloPos = nAttr.create("computeVeloPos", "cvp", MFnNumericData::kBoolean, false, &stat);
-    nAttr.setKeyable(false);
-
-    aVelocityMult = nAttr.create("veloMult", "vmul", MFnNumericData::kFloat, 1.0, &stat);
-    nAttr.setKeyable(true);
-    nAttr.setStorable(true);
-    nAttr.setHidden(false);
-    nAttr.setReadable(true);
-
     aAngularVelocityMult = nAttr.create("angVeloMult", "avmul", MFnNumericData::kFloat, 1.0, &stat);
     nAttr.setKeyable(true);
     nAttr.setStorable(true);
     nAttr.setHidden(false);
     nAttr.setReadable(true);
+    
+    aIndexFrom = tAttr.create("indexFrom", "ifrm", MFnStringData::kString);
+    nAttr.setKeyable(true);
+
+    aInstanceData = tAttr.create("instanceData", "instd", MFnArrayAttrsData::kDynArrayAttrs, &stat);
+    tAttr.setKeyable(false);
+    tAttr.setStorable(false);
+    tAttr.setHidden(false);
+    tAttr.setReadable(true);
 
     aExportAttributes = tAttr.create("exportAttributes", "expattr", MFnStringData::kString);
 
@@ -541,6 +546,9 @@ MStatus partioInstancer::initialize()
     eAttr.addField("Angular Velocity", 1);
 
     // add attributes
+    addAttribute(time);
+    addAttribute(aByFrame);
+
     addAttribute(aSize);
     addAttribute(aFlipYZ);
     addAttribute(aDrawStyle);
@@ -586,8 +594,7 @@ MStatus partioInstancer::initialize()
     addAttribute(aVelocitySource);
     addAttribute(aAngularVelocitySource);
 
-    addAttribute(aByFrame);
-    addAttribute(time);
+
 
     // attribute affects
     attributeAffects(aSize, aUpdateCache);
