@@ -408,7 +408,7 @@ struct PartioData {
                     user.name != "opacityPP" &&
                     user.name != "radiusPP")
                 {
-                    if (user.type == PARTIO::FLOAT || user.count == 1)
+                    if (user.type == PARTIO::FLOAT && user.count == 1)
                     {
                         AiNodeDeclare(currentInstance, parts[index], "uniform Float");
                         floatArr = AiArrayAllocate(pointCount, 1, AI_TYPE_FLOAT);
@@ -537,7 +537,7 @@ struct PartioData {
             }
             for (size_t x = 0; x < extraAttrs.size(); ++x)
             {
-                if (extraAttrs[x].type == PARTIO::FLOAT)
+                if (extraAttrs[x].type == PARTIO::FLOAT && extraAttrs[x].count == 1)
                 {
 
                     const float* partioFLOAT = points->data<float>(extraAttrs[x], id);
