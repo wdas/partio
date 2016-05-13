@@ -433,7 +433,11 @@ namespace MHWRender {
 
     DrawAPI partioVisualizerDrawOverride::supportedDrawAPIs() const
     {
+#if MAYA_API_VERSION >= 201600
+        return kOpenGL | kOpenGLCoreProfile;
+#else
         return kOpenGL;
+#endif
     }
 
     void partioVisualizerDrawOverride::init_shaders()
