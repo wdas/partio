@@ -3,13 +3,13 @@
 /// by John Cassella (redpawfx)  for  Luma Pictures  (c) 2013
 
 #include <ai.h>
+#include <cstring>
 #include <Partio.h>
 #include <PartioAttribute.h>
 #include <PartioIterator.h>
 
 #include <sstream>
 #include <iostream>
-#include <cstring>
 #include <cstdlib>
 #include <string>
 #include <utility>
@@ -278,7 +278,8 @@ struct PartioData {
                     continue;
 
                 //AiArraySetFlt(radarr , i, rad);
-                radiiVector.push_back(rad);
+                if (hasRadiusPP)
+                    radiiVector.push_back(rad);
                 pointsVector.push_back(position);
                 validPointsVector.push_back(i);
             }
