@@ -35,10 +35,8 @@ if (UNIX)
     set(PLUGIN_SUFFIX ".so")
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
     set(SUFFIX ".so")
+    add_definitions(-Wall -Werror -Wextra)
 endif()
-
-set(STD_INCLUDES "/usr/include" "/usr/include/CC")
-set(STD_LIB "/usr/lib/")
 
 include_directories(${STD_INCLUDES} ${ARNOLD_INCLUDE_DIR})
 link_directories(${STD_LIB} ${ARNOLD_LIBRARY})
