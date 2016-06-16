@@ -278,6 +278,8 @@ struct PartioData {
         AtArray* pointarr = 0;
         AtArray* radarr = 0;
 
+        bool can_accelerate = false;
+
         ////////////////
         /// Velocity
         if ((global_motionBlurSteps > 1) && (arg_velFrom.length() > 0) &&
@@ -295,11 +297,9 @@ struct PartioData {
                 (accelerationAttr.type == PARTIO::FLOAT || accelerationAttr.type == PARTIO::VECTOR))
             {
                 AiMsgInfo("[partioGenerator] found acceleration attr, motion blur is a GO!!");
-                canMotionBlur = true;
+                can_accelerate = true;
             }
         }
-
-        const bool can_accelerate = accelerationAttr.type != PARTIO::NONE;
 
         if (canMotionBlur)
         {
@@ -326,8 +326,7 @@ struct PartioData {
             motion_step_times.resize(static_cast<size_t>(global_motionBlurSteps), 0.0f);
             for (int st = 0; st < global_motionBlurSteps; ++st)
             {
-                motion_step_times[st] =
-                    static_cast<float>(-0.5 + ((double)st / ((double)global_motionBlurSteps - 1.0))) * motion_blur_time;
+                motion_step_times[st] = -0.5 + ((double)st / ((double)global_motionBlurSteps - 1.0)) * motion_blur_time;
             }
         }
 
