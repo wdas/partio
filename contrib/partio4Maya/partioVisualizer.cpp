@@ -573,8 +573,9 @@ MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
             ///////////////////////////////////////
 
             mLastFileLoaded = newCacheFile;
-            if (pvCache.particles->numParticles() == 0)
+            if (pvCache.particles == 0 || pvCache.particles->numParticles() == 0)
             {
+                drawError = 1;
                 return (MS::kSuccess);
             }
 
