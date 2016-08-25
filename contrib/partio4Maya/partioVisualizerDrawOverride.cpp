@@ -22,6 +22,7 @@
 #include <GL/glew.h>
 
 #include "partioVisualizerDrawOverride.h"
+#include "shaderUtils.h"
 
 #include <maya/MUserData.h>
 #include <maya/MFnDependencyNode.h>
@@ -29,6 +30,89 @@
 #include <maya/MHWGeometryUtilities.h>
 
 namespace {
+    bool g_is_initialized = false;
+    bool g_is_valid = false;
+
+    //std::shared_ptr<GLPipeline> g_basic_particle_pipeline;
+
+    GLuint INVALID_GL_OBJECT = static_cast<GLuint>(-1);
+
+    std::shared_ptr<GLProgram> g_lit_particle_vertex;
+    std::shared_ptr<GLPipeline> g_lit_particle_pipeline;
+
+    GLint g_world_view_location = INVALID_GL_OBJECT;
+    GLint g_proj_location = INVALID_GL_OBJECT;
+
+    // we always want to init glew here, or else it might fail in rare cases
+    // when done in the plugin init
+    bool init_glew()
+    {
+        if (g_is_initialized)
+            return g_is_valid;
+        g_is_initialized = true;
+
+        MHWRender::MRenderer* renderer = MHWRender::MRenderer::theRenderer();
+
+        if (renderer == 0 || !renderer->drawAPIIsOpenGL())
+        {
+            MGlobal::displayError("[partio] DirectX for VP2 is not supported!");
+            return false;
+        }
+
+        GLenum err = glewInit();
+        if (err != GLEW_OK)
+        {
+            MGlobal::displayError(MString("[partio] Error initializing glew : ") + MString((const char*)glewGetErrorString(err)));
+            return false;
+        }
+
+        try{
+
+            g_lit_particle_vertex = GLProgram::create_program(GL_VERTEX_SHADER, 1,R"glsl(
+#version 110
+uniform mat4 world_view;
+uniform mat4 proj;
+void main(void) {
+    gl_Position =  proj * world_view * gl_Vertex;
+    float cosTheta = 1.0;
+    if (gl_Normal.xyz != vec3(0.0, 0.0, 0.0))
+        cosTheta = abs( dot(normalize(gl_NormalMatrix * gl_Normal.xyz), vec3(0.0, 0.0, -1.0)));
+    gl_FrontColor = gl_Color * cosTheta;
+    gl_BackColor = gl_Color * cosTheta;
+}
+            )glsl");
+
+            auto lit_particle_fragment = GLProgram::create_program(GL_FRAGMENT_SHADER, 1, R"glsl(
+#version 110
+
+void main(void)
+{
+    gl_FragColor = gl_Color;
+}
+)glsl");
+
+            g_lit_particle_pipeline = GLPipeline::create_pipeline(2, &g_lit_particle_vertex, &lit_particle_fragment);
+
+            g_world_view_location = g_lit_particle_vertex->get_uniform_location("world_view");
+            g_proj_location = g_lit_particle_vertex->get_uniform_location("proj");
+        }
+        catch(GLProgram::CreateException& ex)
+        {
+            std::cerr << "[ai_fractal] Error creating shader" << std::endl;
+            std::cerr << ex.what() << std::endl;
+            return false;
+        }
+        catch(GLPipeline::ValidateException& ex)
+        {
+            std::cerr << "[ai_fractal] Error validating pipeline" << std::endl;
+            std::cerr << ex.what() << std::endl;
+            return false;
+        }
+
+        g_is_valid = true;
+        return true;
+    }
+
     const char* vertex_shader_code =
             "#version 110\n"\
             "uniform mat4 world_view;\n" \
@@ -42,39 +126,6 @@ namespace {
             " }\n";
     const char* pixel_shader_code = "#version 110\n" \
             "void main(void) { gl_FragColor = gl_Color; }\n";
-
-    GLuint INVALID_GL_OBJECT = static_cast<GLuint>(-1);
-    GLuint vertex_shader = INVALID_GL_OBJECT;
-    GLuint pixel_shader = INVALID_GL_OBJECT;
-    GLuint shader_program = INVALID_GL_OBJECT;
-    GLint world_view_location = INVALID_GL_OBJECT;
-    GLint proj_location = INVALID_GL_OBJECT;
-
-    template <GLint shader_type>
-    bool create_shader(GLuint& shader, const char* shader_code)
-    {
-        shader = glCreateShader(shader_type);
-
-        GLint code_size = static_cast<GLint>(strlen(shader_code));
-        glShaderSource(shader, 1, &shader_code, &code_size);
-        glCompileShader(shader);
-        GLint success = 0;
-        glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-        if (success == GL_FALSE)
-        {
-            std::cout << "[partioVisualizer] Error building shader : " << std::endl;
-            std::cout << shader_code << std::endl;
-            GLint max_length = 0;
-            glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &max_length);
-            std::vector<GLchar> info_log(max_length);
-            glGetShaderInfoLog(shader, max_length, &max_length, &info_log[0]);
-            std::cout << &info_log[0] << std::endl;
-            glDeleteShader(shader); shader = INVALID_GL_OBJECT;
-            return false;
-        }
-        else
-            return true;
-    }
 
     // TODO: make partioVisualizer use the code from here
     struct DrawData : public MUserData {
@@ -118,7 +169,7 @@ namespace {
 
             MPoint world_view_pos = world_view_matrix * MPoint(position[0], position[1], position[2], 1.0);
 
-            glUniformMatrix4fv(world_view_location, 1, false, &world_view[0][0]);
+            g_lit_particle_vertex->set_matrix(g_world_view_location, 1, false, &world_view[0][0]);
 
             // TODO: setup radius using the scale of the Matrix
             if (radius != data.last_radius)
@@ -369,9 +420,12 @@ namespace MHWRender {
 
     void partioVisualizerDrawOverride::DrawCallback(const MDrawContext& context, const MUserData* data)
     {
+        if (!init_glew())
+            return;
+
         const DrawData* draw_data = reinterpret_cast<const DrawData*>(data);
 
-        if (draw_data == 0 || shader_program == INVALID_GL_OBJECT)
+        if (draw_data == 0)
             return;
 
         const bool draw_bounding_box = context.getDisplayStyle() & MHWRender::MFrameContext::kBoundingBox;
@@ -399,29 +453,26 @@ namespace MHWRender {
         float proj[4][4];
         context.getMatrix(MHWRender::MDrawContext::kProjectionMtx).get(proj);
 
-        GLint current_program = 0;
-        glGetIntegerv(GL_CURRENT_PROGRAM, &current_program);
-
-        glUseProgram(shader_program);
-
-        glUniformMatrix4fv(world_view_location, 1, false, &world_view[0][0]);
-        glUniformMatrix4fv(proj_location, 1, false, &proj[0][0]);
-
-        draw_data->draw(draw_bounding_box, world_view_matrix);
-
-        if (draw_logo)
         {
-            if (draw_data->m_draw_error == 0)
-                glColor3fv(draw_data->m_wireframe_color);
-            if (draw_data->m_draw_error == 1)
-                glColor3f(.75f, 0.0f, 0.0f);
-            else if (draw_data->m_draw_error == 2)
-                glColor3f(0.0f, 0.0f, 0.0f);
+            GLPipeline::ScopedSet scoped_pipeline(*g_lit_particle_pipeline);
 
-            draw_data->draw_icon();
+            g_lit_particle_vertex->set_matrix(g_world_view_location, 1, false, &world_view[0][0]);
+            g_lit_particle_vertex->set_matrix(g_proj_location, 1, false, &proj[0][0]);
+
+            draw_data->draw(draw_bounding_box, world_view_matrix);
+
+            if (draw_logo)
+            {
+                if (draw_data->m_draw_error == 0)
+                    glColor3fv(draw_data->m_wireframe_color);
+                if (draw_data->m_draw_error == 1)
+                    glColor3f(.75f, 0.0f, 0.0f);
+                else if (draw_data->m_draw_error == 2)
+                    glColor3f(0.0f, 0.0f, 0.0f);
+
+                draw_data->draw_icon();
+            }
         }
-
-        glUseProgram(current_program);
 
         glPopClientAttrib();
         glPopAttrib();
@@ -466,58 +517,5 @@ namespace MHWRender {
 #else
         return kOpenGL;
 #endif
-    }
-
-    void partioVisualizerDrawOverride::init_shaders()
-    {
-
-        if (!create_shader<GL_VERTEX_SHADER>(vertex_shader, vertex_shader_code))
-            return;
-        if (!create_shader<GL_FRAGMENT_SHADER>(pixel_shader, pixel_shader_code))
-        {
-            glDeleteShader(vertex_shader); vertex_shader = INVALID_GL_OBJECT;
-            return;
-        }
-
-        shader_program = glCreateProgram();
-
-        glAttachShader(shader_program, vertex_shader);
-        glAttachShader(shader_program, pixel_shader);
-        glLinkProgram(shader_program);
-
-        GLint success = 0;
-        glGetProgramiv(shader_program, GL_LINK_STATUS, &success);
-        if (success == GL_FALSE)
-        {
-            std::cout << "[partioVisualizer] Error linking shader." << std::endl;
-
-            GLint max_length = 0;
-            glGetProgramiv(shader_program, GL_INFO_LOG_LENGTH, &max_length);
-            std::vector<GLchar> info_log(max_length);
-            glGetProgramInfoLog(shader_program, max_length, &max_length, &info_log[0]);
-
-            std::cout << &info_log[0] << std::endl;
-
-            glDeleteShader(vertex_shader); vertex_shader = INVALID_GL_OBJECT;
-            glDeleteShader(pixel_shader); pixel_shader = INVALID_GL_OBJECT;
-            glDeleteProgram(shader_program); shader_program = INVALID_GL_OBJECT;
-            return;
-        }
-
-        glDetachShader(shader_program, vertex_shader);
-        glDetachShader(shader_program, pixel_shader);
-
-        world_view_location = glGetUniformLocation(shader_program, "world_view");
-        proj_location = glGetUniformLocation(shader_program, "proj");
-    }
-
-    void partioVisualizerDrawOverride::free_shaders()
-    {
-        if (vertex_shader != INVALID_GL_OBJECT)
-            glDeleteShader(vertex_shader);
-        if (pixel_shader != INVALID_GL_OBJECT)
-            glDeleteShader(pixel_shader);
-        if (shader_program != INVALID_GL_OBJECT)
-            glDeleteProgram(shader_program);
     }
 }

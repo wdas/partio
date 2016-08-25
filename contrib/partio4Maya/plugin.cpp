@@ -41,16 +41,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 MStatus initializePlugin ( MObject obj )
 {
-    if (MGlobal::mayaState() == MGlobal::kInteractive)
-    {
-        MHWRender::MRenderer* renderer = MHWRender::MRenderer::theRenderer();
-        if (renderer != 0 && renderer->drawAPIIsOpenGL())
-        {
-            glewInit();
-            MHWRender::partioVisualizerDrawOverride::init_shaders();
-        }
-    }
-
     // source  mel scripts this way if they're missing from the script path it will alert the user...
     MGlobal::executeCommand("source AEpartioEmitterTemplate.mel");
     MGlobal::executeCommand("source AEpartioVisualizerTemplate.mel");
@@ -122,9 +112,6 @@ MStatus initializePlugin ( MObject obj )
 
 MStatus uninitializePlugin ( MObject obj )
 {
-    if (MGlobal::mayaState() == MGlobal::kInteractive)
-        MHWRender::partioVisualizerDrawOverride::free_shaders();
-
     MStatus status;
     MFnPlugin plugin ( obj );
 
