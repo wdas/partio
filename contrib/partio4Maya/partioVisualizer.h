@@ -92,7 +92,7 @@ enum {
 	PARTIO_DRAW_STYLE_DISK,
     PARTIO_DRAW_STYLE_BOUNDING_BOX,
 	PARTIO_DRAW_STYLE_SPHERE,
-	PARTIO_DRAW_STYLE_VELOCITY
+	PARTIO_DRAW_STYLE_VELOCITY,
 };
 
 class partioVizReaderCache
@@ -107,8 +107,10 @@ public:
     PARTIO::ParticleAttribute opacityAttr;
     PARTIO::ParticleAttribute radiusAttr;
 	PARTIO::ParticleAttribute incandescenceAttr;
+	PARTIO::ParticleAttribute normalAttr;
     std::vector<float> rgba;
     std::vector<float> radius;
+	std::vector<float> normal;
 };
 
 class partioVisualizerUI : public MPxSurfaceShapeUI
@@ -171,6 +173,7 @@ public:
     static MObject aAlphaFrom;
 	static MObject aIncandFrom;
     static MObject aRadiusFrom;
+	static MObject aNormalFrom;
     static MObject aPointSize;
     static MObject aDefaultPointColor;
     static MObject aDefaultAlpha;
@@ -196,6 +199,7 @@ private:
     MString mLastAlphaFromIndex;
     MString mLastRadiusFromIndex;
 	MString mLastIncandFromIndex;
+	MString mLastNormalFromIndex;
     MFloatVector mLastColor;
     float mLastAlpha;
     bool mLastInvertAlpha;
