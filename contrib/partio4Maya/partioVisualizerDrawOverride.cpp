@@ -31,9 +31,9 @@
 namespace {
     const char* vertex_shader_code =
             "#version 110\n"\
-            "void main(void) {"
-                    "uniform mat4 world_view;\n" \
-                    "uniform mat4 proj;\n" \
+            "uniform mat4 world_view;\n" \
+            "uniform mat4 proj;\n" \
+            "void main(void) {\n" \
                     "gl_Position =  proj * world_view * gl_Vertex;\n" \
                     "float cosTheta = 1.0;\n" \
                     "if (gl_Normal.xyz != vec3(0.0, 0.0, 0.0)) cosTheta = abs( dot(normalize(gl_NormalMatrix * gl_Normal.xyz), vec3(0.0, 0.0, -1.0)));\n" \
