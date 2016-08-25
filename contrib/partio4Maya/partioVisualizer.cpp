@@ -48,6 +48,8 @@ static MGLFunctionTable* gGLFT = NULL;
 #undef max
 #endif
 
+#include <iostream>
+
 /// ///////////////////////////////////////////////////
 /// PARTIO VISUALIZER
 
@@ -75,6 +77,7 @@ MObject partioVisualizer::aColorFrom;
 MObject partioVisualizer::aRadiusFrom;
 MObject partioVisualizer::aAlphaFrom;
 MObject partioVisualizer::aIncandFrom;
+MObject partioVisualizer::aNormalFrom;
 MObject partioVisualizer::aPointSize;
 MObject partioVisualizer::aDefaultPointColor;
 MObject partioVisualizer::aDefaultAlpha;
@@ -255,6 +258,7 @@ void partioVisualizer::initCallback()
     MPlug(tmo, aAlphaFrom).getValue(mLastAlphaFromIndex);
     MPlug(tmo, aRadiusFrom).getValue(mLastRadiusFromIndex);
     MPlug(tmo, aIncandFrom).getValue(mLastIncandFromIndex);
+    MPlug(tmo, aNormalFrom).getValue(mLastNormalFromIndex);
     MPlug(tmo, aSize).getValue(multiplier);
     MPlug(tmo, aInvertAlpha).getValue(mLastInvertAlpha);
     MPlug(tmo, aCacheStatic).getValue(mLastStatic);
@@ -354,22 +358,18 @@ MStatus partioVisualizer::initialize()
     tAttr.setUsesArrayDataBuilder(true);
 
     aVelocityFrom = tAttr.create("velocityFrom", "vfrm", MFnStringData::kString);
-    nAttr.setKeyable(true);
 
     aAccelerationFrom = tAttr.create("accelerationFrom", "afrm", MFnStringData::kString);
-    nAttr.setKeyable(true);
 
     aColorFrom = tAttr.create("colorFrom", "cfrm", MFnStringData::kString);
-    nAttr.setKeyable(true);
 
     aAlphaFrom = tAttr.create("opacityFrom", "ofrm", MFnStringData::kString);
-    nAttr.setKeyable(true);
 
     aIncandFrom = tAttr.create("incandescenceFrom", "ifrm", MFnStringData::kString);
-    nAttr.setKeyable(true);
 
     aRadiusFrom = tAttr.create("radiusFrom", "rfrm", MFnStringData::kString);
-    nAttr.setKeyable(true);
+
+    aNormalFrom = tAttr.create("normalFrom", "nfrm", MFnStringData::kString);
 
     aPointSize = nAttr.create("pointSize", "ptsz", MFnNumericData::kInt, 2, &stat);
     nAttr.setDefault(2);
@@ -421,6 +421,7 @@ MStatus partioVisualizer::initialize()
     addAttribute(aIncandFrom);
     addAttribute(aAlphaFrom);
     addAttribute(aRadiusFrom);
+    addAttribute(aNormalFrom);
     addAttribute(aPointSize);
     addAttribute(aDefaultPointColor);
     addAttribute(aDefaultAlpha);
@@ -444,6 +445,7 @@ MStatus partioVisualizer::initialize()
     attributeAffects(aIncandFrom, aUpdateCache);
     attributeAffects(aAlphaFrom, aUpdateCache);
     attributeAffects(aRadiusFrom, aUpdateCache);
+    attributeAffects(aNormalFrom, aUpdateCache);
     attributeAffects(aPointSize, aUpdateCache);
     attributeAffects(aDefaultPointColor, aUpdateCache);
     attributeAffects(aDefaultAlpha, aUpdateCache);
@@ -476,6 +478,7 @@ MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
         MString incandFromIndex = block.inputValue(aIncandFrom).asString();
         MString opacityFromIndex = block.inputValue(aAlphaFrom).asString();
         MString radiusFromIndex = block.inputValue(aRadiusFrom).asString();
+        MString normalFromIndex = block.inputValue(aNormalFrom).asString();
         bool cacheActive = block.inputValue(aCacheActive).asBool();
 
         MString cacheDir = block.inputValue(aCacheDir).asString();
@@ -587,6 +590,14 @@ MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
             {
                 pvCache.rgba.resize(pvCache.particles->numParticles() * 4ul);
                 pvCache.radius.resize(pvCache.particles->numParticles());
+                if (pvCache.particles->attributeInfo(normalFromIndex.asChar(), pvCache.normalAttr))
+                {
+                    pvCache.normal.resize(pvCache.particles->numParticles() * 3ul);
+                }
+                else
+                {
+                    pvCache.normal.resize(0);
+                }
             }
             catch (...)
             {
@@ -738,6 +749,25 @@ MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
                 mLastRadius = defaultRadius;
                 mLastRadiusFromIndex = radiusFromIndex;
             }
+
+            if (cacheChanged || normalFromIndex != mLastNormalFromIndex)
+            {
+                if (pvCache.particles->attributeInfo(normalFromIndex.asChar(), pvCache.normalAttr))
+                {
+                    if (pvCache.normalAttr.count == 3)  // single float value for normal
+                    {
+                        for (int i = 0; i < pvCache.particles->numParticles(); ++i)
+                        {
+                            const float* attrVal = pvCache.particles->data<float>(pvCache.normalAttr, i);
+                            pvCache.normal[i * 3] = attrVal[0];
+                            pvCache.normal[i * 3 + 1] = attrVal[1];
+                            pvCache.normal[i * 3 + 2] = attrVal[2];
+                        }
+                    }
+                }
+                mLastNormalFromIndex = normalFromIndex;
+            }
+            
 
             if (cacheChanged ||
                 incandFromIndex != mLastIncandFromIndex) // incandescence does not affect viewport draw for now
@@ -984,6 +1014,7 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
 
     const int stride_position = 3 * (int)sizeof(float) * (drawSkipVal);
     const int stride_color = 4 * (int)sizeof(float) * (drawSkipVal);
+    const int stride_normal = 3 * (int)sizeof(float) * (drawSkipVal);
 
     const float pointSizeVal = MPlug(thisNode, shapeNode->aPointSize).asFloat();
     const float defaultAlphaVal = MPlug(thisNode, shapeNode->aDefaultAlpha).asFloat();
@@ -1012,12 +1043,23 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
         glEnableClientState(GL_VERTEX_ARRAY);
         glEnableClientState(GL_COLOR_ARRAY);
 
+        bool useNormals = false;
+
         glPointSize(pointSizeVal);
         if (pvCache->particles->numParticles() > 0)
         {
             // now setup the position/color/alpha output pointers
             const float* partioPositions = pvCache->particles->data<float>(pvCache->positionAttr, 0);
 
+            if (!pvCache->normal.empty())
+            {
+                useNormals = true;
+                glEnableClientState(GL_NORMAL_ARRAY);
+                glEnable(GL_LIGHTING);
+                glEnable(GL_LIGHT0);
+                glEnable(GL_DEPTH_TEST);
+                glNormalPointer(GL_FLOAT, stride_normal, pvCache->normal.data());
+            }
             glVertexPointer(3, GL_FLOAT, stride_position, partioPositions);
             glColorPointer(4, GL_FLOAT, stride_color, pvCache->rgba.data());
             glDrawArrays(GL_POINTS, 0, (pvCache->particles->numParticles() / (drawSkipVal + 1)));
@@ -1027,6 +1069,11 @@ void partioVisualizerUI::drawPartio(partioVizReaderCache* pvCache, int drawStyle
         glDisableClientState(GL_COLOR_ARRAY); // even though we are pushing and popping
         // attribs disabling the color array is required or else it will freak out maya
         // interestingly it's not needed for VP2...
+        if (useNormals)
+        {
+            glDisableClientState(GL_NORMAL_ARRAY);
+        }
+
     }
     else if (drawStyle == PARTIO_DRAW_STYLE_DISK || drawStyle == PARTIO_DRAW_STYLE_RADIUS)
     {

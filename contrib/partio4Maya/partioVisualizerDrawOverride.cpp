@@ -29,10 +29,17 @@
 #include <maya/MHWGeometryUtilities.h>
 
 namespace {
-    const char* vertex_shader_code = "#version 110\n" \
+    const char* vertex_shader_code =
+            "#version 110\n"\
             "uniform mat4 world_view;\n" \
             "uniform mat4 proj;\n" \
-            "void main(void) { gl_Position = proj * world_view * gl_Vertex; gl_FrontColor = gl_Color; gl_BackColor = gl_Color; }\n";
+            "void main(void) {\n" \
+                    "gl_Position =  proj * world_view * gl_Vertex;\n" \
+                    "float cosTheta = 1.0;\n" \
+                    "if (gl_Normal.xyz != vec3(0.0, 0.0, 0.0)) cosTheta = abs( dot(normalize(gl_NormalMatrix * gl_Normal.xyz), vec3(0.0, 0.0, -1.0)));\n" \
+                    "gl_FrontColor = gl_Color * cosTheta;\n" \
+                    "gl_BackColor = gl_Color * cosTheta;\n" \
+            " }\n";
     const char* pixel_shader_code = "#version 110\n" \
             "void main(void) { gl_FragColor = gl_Color; }\n";
 
@@ -249,6 +256,9 @@ namespace {
             if (p_reader_cache == 0 || p_reader_cache->particles == 0 || p_reader_cache->positionAttr.attributeIndex == -1)
                 return;
 
+            // default normal to 0,0,0
+            glNormal3f(0.0, 0.0, 0.0);
+
             // check for viewport draw mode
             if (m_draw_style == PARTIO_DRAW_STYLE_BOUNDING_BOX || as_bounding_box)
                 draw_bounding_box();
@@ -267,25 +277,43 @@ namespace {
                 {
                     const int stride_position = 3 * static_cast<int>(sizeof(float)) * m_draw_skip;
                     const int stride_color = 4 * static_cast<int>(sizeof(float)) * m_draw_skip;
+                    const int stride_normal = 3 * static_cast<int>(sizeof(float)) * m_draw_skip;
 
                     glDisable(GL_POINT_SMOOTH);
                     glEnableClientState(GL_VERTEX_ARRAY);
                     glEnableClientState(GL_COLOR_ARRAY);
 
+                    bool useNormals = false;
+
                     glPointSize(m_point_size);
                     if (p_reader_cache->particles->numParticles() > 0)
                     {
+                        if (!p_reader_cache->normal.empty())
+                        {
+                            useNormals = true;
+                            glEnableClientState(GL_NORMAL_ARRAY);
+                        }
+
                         const float* partioPositions = p_reader_cache->particles->data<float>(p_reader_cache->positionAttr, 0);
 
                         glVertexPointer(3, GL_FLOAT, stride_position, partioPositions);
                         glColorPointer(4, GL_FLOAT, stride_color, p_reader_cache->rgba.data());
-                        glDrawArrays(GL_POINTS, 0, (p_reader_cache->particles->numParticles() / (m_draw_skip + 1)));
+                        if (useNormals)
+                        {
+                            glNormalPointer(GL_FLOAT, stride_normal, p_reader_cache->normal.data());
+                        }
+                        glDrawArrays(GL_POINTS, 0, (p_reader_cache->particles->numParticles() / (m_draw_skip + 1))-3);
                     }
 
                     glDisableClientState(GL_VERTEX_ARRAY);
                     glDisableClientState(GL_COLOR_ARRAY); // even though we are pushing and popping
                     // attribs disabling the color array is required or else it will freak out VP1
                     // interestingly it's not needed for VP2...
+
+                    if (useNormals)
+                    {
+                        glDisableClientState(GL_NORMAL_ARRAY);
+                    }
                 }
                 else if (m_draw_style == PARTIO_DRAW_STYLE_RADIUS || m_draw_style == PARTIO_DRAW_STYLE_DISK)
                 {
