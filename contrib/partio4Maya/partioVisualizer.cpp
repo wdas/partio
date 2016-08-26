@@ -754,7 +754,8 @@ MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
             {
                 if (pvCache.particles->attributeInfo(normalFromIndex.asChar(), pvCache.normalAttr))
                 {
-                    if (pvCache.normalAttr.count == 3)  // single float value for normal
+                    pvCache.normal.resize(pvCache.particles->numParticles() * 3ul);
+                    if (pvCache.normalAttr.count == 3)
                     {
                         for (int i = 0; i < pvCache.particles->numParticles(); ++i)
                         {
@@ -765,6 +766,11 @@ MStatus partioVisualizer::compute(const MPlug& plug, MDataBlock& block)
                         }
                     }
                 }
+                else
+                {
+                    pvCache.normal.resize(0);
+                }
+
                 mLastNormalFromIndex = normalFromIndex;
             }
             
