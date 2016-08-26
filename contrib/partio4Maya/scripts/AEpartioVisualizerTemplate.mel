@@ -29,7 +29,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 global proc AEpartioVisualizerTemplate( string $nodeName )
 {
-    editorTemplate -callCustom pioVizLogoHeader pioVizLogoHeader $nodeName;
+    // So, the "$nodeName" that maya passes in here is basically useless...
+    // ...because it's non-unique. Instead, the convention seems to be that
+    // when using -callCustom, you pass an arg which is an attribute name -
+    // when maya then calls your custom function, it will automatically add
+    // the (unique) node name in front of your attribute name.. and then you
+    // get the node name by calling plugNode on THAT. Absolutely GENIUS
+    // design...
+    editorTemplate -callCustom pioVizLogoHeader pioVizLogoHeader;
 
     editorTemplate -beginScrollLayout;
 
@@ -43,7 +50,7 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
     editorTemplate -addControl "byFrame";
     editorTemplate -addControl "cacheFormat";
     editorTemplate -addControl "iconSize";
-    editorTemplate -callCustom pioVizForceUpdate pioVizForceUpdate $nodeName;
+    editorTemplate -callCustom pioVizForceUpdate pioVizForceUpdate "message";
 
 
     editorTemplate -endLayout;
@@ -61,7 +68,7 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
             //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
         editorTemplate -endLayout;
         editorTemplate -beginLayout "Channel Control" -collapse 0;
-        editorTemplate -callCustom "pioVizCustomAttrsManage" "pioVizCustomAttrsManage" $nodeName;
+        editorTemplate -callCustom "pioVizCustomAttrsManage" "pioVizCustomAttrsManage" message;
         //editorTemplate -addControl "velocityFrom";
         //editorTemplate -addControl "colorFrom";
         //editorTemplate -addControl "incandescenceFrom";
@@ -104,9 +111,9 @@ global proc AEpartioVisualizerTemplate( string $nodeName )
     editorTemplate -endScrollLayout;
 }
 
-global proc pioVizCustomAttrsManage (string $nodeName)
+global proc pioVizCustomAttrsManage (string $attrName)
 {
-    $nodeName = pioStripNodeName ($nodeName);
+    string $nodeName = plugNode($attrName);
     if (`columnLayout -q -exists "foobar"`)
     { deleteUI "foobar"; }
 
@@ -145,16 +152,16 @@ global proc pioVizSwitchAttributeFrom(string $nodeName, int $attr, string $menu)
 
 }
 
-global proc pioVizForceUpdate(string $nodeName)
+global proc pioVizForceUpdate(string $attrName)
 {
-    $nodeName = pioStripNodeName ($nodeName);
+    string $nodeName = plugNode($attrName);
     if (!`button -q -exists  pioVizReloadButton`)
     {   rowLayout -nc 1 ;
         button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioVizReloadButton;
     }
 }
 
-global proc  pioVizLogoHeader(string $nodeName)
+global proc  pioVizLogoHeader()
 {
     if (!`symbolButton -q -exists  pioVizHeaderIcon`)
     {   rowLayout -nc 2 ;
