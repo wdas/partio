@@ -113,6 +113,7 @@ public:
     PARTIO::ParticleAttribute lastAimPosAttr;
     PARTIO::ParticleAttribute lastPosAttr;
     PARTIO::ParticleAttribute indexAttr;
+    PARTIO::ParticleAttribute displayColorAttr;
 //  PARTIO::ParticleAttribute shaderIndexAttr;
     MFnArrayAttrsData instanceData;
     MObject instanceDataObj;
@@ -214,6 +215,7 @@ public:
     static MObject aVelocityFrom;
     static MObject aAngularVelocityFrom;
     static MObject aAngularVelocityMult;
+    static MObject aDisplayColorFrom;
 
     static MObject aIndexFrom;
 
@@ -253,6 +255,7 @@ private:
     MString m_lastLastScaleFrom;
     MString m_lastIndexFrom;
     MString m_lastAngularVelocityFrom;
+    MString m_lastDisplayColorFrom;
     float m_lastAngularVelocityMult;
     short m_lastAngularVelocitySource;
     bool m_lastFlipStatus;

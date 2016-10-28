@@ -151,7 +151,7 @@ global proc pioInstCustomAttrsManage (string $attrName)
     setParent ..;
     setParent ..;
 
-    ///  INDEX
+    /// INDEX
     frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "Index Channels" ;
     columnLayout;
     string $indexAttributes[] = {"indexFrom"};
@@ -166,6 +166,15 @@ global proc pioInstCustomAttrsManage (string $attrName)
     string $lastAttributes[] = {"velocityFrom", "lastPositionFrom", "angularVelocityFrom", "lastRotationFrom", "lastAimDirectionFrom", "lastAimPositionFrom"};
     string $lastLabels[] = {"Velocity", "Last Position", "Angular Velocity", "Last Rotation", "Last Aim Direction", "Last Aim Position"};
     generateAttributesMenu($nodeName, $attrNameList, $lastLabels, $lastAttributes);
+    setParent ..;
+    setParent ..;
+
+    /// VIEWPORT ATTRIBUTES
+    frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "Viewport Channels" ;
+    columnLayout;
+    string $viewportAttributes[] = {"displayColorFrom"};
+    string $viewportLabels[] = {"Display Color"};
+    generateAttributesMenu($nodeName, $attrNameList, $viewportLabels, $viewportAttributes);
     setParent ..;
     setParent ..;
 
