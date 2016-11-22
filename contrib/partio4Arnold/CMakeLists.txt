@@ -6,6 +6,6 @@ endif ()
 
 if(MTOA_FOUND)
 	add_subdirectory(plugin)
-else()
-	add_subdirectory(procedurals)
 endif()
+add_subdirectory(procedurals)
+add_subdirectory(shaders)
