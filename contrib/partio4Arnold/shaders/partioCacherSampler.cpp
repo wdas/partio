@@ -57,14 +57,6 @@ enum Mode
     MODE_PASSTHROUGH
 };
 
-// not sure if  i need to bother with this possibly can just internally switch based on shading context instead 
-// currently not being used
-enum shadingMode
-{
-    SHAD_SURFACE = 0,
-    SHAD_DISPLACEMENT
-};
-
 enum Blend_Mode
 {
     BLEND_NONE = 0,
@@ -87,14 +79,6 @@ const char *gs_ModeNames[] =
     NULL
 };
 
-// not sure if  i need to bother with this possibly can just internally switch based on shading context instead 
-const char *gs_shadModeNames[] =
-{
-    "SurfaceColor",
-    "Displacement",
-    NULL
-};
-
 const char *gs_BlendMode[] =
 {
     "Blend None",
@@ -105,7 +89,6 @@ const char *gs_BlendMode[] =
 
 enum partioPointCacherParams
 {
-    p_shadMode,
     p_mode,
     p_file,
     p_input,
@@ -139,7 +122,6 @@ T Clamp(T value, T low, T high)
 
 node_parameters
 {
-    AiParameterENUM("shadingMode", 0, gs_shadModeNames);
     AiParameterENUM("mode", 0, gs_ModeNames);
     AiParameterSTR("file", NULL);
     AiParameterRGB("input", 0, 0, 0);
@@ -202,7 +184,6 @@ struct NodeAOVData
 static std::string file;
 static int mode;
 static int blendMode;
-static int shadMode;
 static float searchDist;
 static bool initialized = false;
 static bool finalized = false;
@@ -321,8 +302,6 @@ node_initialize
     {
         if (mode != AiNodeGetInt(node, "mode"))
             AiMsgError("[luma.partioCacherSampler] all nodes do not agree on mode");
-        if (shadMode != AiNodeGetInt(node, "shadingMode"))
-            AiMsgError("[luma.partioCacherSampler] all nodes do not agree on shadingMode");
         return;
     }
 
@@ -333,13 +312,11 @@ node_initialize
     if (file == "" || (AiNodeGetInt(options, "xres") == 64 && AiNodeGetInt(options, "yres") == 64))
     {
         mode = MODE_PASSTHROUGH;
-        shadMode = SHAD_DISPLACEMENT;
         AiMsgInfo("not active");
         return;
     }
 
     mode = AiNodeGetInt(node, "mode");
-    shadMode = AiNodeGetInt(node,"shadingMode");
 
 
     if (mode == MODE_PASSTHROUGH)
@@ -671,13 +648,13 @@ shader_evaluate
     AiV3Create(disp, rgb.r, rgb.g, rgb.b);
 /// PASSTHRU MODE
     // not sure if  displacement context uses other rays besides  camera, so commented it out for now
-    if (mode == MODE_PASSTHROUGH ||
-    (mode == MODE_WRITE && sg->Rt != AI_RAY_CAMERA)// ||
-    //(mode == MODE_READ && sg->Rt != AI_RAY_CAMERA))
-    )
+    if (mode == MODE_PASSTHROUGH || (mode == MODE_WRITE && sg->Rt != AI_RAY_CAMERA))// 
+    // || (mode == MODE_READ && sg->Rt != AI_RAY_CAMERA))
     {
-        sg->out.RGB = AiShaderEvalParamRGB(p_input);
-        sg->out.VEC = disp;
+        if (sg->sc == AI_CONTEXT_SURFACE)
+            sg->out.RGB = AiShaderEvalParamRGB(p_input);
+        else if (sg->sc == AI_CONTEXT_DISPLACEMENT)
+            sg->out.VEC = disp;
         return;
     }
 
@@ -755,10 +732,10 @@ shader_evaluate
 */
 
 
-        //if (sg->sc == AI_CONTEXT_SURFACE)
+        if (sg->sc == AI_CONTEXT_SURFACE)
             sg->out.RGB = rgb;
 
-        //if (sg->sc == AI_CONTEXT_DISPLACEMENT)
+        else if (sg->sc == AI_CONTEXT_DISPLACEMENT)
             sg->out.VEC = disp;
 
     } /// end WRITE MODE
@@ -766,11 +743,22 @@ shader_evaluate
 ///  READ MODE
     else if (mode == MODE_READ)
     {
-        //  we only want primary rays, not  secondary  right? 
-        if (sg->Rt == AI_RAY_CAMERA  && (sg->sc == AI_CONTEXT_SURFACE || sg->sc == AI_CONTEXT_DISPLACEMENT))
-            tdata->total_primary_samples += 1;
-        else
-            tdata->total_secondary_samples += 1;
+        // apparently  ray type for  displacement is  AI_RAY_UNDEFINED?
+
+        if (sg->sc == AI_CONTEXT_DISPLACEMENT)
+        {
+            if (sg->Rt ==AI_RAY_UNDEFINED)
+                tdata->total_primary_samples += 1;
+            else
+                tdata->total_secondary_samples += 1;
+        }
+        else if (sg->sc == AI_CONTEXT_SURFACE)
+        {
+            if (sg->Rt == AI_RAY_CAMERA)
+                tdata->total_primary_samples += 1;
+            else
+                tdata->total_secondary_samples += 1;
+        }
 
         float* inputPoint = reinterpret_cast<float*>(&sg->P);
 
@@ -805,29 +793,38 @@ shader_evaluate
             // if no points within the final search distance /count
             if (!indexes.size())
             {
-                sg->out.RGB = AiShaderEvalParamRGB(p_input);
-                sg->out.VEC = disp;
+                if (sg->sc == AI_CONTEXT_SURFACE)
+                    sg->out.RGB = AiShaderEvalParamRGB(p_input);
+                else if (sg->sc == AI_CONTEXT_DISPLACEMENT)
+                    sg->out.VEC = disp;
+                
                 if (diag)
                 {
                     AtColor errorColor = AiShaderEvalParamRGB(p_error_color);
+                    AtVector errorDir =  AiShaderEvalParamVec(p_error_disp);
 
                     //AiMsgInfo("failed to get closest point");
-                    sg->out.RGB.r = errorColor.r;
-                    sg->out.RGB.g = errorColor.g;
-                    sg->out.RGB.b = errorColor.b;
-                    AtVector errorDir =  AiShaderEvalParamVec(p_error_disp);
-                    sg->out.VEC = errorDir;
+                    if (sg->sc == AI_CONTEXT_SURFACE)
+                        sg->out.RGB = errorColor;
+                    else if (sg->sc == AI_CONTEXT_DISPLACEMENT)
+                        sg->out.VEC = errorDir;
                 }
 
 
                 AiAOVSetFlt(sg, AiShaderEvalParamStr(p_aov_diag), 1.0f);
-                if (sg->Rt == AI_RAY_CAMERA && (sg->sc == AI_CONTEXT_SURFACE || sg->sc == AI_CONTEXT_DISPLACEMENT))
+                if (sg->sc == AI_CONTEXT_DISPLACEMENT)
                 {
-                    tdata->missed_primary_samples += 1;
+                    if (sg->Rt ==AI_RAY_UNDEFINED)
+                        tdata->missed_primary_samples += 1;
+                    else
+                        tdata->missed_secondary_samples += 1;
                 }
-                else
+                else if (sg->sc == AI_CONTEXT_SURFACE)
                 {
-                    tdata->missed_secondary_samples += 1;
+                    if (sg->Rt == AI_RAY_CAMERA)
+                        tdata->missed_primary_samples += 1;
+                    else
+                        tdata->missed_secondary_samples += 1;
                 }
                 return;
             }
@@ -858,6 +855,7 @@ shader_evaluate
         {
             minDist = distanceSorted.begin()->second;
         }
+        
         if (isnan(distanceSorted.end()->second))
         {
             maxDist = maxSearchDistance;
@@ -918,8 +916,8 @@ shader_evaluate
         std::map<const char*,AtRGB>::iterator rgbit;
         std::map<const char*,AtRGBA>::iterator rgbAit;
         std::map<const char*,float>::iterator fltit;
-        
-        // once this loop is longer than 1,  i start getting the  bucket "blocks" in the render
+
+        uint counter = 0;
         for (it = distanceSorted.begin(); it != distanceSorted.end(); ++it)
         {
 
@@ -934,7 +932,9 @@ shader_evaluate
                 continue;
             }
 
-            float lerpVal = 1-(linstep(it->second, minDist,maxDist));
+            counter ++;
+            // not used anymore.. changed to use a pure average 
+            //float lerpVal = 1-(linstep(it->second, minDist,maxDist));
 
 /*
             if (aovRGB.size())
@@ -1007,8 +1007,14 @@ shader_evaluate
             if (!readPoints->attributeInfo("Cd", rgbAttr))
             {
                 AiMsgError("EMPTY!");
-                sg->out.RGB = AI_RGB_BLACK;
-                sg->out.VEC = AI_V3_ZERO;
+                if (sg->sc == AI_CONTEXT_SURFACE)
+                {
+                    sg->out.RGB = AI_RGB_BLACK;
+                }
+                if (sg->sc == AI_CONTEXT_DISPLACEMENT)
+                {
+                    sg->out.VEC = AI_V3_ZERO;
+                }
                 return;
             }
 
@@ -1025,22 +1031,44 @@ shader_evaluate
 
             AtRGB vv = {rgbX,rgbY,rgbZ};
             AtVector dv = {rgbX,rgbY,rgbZ};
-            if(!first)
+            if(first)
             {
-                vv = AiColorLerp(lerpVal,vv, finalRGB);
-                dv = AiV3Lerp(lerpVal, dv, finalDisp);
+                finalRGB = vv;
+                finalDisp = dv;
+
             }
-            finalRGB = vv;
-            finalDisp = dv;
+            else
+            {
+                AtRGB lastColor = finalRGB;
+                AiColorAdd(finalRGB, vv, lastColor);
+
+                AtVector lastVec = finalDisp;
+                AiV3Add(finalDisp, dv, lastVec);
+                //vv = AiColorLerp(lerpVal,vv, finalRGB);
+                //dv = AiV3Lerp(lerpVal, dv, finalDisp);
+            }
 
         } // searchPoints loop
 
+        if (sg->sc == AI_CONTEXT_SURFACE)
+        {
+            finalRGB.r /= counter;
+            finalRGB.g /= counter;
+            finalRGB.b /= counter;
 
+            sg->out.RGB = finalRGB;
+        }
+        if (sg->sc == AI_CONTEXT_DISPLACEMENT)
+        {
+            finalDisp.x /= counter;
+            finalDisp.y /= counter;
+            finalDisp.z /= counter;
+
+            sg->out.VEC = finalDisp;
+        }
         /// NOT SURE if it matters or makes a  difference to arnold if i use a color  out.RGB  to feed  a vector input like 
         /// vector  displacment in the shading networks?  so  I started adding both output types?  
-        
-        sg->out.RGB = finalRGB;
-        sg->out.VEC = finalDisp;
+        /// splitting for now  this way?  
 
 /*
         if (aovRGB.size())
