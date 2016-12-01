@@ -113,6 +113,9 @@ enum partioPointCacherParams
     p_search_distance,
     p_search_points,
     p_scale_searchDist_by_aa,
+    p_negateX,
+    p_negateY,
+    p_negateZ,
     p_error_color,
     p_error_disp,
     p_diag,
@@ -121,9 +124,11 @@ enum partioPointCacherParams
 
 };
 
-inline float lerp(float t, float a, float b)
+
+inline float linstep(float t, float min, float max)
 {
-    return  a+(t*(b-a));
+    return CLAMP((t-min)/(min-max),0.0f, 1.0f);
+    //return  min+(t*(max-min));
 }
 
 template <class T>
@@ -142,6 +147,9 @@ node_parameters
     AiParameterFLT("max_search_distance", 1.0f);
     AiParameterINT("search_points", 1);
     AiParameterBOOL("scale_searchDist_by_AA_samples", false);
+    AiParameterBOOL("negate_X", false);
+    AiParameterBOOL("negate_Y", false);
+    AiParameterBOOL("negate_Z", false);
     AiParameterRGB("diagnostic_color", 1,1,0);
     AiParameterVec("diagnostic_disp",  0,1,0);
     AiParameterBOOL("show_diagnostic", false);
@@ -199,10 +207,14 @@ static float searchDist;
 static bool initialized = false;
 static bool finalized = false;
 static bool diag = false;
+static bool negX = false;
+static bool negY = false;
+static bool negZ = false;
 static int  searchPoints;
 static std::set<NodeAOVData> allAOVs;
 static std::map<std::string, uint> AOVTypes;
 static ThreadData threadData[AI_MAX_THREADS];
+
 
 
 inline bool AiAOVGet(AtShaderGlobals *sg, const char *name, AtColor& val)
@@ -385,6 +397,10 @@ node_initialize
 
     else if (mode == MODE_READ)
     {
+        negX = AiNodeGetBool(node,"negate_X");
+        negY = AiNodeGetBool(node,"negate_Y");
+        negZ = AiNodeGetBool(node,"negate_Z");
+
         AiMsgInfo("[luma.partioCacherSampler] read mode (\"%s\")", file.c_str());
 
         diag = AiNodeGetBool(node, "show_diagnostic") == true;
@@ -751,7 +767,7 @@ shader_evaluate
     else if (mode == MODE_READ)
     {
         //  we only want primary rays, not  secondary  right? 
-        if (sg->Rt == AI_RAY_CAMERA && (sg->sc == AI_CONTEXT_SURFACE || sg->sc == AI_CONTEXT_DISPLACEMENT))
+        if (sg->Rt == AI_RAY_CAMERA  && (sg->sc == AI_CONTEXT_SURFACE || sg->sc == AI_CONTEXT_DISPLACEMENT))
             tdata->total_primary_samples += 1;
         else
             tdata->total_secondary_samples += 1;
@@ -917,8 +933,8 @@ shader_evaluate
                 AiMsgError("Found NAN inbetween min/max values!");
                 continue;
             }
-            // we may not need this anymore since the NANS seemed to be coming from above....
-            float lerpVal = Clamp((1-(lerp(it->second, minDist,maxDist))),0.0f,1.0f);
+
+            float lerpVal = 1-(linstep(it->second, minDist,maxDist));
 
 /*
             if (aovRGB.size())
@@ -997,8 +1013,18 @@ shader_evaluate
             }
 
             const float *rgbVal = readPoints->data<float>(rgbAttr, it->first);
-            AtRGB vv = {rgbVal[0],rgbVal[1],rgbVal[2]};
-            AtVector dv = {rgbVal[0],rgbVal[1],rgbVal[2]};
+            float rgbX = rgbVal[0];
+            float rgbY = rgbVal[1];
+            float rgbZ = rgbVal[2];
+            if (negX)
+                rgbX = -rgbVal[0];
+            if (negY)
+                rgbY = -rgbVal[1];
+            if (negZ)
+                rgbZ = -rgbVal[2];
+
+            AtRGB vv = {rgbX,rgbY,rgbZ};
+            AtVector dv = {rgbX,rgbY,rgbZ};
             if(!first)
             {
                 vv = AiColorLerp(lerpVal,vv, finalRGB);
