@@ -102,7 +102,8 @@ namespace {
         p_error_color,
         p_error_disp,
         p_diag,
-        p_aov_diag
+        p_aov_diag,
+        p_color_channel
     };
 
     struct ThreadData {
@@ -130,7 +131,7 @@ namespace {
         std::string file;
         AtNode* node;
         PARTIO::ParticlesDataMutable* readPoints;
-        PARTIO::ParticleAttribute rgbAttr;
+        PARTIO::ParticleAttribute colorAttr;
         Mode mode;
         float searchDist;
         int blendMode;
@@ -185,15 +186,15 @@ namespace {
 
                 PARTIO::ParticleAttribute position_attr = out_points->addAttribute("position", PARTIO::VECTOR, 3);
                 PARTIO::ParticleAttribute id_attr = out_points->addAttribute("id", PARTIO::INT, 1);
-                PARTIO::ParticleAttribute rgb_attr = out_points->addAttribute("rgbPP", PARTIO::VECTOR, 3);
+                PARTIO::ParticleAttribute color_attr = out_points->addAttribute(AiNodeGetStr(node, "color_channel"), PARTIO::VECTOR, 3);
 
                 PARTIO::ParticlesDataMutable::iterator it = out_points->begin();
                 PARTIO::ParticleAccessor position_access(position_attr);
                 PARTIO::ParticleAccessor id_access(id_attr);
-                PARTIO::ParticleAccessor rgb_access(rgb_attr);
+                PARTIO::ParticleAccessor color_access(color_attr);
                 it.addAccessor(position_access);
                 it.addAccessor(id_access);
-                it.addAccessor(rgb_access);
+                it.addAccessor(color_access);
 
                 int idCounter = 0;
                 for (unsigned int t = 0; t < AI_MAX_THREADS; ++t)
@@ -205,7 +206,7 @@ namespace {
                     {
                         PARTIO::Data<float, 3>& P = position_access.data<PARTIO::Data<float, 3> >(it);
                         PARTIO::Data<int, 1>& id = id_access.data<PARTIO::Data<int, 1> >(it);
-                        PARTIO::Data<float, 3>& color = rgb_access.data<PARTIO::Data<float, 3> >(it);
+                        PARTIO::Data<float, 3>& color = color_access.data<PARTIO::Data<float, 3> >(it);
 
                         P[0] = tdata.P[ii].x;
                         P[1] = tdata.P[ii].y;
@@ -318,10 +319,11 @@ namespace {
 
                 if (readPoints)
                 {
+                    const char* color_channel = AiNodeGetStr(node, "color_channel");
                     /// We can do an early exit here, so no need to check this at every iteration.
-                    if (!readPoints->attributeInfo("Cd", rgbAttr))
+                    if (!readPoints->attributeInfo(color_channel, colorAttr))
                     {
-                        AiMsgError("[luma.partioCacherSampler] Input cache does not have a Cd attribute!");
+                        AiMsgError("[luma.partioCacherSampler] Input cache does not have a %s attribute!", color_channel);
                         readPoints->release();
                         readPoints = 0;
                         mode = MODE_PASSTHROUGH;
@@ -366,6 +368,7 @@ node_parameters
     AiParameterBOOL("show_diagnostic", false);
 
     AiParameterSTR("aov_diagnostic", "diagnostic");
+    AiParameterSTR("color_channel", "Cd");
     AiMetaDataSetInt(mds, "aov_diagnostic", "aov.type", AI_TYPE_FLOAT);
 
     AiMetaDataSetStr(mds, 0, "maya.classification", "shader/surface");
@@ -392,20 +395,19 @@ node_finish
 shader_evaluate
 {
     ShaderData* data = reinterpret_cast<ShaderData*>(AiNodeGetLocalData(node));
-    const AtRGB input = AiShaderEvalParamRGB(p_input);
     if (data->mode == MODE_PASSTHROUGH || (data->mode == MODE_WRITE && sg->Rt != AI_RAY_CAMERA)) /// PASSTHRU MODE
     {
-        sg->out.RGB = input;
+        sg->out.RGB = AiShaderEvalParamRGB(p_input);
         return;
     }
     else if (data->mode == MODE_WRITE) /// WRITE MODE
     {
+        sg->out.RGB = AiShaderEvalParamRGB(p_input);
         ThreadData& tdata = data->threadData[sg->tid];
         // beauty: this must happen first to trigger downstream evaluation of AOVs
-        tdata.RGB.push_back(input);
+        tdata.RGB.push_back(sg->out.RGB);
         // point
         tdata.P.push_back(sg->P);
-        sg->out.RGB = input;
     } /// end WRITE MODE
     else if (data->readPoints != 0) /// READ MODE
     {
@@ -442,21 +444,18 @@ shader_evaluate
             /// bit of a magic number but  should suffice to allow for  searching for  points that are nearly at the search position
         }
 
-        // this also does the find  points for BLEND_ALL
-        /// not sure if this is the best use of LocalData? 
-        PARTIO::ParticlesDataMutable* readPoints = (PARTIO::ParticlesDataMutable*)AiNodeGetLocalData(node);
-        readPoints->findNPoints(inputPoint, firstSearchPoints, firstSearchDistance, indexes, pointDistanceSquared);
+        data->readPoints->findNPoints(inputPoint, firstSearchPoints, firstSearchDistance, indexes, pointDistanceSquared);
 
         // if no points within the first search distance /count
         if (indexes.empty())
         {
             if (data->blendMode == BLEND_ERROR)
-                readPoints->findNPoints(inputPoint, data->searchPoints, maxSearchDistance, indexes, pointDistanceSquared);
+                data->readPoints->findNPoints(inputPoint, data->searchPoints, maxSearchDistance, indexes, pointDistanceSquared);
 
             // if no points within the final search distance /count
             if (indexes.empty())
             {
-                sg->out.RGB = input;
+                sg->out.RGB = AiShaderEvalParamRGB(p_input);
 
                 if (data->diag)
                 {
@@ -521,7 +520,7 @@ shader_evaluate
 
             counter++;
 
-            const float* rgbVal = readPoints->data<float>(data->rgbAttr, it->first);
+            const float* rgbVal = data->readPoints->data<float>(data->colorAttr, it->first);
             finalValue.x += data->negX ? -rgbVal[0] : rgbVal[0];
             finalValue.y += data->negY ? -rgbVal[1] : rgbVal[1];
             finalValue.z += data->negZ ? -rgbVal[2] : rgbVal[2];
