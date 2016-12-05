@@ -9,6 +9,7 @@
 #include <map>
 #include <algorithm>
 #include <ai_types.h>
+#include <limits>
 
 /// NOTES:
 /*
@@ -29,750 +30,415 @@
  * any help with that and explanation would be helpful as well.
  * 
  * CAVEATS:
- *            I know I haven't switched over the   initialize stuff to  "update"
- *            The sampling  lerp stuff may need a major overhaul but I don't know if thats the root cause of the threading issues. 
+ *            The sampling  lerp stuff may need a major overhaul but I don't know if thats the root cause of the threading issues.
  * 
- *Please add notes where you see fit, I'd like to learn what I'm doing wrong while we're fixing this.
+ * Please add notes where you see fit, I'd like to learn what I'm doing wrong while we're fixing this.
  * 
- *  Is there a way to make one shader have multiple connection  outputs?   a float and  an RGB for example? so one could be connected 
- * to the  normalDisplacement  and the rgb could go to the vector displacement,  or do I have to separate it out into 2 separate shaders? 
+ * Is there a way to make one shader have multiple connection  outputs?   a float and  an RGB for example? so one could be connected
+ * to the  normalDisplacement  and the rgb could go to the vector displacement,  or do I have to separate it out into 2 separate shaders?
+ * Pal: No, there is no stable ways to have multiple outputs at this moment.
+ *
+ * Pal's Notes.
+ * * I removed the AOV code for now, since the uses were disabled anyway, so we can have a clearer working shader.
+ *   Feel free to go ahead and add back the code, following the approaches found in the current code.
+ * * I refactored things, so now it's using the node's local data, and updates are actually happening in updates.
+ *   That means we can use multiple of the same shader now.
+ * * I don't think uint is part of the c++ standard. It's probably coming from a linux header, so using
+ *   unsigned int instead.
  */
 
 
-//#define MAX_THREADS 64
 #define ID_ARNOLD_PARTIO_CACHER_SAMPLER       0x00116ED2
-
 AI_SHADER_NODE_EXPORT_METHODS(partioCacherSamplerMtd);
 
-namespace
-{
+namespace {
+    enum Mode {
+        MODE_READ = 0,
+        MODE_WRITE,
+        MODE_PASSTHROUGH,
+        MODE_LAST = MODE_PASSTHROUGH
+    };
 
-//using namespace Partio;
-using namespace std;
+    enum Blend_Mode {
+        BLEND_NONE = 0,
+        BLEND_ERROR,
+        BLEND_ALL
+    };
 
-enum Mode
-{
-    MODE_READ = 0,
-    MODE_WRITE,
-    MODE_PASSTHROUGH
+    struct sort_pred {
+        bool operator()(const std::pair<int, float>& left, const std::pair<int, float>& right)
+        {
+            return left.second < right.second;
+        }
+    };
+
+    const char* gs_ModeNames[] =
+        {
+            "read",
+            "write",
+            "passthrough",
+            0
+        };
+
+    const char* gs_BlendMode[] =
+        {
+            "Blend None",
+            "Blend Error",
+            "Blend All",
+            0
+        };
+
+    enum partioPointCacherParams {
+        p_mode,
+        p_file,
+        p_input,
+        p_blend_mode,
+        p_search_distance,
+        p_search_points,
+        p_scale_searchDist_by_aa,
+        p_negateX,
+        p_negateY,
+        p_negateZ,
+        p_error_color,
+        p_error_disp,
+        p_diag,
+        p_aov_diag
+    };
+
+    struct ThreadData {
+        std::vector<AtPoint> P;
+        std::vector<AtRGB> RGB;
+        unsigned int total_primary_samples;
+        unsigned int total_secondary_samples;
+        unsigned int missed_primary_samples;
+        unsigned int missed_secondary_samples;
+
+        ThreadData() : total_primary_samples(0),
+                       total_secondary_samples(0),
+                       missed_primary_samples(0),
+                       missed_secondary_samples(0)
+        {
+        }
+    };
+
+    /// A good rule of thumb to order the variables by their primitive size
+    /// that helps to minimize the data structure size. That way padding will be minimal.
+    /// A different strategy would be to organize data layout by access frequency, and make sure
+    /// that the most frequently accessed datas are on the same cache lines.
+    struct ShaderData {
+        ThreadData threadData[AI_MAX_THREADS];
+        std::string file;
+        AtNode* node;
+        PARTIO::ParticlesDataMutable* readPoints;
+        PARTIO::ParticleAttribute rgbAttr;
+        Mode mode;
+        float searchDist;
+        int blendMode;
+        int searchPoints;
+        bool diag;
+        bool negX;
+        bool negY;
+        bool negZ;
+
+        ShaderData() : node(0), readPoints(0),
+                       mode(MODE_PASSTHROUGH), searchDist(0.0f),
+                       blendMode(BLEND_NONE), searchPoints(0),
+                       diag(false), negX(false), negY(false), negZ(false)
+        {
+        }
+
+        ~ShaderData()
+        {
+            AiMsgInfo("[luma.partioCacherSampler] Deleting shader data for : %s", AiNodeGetName(node));
+
+            if (mode == MODE_WRITE) // write
+            {
+                unsigned int threadCounter = 0;
+                /// To avoid constant memory reallocations we first count the number of particles to be merged together.
+                /// And we try to avoid creating one huge memory segment.
+                size_t num_particles = 0;
+
+                for (unsigned int t = 0; t < AI_MAX_THREADS; ++t)
+                {
+                    if (threadData[t].P.size())
+                    {
+                        threadCounter++;
+                        num_particles += threadData[t].P.size();
+                    }
+                }
+
+                AiMsgInfo("[luma.partioCacherSampler] gathered %d points from %i threads.", static_cast<int>(num_particles), threadCounter);
+
+                PARTIO::ParticlesDataMutable* out_points = PARTIO::createInterleave();
+
+                const static size_t max_particle_count = static_cast<size_t>(std::numeric_limits<int>::max());
+                /// Again Partio is kinda fucked here. It takes an integer as an input for the addParticles
+                /// so we have to clamp against the maximum value of int here.
+                /// This is one of the things I want to fix in Partio...
+                if (num_particles > max_particle_count)
+                {
+                    num_particles = max_particle_count;
+                    AiMsgWarning("[luma.partioCacherSampler] There are more than 2^31 particles!");
+                }
+
+                out_points->addParticles(static_cast<int>(num_particles));
+
+                PARTIO::ParticleAttribute position_attr = out_points->addAttribute("position", PARTIO::VECTOR, 3);
+                PARTIO::ParticleAttribute id_attr = out_points->addAttribute("id", PARTIO::INT, 1);
+                PARTIO::ParticleAttribute rgb_attr = out_points->addAttribute("rgbPP", PARTIO::VECTOR, 3);
+
+                PARTIO::ParticlesDataMutable::iterator it = out_points->begin();
+                PARTIO::ParticleAccessor position_access(position_attr);
+                PARTIO::ParticleAccessor id_access(id_attr);
+                PARTIO::ParticleAccessor rgb_access(rgb_attr);
+                it.addAccessor(position_access);
+                it.addAccessor(id_access);
+                it.addAccessor(rgb_access);
+
+                int idCounter = 0;
+                for (unsigned int t = 0; t < AI_MAX_THREADS; ++t)
+                {
+                    const ThreadData& tdata = threadData[t];
+                    const size_t num_points = tdata.P.size();
+
+                    for (size_t ii = 0; ii < num_points && it != out_points->end(); ++it, ++ii, ++idCounter)
+                    {
+                        PARTIO::Data<float, 3>& P = position_access.data<PARTIO::Data<float, 3> >(it);
+                        PARTIO::Data<int, 1>& id = id_access.data<PARTIO::Data<int, 1> >(it);
+                        PARTIO::Data<float, 3>& color = rgb_access.data<PARTIO::Data<float, 3> >(it);
+
+                        P[0] = tdata.P[ii].x;
+                        P[1] = tdata.P[ii].y;
+                        P[2] = tdata.P[ii].z;
+
+                        id[0] = idCounter;
+
+                        color[0] = tdata.RGB[ii].r;
+                        color[1] = tdata.RGB[ii].g;
+                        color[2] = tdata.RGB[ii].b;
+                    }
+                }
+
+                AiMsgDebug("[luma.partioCacherSampler] writing %d points to \"%s\"", static_cast<int>(num_particles), file.c_str());
+
+                // WRITE OUT HERE
+                write(file.c_str(), *out_points);
+                out_points->release();
+                AiMsgDebug("[luma.partioCacherSampler] released  memory");
+            }
+            else if (mode == MODE_READ) /// read
+            {
+                uint missed_primary = 0;
+                uint missed_secondary = 0;
+                uint total_primary = 0;
+                uint total_secondary = 0;
+                for (int i = 0; i < AI_MAX_THREADS; ++i)
+                {
+                    missed_primary += threadData[i].missed_primary_samples;
+                    missed_secondary += threadData[i].missed_secondary_samples;
+                    total_primary += threadData[i].total_primary_samples;
+                    total_secondary += threadData[i].total_secondary_samples;
+                }
+
+                AiMsgInfo("[luma.partioCacherSampler] primary samples: %d total, %d missed (%.02f%%)", total_primary,
+                          missed_primary,
+                          (total_primary == 0) ? 0.0f : (missed_primary / (float)total_primary * 100.0f));
+
+                AiMsgInfo("[luma.partioCacherSampler] secondary samples: %d total, %d missed (%.02f%%)", total_secondary,
+                          missed_secondary,
+                          (total_secondary == 0) ? 0.0f : (missed_secondary / (float)total_secondary * 100.0f));
+
+                if (readPoints)
+                    readPoints->release();
+                AiMsgDebug("[luma.partioCacherSampler] Released memory");
+            }
+        }
+
+        void update(AtNode* _node)
+        {
+            // this grabs the  shader's supported AOVs
+            AiMsgDebug("[luma.partioCacherSampler] Updating node data.");
+
+            node = _node;
+            mode = static_cast<Mode>(CLAMP(AiNodeGetInt(node, "mode"), 0, static_cast<int>(MODE_LAST))); /// Being a bit over-cautious
+
+            negX = AiNodeGetBool(node, "negate_X");
+            negY = AiNodeGetBool(node, "negate_Y");
+            negZ = AiNodeGetBool(node, "negate_Z");
+
+            AtNode* options = AiUniverseGetOptions();
+            const std::string current_file = AiNodeGetStr(node, "file");
+            /// Checking for swatch renders.
+            Mode mode = static_cast<Mode>(AiNodeGetInt(node, "mode"));
+            if (current_file == "" || (AiNodeGetInt(options, "xres") == 64 && AiNodeGetInt(options, "yres") == 64))
+            {
+                AiMsgDebug("[luma.partioCacherSampler] Shader is not active.");
+                return;
+            }
+
+            if (mode == MODE_PASSTHROUGH)
+            {
+                AiMsgDebug("[luma.partioCacherSampler] Passthrough mode.");
+                return;
+            }
+
+            if (mode == MODE_WRITE)
+            {
+                file = current_file;
+                AiMsgDebug("[luma.partioCacherSampler] Write mode (\"%s\")", file.c_str());
+            }
+            else if (mode == MODE_READ)
+            {
+                AiMsgDebug("[luma.partioCacherSampler] Read mode (\"%s\")", file.c_str());
+
+                diag = AiNodeGetBool(node, "show_diagnostic");
+                uint AASamples = static_cast<unsigned int>(std::max(AiNodeGetInt(AiUniverseGetOptions(), "AA_samples"), 0));
+
+                blendMode = AiNodeGetInt(node, "blend_mode");
+                searchDist = AiNodeGetFlt(node, "max_search_distance");
+
+                /// I'm not exactly sure why the sqrt of the AA_samples was used here originally,
+                /// I think it should be square instead. Feel free to correct it.
+                if (AiNodeGetBool(node, "scale_searchDist_by_AA_samples"))
+                    searchDist *= static_cast<float>(AASamples * AASamples);
+
+                searchPoints = AiNodeGetInt(node, "search_points");
+                if (searchPoints <= 0)
+                    searchPoints = 1;
+
+                /// Don't reload file, this is important for IPR
+                if (current_file != file)
+                {
+                    file = current_file;
+                    if (readPoints)
+                        readPoints->release();
+
+                    readPoints = PARTIO::read(file.c_str());
+                }
+
+                if (readPoints)
+                {
+                    /// We can do an early exit here, so no need to check this at every iteration.
+                    if (!readPoints->attributeInfo("Cd", rgbAttr))
+                    {
+                        AiMsgError("[luma.partioCacherSampler] Input cache does not have a Cd attribute!");
+                        readPoints->release();
+                        readPoints = 0;
+                        mode = MODE_PASSTHROUGH;
+                    }
+                    else
+                    {
+                        AiMsgDebug("[luma.partioCacherSampler] Sorting points");
+                        readPoints->sort();
+                        AiMsgDebug("[luma.partioCacherSampler] KDtree Created");
+                        AiMsgDebug("[luma.partioCacherSampler] Loaded %d points", (int)readPoints->numParticles());
+                    }
+                }
+            }
+        }
+
+        static void* operator new(size_t count)
+        {
+            return AiMalloc(static_cast<unsigned int>(count));
+        }
+
+        static void operator delete(void* d)
+        {
+            AiFree(d);
+        }
+    };
 };
-
-enum Blend_Mode
-{
-    BLEND_NONE = 0,
-    BLEND_ERROR,
-    BLEND_ALL
-};
-
-struct sort_pred {
-    bool operator()(const std::pair<int,float> &left, const std::pair<int,float> &right) {
-        return left.second < right.second;
-    }
-};
-
-
-const char *gs_ModeNames[] =
-{
-    "read",
-    "write",
-    "passthrough",
-    NULL
-};
-
-const char *gs_BlendMode[] =
-{
-    "Blend None",
-    "Blend Error",
-    "Blend All",
-    NULL
-};
-
-enum partioPointCacherParams
-{
-    p_mode,
-    p_file,
-    p_input,
-    p_blend_mode,
-    p_search_distance,
-    p_search_points,
-    p_scale_searchDist_by_aa,
-    p_negateX,
-    p_negateY,
-    p_negateZ,
-    p_error_color,
-    p_error_disp,
-    p_diag,
-    p_aov_diag
-};
-
-};
-
-
-inline float linstep(float t, float min, float max)
-{
-    return CLAMP((t-min)/(min-max),0.0f, 1.0f);
-    //return  min+(t*(max-min));
-}
-
-template <class T>
-T Clamp(T value, T low, T high)
-{
-    return value < low ? low : (value > high ? high : value );
-}
 
 node_parameters
 {
     AiParameterENUM("mode", 0, gs_ModeNames);
     AiParameterSTR("file", NULL);
     AiParameterRGB("input", 0, 0, 0);
-    AiParameterENUM("blend_mode",0, gs_BlendMode);
+    AiParameterENUM("blend_mode", 0, gs_BlendMode);
     AiParameterFLT("max_search_distance", 1.0f);
     AiParameterINT("search_points", 1);
     AiParameterBOOL("scale_searchDist_by_AA_samples", false);
     AiParameterBOOL("negate_X", false);
     AiParameterBOOL("negate_Y", false);
     AiParameterBOOL("negate_Z", false);
-    AiParameterRGB("diagnostic_color", 1,1,0);
-    AiParameterVec("diagnostic_disp",  0,1,0);
+    AiParameterRGB("diagnostic_color", 1, 1, 0);
+    AiParameterVec("diagnostic_disp", 0, 1, 0);
     AiParameterBOOL("show_diagnostic", false);
 
     AiParameterSTR("aov_diagnostic", "diagnostic");
     AiMetaDataSetInt(mds, "aov_diagnostic", "aov.type", AI_TYPE_FLOAT);
 
-    //AiMetaDataSetBool(mds, NULL, "maya.hide", true);
     AiMetaDataSetStr(mds, 0, "maya.classification", "shader/surface");
     AiMetaDataSetInt(mds, NULL, "maya.id", ID_ARNOLD_PARTIO_CACHER_SAMPLER);
 }
 
-struct AOVData
-{
-    uint type;
-    char name;
-    std::vector<AtVector>* dataA;  // vector3 types
-    std::vector<AtRGBA>* dataB;  // vector4 types
-    std::vector<float>* dataC;       // float types
-};
-
-typedef std::map<std::string, AOVData> AOVDataMap;
-
-struct ThreadData
-{
-    std::vector<AtPoint>* P;
-    std::vector<AtRGB>* RGB;
-    std::vector<AtVector>* dispVec;
-    AOVDataMap* AOVs;
-    uint total_primary_samples;
-    uint total_secondary_samples;
-    uint missed_primary_samples;
-    uint missed_secondary_samples;
-    ThreadData() : total_primary_samples(0),
-        total_secondary_samples(0),
-        missed_primary_samples(0),
-        missed_secondary_samples(0) {}
-};
-
-struct NodeAOVData
-{
-    std::string name;
-    uint type;
-    bool operator<(const NodeAOVData &other) const
-    {
-        return (name < other.name);
-    }
-};
-
-static std::string file;
-static int mode;
-static int blendMode;
-static float searchDist;
-static bool initialized = false;
-static bool finalized = false;
-static bool diag = false;
-static bool negX = false;
-static bool negY = false;
-static bool negZ = false;
-static int  searchPoints;
-static std::set<NodeAOVData> allAOVs;
-static std::map<std::string, uint> AOVTypes;
-static ThreadData threadData[AI_MAX_THREADS];
-
-
-
-inline bool AiAOVGet(AtShaderGlobals *sg, const char *name, AtColor& val)
-{
-    return AiAOVGetRGB(sg, name, val);
-}
-
-inline bool AiAOVGet(AtShaderGlobals *sg, const char *name, AtRGBA& val)
-{
-    return AiAOVGetRGBA(sg, name, val);
-}
-
-inline bool AiAOVGet(AtShaderGlobals *sg, const char *name, AtVector& val)
-{
-    if (std::string(name) == "N") {
-        val = sg->N;
-    }
-    else
-    {
-        return AiAOVGetVec(sg, name, val);
-    }
-    return true;
-}
-
-inline bool AiAOVGet(AtShaderGlobals *sg, const char *name, float& val)
-{
-    return AiAOVGetFlt(sg, name, val);
-}
-
-
-void cacheGlobalAOVs()
-{
-    AiMsgInfo("[luma.partioCacherSampler] cacheGlobalAOVs");
-    // save out AOV names to static variable
-    AtArray* outputs = AiNodeGetArray(AiUniverseGetOptions(), "outputs");
-    for (uint i=0; i < outputs->nelements; ++i)
-    {
-        std::string output(AiArrayGetStr(outputs, i));
-        size_t index = output.find_first_of(' ');
-        std::string aov = output.substr(0, index);
-
-        // filter standard aovs out since they are always  computed anyway except for normal since it may be usefull as a utility
-        // P is always exported so we're also filtering that out here as well
-        if (aov == "P" || aov == "Z" || aov == "opacity" || aov == "motionvector" ||
-                aov == "Pref" || aov == "raycount" || aov == "cputime" || aov == "RGB" || aov == "RGBA")
-        {
-            AiMsgWarning("[luma.partioCacherSampler] AOV: \"%s\" is not being cached)",aov.c_str());
-            continue;
-        }
-        // TODO: handle same AOV with different types (possible)?
-        size_t index2 = output.find_first_of(' ', index+1);
-        std::string typeName = output.substr(index+1, index2 - (index+1));
-        AiMsgInfo("[luma.partioCacherSampler] AOV: \"%s\" (\"%s\")", aov.c_str(), typeName.c_str());
-        uint type = AI_TYPE_RGBA;
-        if (typeName == "RGB")
-            type = AI_TYPE_RGB;
-        else if (typeName == "VECTOR")
-            type = AI_TYPE_VECTOR;
-        else if (typeName == "POINT")
-            type = AI_TYPE_POINT;
-        else if (typeName == "RGBA")
-            type = AI_TYPE_RGBA;
-        else if (typeName == "FLOAT")
-            type = AI_TYPE_FLOAT;
-        else
-            AiMsgError("[luma.partioCacherSampler] AOV \"%s\" has unsupported data type", aov.c_str());
-        NodeAOVData d;
-        d.name = aov;
-        d.type = type;
-        allAOVs.insert(d);
-        AOVTypes[aov] = type;
-    }
-}
-
-
-// I know most of  this needs to go to update
 node_initialize
 {
-
-    // this grabs the  shader's supported AOVs
-    AiMsgInfo("[luma.partioCacherSampler] initialize...");
-    // pre-cache a pointer to aov array, so we don't have to call AiNodeGetArray in evaluate
-    AtArray* aovs = AiNodeGetArray(node, "mtoa_aovs");
-    if (aovs != NULL)
-    {
-        AtArray** paovs = (AtArray**)AiMalloc(sizeof(AtArray*));
-
-        *paovs = aovs;
-        //node->local_data = paovs;
-
-        if (aovs->nelements)
-        {
-            AiMsgInfo("[luma.partioCacherSampler] %s AOVs:", AiNodeGetName(node));
-            for (uint i=0; i < aovs->nelements; ++i)
-            {
-                const char* aovName = AiArrayGetStr(aovs, i);
-                AiMsgInfo("[luma.partioCacherSampler]   \"%s\"", aovName);
-            }
-        }
-        else
-            AiMsgInfo("[luma.partioCacherSampler] %s has no AOVs", AiNodeGetName(node));
-    }
-    if (initialized)
-    {
-        if (mode != AiNodeGetInt(node, "mode"))
-            AiMsgError("[luma.partioCacherSampler] all nodes do not agree on mode");
-        return;
-    }
-
-    initialized = true;
-    AtNode* options = AiUniverseGetOptions();
-    file = AiNodeGetStr(node, "file");
-    // hacky check for swatches
-    if (file == "" || (AiNodeGetInt(options, "xres") == 64 && AiNodeGetInt(options, "yres") == 64))
-    {
-        mode = MODE_PASSTHROUGH;
-        AiMsgInfo("not active");
-        return;
-    }
-
-    mode = AiNodeGetInt(node, "mode");
-
-
-    if (mode == MODE_PASSTHROUGH)
-    {
-        AiMsgInfo("[luma.partioCacherSampler] passthrough mode");
-        return;
-    }
-
-    // here we grab any other aov's we support from the globals... for now  just  N if it is enabled.
-    cacheGlobalAOVs();
-
-    if (mode == MODE_WRITE)
-    {
-        AiMsgInfo("[luma.partioCacherSampler] write mode (\"%s\")", file.c_str());
-        for (uint t=0; t < AI_MAX_THREADS; ++t)
-        {
-            threadData[t].P = new std::vector<AtPoint>;
-            threadData[t].RGB = new std::vector<AtRGB>;
-            threadData[t].dispVec = new std::vector<AtVector>;
-
-/*
-            AOVDataMap* map = new AOVDataMap;
-            std::set<NodeAOVData>::iterator it;
-            for (it=allAOVs.begin(); it != allAOVs.end(); ++it)
-            {
-                AOVData d;
-                d.type = it->type;
-
-                switch (it->type)
-                {
-                case AI_TYPE_RGB:
-                case AI_TYPE_VECTOR:
-                case AI_TYPE_POINT:
-                    d.dataA = new std::vector<AtVector> ;
-                    (*map)[it->name] = d;
-                    break;
-                case AI_TYPE_RGBA:
-                    d.dataB = new std::vector<AtRGBA>;
-                    (*map)[it->name] = d;
-                    break;
-                case AI_TYPE_FLOAT:
-                    d.dataC = new std::vector<float>;
-                    (*map)[it->name] = d;
-                    break;
-                default:
-                    AiMsgError("[luma.partioCacherSampler] AOV \"%s\" has unsupported data type", it->name.c_str());
-                    return;
-                }
-            }
-            threadData[t].AOVs = map;
-*/
-        }
-    }
-
-
-    else if (mode == MODE_READ)
-    {
-        negX = AiNodeGetBool(node,"negate_X");
-        negY = AiNodeGetBool(node,"negate_Y");
-        negZ = AiNodeGetBool(node,"negate_Z");
-
-        AiMsgInfo("[luma.partioCacherSampler] read mode (\"%s\")", file.c_str());
-
-        diag = AiNodeGetBool(node, "show_diagnostic") == true;
-
-        uint AASamples =  AiNodeGetInt(AiUniverseGetOptions(), "AA_samples") ;
-
-        blendMode = AiNodeGetInt(node,"blend_mode");
-
-        searchDist = AiNodeGetFlt(node, "max_search_distance");
-
-        if (AiNodeGetBool(node, "scale_searchDist_by_AA_samples"))
-        {
-            searchDist *= sqrt(AASamples);
-        }
-
-        searchPoints = AiNodeGetInt(node,"search_points");
-        if(searchPoints <=0)
-        {
-            searchPoints = 1;
-        }
-        PARTIO::ParticlesDataMutable* readPoints;
-        readPoints=PARTIO::read(file.c_str());
-        if (readPoints)
-        {
-            AiMsgInfo("[luma.partioCacherSampler] sorting points");
-            readPoints->sort();
-            AiMsgInfo("[luma.partioCacherSampler] KDtree Created");
-            AiMsgInfo("[luma.partioCacherSampler] loaded %d points", (int)readPoints->numParticles());
-        }
-        //AiNodeSetLocalData(node, AiMalloc(sizeof(readPoints)));
-        AiNodeSetLocalData(node,readPoints);
-    }
+    ShaderData* data = new ShaderData();
+    AiNodeSetLocalData(node, data);
 }
 
-
-/// TODO:  move most init stuff here 
 node_update
 {
+    ShaderData* data = reinterpret_cast<ShaderData*>(AiNodeGetLocalData(node));
+    data->update(node);
 }
 
 node_finish
 {
-    AiMsgInfo("[luma.partioCacherSampler] finish...");
-
-
-    if (finalized)
-        return;
-
-    AiMsgInfo("finish %s", AiNodeGetName(node));
-
-    finalized = true;
-
-    if (mode == MODE_WRITE) // write
-    {
-        std::vector<AtPoint> allP;
-        std::vector<AtRGB> allRGB;
-        uint t=0;
-        uint threadCounter = 0;
-        for (t=0; t < AI_MAX_THREADS; ++t)
-        {
-            if (threadData[t].P->size())
-            {
-                threadCounter ++;
-            }
-            allP.insert(allP.end(), threadData[t].P->begin(), threadData[t].P->end());
-            delete threadData[t].P;
-            allRGB.insert(allRGB.end(), threadData[t].RGB->begin(), threadData[t].RGB->end());
-            delete threadData[t].RGB;
-        }
-        AiMsgInfo("[luma.partioCacherSampler] gathered %d points from %i threads.", (int)allP.size(),threadCounter);
-
-        PARTIO::ParticlesDataMutable* writePoints=PARTIO::createInterleave();
-
-        writePoints->addParticles(allP.size());
-
-        PARTIO::ParticleAttribute position=writePoints->addAttribute("position",PARTIO::VECTOR,3);
-        PARTIO::ParticleAttribute id=writePoints->addAttribute("id",PARTIO::INT,1);
-        PARTIO::ParticleAttribute rgb = writePoints->addAttribute("rgbPP", PARTIO::VECTOR,3);
-
-        PARTIO::ParticlesDataMutable::iterator it= writePoints->begin();
-        PARTIO::ParticleAccessor positionAccess(position);
-        it.addAccessor(positionAccess);
-        PARTIO::ParticleAccessor idAccess(id);
-        it.addAccessor(idAccess);
-        PARTIO::ParticleAccessor rgbAccess(rgb);
-        it.addAccessor(rgbAccess);
-
-        int idCounter=0;
-        for (it = writePoints->begin(); it!=writePoints->end(); ++it)
-        {
-            PARTIO::Data<float,3>& P=positionAccess.data<PARTIO::Data<float,3> >(it);
-            PARTIO::Data<int,1>& id=idAccess.data<PARTIO::Data<int,1> >(it);
-            PARTIO::Data<float,3>& color= rgbAccess.data<PARTIO::Data<float,3> >(it);
-
-            P[0]=allP[idCounter].x;
-            P[1]=allP[idCounter].y;
-            P[2]=allP[idCounter].z;
-
-            id[0]=idCounter;
-
-            color[0] = allRGB[idCounter].r;
-            color[1] = allRGB[idCounter].g;
-            color[2] = allRGB[idCounter].b;
-
-            idCounter++;
-        }
-
-        std::set<NodeAOVData>::iterator itAov;
-        for (itAov=allAOVs.begin(); itAov != allAOVs.end(); ++itAov)
-        {
-
-            /// reset the iterator
-            it=writePoints->begin();
-
-            switch (itAov->type)
-            {
-            case AI_TYPE_RGB:
-            case AI_TYPE_VECTOR:
-            case AI_TYPE_POINT:
-            {
-
-                std::vector<AtVector> allVec;
-                for (unsigned int t=0; t < AI_MAX_THREADS; ++t)
-                {
-                    std::vector<AtVector>* pData = threadData[t].AOVs->find(itAov->name)->second.dataA;
-                    allVec.insert(allVec.end(), pData->begin(), pData->end());
-                }
-
-                if (allVec.size())
-                {
-                    PARTIO::ParticleAttribute  vectorAttribute = writePoints->addAttribute(itAov->name.c_str(), PARTIO::VECTOR, 3);
-                    PARTIO::ParticleAccessor vectorAccess(vectorAttribute);
-                    it.addAccessor(vectorAccess);
-                    int a = 0;
-                    for (it=writePoints->begin(); it!=writePoints->end(); ++it)
-                    {
-                        PARTIO::Data<float,3>& vecData=vectorAccess.data<PARTIO::Data<float,3> >(it);
-                        vecData[0] = (float)allVec[a].x;
-                        vecData[1] = (float)allVec[a].y;
-                        vecData[2] = (float)allVec[a].z;
-                        a++;
-                    }
-                }
-                else
-                {
-                    AiMsgError("[luma.partioCacherSampler] no rgb data for  %s", itAov->name.c_str());
-                }
-
-                break;
-            }
-
-            case AI_TYPE_RGBA:
-            {
-
-                std::vector<AtRGBA> allPoint;
-                for (unsigned int t=0; t < AI_MAX_THREADS; ++t)
-                {
-                    std::vector<AtRGBA>* pData = threadData[t].AOVs->find(itAov->name)->second.dataB;
-                    allPoint.insert(allPoint.end(), pData->begin(), pData->end());
-                }
-
-                if (allPoint.size())
-                {
-                    PARTIO::ParticleAttribute  pointAttribute = writePoints->addAttribute(itAov->name.c_str(), PARTIO::FLOAT, 4);
-                    PARTIO::ParticleAccessor pointAccess(pointAttribute);
-                    it.addAccessor(pointAccess);
-                    int a = 0;
-                    for (it=writePoints->begin(); it!=writePoints->end(); ++it)
-                    {
-                        PARTIO::Data<float,4>& pointData=pointAccess.data<PARTIO::Data<float,4> >(it);
-                        pointData[0] = (float)allPoint[a].r;
-                        pointData[1] = (float)allPoint[a].g;
-                        pointData[2] = (float)allPoint[a].b;
-                        pointData[3] = (float)allPoint[a].a;
-                        a++;
-                    }
-                }
-                else
-                {
-                    AiMsgError("[luma.partioCacherSampler] no rgba data for  %s", itAov->name.c_str());
-                }
-                break;
-            }
-
-            case AI_TYPE_FLOAT:
-            {
-
-                std::vector<float> allFlt;
-                for (unsigned int t=0; t < AI_MAX_THREADS; ++t)
-                {
-                    std::vector<float>* pData = threadData[t].AOVs->find(itAov->name)->second.dataC;
-                    allFlt.insert(allFlt.end(), pData->begin(), pData->end());
-                }
-
-                if (allFlt.size())
-                {
-                    PARTIO::ParticleAttribute  floatAttribute = writePoints->addAttribute(itAov->name.c_str(), PARTIO::FLOAT, 1);
-                    PARTIO::ParticleAccessor floatAccess(floatAttribute);
-                    it.addAccessor(floatAccess);
-                    int a = 0;
-                    for (it=writePoints->begin(); it!=writePoints->end(); ++it)
-                    {
-                        PARTIO::Data<float,1>& fltData=floatAccess.data<PARTIO::Data<float,1> >(it);
-                        fltData[0] = (float)allFlt[a];
-                        a++;
-                    }
-                }
-                else
-                {
-                    AiMsgError("[luma.partioCacherSampler] no float data for  %s", itAov->name.c_str());
-                }
-
-                break;
-            }
-            }/// end TYPE switch
-        } /// end forAOV loop
-
-        // delete AOVDataMap
-        for (uint t=0; t < AI_MAX_THREADS; ++t)
-        {
-            delete threadData[t].AOVs;
-        }
-
-        AiMsgInfo("[luma.partioCacherSampler] writing %d points to \"%s\"", (int)allP.size(), file.c_str());
-
-        // WRITE OUT HERE
-        write(file.c_str(), *writePoints);
-        writePoints->release();
-        AiMsgInfo("[luma.partioCacherSampler] released  memory");
-
-    }
-
-    else if (mode == MODE_READ) /// read
-    {
-        uint missed_primary = 0;
-        uint missed_secondary = 0;
-        uint total_primary = 0;
-        uint total_secondary = 0;
-        for (int i=0; i < AI_MAX_THREADS; ++i)
-        {
-            missed_primary += threadData[i].missed_primary_samples;
-            missed_secondary += threadData[i].missed_secondary_samples;
-            total_primary += threadData[i].total_primary_samples;
-            total_secondary += threadData[i].total_secondary_samples;
-        }
-        AiMsgInfo("[luma.partioCacherSampler] primary samples: %d total, %d missed (%.02f%%)", total_primary, missed_primary,
-                  (total_primary == 0) ? 0.0f : (missed_primary/(float)total_primary*100.0f));
-
-        AiMsgInfo("[luma.partioCacherSampler] secondary samples: %d total, %d missed (%.02f%%)", total_secondary, missed_secondary,
-                  (total_secondary == 0) ? 0.0f : (missed_secondary/(float)total_secondary*100.0f));
-
-        PARTIO::ParticlesDataMutable* readPoints = (PARTIO::ParticlesDataMutable*)AiNodeGetLocalData(node);
-        readPoints->release();
-        AiMsgInfo("[luma.partioCacherSampler] released  memory");
-        
-        /// doesn't work,  double free corrupt crash 
-        //if(readPoints != NULL)
-         //   AiFree(AiNodeGetLocalData(node));
-    }
-
+    delete reinterpret_cast<ShaderData*>(AiNodeGetLocalData(node));
 }
 
 shader_evaluate
 {
-
-    AtRGB rgb = AiShaderEvalParamRGB(p_input);
-    AtVector disp;
-    AiV3Create(disp, rgb.r, rgb.g, rgb.b);
-/// PASSTHRU MODE
-    // not sure if  displacement context uses other rays besides  camera, so commented it out for now
-    if (mode == MODE_PASSTHROUGH || (mode == MODE_WRITE && sg->Rt != AI_RAY_CAMERA))// 
-    // || (mode == MODE_READ && sg->Rt != AI_RAY_CAMERA))
+    ShaderData* data = reinterpret_cast<ShaderData*>(AiNodeGetLocalData(node));
+    const AtRGB input = AiShaderEvalParamRGB(p_input);
+    if (data->mode == MODE_PASSTHROUGH || (data->mode == MODE_WRITE && sg->Rt != AI_RAY_CAMERA)) /// PASSTHRU MODE
     {
-        if (sg->sc == AI_CONTEXT_SURFACE)
-            sg->out.RGB = AiShaderEvalParamRGB(p_input);
-        else if (sg->sc == AI_CONTEXT_DISPLACEMENT)
-            sg->out.VEC = disp;
+        sg->out.RGB = input;
         return;
     }
-
-    ThreadData *tdata = &threadData[sg->tid];
-
-/// WRITE MODE
-    if (mode == MODE_WRITE)
+    else if (data->mode == MODE_WRITE) /// WRITE MODE
     {
+        ThreadData& tdata = data->threadData[sg->tid];
         // beauty: this must happen first to trigger downstream evaluation of AOVs
-
-        tdata->RGB->push_back(rgb);
-
+        tdata.RGB.push_back(input);
         // point
-        tdata->P->push_back(sg->P);
-
-        // disp
-        tdata->dispVec->push_back(disp);
-
-/// AOV STUFFS 
-/*
-        std::set<NodeAOVData>::iterator itAOV;
-
-
-        if (allAOVs.size())
-
-        {
-            for (itAOV=allAOVs.begin(); itAOV != allAOVs.end(); ++itAOV)
-            {
-                const char* aovName = itAOV->name.c_str();
-                AOVDataMap::iterator it = tdata->AOVs->find(aovName);
-                if (it != tdata->AOVs->end())
-                {
-                    switch (it->second.type)
-                    {
-                    case AI_TYPE_RGB:
-                    case AI_TYPE_VECTOR:
-                    case AI_TYPE_POINT:
-                    {
-                        AtVector v;
-                        if (AiAOVGet(sg, aovName, v))
-                        {
-                            it->second.dataA->push_back(v);
-                        }
-                    }
-                    break;
-                    case AI_TYPE_RGBA:
-                    {
-                        AtRGBA rgba;
-                        if (AiAOVGet(sg, aovName, rgba))
-                        {
-                            it->second.dataB->push_back(rgba);
-                        }
-                    }
-                    break;
-                    case AI_TYPE_FLOAT:
-                    {
-                        float f;
-                        if (AiAOVGet(sg, aovName, f))
-                        {
-                            it->second.dataC->push_back(f);
-                        }
-                    }
-                    break;
-                    default:
-                        AiMsgError("[luma.partioCacherSampler] AOV \"%s\" has unsupported data type", aovName);
-                        return;
-                    }
-                }
-                else
-                {
-                    AiMsgWarning("AOV: '%s': could not find", aovName);
-                }
-            }
-        }
-*/
-
-
-        if (sg->sc == AI_CONTEXT_SURFACE)
-            sg->out.RGB = rgb;
-
-        else if (sg->sc == AI_CONTEXT_DISPLACEMENT)
-            sg->out.VEC = disp;
-
+        tdata.P.push_back(sg->P);
+        sg->out.RGB = input;
     } /// end WRITE MODE
-
-///  READ MODE
-    else if (mode == MODE_READ)
+    else if (data->readPoints != 0) /// READ MODE
     {
+        ThreadData& tdata = data->threadData[sg->tid];
         // apparently  ray type for  displacement is  AI_RAY_UNDEFINED?
-
         if (sg->sc == AI_CONTEXT_DISPLACEMENT)
         {
-            if (sg->Rt ==AI_RAY_UNDEFINED)
-                tdata->total_primary_samples += 1;
+            if (sg->Rt == AI_RAY_UNDEFINED)
+                tdata.total_primary_samples += 1;
             else
-                tdata->total_secondary_samples += 1;
+                tdata.total_secondary_samples += 1;
         }
         else if (sg->sc == AI_CONTEXT_SURFACE)
         {
             if (sg->Rt == AI_RAY_CAMERA)
-                tdata->total_primary_samples += 1;
+                tdata.total_primary_samples += 1;
             else
-                tdata->total_secondary_samples += 1;
+                tdata.total_secondary_samples += 1;
         }
 
-        float* inputPoint = reinterpret_cast<float*>(&sg->P);
+        const float* inputPoint = reinterpret_cast<const float*>(&sg->P);
 
         std::vector<PARTIO::ParticleIndex> indexes;
         std::vector<float> pointDistanceSquared;
 
-        float maxSearchDistance = searchDist;
-        int firstSearchPoints = searchPoints;
+        const float maxSearchDistance = data->searchDist;
+        int firstSearchPoints = data->searchPoints;
         float firstSearchDistance = maxSearchDistance;
 
-        if(blendMode == BLEND_NONE || blendMode == BLEND_ERROR)
+        if (data->blendMode == BLEND_NONE || data->blendMode == BLEND_ERROR)
         {
             firstSearchPoints = 1;
-            firstSearchDistance = maxSearchDistance*.01;
+            firstSearchDistance = maxSearchDistance * .01f;
             /// bit of a magic number but  should suffice to allow for  searching for  points that are nearly at the search position
         }
 
@@ -781,27 +447,21 @@ shader_evaluate
         PARTIO::ParticlesDataMutable* readPoints = (PARTIO::ParticlesDataMutable*)AiNodeGetLocalData(node);
         readPoints->findNPoints(inputPoint, firstSearchPoints, firstSearchDistance, indexes, pointDistanceSquared);
 
-
         // if no points within the first search distance /count
-        if (!indexes.size())
+        if (indexes.empty())
         {
-            if (blendMode == BLEND_ERROR )
-            {
-                readPoints->findNPoints(inputPoint, searchPoints, maxSearchDistance, indexes, pointDistanceSquared);
-            }
+            if (data->blendMode == BLEND_ERROR)
+                readPoints->findNPoints(inputPoint, data->searchPoints, maxSearchDistance, indexes, pointDistanceSquared);
 
             // if no points within the final search distance /count
-            if (!indexes.size())
+            if (indexes.empty())
             {
-                if (sg->sc == AI_CONTEXT_SURFACE)
-                    sg->out.RGB = AiShaderEvalParamRGB(p_input);
-                else if (sg->sc == AI_CONTEXT_DISPLACEMENT)
-                    sg->out.VEC = disp;
-                
-                if (diag)
+                sg->out.RGB = input;
+
+                if (data->diag)
                 {
                     AtColor errorColor = AiShaderEvalParamRGB(p_error_color);
-                    AtVector errorDir =  AiShaderEvalParamVec(p_error_disp);
+                    AtVector errorDir = AiShaderEvalParamVec(p_error_disp);
 
                     //AiMsgInfo("failed to get closest point");
                     if (sg->sc == AI_CONTEXT_SURFACE)
@@ -810,303 +470,67 @@ shader_evaluate
                         sg->out.VEC = errorDir;
                 }
 
-
                 AiAOVSetFlt(sg, AiShaderEvalParamStr(p_aov_diag), 1.0f);
                 if (sg->sc == AI_CONTEXT_DISPLACEMENT)
                 {
-                    if (sg->Rt ==AI_RAY_UNDEFINED)
-                        tdata->missed_primary_samples += 1;
+                    if (sg->Rt == AI_RAY_UNDEFINED)
+                        tdata.missed_primary_samples += 1;
                     else
-                        tdata->missed_secondary_samples += 1;
+                        tdata.missed_secondary_samples += 1;
                 }
                 else if (sg->sc == AI_CONTEXT_SURFACE)
                 {
                     if (sg->Rt == AI_RAY_CAMERA)
-                        tdata->missed_primary_samples += 1;
+                        tdata.missed_primary_samples += 1;
                     else
-                        tdata->missed_secondary_samples += 1;
+                        tdata.missed_secondary_samples += 1;
                 }
                 return;
             }
         }
 
         /// need to sort the arrays.. partio does not return an ordered list of nearest neighbors.... yet
-
-        std::vector<std::pair<int,float> > distanceSorted;
-        distanceSorted.clear();
+        std::vector<std::pair<unsigned int, float> > distanceSorted;
+        distanceSorted.reserve(indexes.size());
         for (uint i = 0; i < indexes.size(); i++)
         {
-            std::pair<int,float> entry;
-            entry.first = indexes[i];
+            std::pair<int, float> entry;
+            entry.first = static_cast<unsigned int>(indexes[i]); /// Partio is quite fucked up with this
+            /// they are using 64 bit indices, but in reality the library can't access
+            /// more than 32 bit worth of particles, because the access functions use integers
             entry.second = pointDistanceSquared[i];
             distanceSorted.push_back(entry);
-
         }
-        std::sort(distanceSorted.begin(), distanceSorted.end(),sort_pred());
+        std::sort(distanceSorted.begin(), distanceSorted.end(), sort_pred());
 
-        // we check here because there are some cases that are returning  these as NANs
-        float minDist, maxDist;
-        if (isnan(distanceSorted.begin()->second))
-        {
-            minDist = 0;
-            AiMsgWarning("[luma.partioCacherSampler] found NAN in minDist, clamping...");
-        }
-        else
-        {
-            minDist = distanceSorted.begin()->second;
-        }
-        
-        if (isnan(distanceSorted.end()->second))
-        {
-            maxDist = maxSearchDistance;
-            AiMsgWarning("[luma.partioCacherSampler] found NAN in maxDist, clamping...");
-        }
-        else
-        {
-            maxDist = distanceSorted.end()->second;
-        }
+        // const float minDist = std::isnan(distanceSorted.front().second) ? 0.0f : distanceSorted.front().second;
+        // const float maxDist = std::isnan(distanceSorted.back().second) ? maxSearchDistance : distanceSorted.back().second;
+        /// End is after the last point! Back is the last element
+        /// I'm using front here, so it'll rhyme better with back. However front is not valid
+        /// if there are no elements, but we already checked for that earlier, so no issues there.
 
-        /// temporary storage for  sample iteration
-        AtRGB finalRGB = AI_RGB_BLACK;
-        AtVector finalDisp = AI_V3_ZERO;
-        std::vector<std::pair<int,float> >::iterator it;
-/*
-        std::map<const char*, AtRGB> aovRGB;
-        std::map<const char*, AtRGBA> aovRGBA;
-        std::map<const char*, float> aovFLOAT;
-
-        std::set<NodeAOVData>::iterator itAOV;
-
-        if (allAOVs.size())
-        {
-            for (itAOV=allAOVs.begin(); itAOV != allAOVs.end(); ++itAOV)
-            {
-                const char* aovName = itAOV->name.c_str();
-
-                PARTIO::ParticleAttribute aovAttr;
-                if (points->attributeInfo(aovName,aovAttr))
-                {
-                    if (aovAttr.type == PARTIO::VECTOR)
-                    {
-                        aovRGB.insert(pair<const char*, AtRGB> (aovName,AI_RGB_BLACK));
-                    }
-                    else if  (aovAttr.type == PARTIO::FLOAT )
-                    {
-                        if (aovAttr.count > 1)
-                        {
-                            aovRGBA.insert(pair<const char*, AtRGBA> (aovName,AI_RGBA_BLACK));
-                        }
-                        else
-                        {
-                            aovFLOAT.insert(pair<const char*, float> (aovName,0.0));
-                        }
-                    }
-                    else
-                    {
-                        AiMsgWarning("[luma.partioCacherSampler] AOV: '%s': unknown data type", aovName);
-                    }
-                }
-                else
-                {
-                    AiMsgWarning("[luma.partioCacherSampler] AOV: '%s': could not find", aovName);
-                }
-            }
-        }
-*/
-        std::map<const char*,AtRGB>::iterator rgbit;
-        std::map<const char*,AtRGBA>::iterator rgbAit;
-        std::map<const char*,float>::iterator fltit;
-
+        AtVector finalValue = AI_V3_ZERO;
         uint counter = 0;
-        for (it = distanceSorted.begin(); it != distanceSorted.end(); ++it)
+        for (std::vector<std::pair<unsigned int, float> >::iterator it = distanceSorted.begin(); it != distanceSorted.end(); ++it)
         {
-
-            bool first = false;
-            if (it == distanceSorted.begin())
+            if (std::isnan(it->second))
             {
-                first = true;
-            }
-            if (isnan(it->second))
-            {
-                AiMsgError("Found NAN inbetween min/max values!");
+                AiMsgWarning("[luma.partioCacherSampler] Found NAN inbetween min/max values!");
                 continue;
             }
 
-            counter ++;
-            // not used anymore.. changed to use a pure average 
-            //float lerpVal = 1-(linstep(it->second, minDist,maxDist));
+            counter++;
 
-/*
-            if (aovRGB.size())
-            {
-                for (rgbit=aovRGB.begin(); rgbit != aovRGB.end(); ++rgbit)
-                {
-                    PARTIO::ParticleAttribute aovAttr;
-
-                    if (points->attributeInfo(rgbit->first,aovAttr))
-                    {
-                        const float* vectorVal = points->data<float>(aovAttr, it->first);
-                        AtRGB vv = {vectorVal[0],vectorVal[1],vectorVal[2]};
-                        rgbit->second = AiColorLerp(lerpVal,vv, rgbit->second);
-                        if(!first)
-                        {
-                            rgbit->second = AiColorLerp(lerpVal,vv, rgbit->second);
-
-                        }
-                        else
-                        {
-                            rgbit->second = vv;
-                        }
-                    }
-                }
-            }
-            if (aovRGBA.size())
-            {
-                for (rgbAit=aovRGBA.begin(); rgbAit != aovRGBA.end(); ++rgbAit)
-                {
-                    PARTIO::ParticleAttribute aovAttr;
-
-                    if (points->attributeInfo(rgbAit->first,aovAttr))
-                    {
-                        const float* vectorVal = points->data<float>(aovAttr, it->first);
-                        AtRGBA vva = {vectorVal[0],vectorVal[1],vectorVal[2],vectorVal[3]};
-                        if(!first)
-                        {
-                            rgbAit->second = AiColorLerp(lerpVal,vva, rgbAit->second);
-                        }
-                        else
-                        {
-                            rgbAit->second = vva;
-                        }
-                    }
-                }
-            }
-            if (aovFLOAT.size())
-            {
-                for (fltit=aovFLOAT.begin(); fltit != aovFLOAT.end(); ++fltit)
-                {
-                    PARTIO::ParticleAttribute aovAttr;
-
-                    if (points->attributeInfo(fltit->first,aovAttr))
-                    {
-                        const float* floatVal = points->data<float>(aovAttr, it->first);
-                        if(!first)
-                        {
-                            fltit->second  = lerp(lerpVal,*floatVal, fltit->second);
-                        }
-                        else
-                        {
-                            fltit->second = *floatVal;
-                        }
-                    }
-                }
-            }
-*/
-            PARTIO::ParticleAttribute rgbAttr;
-            // hardcoded for now, but will eventually want to put in a pulldown menu like vdbSampler
-            if (!readPoints->attributeInfo("Cd", rgbAttr))
-            {
-                AiMsgError("EMPTY!");
-                if (sg->sc == AI_CONTEXT_SURFACE)
-                {
-                    sg->out.RGB = AI_RGB_BLACK;
-                }
-                if (sg->sc == AI_CONTEXT_DISPLACEMENT)
-                {
-                    sg->out.VEC = AI_V3_ZERO;
-                }
-                return;
-            }
-
-            const float *rgbVal = readPoints->data<float>(rgbAttr, it->first);
-            float rgbX = rgbVal[0];
-            float rgbY = rgbVal[1];
-            float rgbZ = rgbVal[2];
-            if (negX)
-                rgbX = -rgbVal[0];
-            if (negY)
-                rgbY = -rgbVal[1];
-            if (negZ)
-                rgbZ = -rgbVal[2];
-
-            AtRGB vv = {rgbX,rgbY,rgbZ};
-            AtVector dv = {rgbX,rgbY,rgbZ};
-            if(first)
-            {
-                finalRGB = vv;
-                finalDisp = dv;
-
-            }
-            else
-            {
-                AtRGB lastColor = finalRGB;
-                AiColorAdd(finalRGB, vv, lastColor);
-
-                AtVector lastVec = finalDisp;
-                AiV3Add(finalDisp, dv, lastVec);
-                //vv = AiColorLerp(lerpVal,vv, finalRGB);
-                //dv = AiV3Lerp(lerpVal, dv, finalDisp);
-            }
-
+            const float* rgbVal = readPoints->data<float>(data->rgbAttr, it->first);
+            finalValue.x += data->negX ? -rgbVal[0] : rgbVal[0];
+            finalValue.y += data->negY ? -rgbVal[1] : rgbVal[1];
+            finalValue.z += data->negZ ? -rgbVal[2] : rgbVal[2];
         } // searchPoints loop
 
-        if (sg->sc == AI_CONTEXT_SURFACE)
-        {
-            finalRGB.r /= counter;
-            finalRGB.g /= counter;
-            finalRGB.b /= counter;
-
-            sg->out.RGB = finalRGB;
-        }
-        if (sg->sc == AI_CONTEXT_DISPLACEMENT)
-        {
-            finalDisp.x /= counter;
-            finalDisp.y /= counter;
-            finalDisp.z /= counter;
-
-            sg->out.VEC = finalDisp;
-        }
-        /// NOT SURE if it matters or makes a  difference to arnold if i use a color  out.RGB  to feed  a vector input like 
-        /// vector  displacment in the shading networks?  so  I started adding both output types?  
-        /// splitting for now  this way?  
-
-/*
-        if (aovRGB.size())
-        {
-            for (rgbit=aovRGB.begin(); rgbit != aovRGB.end(); ++rgbit)
-            {
-                if(std::string(rgbit->first) == "N")
-                {
-                    AtPoint foo;
-                    foo.x = rgbit->second.r;
-                    foo.y = rgbit->second.g;
-                    foo.z = rgbit->second.b;
-                    sg->N = foo;
-                }
-                else
-                {
-                    AiAOVSetRGB(sg, rgbit->first, rgbit->second);
-                }
-            }
-        }
-        if (aovRGBA.size())
-        {
-            for (rgbAit=aovRGBA.begin(); rgbAit != aovRGBA.end(); ++rgbAit)
-            {
-                AiAOVSetRGBA(sg, rgbAit->first, rgbAit->second);
-            }
-        }
-        if (aovFLOAT.size())
-        {
-            for (fltit=aovFLOAT.begin(); fltit != aovFLOAT.end(); ++fltit)
-            {
-                AiAOVSetFlt(sg, fltit->first, fltit->second);
-            }
-        }
-*/
-    } /// end read mode
-    else
-    {
-        AiMsgError("invalid mode!");
-    }
+        if (counter > 1)
+            finalValue *= 1.0f / static_cast<float>(counter);
+        sg->out.VEC = finalValue;
+        /// out.RGB and out.VEC are pointing to the same memory, as both are part of the same union.
+        /// There is no need to split the logic.
+    } /// end READ MODE
 }
