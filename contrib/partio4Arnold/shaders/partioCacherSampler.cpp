@@ -22,22 +22,7 @@
  * This is using the "read mode"  functionality  per sample to pull in the  partio cache,  sort it into a kdtree, and do lookups 
  * for the  displacement value for each sample point. 
  * 
- * The problems I'm having, are based in the multi-sampling,  turning up the search points higher than 1, makes each thread seem to return 
- * different  values than neighboring threads and I get bucket sized "blocks" of different  results, which randomly  change each  time 
- * I render the  same frame.
  * 
- * I also don't know exactly what/how I should be implementing  in the "local_data" 
- * any help with that and explanation would be helpful as well.
- * 
- * CAVEATS:
- *            The sampling  lerp stuff may need a major overhaul but I don't know if thats the root cause of the threading issues.
- * 
- * Please add notes where you see fit, I'd like to learn what I'm doing wrong while we're fixing this.
- * 
- * Is there a way to make one shader have multiple connection  outputs?   a float and  an RGB for example? so one could be connected
- * to the  normalDisplacement  and the rgb could go to the vector displacement,  or do I have to separate it out into 2 separate shaders?
- * Pal: No, there is no stable ways to have multiple outputs at this moment.
- *
  * Pal's Notes.
  * * I removed the AOV code for now, since the uses were disabled anyway, so we can have a clearer working shader.
  *   Feel free to go ahead and add back the code, following the approaches found in the current code.
@@ -290,6 +275,7 @@ namespace {
             }
             else if (mode == MODE_READ)
             {
+                
                 AiMsgDebug("[luma.partioCacherSampler] Read mode (\"%s\")", file.c_str());
 
                 diag = AiNodeGetBool(node, "show_diagnostic");
@@ -316,7 +302,9 @@ namespace {
 
                     readPoints = PARTIO::read(file.c_str());
                 }
-
+                    
+                    AiMsgDebug("[luma.partioCacherSampler] Read mode (\"%s\")", file.c_str());
+                    
                 if (readPoints)
                 {
                     const char* color_channel = AiNodeGetStr(node, "color_channel");
@@ -330,10 +318,10 @@ namespace {
                     }
                     else
                     {
-                        AiMsgDebug("[luma.partioCacherSampler] Sorting points");
+                        AiMsgInfo("[luma.partioCacherSampler] Sorting points");
                         readPoints->sort();
-                        AiMsgDebug("[luma.partioCacherSampler] KDtree Created");
-                        AiMsgDebug("[luma.partioCacherSampler] Loaded %d points", (int)readPoints->numParticles());
+                        AiMsgInfo("[luma.partioCacherSampler] KDtree Created");
+                        AiMsgInfo("[luma.partioCacherSampler] Loaded %d points", (int)readPoints->numParticles());
                     }
                 }
             }
