@@ -33,13 +33,17 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 #include <Partio.h>
-#include <SeExpression.h>
+#include <SeExpr2/Expression.h>
 #include <map>
 
 namespace Partio{
 
+using Vec3d = SeExpr2::Vec<double,3>;
+
+using Vec3dRef= SeExpr2::Vec<double,3,true>;
+
 template<class T>
-class AttribVar:public SeExprVarRef
+class AttribVar:public SeExpr2::ExprVarRef
 {
     Partio::ParticlesDataMutable* parts;
     Partio::ParticleAttribute attr;
@@ -48,11 +52,11 @@ class AttribVar:public SeExprVarRef
 public:
     AttribVar(Partio::ParticlesDataMutable* parts,
         Partio::ParticleAttribute attr,int& currentIndex)
-        :parts(parts),attr(attr),currentIndex(currentIndex),clampedCount(std::min(attr.count,3))
+        :SeExpr2::ExprVarRef(SeExpr2::TypeVec(1).Varying()),parts(parts),attr(attr),currentIndex(currentIndex),clampedCount(std::min(attr.count,3))
     {}
 
     bool isVec(){return attr.count!=1;}
-    void eval(const SeExprVarNode* node,SeVec3d& result){
+    void eval(double* result) {
         const T* ptr=parts->data<T>(attr,currentIndex);
         //std::cerr<<"in eval for "<<attr.name<<" count is "<<clampedCount<<" cur "<<currentIndex<<std::endl;
         for(int k=0;k<clampedCount;k++){
@@ -63,22 +67,36 @@ public:
             result[k]=0;
         }
     }
+    void eval(const char** resultStr) {}
+    /// void eval(const SeExpr2::ExprVarNode* node,Vec3d& result){
+        /// const T* ptr=parts->data<T>(attr,currentIndex);
+        /// //std::cerr<<"in eval for "<<attr.name<<" count is "<<clampedCount<<" cur "<<currentIndex<<std::endl;
+        /// for(int k=0;k<clampedCount;k++){
+            /// result[k]=ptr[k];
+        /// }
+        /// // set any remaining fields (i.e. if clampedCount is 2)
+        /// for(int k=clampedCount;k<3;k++){
+            /// result[k]=0;
+        /// }
+    /// }
 };
 
-struct SimpleVar:public SeExprVarRef{
+struct SimpleVar:public SeExpr2::ExprVarRef{
     double val;
-    SimpleVar():val(0){}
+    SimpleVar():SeExpr2::ExprVarRef(SeExpr2::TypeVec(1).Varying()), val(0){}
     bool isVec(){return false;}
-    void eval(const SeExprVarNode* node,SeVec3d& result){
-        result[0]=result[1]=result[2]=val;
-    }
+    void eval(double* result) {result[0] = val;}
+    void eval(const char** resultStr) {}
+    /// void eval(const SeExprVarNode* node,Vec3d& result){
+        /// result[0]=result[1]=result[2]=val;
+    /// }
 };
 
 /// Class that maps back to the partio data
 template<class T> class VarToPartio;
 
 /// NOTE: This class is experimental and may be deleted/modified in future versions
-class PartioSe:public SeExpression{
+class PartioSe:public SeExpr2::Expression{
     bool isPaired;
     int currentIndex;
     Partio::ParticleAttribute pairH1,pairH2;
@@ -98,7 +116,8 @@ class PartioSe:public SeExpression{
     mutable SimpleVar indexVar,countVar,timeVar;
 
 public:
-    typedef  SeExpression::LocalVarTable::const_iterator LocalVarTableIterator;
+    typedef std::map<std::string, SeExpr2::ExprVarRef*> LocalVarTable;
+    typedef LocalVarTable::const_iterator LocalVarTableIterator;
     
     PartioSe(Partio::ParticlesDataMutable* parts,const char* expr);
     PartioSe(Partio::ParticlesDataMutable* partsPairing,Partio::ParticlesDataMutable* parts,const char* expr);
@@ -110,7 +129,7 @@ public:
     void run(int i);
     bool runRange(int istart,int iend);
     void setTime(float val);
-    SeExprVarRef*  resolveVar(const std::string& s) const;
+    SeExpr2::ExprVarRef*  resolveVar(const std::string& s) const;
 private:
     PartioSe(const PartioSe&);
     PartioSe& operator=(const PartioSe&);
