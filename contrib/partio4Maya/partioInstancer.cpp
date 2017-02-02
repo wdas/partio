@@ -118,6 +118,8 @@ MObject partioInstancer::aVelocityFrom;
 MObject partioInstancer::aAngularVelocityFrom;
 MObject partioInstancer::aAngularVelocityMult;
 
+MObject partioInstancer::aDisplayColorFrom;
+
 MObject partioInstancer::aIndexFrom;
 
 /// not implemented yet
@@ -301,6 +303,7 @@ partioInstancer::partioInstancer() :
         m_lastLastScaleFrom(""),
         m_lastIndexFrom(""),
         m_lastAngularVelocityFrom(""),
+        m_lastDisplayColorFrom(""),
         m_lastAngularVelocityMult(-1.0f),
         m_lastAngularVelocitySource(-1),
         m_lastFlipStatus(false),
@@ -519,6 +522,9 @@ MStatus partioInstancer::initialize()
     aAngularVelocityFrom = tAttr.create("angularVelocityFrom", "avelfrm", MFnStringData::kString);
     nAttr.setKeyable(true);
 
+    aDisplayColorFrom = tAttr.create("displayColorFrom", "adspcfrm", MFnStringData::kString);
+    nAttr.setKeyable(true);
+
     aAngularVelocityMult = nAttr.create("angVeloMult", "avmul", MFnNumericData::kFloat, 1.0, &stat);
     nAttr.setKeyable(true);
     nAttr.setStorable(true);
@@ -585,6 +591,7 @@ MStatus partioInstancer::initialize()
     addAttribute(aVelocityFrom);
     addAttribute(aAngularVelocityFrom);
     addAttribute(aAngularVelocityMult);
+    addAttribute(aDisplayColorFrom);
 
     addAttribute(aIndexFrom);
 
@@ -593,8 +600,6 @@ MStatus partioInstancer::initialize()
     addAttribute(aExportAttributes);
     addAttribute(aVelocitySource);
     addAttribute(aAngularVelocitySource);
-
-
 
     // attribute affects
     attributeAffects(aSize, aUpdateCache);
@@ -633,6 +638,7 @@ MStatus partioInstancer::initialize()
     attributeAffects(aLastAimPositionFrom, aUpdateCache);
     attributeAffects(aLastPositionFrom, aUpdateCache);
     attributeAffects(aVelocityFrom, aUpdateCache);
+    attributeAffects(aDisplayColorFrom, aUpdateCache);
 
     attributeAffects(aIndexFrom, aUpdateCache);
 
@@ -964,6 +970,7 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
             const MString aimWorldUpFrom = block.inputValue(aAimWorldUpFrom).asString();
             const MString indexFrom = block.inputValue(aIndexFrom).asString();
             const MString angularVelocityFrom = block.inputValue(aAngularVelocityFrom).asString();
+            const MString displayColorFrom = block.inputValue(aDisplayColorFrom).asString();
 
             const float angularVelocityMult = block.inputValue(aAngularVelocityMult).asFloat();
             const short angularVelocitySource = block.inputValue(aAngularVelocitySource).asShort();
@@ -982,6 +989,7 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                 lastAimDirectionFrom != m_lastLastAimDirectionFrom ||
                 lastAimPositionFrom != m_lastLastAimPositionFrom ||
                 angularVelocityFrom != m_lastAngularVelocityFrom ||
+                displayColorFrom != m_lastDisplayColorFrom ||
                 angularVelocityMult != m_lastAngularVelocityMult ||
                 angularVelocitySource != m_lastAngularVelocitySource)
             {
@@ -1000,6 +1008,7 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                 m_lastAngularVelocityFrom = angularVelocityFrom;
                 m_lastAngularVelocityMult = angularVelocityMult;
                 m_lastAngularVelocitySource = angularVelocitySource;
+                m_lastDisplayColorFrom = displayColorFrom;
 
                 MDoubleArray indexArray;
                 MVectorArray scaleArray;
@@ -1009,6 +1018,7 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                 MVectorArray aimAxisArray;
                 MVectorArray aimUpAxisArray;
                 MVectorArray aimWorldUpArray;
+                MVectorArray displayColorArray;
 
                 // clear these out to update on any change
                 pvCache.rotationAttr.type = PARTIO::NONE;
@@ -1024,6 +1034,7 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                 pvCache.lastAimDirAttr.type = PARTIO::NONE;
                 pvCache.lastAimPosAttr.type = PARTIO::NONE;
                 pvCache.indexAttr.type = PARTIO::NONE;
+                pvCache.displayColorAttr.type = PARTIO::NONE;
 
                 // Index
                 if (pvCache.particles->attributeInfo(indexFrom.asChar(), pvCache.indexAttr))
@@ -1118,6 +1129,17 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                         else if (angularVelocitySource == AVS_ANGULAR_VELOCITY)
                             pvCache.particles->attributeInfo(angularVelocityFrom.asChar(), pvCache.angularVelocityAttr);
                     }
+                }
+
+                if (pvCache.particles->attributeInfo(displayColorFrom.asChar(), pvCache.displayColorAttr))
+                {
+                    updateInstanceDataVector(pvCache, displayColorArray, "displayColor", numParticles);
+                    writeOutVectorAttribute(pvCache.particles, pvCache.displayColorAttr, displayColorArray);
+                }
+                else // there are no calls to remove an array
+                {
+                    MDoubleArray displayColorDoubleArray;
+                    updateInstanceDataDouble(pvCache, displayColorDoubleArray, "displayColor", 1);
                 }
 
                 const FloatTupleSize rotationTupleSize = getFloatTupleSize(pvCache.rotationAttr);
@@ -1467,13 +1489,26 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
 
         /// looping thru particles one by one...
         glPointSize(pointSizeVal);
-        glColor3f(1.0, 1.0, 1.0);
+        glColor3f(1.0f, 1.0f, 1.0f);
         glBegin(GL_POINTS);
 
         MVectorArray positions = pvCache->instanceData.vectorArray("position");
-        for (unsigned int i = 0; i < positions.length(); i++)
+        MFnArrayAttrsData::Type colorArrayType = MFnArrayAttrsData::kInvalid;
+        const bool colorExists = pvCache->instanceData.checkArrayExist("displayColor", colorArrayType);
+        if (colorExists && colorArrayType == MFnArrayAttrsData::kVectorArray)
         {
-            glVertex3f(positions[i].x, positions[i].y, positions[i].z);
+            MVectorArray displayColors = pvCache->instanceData.vectorArray("displayColor");
+            const unsigned int array_length = std::min(displayColors.length(), positions.length());
+            for (unsigned int i = 0; i < array_length; i++)
+            {
+                glColor3f(static_cast<float>(displayColors[i].x), static_cast<float>(displayColors[i].y), static_cast<float>(displayColors[i].z));
+                glVertex3f(static_cast<float>(positions[i].x), static_cast<float>(positions[i].y), static_cast<float>(positions[i].z));
+            }
+        }
+        else
+        {
+            for (unsigned int i = 0; i < positions.length(); i++)
+                glVertex3f(static_cast<float>(positions[i].x), static_cast<float>(positions[i].y), static_cast<float>(positions[i].z));
         }
 
         glEnd();
@@ -1481,39 +1516,35 @@ void partioInstancerUI::drawPartio(partioInstReaderCache* pvCache, int drawStyle
 
         if (drawStyle == DRAW_STYLE_LABEL)
         {
-            glColor3f(0.0, 0.0, 0.0);
-            for (unsigned int i = 0; i < positions.length(); i++)
+            glColor3f(0.0f, 0.0f, 0.0f);
+            for (unsigned int i = 0; i < positions.length(); ++i)
             {
                 MString idVal;
-                if (pvCache->indexAttr.type == PARTIO::FLOAT)
+                switch (pvCache->indexAttr.type)
                 {
-                    const float* attrVal = pvCache->particles->data<float>(pvCache->indexAttr, i);
-                    idVal = (double)(int)attrVal[0];
-                }
-                else if (pvCache->indexAttr.type == PARTIO::INT)
-                {
-                    const int* attrVal = pvCache->particles->data<int>(pvCache->indexAttr, i);
-                    idVal = (double)attrVal[0];
-                }
-                else if (pvCache->indexAttr.type == PARTIO::VECTOR)
-                {
-                    const float* attrVal = pvCache->particles->data<float>(pvCache->indexAttr, i);
-                    char idString[100];
-                    sprintf(idString, "(%.2f,%.2f,%.2f)", (double)attrVal[0], (double)attrVal[1], (double)attrVal[2]);
-                    idVal = idString;
-                }
-                else
-                {
-                    idVal = "";
+                    case PARTIO::VECTOR:
+                    {
+                        const float* attrVal = pvCache->particles->data<float>(pvCache->indexAttr, i);
+                        char idString[100];
+                        sprintf(idString, "(%.2f,%.2f,%.2f)", (double)attrVal[0], (double)attrVal[1], (double)attrVal[2]);
+                        idVal = idString;
+                    }
+                        break;
+                    case PARTIO::FLOAT:
+                        idVal = static_cast<int>(*pvCache->particles->data<float>(pvCache->indexAttr, i));
+                        break;
+                    case PARTIO::INT:
+                        idVal = *pvCache->particles->data<int>(pvCache->indexAttr, i);
+                        break;
+                    default:
+                        idVal = "";
                 }
                 /// TODO: draw text label per particle here
                 view.drawText(idVal, MPoint(positions[i].x, positions[i].y, positions[i].z), M3dView::kLeft);
             }
         }
-
         glPopAttrib();
     } // if (particles)
-
 }
 
 partioInstancerUI::partioInstancerUI()

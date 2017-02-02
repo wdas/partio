@@ -10,9 +10,6 @@ namespace MHWRender{
         static MPxDrawOverride* creator(const MObject& obj);
 
         static MString registrantId;
-
-        static void init_shaders();
-        static void free_shaders();
     private:
         partioVisualizerDrawOverride(const MObject& obj);
         ~partioVisualizerDrawOverride();

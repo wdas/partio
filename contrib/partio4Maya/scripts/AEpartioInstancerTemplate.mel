@@ -30,7 +30,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 global proc AEpartioInstancerTemplate( string $nodeName )
 {
-    editorTemplate -callCustom pioInstLogoHeader pioInstLogoHeader $nodeName;
+    editorTemplate -callCustom pioInstLogoHeader pioInstLogoHeader;
 
     editorTemplate -beginScrollLayout;
 
@@ -49,7 +49,7 @@ global proc AEpartioInstancerTemplate( string $nodeName )
     editorTemplate -addControl "byFrame";
     editorTemplate -addControl "cacheFormat";
     editorTemplate -addControl "iconSize";
-    editorTemplate -callCustom pioInstForceUpdate pioInstForceUpdate $nodeName;
+    editorTemplate -callCustom pioInstForceUpdate pioInstForceUpdate message;
 
     editorTemplate -endLayout;
 
@@ -61,7 +61,7 @@ global proc AEpartioInstancerTemplate( string $nodeName )
             //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
         editorTemplate -endLayout;
         editorTemplate -beginLayout "Instancer Channels" -collapse 0;
-        editorTemplate -callCustom "pioInstCustomAttrsManage" "pioInstCustomAttrsManage" $nodeName;
+        editorTemplate -callCustom "pioInstCustomAttrsManage" "pioInstCustomAttrsManage" message;
         editorTemplate -endLayout;
 
     // include/call base class/node attributes
@@ -113,9 +113,9 @@ proc generateAttributesMenu(string $nodeName, string $attrNameList[], string $la
     }
 }
 
-global proc pioInstCustomAttrsManage (string $nodeName)
+global proc pioInstCustomAttrsManage (string $attrName)
 {
-    $nodeName = pioStripNodeName ($nodeName);
+    string $nodeName = plugNode($attrName);
     if (`columnLayout -q -exists "foobar"`)
     { deleteUI "foobar"; }
 
@@ -151,7 +151,7 @@ global proc pioInstCustomAttrsManage (string $nodeName)
     setParent ..;
     setParent ..;
 
-    ///  INDEX
+    /// INDEX
     frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "Index Channels" ;
     columnLayout;
     string $indexAttributes[] = {"indexFrom"};
@@ -169,6 +169,15 @@ global proc pioInstCustomAttrsManage (string $nodeName)
     setParent ..;
     setParent ..;
 
+    /// VIEWPORT ATTRIBUTES
+    frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "Viewport Channels" ;
+    columnLayout;
+    string $viewportAttributes[] = {"displayColorFrom"};
+    string $viewportLabels[] = {"Display Color"};
+    generateAttributesMenu($nodeName, $attrNameList, $viewportLabels, $viewportAttributes);
+    setParent ..;
+    setParent ..;
+
     frameLayout -collapse 1 -borderVisible 0 -w 450 -l "Custom Attributes Export";
 
     attrControlGrp -attribute ($nodeName+".exportAttributes") "ExportAttributesCtrlGrp";
@@ -177,16 +186,16 @@ global proc pioInstCustomAttrsManage (string $nodeName)
     setParent ..;
 }
 
-global proc pioInstForceUpdate(string $nodeName)
+global proc pioInstForceUpdate(string $attrName)
 {
-    $nodeName = pioStripNodeName ($nodeName);
+    string $nodeName = plugNode($attrName);
     if (!`button -q -exists  pioInstReloadButton`)
     {   rowLayout -nc 1 ;
         button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioInstReloadButton;
     }
 }
 
-global proc  pioInstLogoHeader(string $nodeName)
+global proc  pioInstLogoHeader()
 {
     if (!`symbolButton -q -exists  pioInstHeaderIcon`)
     {   rowLayout -nc 2 ;
