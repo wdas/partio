@@ -50,11 +50,18 @@ elseif (UNIX)
     set(PARTIO_LIB libpartio.a)
 endif ()
 
+# Boost for regex based features, gcc 4.8's regex is unstable
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost
+        COMPONENTS regex)
+
+include_directories(${Boost_INCLUDE_DIR})
+
 add_library(${PLUGIN_NAME} SHARED "partioGenerator.cpp")
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ./ )
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
 
-target_link_libraries(${PLUGIN_NAME} ${PARTIO_LIBRARIES} ${ARNOLD_LIBRARY})
+target_link_libraries(${PLUGIN_NAME} ${PARTIO_LIBRARIES} ${ARNOLD_LIBRARY} ${Boost_LIBRARIES})
 
 set(PARTIO4ARNOLD_OUTPUT_PATH "arnold/procedurals")
 if (BUILD_PARTIO_ARNOLD)
