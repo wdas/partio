@@ -4,8 +4,8 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
 
 if(COMMAND cmake_policy)
-     cmake_policy(SET CMP0003 NEW)
-	 cmake_policy(SET CMP0015 NEW)  # to supress relative library directory warnings
+    cmake_policy(SET CMP0003 NEW)
+    cmake_policy(SET CMP0015 NEW)  # to supress relative library directory warnings
 endif(COMMAND cmake_policy)
 
 set(CMAKE_CXX_WARNING_LEVEL 4)
@@ -23,21 +23,21 @@ set(PLUGIN_NAME "partioShaders")
 set(CMAKE_PROJECT_NAME "partioShaders")
 
 if (APPLE)
-	set(PLUGIN_SUFFIX ".bundle")
-	set(CMAKE_SHARED_LIBRARY_SUFFIX ".bundle")
-	set(SUFFIX ".bundle")
+    set(PLUGIN_SUFFIX ".bundle")
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".bundle")
+    set(SUFFIX ".bundle")
 endif ()
 
 if (WIN32)
-	set(PLUGIN_SUFFIX ".dll")
-	set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
-	set(SUFFIX ".dll")
+    set(PLUGIN_SUFFIX ".dll")
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
+    set(SUFFIX ".dll")
 endif ()
 
 if (UNIX)
-	set(PLUGIN_SUFFIX ".so")
-	set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
-	set(SUFFIX ".so")
+    set(PLUGIN_SUFFIX ".so")
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+    set(SUFFIX ".so")
 endif ()
 
 set(PARTIO_INCLUDE ${INCLUDE_OUTPUT_PATH})
@@ -53,11 +53,11 @@ set(TARGET_H ${partio4ArnoldINCLUDES})
 set(TARGET_SRC ${partio4ArnoldCPP})
 
 if (WIN32)
-	set(PARTIO_LIB partio)
+    set(PARTIO_LIB partio)
 elseif (APPLE)
-	set(PARTIO_LIB libpartio.a)
+    set(PARTIO_LIB libpartio.a)
 elseif (UNIX)
-	set(PARTIO_LIB libpartio.a)
+    set(PARTIO_LIB libpartio.a)
 endif ()
 
 

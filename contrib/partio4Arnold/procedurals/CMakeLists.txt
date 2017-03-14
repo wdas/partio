@@ -35,7 +35,7 @@ if (UNIX)
     set(PLUGIN_SUFFIX ".so")
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
     set(SUFFIX ".so")
-    add_definitions(-Wall -Werror -Wextra)
+    add_definitions(-Wall -Wextra) # -Werror
 endif()
 
 include_directories(${STD_INCLUDES} ${ARNOLD_INCLUDE_DIR})
@@ -57,7 +57,13 @@ find_package(Boost
 
 include_directories(${Boost_INCLUDE_DIR})
 
-add_library(${PLUGIN_NAME} SHARED "partioGenerator.cpp")
+if (ARNOLD_VERSION_ARCH_NUM VERSION_GREATER "4")
+    set(SRC partioGenerator5.cpp)
+else ()
+    set(SRC partioGenerator.cpp)
+endif ()
+
+add_library(${PLUGIN_NAME} SHARED ${SRC})
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ./ )
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
 
