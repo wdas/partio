@@ -13,7 +13,4 @@ if (ARNOLD_VERSION_ARCH_NUM VERSION_GREATER "4")
 endif ()
 
 add_subdirectory(procedurals)
-
-if (ARNOLD_VERSION_ARCH_NUM VERSION_LESS "5")
-    add_subdirectory(shaders)
-endif ()
+add_subdirectory(shaders)

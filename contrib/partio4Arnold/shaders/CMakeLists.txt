@@ -43,14 +43,14 @@ endif ()
 set(PARTIO_INCLUDE ${INCLUDE_OUTPUT_PATH})
 set(PARTIO_LIBDIR  ${LIBRARY_OUTPUT_PATH})
 
-file(GLOB partio4ArnoldCPP "*.cpp")
-file(GLOB partio4ArnoldINCLUDES "*.h")
+if (ARNOLD_VERSION_ARCH_NUM VERSION_GREATER "4")
+    set(TARGET_SRC Loader5.cpp partioCacherSampler5.cpp)# partioPoint5.cpp)
+else ()
+    set(TARGET_SRC Loader.cpp partioCacherSampler.cpp partioPoint.cpp)
+endif ()
 
-include_directories(${STD_INCLUDES} ${partio4ArnoldINCLUDES} ${ARNOLD_INCLUDE_DIR}  ${PARTIO_INCLUDE})
-link_directories(${STD_LIB}  ${ARNOLD_LIBRARY}  ${PARTIO_LIBDIR} ${ZLIB_LIBRARY_DIR})
-
-set(TARGET_H ${partio4ArnoldINCLUDES})
-set(TARGET_SRC ${partio4ArnoldCPP})
+include_directories(${STD_INCLUDES} ${ARNOLD_INCLUDE_DIR}  ${PARTIO_INCLUDE})
+link_directories(${STD_LIB} ${ARNOLD_LIBRARY} ${PARTIO_LIBDIR} ${ZLIB_LIBRARY_DIR})
 
 if (WIN32)
     set(PARTIO_LIB partio)
@@ -60,8 +60,7 @@ elseif (UNIX)
     set(PARTIO_LIB libpartio.a)
 endif ()
 
-
-add_library(${PLUGIN_NAME} SHARED ${TARGET_H} ${TARGET_SRC})
+add_library(${PLUGIN_NAME} SHARED ${TARGET_SRC})
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ./)
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
 

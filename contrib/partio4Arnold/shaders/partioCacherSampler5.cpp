@@ -1,15 +1,8 @@
 #include <ai.h>
 
 #include <Partio.h>
-#include <PartioAttribute.h>
-#include <PartioIterator.h>
 #include <set>
-#include <vector>
-#include <utility>
-#include <map>
 #include <algorithm>
-#include <ai_types.h>
-#include <limits>
 
 /// NOTES:
 /*
@@ -93,7 +86,7 @@ namespace {
     };
 
     struct ThreadData {
-        std::vector<AtPoint> P;
+        std::vector<AtVector> P;
         std::vector<AtRGB> RGB;
         unsigned int total_primary_samples;
         unsigned int total_secondary_samples;
@@ -245,7 +238,7 @@ namespace {
             AiMsgDebug("[luma.partioCacherSampler] Updating node data.");
 
             node = _node;
-            mode = static_cast<Mode>(CLAMP(AiNodeGetInt(node, "mode"), 0,
+            mode = static_cast<Mode>(AiClamp(AiNodeGetInt(node, "mode"), 0,
                                            static_cast<int>(MODE_LAST))); /// Being a bit over-cautious
 
             negX = AiNodeGetBool(node, "negate_X");
@@ -253,7 +246,7 @@ namespace {
             negZ = AiNodeGetBool(node, "negate_Z");
 
             AtNode* options = AiUniverseGetOptions();
-            const std::string current_file = AiNodeGetStr(node, "file");
+            const std::string current_file = AiNodeGetStr(node, "file").c_str();
             /// Checking for swatch renders.
             Mode mode = static_cast<Mode>(AiNodeGetInt(node, "mode"));
             if (current_file == "" || (AiNodeGetInt(options, "xres") == 64 && AiNodeGetInt(options, "yres") == 64)) {
@@ -336,26 +329,26 @@ namespace {
 
 node_parameters
 {
-    AiParameterENUM("mode", 0, gs_ModeNames);
-    AiParameterSTR("file", NULL);
-    AiParameterRGB("input", 0, 0, 0);
-    AiParameterENUM("blend_mode", 0, gs_BlendMode);
-    AiParameterFLT("max_search_distance", 1.0f);
-    AiParameterINT("search_points", 1);
-    AiParameterBOOL("scale_searchDist_by_AA_samples", false);
-    AiParameterBOOL("negate_X", false);
-    AiParameterBOOL("negate_Y", false);
-    AiParameterBOOL("negate_Z", false);
-    AiParameterRGB("diagnostic_color", 1, 1, 0);
-    AiParameterVec("diagnostic_disp", 0, 1, 0);
-    AiParameterBOOL("show_diagnostic", false);
+    AiParameterEnum("mode", 0, gs_ModeNames);
+    AiParameterStr("file", NULL);
+    AiParameterRGB("input", 0.0f, 0.0f, 0.0f);
+    AiParameterEnum("blend_mode", 0, gs_BlendMode);
+    AiParameterFlt("max_search_distance", 1.0f);
+    AiParameterInt("search_points", 1);
+    AiParameterBool("scale_searchDist_by_AA_samples", false);
+    AiParameterBool("negate_X", false);
+    AiParameterBool("negate_Y", false);
+    AiParameterBool("negate_Z", false);
+    AiParameterRGB("diagnostic_color", 1.0f, 1.0f, 0.0f);
+    AiParameterVec("diagnostic_disp", 0.0f, 1.0f, 0.0f);
+    AiParameterBool("show_diagnostic", false);
 
-    AiParameterSTR("aov_diagnostic", "diagnostic");
-    AiParameterSTR("color_channel", "Cd");
-    AiMetaDataSetInt(mds, "aov_diagnostic", "aov.type", AI_TYPE_FLOAT);
+    AiParameterStr("aov_diagnostic", "diagnostic");
+    AiParameterStr("color_channel", "Cd");
+    AiMetaDataSetInt(nentry, "aov_diagnostic", "aov.type", AI_TYPE_FLOAT);
 
-    AiMetaDataSetStr(mds, 0, "maya.classification", "shader/surface");
-    AiMetaDataSetInt(mds, NULL, "maya.id", ID_ARNOLD_PARTIO_CACHER_SAMPLER);
+    AiMetaDataSetStr(nentry, nullptr, "maya.classification", "shader/surface");
+    AiMetaDataSetInt(nentry, nullptr, "maya.id", ID_ARNOLD_PARTIO_CACHER_SAMPLER);
 }
 
 node_initialize
@@ -380,14 +373,14 @@ shader_evaluate
     ShaderData* data = reinterpret_cast<ShaderData*>(AiNodeGetLocalData(node));
     if (data->mode == MODE_PASSTHROUGH || (data->mode == MODE_WRITE && sg->Rt != AI_RAY_CAMERA)) /// PASSTHRU MODE
     {
-        sg->out.RGB = AiShaderEvalParamRGB(p_input);
+        sg->out.RGB() = AiShaderEvalParamRGB(p_input);
         return;
     } else if (data->mode == MODE_WRITE) /// WRITE MODE
     {
-        sg->out.RGB = AiShaderEvalParamRGB(p_input);
+        sg->out.RGB() = AiShaderEvalParamRGB(p_input);
         ThreadData& tdata = data->threadData[sg->tid];
         // beauty: this must happen first to trigger downstream evaluation of AOVs
-        tdata.RGB.push_back(sg->out.RGB);
+        tdata.RGB.push_back(sg->out.RGB());
         // point
         tdata.P.push_back(sg->P);
     } /// end WRITE MODE
@@ -436,17 +429,17 @@ shader_evaluate
 
             // if no points within the final search distance /count
             if (indexes.empty()) {
-                sg->out.RGB = AiShaderEvalParamRGB(p_input);
+                sg->out.RGB() = AiShaderEvalParamRGB(p_input);
 
                 if (data->diag) {
-                    AtColor errorColor = AiShaderEvalParamRGB(p_error_color);
+                    AtRGB errorColor = AiShaderEvalParamRGB(p_error_color);
                     AtVector errorDir = AiShaderEvalParamVec(p_error_disp);
 
                     //AiMsgInfo("failed to get closest point");
                     if (sg->sc == AI_CONTEXT_SURFACE) {
-                        sg->out.RGB = errorColor;
+                        sg->out.RGB() = errorColor;
                     } else if (sg->sc == AI_CONTEXT_DISPLACEMENT) {
-                        sg->out.VEC = errorDir;
+                        sg->out.VEC() = errorDir;
                     }
                 }
 
@@ -507,7 +500,7 @@ shader_evaluate
         if (counter > 1) {
             finalValue *= 1.0f / static_cast<float>(counter);
         }
-        sg->out.VEC = finalValue;
+        sg->out.VEC() = finalValue;
         /// out.RGB and out.VEC are pointing to the same memory, as both are part of the same union.
         /// There is no need to split the logic.
     } /// end READ MODE
