@@ -8,29 +8,21 @@ public:
     static void* creator();
 
     virtual AtNode* CreateArnoldNodes();
-    //virtual void ProcessRenderFlags(AtNode* node);
 
     static void NodeInitializer(CAbTranslator context);
 
     void Export(AtNode* anode);
 
+#ifdef MTOA12
     void ExportMotion(AtNode* anode, unsigned int step);
-
     virtual void Update(AtNode* anode);
-
     virtual void UpdateMotion(AtNode* anode, uint step);
+#elif MTOA14
+    void ExportMotion(AtNode* anode);
+#endif
 
 protected:
-    CPartioVizTranslator() :
-            CShapeTranslator()
-    {
-        // Just for debug info, translator creates whatever arnold nodes are required
-        // through the CreateArnoldNodes method
-        m_abstract.arnold = "procedural";
-
-    }
-
-    void ExportBoundingBox(AtNode* procedural);
+    CPartioVizTranslator() : CShapeTranslator() { }
 
     void ExportPartioVizShaders(AtNode* procedural);
 
@@ -41,7 +33,6 @@ protected:
     AtNode* ExportProcedural(AtNode* procedural, bool update);
 
     bool fileCacheExists(const char* fileName);
-
 
     MFnDagNode m_DagNode;
     MString m_customAttrs;
