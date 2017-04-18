@@ -83,6 +83,23 @@ public:
     //int attributeIndex; 
 };
 
+%feature("docstring","A handle for operating on fixed attribbutes of a particle set");
+class FixedAttribute
+{
+public:
+    %feature("docstring","Type of the particle data (VECTOR,INT,FLOAT)");
+    ParticleAttributeType type;
+
+    %feature("docstring","Number of primitives (int's or float's)");
+    int count;
+
+    %feature("docstring","Attribute name");
+    std::string name;
+
+    // internal use
+    //int attributeIndex;
+};
+
 
 %typemap(in) uint64_t {
 	$1 = (uint64_t) PyLong_AsLong($input);
@@ -451,7 +468,7 @@ public:
 
     %feature("autodoc");
     %feature("docstring","Searches for and returns the attribute handle for a named fixed attribute");
-    %newobject attributeInfo;
+    %newobject fixedAttributeInfo;
     FixedAttribute* fixedAttributeInfo(const char* name)
     {
         FixedAttribute a;
@@ -477,7 +494,7 @@ public:
 
     %feature("autodoc");
     %feature("docstring","Returns the fixed attribute handle by index");
-    %newobject attributeInfo;
+    %newobject fixedAttributeInfo;
     FixedAttribute* fixedAttributeInfo(const int index)
     {
         if(index<0 || index>=$self->numFixedAttributes()){
