@@ -583,11 +583,6 @@ procedural_init
     return data->init(node);
 }
 
-procedural_init_bounds
-{
-    return 0;
-}
-
 procedural_num_nodes
 {
     return 1;
