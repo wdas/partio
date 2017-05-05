@@ -29,203 +29,163 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 global proc AEpartioVisualizerTemplate( string $nodeName )
 {
-	editorTemplate -callCustom pioVizLogoHeader pioVizLogoHeader $nodeName;
-	editorTemplate -beginLayout "Global" -collapse 0;
-	editorTemplate -addControl "cacheActive";
-	editorTemplate -addControl "staticCache";
-	//editorTemplate -addControl "flipYZ";
-	editorTemplate -callCustom pioAEoutpathNew pioAEoutpathReplace cacheDir;
-	editorTemplate -addControl "cachePrefix";
-	editorTemplate -addControl "cacheOffset";
-	editorTemplate -addControl "byFrame";
-	editorTemplate -addControl "cacheFormat";
-	editorTemplate -addControl "iconSize";
-	editorTemplate -callCustom pioVizForceUpdate pioVizForceUpdate $nodeName;
+    // So, the "$nodeName" that maya passes in here is basically useless...
+    // ...because it's non-unique. Instead, the convention seems to be that
+    // when using -callCustom, you pass an arg which is an attribute name -
+    // when maya then calls your custom function, it will automatically add
+    // the (unique) node name in front of your attribute name.. and then you
+    // get the node name by calling plugNode on THAT. Absolutely GENIUS
+    // design...
+    editorTemplate -callCustom pioVizLogoHeader pioVizLogoHeader;
+
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Global" -collapse 0;
+    editorTemplate -addControl "cacheActive";
+    editorTemplate -addControl "staticCache";
+    //editorTemplate -addControl "flipYZ";
+    editorTemplate -callCustom pioAEoutpathNew pioAEoutpathReplace cacheDir;
+    editorTemplate -addControl "cachePrefix";
+    editorTemplate -addControl "cacheOffset";
+    editorTemplate -addControl "byFrame";
+    editorTemplate -addControl "cacheFormat";
+    editorTemplate -addControl "iconSize";
+    editorTemplate -callCustom pioVizForceUpdate pioVizForceUpdate "message";
 
 
-	editorTemplate -endLayout;
+    editorTemplate -endLayout;
 
-	editorTemplate -beginScrollLayout;
+        editorTemplate -beginLayout "General Parameters" -collapse 0;
+            editorTemplate -addControl "pointSize";
+            editorTemplate -addControl "drawStyle";
+            editorTemplate -addControl "drawSkip";
+            editorTemplate -addControl "defaultPointColor";
+            editorTemplate -addControl "defaultAlpha";
+            editorTemplate -addControl "invertAlpha";
+            editorTemplate -addControl "defaultRadius";
+            //editorTemplate -addControl "useEmitterTransform";
+            //editorTemplate -addControl -l "Jitter Position Magnitude" "jitterPos" ;
+            //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
+        editorTemplate -endLayout;
+        editorTemplate -beginLayout "Channel Control" -collapse 0;
+        editorTemplate -callCustom "pioVizCustomAttrsManage" "pioVizCustomAttrsManage" message;
+        //editorTemplate -addControl "velocityFrom";
+        //editorTemplate -addControl "colorFrom";
+        //editorTemplate -addControl "incandescenceFrom";
+        //editorTemplate -addControl "opacityFrom";
+        //editorTemplate -addControl "radiusFrom";
+        editorTemplate -endLayout;
 
-		editorTemplate -beginLayout "General Parameters" -collapse 0;
-			editorTemplate -addControl "pointSize";
-			editorTemplate -addControl "drawStyle";
-			editorTemplate -addControl "drawSkip";
-			editorTemplate -addControl "defaultPointColor";
-			editorTemplate -addControl "defaultAlpha";
-			editorTemplate -addControl "invertAlpha";
-			editorTemplate -addControl "defaultRadius";
-		    //editorTemplate -addControl "useEmitterTransform";
-		    //editorTemplate -addControl -l "Jitter Position Magnitude" "jitterPos" ;
-		    //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
-		editorTemplate -endLayout;
-		editorTemplate -beginLayout "Channel Control" -collapse 0;
-		editorTemplate -callCustom "pioVizCustomAttrsManage" "pioVizCustomAttrsManage" $nodeName;
-		editorTemplate -endLayout;
+    // include/call base class/node attributes
+    //AEdependNodeTemplate $nodeName;
+    editorTemplate -beginLayout ("Render Stats");
+        editorTemplate -beginNoOptimize;
+        editorTemplate -addControl "castsShadows";
+        editorTemplate -addControl "receiveShadows";
+        editorTemplate -addControl "motionBlur";
+        editorTemplate -addControl "primaryVisibility";
+        editorTemplate -addControl "smoothShading";
+        editorTemplate -addControl "visibleInReflections";
+        editorTemplate -addControl "visibleInRefractions";
+    editorTemplate -endLayout;
 
-	// include/call base class/node attributes
-	//AEdependNodeTemplate $nodeName;
-	editorTemplate -beginLayout ("Render Stats");
-		editorTemplate -beginNoOptimize;
-		editorTemplate -addControl "castsShadows";
-		editorTemplate -addControl "receiveShadows";
-		editorTemplate -addControl "motionBlur";
-		editorTemplate -addControl "primaryVisibility";
-		editorTemplate -addControl "smoothShading";
-		editorTemplate -addControl "visibleInReflections";
-		editorTemplate -addControl "visibleInRefractions";
-	editorTemplate -endLayout;
+    AEshapeTemplate $nodeName;  // adds place for renderer specific controls
 
-	AEshapeTemplate $nodeName;  // adds place for renderer specific controls
-
-	editorTemplate -suppress "compInstObjGroups";
-	editorTemplate -suppress "ignoreSelfShadowing";
-	editorTemplate -suppress "geometryAntialiasingOverride";
-	editorTemplate -suppress "antialiasingLevel";
-	editorTemplate -suppress "shadingSamplesOverride";
-	editorTemplate -suppress "shadingSamples";
-	editorTemplate -suppress "maxShadingSamples";
-	editorTemplate -suppress "volumeSamplesOverride";
-	editorTemplate -suppress "volumeSamples";
-	editorTemplate -suppress "depthJitter";
-	editorTemplate -suppress "maxVisibilitySamplesOverride";
-	editorTemplate -suppress "maxVisibilitySamples";
-	editorTemplate -suppress "localPosition";
-	editorTemplate -suppress "localScale";
+    editorTemplate -suppress "compInstObjGroups";
+    editorTemplate -suppress "ignoreSelfShadowing";
+    editorTemplate -suppress "geometryAntialiasingOverride";
+    editorTemplate -suppress "antialiasingLevel";
+    editorTemplate -suppress "shadingSamplesOverride";
+    editorTemplate -suppress "shadingSamples";
+    editorTemplate -suppress "maxShadingSamples";
+    editorTemplate -suppress "volumeSamplesOverride";
+    editorTemplate -suppress "volumeSamples";
+    editorTemplate -suppress "depthJitter";
+    editorTemplate -suppress "maxVisibilitySamplesOverride";
+    editorTemplate -suppress "maxVisibilitySamples";
+    editorTemplate -suppress "localPosition";
+    editorTemplate -suppress "localScale";
 
 
-	editorTemplate -addExtraControls;
-	editorTemplate -endScrollLayout;
+    editorTemplate -addExtraControls;
+    editorTemplate -endScrollLayout;
 }
 
-
-
-global proc pioVizCustomAttrsManage (string $nodeName)
+global proc pioVizCustomAttrsManage (string $attrName)
 {
-    $nodeName = pioStripNodeName ($nodeName);
+    string $nodeName = plugNode($attrName);
     if (`columnLayout -q -exists "foobar"`)
     { deleteUI "foobar"; }
 
     columnLayout  foobar;
 
     string $multiList[] = `listAttr -multi ($nodeName+".partioCacheAttributes")`;
-
-	int $colorFrom = `getAttr ($nodeName+".colorFrom")` + 2;
-	int $opacityFrom = `getAttr ($nodeName+".opacityFrom")` + 2;
-	int $radiusFrom  = `getAttr ($nodeName+".radiusFrom")` + 2;
-	int $incandFrom = `getAttr ($nodeName+".incandescenceFrom")` + 2;
-
-
-	string $colorMenu = `optionMenuGrp -label "Color from->"`;
-	menuItem -l "None";
-
+    string $attrNameList[] = {};
+    int $id = 0;
     for ($multi in $multiList)
     {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
+        $attrNameList[$id] = `getAttr ($nodeName + "." + $multi)`;
+        $id = $id + 1;
     }
-	optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 0 + " " + $colorMenu)  $colorMenu;
-	
-	string $incandMenu = `optionMenuGrp -label "Incandescence from->"`;
-	menuItem -l "None";
 
-    for ($multi in $multiList)
+    string $attributes[] = {"velocityFrom", "accelerationFrom", "colorFrom", "opacityFrom", "radiusFrom", "incandescenceFrom", "normalFrom"};
+    string $labels[] = {"Velocity from ->", "Acceleration from ->", "Color from ->", "Opacity from ->", "Radius from ->", "Incandescence from ->", "Normal from ->"};
+
+    int $i = 0;
+    for ($i = 0; $i < size($attributes); ++$i)
     {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
+        attrControlGrp -annotation $labels[$i] -attribute ($nodeName + "." + $attributes[$i]);
+        popupMenu;
+        for ($attr in $attrNameList)
+        {
+            menuItem -label $attr -c ("setAttr -type \"string\" " + $nodeName + "." + $attributes[$i] + " " + $attr);
+        }
     }
-	optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $incandMenu)  $incandMenu;
-
-
-    string $opacMenu = `optionMenuGrp -label "Opacity from->"`;
-	menuItem -l "None";
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-    optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $opacMenu)  $opacMenu;
-
-
-	string $radiusMenu = `optionMenuGrp -label "Radius from->"`;
-	menuItem -l "None";
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioVizSwitchAttributeFrom " + $nodeName + " " + 3 + " " + $radiusMenu)  $radiusMenu;
-
-
-	if (`size($multiList)`)
-	{
-		optionMenuGrp -e -sl $colorFrom  $colorMenu;
-		optionMenuGrp -e -sl $incandFrom $incandMenu;
-		optionMenuGrp -e -sl $opacityFrom $opacMenu;
-		optionMenuGrp -e -sl $radiusFrom $radiusMenu;
-	}
-
 }
 
 global proc pioVizSwitchAttributeFrom(string $nodeName, int $attr, string $menu)
 {
-	string $attrList[] = {"colorFrom", "incandescenceFrom", "opacityFrom", "radiusFrom"};
-	int $sel = `optionMenuGrp -q -sl $menu`;
+    string $attrList[] = {"colorFrom", "incandescenceFrom", "opacityFrom", "radiusFrom"};
+    int $sel = `optionMenuGrp -q -sl $menu`;
 
-	setAttr ($nodeName+"."+$attrList[$attr]) ($sel-2);
+    setAttr ($nodeName+"."+$attrList[$attr]) ($sel-2);
 
 }
 
-global proc pioVizForceUpdate(string $nodeName)
+global proc pioVizForceUpdate(string $attrName)
 {
-	$nodeName = pioStripNodeName ($nodeName);
-	if (!`button -q -exists  pioVizReloadButton`)
-	{	rowLayout -nc 1 ;
-		button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioVizReloadButton;
-	}
+    string $nodeName = plugNode($attrName);
+    if (!`button -q -exists  pioVizReloadButton`)
+    {   rowLayout -nc 1 ;
+        button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioVizReloadButton;
+    }
 }
 
-global proc  pioVizLogoHeader(string $nodeName)
+global proc  pioVizLogoHeader()
 {
-	if (!`symbolButton -q -exists  pioVizHeaderIcon`)
-	{	rowLayout -nc 2 ;
-		symbolButton -h 45 -w 235 -c "pioVizSwapAboutText()" -image "partioVisualizer_logo.png" pioVizHeaderIcon;
-		text -fn "smallBoldLabelFont" -l "Partio Visualizer!!" pioVizAboutText;
-	}
+    if (!`symbolButton -q -exists  pioVizHeaderIcon`)
+    {   rowLayout -nc 2 ;
+        symbolButton -h 45 -w 235 -c "pioVizSwapAboutText()" -image "partioVisualizer_logo.png" pioVizHeaderIcon;
+        text -fn "smallBoldLabelFont" -l "Partio Visualizer!!" pioVizAboutText;
+    }
 }
 
 
 global proc  pioVizSwapAboutText()
 {
 
-	string $text1 =  "Partio Visualizer!!";
-	string $text2 =  "Partio Visualizer by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2015";
+    string $text1 =  "Partio Visualizer!!";
+    string $text2 =  "Partio Visualizer by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2015";
 
-	string $text = `text -q -l pioVizAboutText`;
-	if (`gmatch $text "Partio Visualizer!!"`)
-	{
-		text -e -l $text2  pioVizAboutText;
-	}
-	else
-	{
-		text -e -l $text1 pioVizAboutText;
-	}
+    string $text = `text -q -l pioVizAboutText`;
+    if (`gmatch $text "Partio Visualizer!!"`)
+    {
+        text -e -l $text2  pioVizAboutText;
+    }
+    else
+    {
+        text -e -l $text1 pioVizAboutText;
+    }
 
 }
 

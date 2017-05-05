@@ -41,7 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "Mutex.h"
 #include "../Partio.h"
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
 template<int d> class KdTree;
 
@@ -112,5 +112,6 @@ private:
     KdTree<3>* kdtree;
 };
 
-}
+EXIT_PARTIO_NAMESPACE
+
 #endif

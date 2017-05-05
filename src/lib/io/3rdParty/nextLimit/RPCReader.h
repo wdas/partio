@@ -9,6 +9,10 @@
 #include <new>
 #include <limits.h>
 
+#include "../../../PartioConfig.h"
+
+ENTER_PARTIO_NAMESPACE
+
 #define ZLIB_CONST
 #include "zlib.h"
 
@@ -123,5 +127,7 @@ private:
 	float					m_bboxMax[3];
 	ChannelInfo*			m_channels;
 };
+
+EXIT_PARTIO_NAMESPACE
 
 #endif

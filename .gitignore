@@ -46,3 +46,6 @@ sesitag.C
 *.so
 /win64/
 /linux64/
+.idea/*
+rez_source_retrieval_data.json
+*.kdev_include_paths

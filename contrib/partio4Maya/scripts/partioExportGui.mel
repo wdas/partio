@@ -84,7 +84,7 @@ global proc partioExportGui  ()
 
     optionMenuGrp -e -sl 5 $partioExportFormatOptionMenu;
 
-    string $exportPerFrameCheckbox = `checkBoxGrp -numberOfCheckBoxes 1  -label1 "Per/Frame"  -v1  0`;
+    string $exportPerFrameCheckbox = `checkBoxGrp -numberOfCheckBoxes 1  -label1 "Per/Frame"  -v1  1`;
 
     string $startFrame = `intFieldGrp -l "StartFrame" -cw 1 90 -cw 2 80 -nf 1  -v $start  0 0 0 `;
     string $endFrame   = `intFieldGrp -l "EndFrame" -cw 1 90 -cw 2 80 -nf 1 -v $end 0 0 0 `;

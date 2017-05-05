@@ -1,607 +1,598 @@
 /////////////////////////////////////////////////////////////////////////////////////
-/// PARTIO GENERATOR  an arnold procedural cache reader that uses the partio Library
-/// by John Cassella (redpawfx)  for  Luma Pictures  (c) 2013
+/// PARTIO GENERATOR an arnold procedural cache reader that uses the partio Library
+/// by John Cassella (redpawfx) and Pal Mezei (sirpalee)  for  Luma Pictures  (c) 2013-2016
 
-#include "partioGenerator.h"
+/*
+ * We decided not to use c++11 here, to improve compatibility with older
+ * versions of the compiler, and or with systems that has a really old
+ * gcc. (I'm looking at you, Apple)
+ */
+
+#include <ai.h>
+#include <cstring>
+#include <Partio.h>
 
 #include <sstream>
-#include <iostream>
-#include <cstring>
-#include <cstdlib>
+#include <utility>
 #include <sys/stat.h>
 
-using namespace std;
-using namespace Partio;
-
-//
-/*
-inline bool lsHandleCudaErrorFunc(const char* fl, int ln)
+template<typename T>
+void getParam(T&, AtNode*, const char*)
 {
- cudaError_t cet = cudaGetLastError();
- if(cet != cudaSuccess)
- {
-  std::cout << "[" << fl << " : " << ln << "] : " << cudaGetErrorString(cet) << "\n";
-  return true;
- }
- else return false;
+    // do nothing
 }
 
-#define lsHandleCudaError() lsHandleCudaErrorFunc(__FILE__, __LINE__)
-*/
-
-
-
-bool partioCacheExists ( const char* fileName )
+template<>
+void getParam<int>(int& param, AtNode* node, const char* paramName)
 {
-    struct stat fileInfo;
-    bool statReturn;
-    int intStat;
-
-    intStat = stat ( fileName, &fileInfo );
-    if ( intStat == 0 )
-    {
-        statReturn = true;
-    }
-    else
-    {
-        statReturn = false;
-    }
-
-    return ( statReturn );
-
+    if (AiNodeLookUpUserParameter(node, paramName) != 0)
+        param = AiNodeGetInt(node, paramName);
 }
 
-// read parameter values from node and load partio cache if it exists
-static int MyInit ( AtNode *mynode, void **user_ptr )
+template<>
+void getParam<float>(float& param, AtNode* node, const char* paramName)
 {
-    //cout << "INIT" << endl;
-    *user_ptr = mynode; // make a copy of the parent procedural
-
-    pointCount 	= 0;
-    cacheExists = false;
-    canMotionBlur = false;
-    hasRgbPP = false;
-	hasIncandPP = false;
-    hasOpacPP = false;
-    hasRadiusPP = false;
-
-    // initialize the arg values
-    arg_file 				= "";
-    arg_radius 				= 0.1f;
-    arg_maxParticleRadius  = 1000000.0f;
-    arg_radiusMult 			= 1;
-    arg_renderType 			= 0; // 0 = points, 1 = sphere, 2 = plane
-    arg_motionBlurMult 		= 1;
-    arg_overrideRadiusPP 	= false;
-    arg_rgbFrom				= "";
-    arg_opacFrom			= "";
-    arg_radFrom             = "";
-	arg_incandFrom			= "";
-    arg_defaultColor 		= AI_RGB_WHITE;
-    arg_defaultOpac			= 1.0f;
-    arg_stepSize			= 0.0f;
-	arg_extraPPAttrs		= "";
-    global_motionBlurSteps 	= 1;
-    global_fps 				= 24;
-    global_motionByFrame 	= 0.5f;
-
-
-    // check for values on node
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_file" ) != NULL )
-    {
-        arg_file 				= AiNodeGetStr ( mynode, "arg_file" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "overrideRadiusPP" ) != NULL )
-    {
-        arg_overrideRadiusPP    = AiNodeGetBool ( mynode, "overrideRadiusPP" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_radius" ) != NULL )
-    {
-        arg_radius 				= AiNodeGetFlt ( mynode, "arg_radius" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_maxParticleRadius" ) != NULL )
-    {
-        arg_maxParticleRadius  = AiNodeGetFlt ( mynode, "arg_maxParticleRadius" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_radiusMult" ) != NULL )
-    {
-        arg_radiusMult 			= AiNodeGetFlt ( mynode, "arg_radiusMult" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_renderType" ) != NULL )
-    {
-        arg_renderType 			= AiNodeGetInt ( mynode, "arg_renderType" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_motionBlurMult" ) != NULL )
-    {
-        arg_motionBlurMult 		= AiNodeGetFlt ( mynode, "arg_motionBlurMult" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_rgbFrom" ) != NULL )
-    {
-        arg_rgbFrom				= AiNodeGetStr ( mynode, "arg_rgbFrom" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_incandFrom" ) != NULL )
-    {
-        arg_incandFrom				= AiNodeGetStr ( mynode, "arg_incandFrom" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_opacFrom" ) != NULL )
-    {
-        arg_opacFrom			= AiNodeGetStr ( mynode, "arg_opacFrom" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_radFrom" ) != NULL )
-    {
-        arg_radFrom			= AiNodeGetStr ( mynode, "arg_radFrom" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_defaultColor" ) != NULL )
-    {
-        arg_defaultColor		= AiNodeGetRGB ( mynode, "arg_defaultColor" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_defaultOpac" ) != NULL )
-    {
-        arg_defaultOpac			= AiNodeGetFlt ( mynode, "arg_defaultOpac" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "global_motionBlurSteps" ) != NULL )
-    {
-        global_motionBlurSteps 	= AiNodeGetInt ( mynode, "global_motionBlurSteps" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "global_fps" ) != NULL )
-    {
-        global_fps				= AiNodeGetFlt ( mynode, "global_fps" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "global_motionByFrame" ) != NULL )
-    {
-        global_motionByFrame	= AiNodeGetFlt ( mynode, "global_motionByFrame" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_stepSize" ) != NULL )
-    {
-        arg_stepSize			= AiNodeGetFlt ( mynode, "arg_stepSize" );
-    }
-    if ( AiNodeLookUpUserParameter ( mynode, "arg_extraPPAttrs" ) != NULL )
-    {
-        arg_extraPPAttrs		= AiNodeGetStr ( mynode, "arg_extraPPAttrs" );
-    }
-
-    AiMsgInfo ( "[partioGenerator] loading cache  %s", arg_file );
-
-    if ( partioCacheExists ( arg_file ) )
-    {
-        cacheExists = true;
-        points=read ( arg_file );
-        if ( points )
-        {
-            pointCount = ( int ) points->numParticles();
-            AiMsgInfo ( "[partioGenerator] loaded %d points", pointCount );
-        }
-        else
-        {
-            AiMsgInfo ( "[partioGenerator] skipping, no points" );
-            return  false;
-        }
-    }
-    return true;
+    if (AiNodeLookUpUserParameter(node, paramName) != 0)
+        param = AiNodeGetFlt(node, paramName);
 }
 
-// close  partio cache
-static int MyCleanup ( void *user_ptr )
+template<>
+void getParam<bool>(bool& param, AtNode* node, const char* paramName)
 {
-    if ( points )
-    {
-        AiMsgInfo ( "[partioGenerator] releasing points!" );
-        points->release();
-    }
-    return true;
+    if (AiNodeLookUpUserParameter(node, paramName) != 0)
+        param = AiNodeGetBool(node, paramName);
 }
 
-static int MyNumNodes ( void *user_ptr )
+template<>
+void getParam<std::string>(std::string& param, AtNode* node, const char* paramName)
 {
-    return  1;
+    if (AiNodeLookUpUserParameter(node, paramName) != 0)
+        param = AiNodeGetStr(node, paramName);
 }
 
-
-// call function to copy values from cache read into AI-Arrays
-static AtNode *MyGetNode ( void *user_ptr, int i )
+template<>
+void getParam<AtRGB>(AtRGB& param, AtNode* node, const char* paramName)
 {
+    if (AiNodeLookUpUserParameter(node, paramName) != 0)
+        param = AiNodeGetRGB(node, paramName);
+}
 
-    AtNode *currentInstance = AiNode ( "points" ); // initialize node
-    if ( !cacheExists )
+struct PartioData {
+    PARTIO::ParticlesData* points;
+
+    std::string arg_velFrom;
+    std::string arg_accFrom;
+    std::string arg_rgbFrom;
+    std::string arg_incandFrom;
+    std::string arg_opacFrom;
+    std::string arg_radFrom;
+    std::string arg_extraPPAttrs;
+    std::string arg_file;
+
+    AtRGB arg_defaultColor;
+
+    float arg_radius;
+    float arg_maxParticleRadius;
+    float arg_minParticleRadius;
+    float arg_radiusMult;
+    float arg_defaultOpac;
+    float arg_stepSize;
+    float arg_motionBlurMult;
+    float arg_filterSmallParticles;
+    float global_motionByFrame;
+    float global_fps;
+
+    int arg_renderType;
+    int global_motionBlurSteps;
+
+    bool arg_overrideRadiusPP;
+    bool cacheExists;
+
+    PartioData() : arg_rgbFrom(""), arg_incandFrom(""), arg_opacFrom(""),
+                   arg_radFrom(""), arg_extraPPAttrs(""), arg_file("")
     {
-        return currentInstance;
+        points = 0;
+
+        arg_defaultColor = AI_RGB_WHITE;
+
+        arg_radius = 0.01f;
+        arg_maxParticleRadius = 1000000.0f;
+        arg_minParticleRadius = 0.0f;
+        arg_radiusMult = 1.0f;
+        arg_defaultOpac = 1.0f;
+        arg_stepSize = 0.0f;
+        arg_motionBlurMult = 1.0f;
+        arg_filterSmallParticles = 8.0f;
+        global_motionByFrame = 0.5f;
+        global_fps = 24.0f;
+
+        arg_renderType = 0;
+        global_motionBlurSteps = 1;
+
+        arg_overrideRadiusPP = false;
+        cacheExists = false;
     }
 
-////////////////////////////////////////////////////////////////////////////////
-/// We at least have to have  position, I mean come on throw us a bone here....
-    if ( !points->attributeInfo ( "position",positionAttr ) && !points->attributeInfo ( "Position",positionAttr ) )
+    ~PartioData()
     {
-        AiMsgInfo ( "[partioGenerator] Could not find position attr maybe you should do something about that" );
-        return currentInstance;
+        if (points)
+            points->release();
     }
 
-    AtArray *pointarr;
-    AtArray *radarr;
-    AtArray *rgbArr;
-    AtArray *opacityArr;
-	AtArray *incandArr;
-	AtArray *floatArr;
-	AtArray *vecArr;
-    pointarr 	= AiArrayAllocate ( pointCount,global_motionBlurSteps,AI_TYPE_POINT );
-
-////////////////
-/// Velocity
-    if ( points->attributeInfo ( "velocity",velocityAttr ) || points->attributeInfo ( "Velocity",velocityAttr ) )
+    bool init(AtNode* node)
     {
-        AiMsgInfo ( "[partioGenerator] found velocity attr,  motion blur is a GO!!" );
-        canMotionBlur = true;
-    }
+        // check for values on node
+        getParam(arg_file, node, "arg_file");
+        getParam(arg_overrideRadiusPP, node, "overrideRadiusPP");
+        getParam(arg_radius, node, "arg_radius");
+        getParam(arg_maxParticleRadius, node, "arg_maxParticleRadius");
+        getParam(arg_minParticleRadius, node, "arg_minParticleRadius");
+        getParam(arg_radiusMult, node, "arg_radiusMult");
+        getParam(arg_renderType, node, "arg_renderType");
+        getParam(arg_motionBlurMult, node, "arg_motionBlurMult");
+        getParam(arg_velFrom, node, "arg_velFrom");
+        getParam(arg_accFrom, node, "arg_accFrom");
+        getParam(arg_rgbFrom, node, "arg_rgbFrom");
+        getParam(arg_incandFrom, node, "arg_incandFrom");
+        getParam(arg_opacFrom, node, "arg_opacFrom");
+        getParam(arg_radFrom, node, "arg_radFrom");
+        getParam(arg_defaultColor, node, "arg_defaultColor");
+        getParam(arg_defaultOpac, node, "arg_defaultOpac");
+        getParam(arg_filterSmallParticles, node, "arg_filterSmallParticles");
+        getParam(global_motionBlurSteps, node, "global_motionBlurSteps");
+        // no need to generate more than one steps
+        // when no acceleration data is used for interpolating the data
+        getParam(global_fps, node, "global_fps");
+        getParam(global_motionByFrame, node, "global_motionByFrame");
+        getParam(arg_stepSize, node, "arg_stepSize");
+        getParam(arg_extraPPAttrs, node, "arg_extraPPAttrs");
 
-////////////
-/// RGB
+        AiMsgInfo("[partioGenerator] loading cache  %s", arg_file.c_str());
 
-
-    if ( arg_rgbFrom && arg_rgbFrom[0] !='\0' && points->attributeInfo ( arg_rgbFrom, rgbAttr ) )
-    {
-        AiNodeDeclare ( currentInstance, "rgbPP", "uniform RGB" );
-        AiMsgInfo ( "[partioGenerator] found rgbPP attr..." );
-        hasRgbPP = true;
-        rgbArr = AiArrayAllocate ( pointCount,1,AI_TYPE_RGB );
-    }
-    else
-    {
-        AiNodeDeclare ( currentInstance, "rgbPP", "constant RGB" );
-        AiNodeSetRGB ( currentInstance , "rgbPP", arg_defaultColor.r, arg_defaultColor.g, arg_defaultColor.b );
-    }
-////////////
-/// Incandescence
-
-
-    if ( arg_incandFrom && arg_incandFrom[0] !='\0' && points->attributeInfo ( arg_incandFrom, incandAttr ) )
-    {
-        AiNodeDeclare ( currentInstance, "incandescencePP", "uniform RGB" );
-        AiMsgInfo ( "[partioGenerator] found incandescencePP attr..." );
-        hasIncandPP = true;
-        incandArr = AiArrayAllocate ( pointCount,1,AI_TYPE_RGB );
-    }
-    else
-    {
-        AiNodeDeclare ( currentInstance, "incandescencePP", "constant RGB" );
-        AiNodeSetRGB ( currentInstance , "incandescencePP", 0.0, 0.0, 0.0 );
-    }
-
-
-//////////////
-/// OPACITY
-
-    if ( arg_opacFrom  && arg_opacFrom[0] !='\0' && points->attributeInfo ( arg_opacFrom, opacityAttr ) )
-    {
-        AiNodeDeclare ( currentInstance, "opacityPP", "uniform Float" );
-        AiMsgInfo ( "[partioGenerator] found opacityPP attr..." );
-        hasOpacPP = true;
-        opacityArr = AiArrayAllocate ( pointCount,1,AI_TYPE_FLOAT );
-    }
-    else
-    {
-        AiNodeDeclare ( currentInstance, "opacityPP", "constant Float" );
-        AiNodeSetFlt ( currentInstance , "opacityPP", arg_defaultOpac );
-    }
-
-///////////////////////////////////////////////////////////////////////////////////
-/// RADIUS by default  if "none" is defined it will look for  radiusPP or  radius
-    if ( ( arg_radFrom && arg_radFrom[0] !='\0' && points->attributeInfo ( arg_radFrom,radiusAttr ) ) && !arg_overrideRadiusPP )
-    {
-        AiMsgInfo ( "[partioGenerator] found radius attr...%s", arg_radFrom );
-        hasRadiusPP = true;
-        radarr     = AiArrayAllocate ( pointCount,1,AI_TYPE_FLOAT );
-    }
-    else if ( ( points->attributeInfo ( "radiusPP",radiusAttr ) || points->attributeInfo ( "radius",radiusAttr ) ) &&  !arg_overrideRadiusPP )
-    {
-        AiMsgInfo ( "[partioGenerator] found radius attr..." );
-        hasRadiusPP = true;
-        radarr     = AiArrayAllocate ( pointCount,1,AI_TYPE_FLOAT );
-    }
-    else
-    {
-        radarr     = AiArrayAllocate ( 1,1,AI_TYPE_FLOAT );
-        AiArraySetFlt ( radarr , 0,  arg_radius*arg_radiusMult );
-    }
-
-
-// now parse and include any extra attrs
-
-	std::vector<ParticleAttribute> extraAttrs;
-	std::vector<AtArray*>  arnoldArrays;
-
-
-	char  extraAttrStr[1000];
-	strncpy(extraAttrStr, arg_extraPPAttrs, sizeof(extraAttrStr));
-	char* parts[100] = {0};
-	unsigned int index = 0;
-	parts[index] = strtok(extraAttrStr, " ");
-	while(parts[index] != 0)
-	{
-		ParticleAttribute user;
-		if (points->attributeInfo(parts[index],user))
-		{
-			// we don't want to double export these 
-			if( user.name != "position" &&
-				user.name != "velocity" &&
-				user.name != "rgbPP" &&
-				user.name != "incandescencePP" &&
-				user.name != "opacityPP" && 
-				user.name != "radiusPP")
-			{
-				if (user.type == FLOAT || user.count == 1)
-				{
-					AiNodeDeclare ( currentInstance, parts[index], "uniform Float" );
-					floatArr     = AiArrayAllocate ( pointCount,1,AI_TYPE_FLOAT );
-					arnoldArrays.push_back(floatArr);
-				}
-				else if (user.type == VECTOR || user.count == 3)
-				{
-					AiNodeDeclare ( currentInstance, parts[index], "uniform Vector" );
-					vecArr =  AiArrayAllocate ( pointCount,1,AI_TYPE_VECTOR );
-					arnoldArrays.push_back(vecArr);
-				}
-				extraAttrs.push_back(user);
-			}
-			else
-			{
-				AiMsgWarning( "[partioGenerator] caught double export call for %s, skipping....", parts[index]);
-			}
-		}
-		else
-		{
-			AiMsgWarning( "[partioGenerator] export ppAttr %s skipped, it doesn't exist  in the cache", parts[index]);
-		}
-
-		++index;
-		parts[index] = strtok(0," ");
-
-	}
-
-
-///////////////////////////////////////////////
-/// LOOP particles
-
-    for ( int i = 0; i< pointCount; i++ )
-    {
-        bool badParticle =  false;
-        const float * partioPositions = points->data<float> ( positionAttr,i );
-        AtPoint point;
-        if ( AiIsFinite ( partioPositions[0] ) && AiIsFinite ( partioPositions[1] ) && AiIsFinite ( partioPositions[2] ) )
+        if (partioCacheExists(arg_file))
         {
-            point.x = partioPositions[0];
-            point.y = partioPositions[1];
-            point.z = partioPositions[2];
-        }
-        else
-        {
-            point.x = 0.0f;
-            point.y = 0.0f;
-            point.z = 0.0f;
-            badParticle = true;
-				AiMsgWarning ( "[partioGenerator] found INF or NAN particle, hiding it..." );
-			}
-
-			/// User Defined or default  RadiusAttr
-			float rad;
-			if ( hasRadiusPP && !arg_overrideRadiusPP )
-			{
-				const float * partioRadius = points->data<float> ( radiusAttr,i );
-				if ( radiusAttr.count == 1 )
-				{
-					rad = partioRadius[0];
-				}
-				else
-				{
-					rad = abs ( float ( ( partioRadius[0]*0.2126 ) + ( partioRadius[1]*0.7152 ) + ( partioRadius[2]*.0722 ) ) );
-				}
-
-				rad *= arg_radiusMult;
-				rad *= arg_radius;
-				// clamp the radius to maxParticleRadius just in case we have rogue particles
-				if ( rad > arg_maxParticleRadius )
-				{
-					rad = arg_maxParticleRadius;
-				}
-
-				// if we decide to support motion blur radius scale then re-enable here
-				//for (int s = 0; s < global_motionBlurSteps; s++)
-				//{
-				//	AiArraySetFlt(radarr , ((s*pointCount)+i), rad);
-				//}
-				AiArraySetFlt ( radarr , (i) , rad );
-        }
-
-        if ( canMotionBlur )
-        {
-            const float * partioVelo = points->data<float> ( velocityAttr,i );
-            AtVector velocitySubstep;
-            AtVector velocity;
-            if ( badParticle )
+            cacheExists = true;
+            points = PARTIO::read(arg_file.c_str());
+            if (points)
+                return true;
+            else
             {
-                velocitySubstep.x = 0.0f;
-                velocitySubstep.y = 0.0f;
-                velocitySubstep.z = 0.0f;
+                AiMsgInfo("[partioGenerator] skipping, no points");
+                return false;
+            }
+        }
+        else
+        {
+            AiMsgInfo("[partioGenerator] %s cache doesn't exists.", arg_file.c_str());
+            return false;
+        }
+    }
+
+    AtNode* getNode()
+    {
+        AtNode* currentInstance = AiNode("points"); // initialize node
+        if (!cacheExists || points == 0)
+            return currentInstance;
+
+        PARTIO::ParticleAttribute positionAttr;
+
+        ////////////////////////////////////////////////////////////////////////////////
+        /// We at least have to have  position, I mean come on throw us a bone here....
+        if (!points->attributeInfo("position", positionAttr) && !points->attributeInfo("Position", positionAttr))
+        {
+            AiMsgInfo("[partioGenerator] Could not find position attr maybe you should do something about that");
+            return currentInstance;
+        }
+
+        PARTIO::ParticleAttribute velocityAttr;
+        PARTIO::ParticleAttribute accelerationAttr;
+        PARTIO::ParticleAttribute radiusAttr;
+
+        bool canMotionBlur = false;
+        bool hasRadiusPP = false;
+
+        int pointCount = points->numParticles();
+        AiMsgInfo("[partioGenerator] loaded %d points", pointCount);
+
+        // first we filter invalid particles properly
+        // then we try avoid very small ones
+        // to do that we need radius and position info
+
+        const float singleRadius = arg_radius * arg_radiusMult;
+
+        ///////////////////////////////////////////////////////////////////////////////////
+        /// RADIUS by default  if "none" is defined it will look for  radiusPP or  radius
+        if (!arg_overrideRadiusPP)
+        {
+            if (((arg_radFrom.length() > 0) && points->attributeInfo(arg_radFrom.c_str(), radiusAttr)))
+            {
+                AiMsgInfo("[partioGenerator] found radius attr...%s", arg_radFrom.c_str());
+                hasRadiusPP = true;
+            }
+            else if ((points->attributeInfo("radiusPP", radiusAttr) || points->attributeInfo("radius", radiusAttr)))
+            {
+                AiMsgInfo("[partioGenerator] found radius attr...");
+                hasRadiusPP = true;
+            }
+        }
+
+        std::vector<AtVector> pointsVector;
+        std::vector<int> validPointsVector;
+        std::vector<float> radiiVector;
+
+        pointsVector.reserve(static_cast<size_t>(pointCount));
+        validPointsVector.reserve(static_cast<size_t>(pointCount));
+        if (hasRadiusPP)
+            radiiVector.reserve(static_cast<size_t>(pointCount));
+
+        const float filterSmallParticles = powf(10.0f, arg_filterSmallParticles);
+
+        for (int i = 0; i < pointCount; ++i)
+        {
+            const float* partioPositions = points->data<float>(positionAttr, static_cast<size_t>(i));
+            if (AiIsFinite(partioPositions[0]) && AiIsFinite(partioPositions[1]) && AiIsFinite(partioPositions[2]))
+            {
+                const AtVector position = {partioPositions[0], partioPositions[1], partioPositions[2]};
+                // doing the radiuses here is a temporary workaround
+                // and an experiment to see how easily we can filter
+                // very small particles
+                float rad = 0.0f;
+                if (hasRadiusPP)
+                {
+                    // const float* partioRadius = points->data<float>(radiusAttr, id);
+                    const float* partioRadius = points->data<float>(radiusAttr, static_cast<size_t>(i));
+                    if (radiusAttr.count == 1)
+                        rad = partioRadius[0];
+                    else
+                        rad = ABS((partioRadius[0] * 0.2126f) + (partioRadius[1] * 0.7152f) + (partioRadius[2] * .0722f));
+
+                    rad *= arg_radius * arg_radiusMult;
+                }
+                else
+                    rad = singleRadius;
+
+                // clamp the radius to maxParticleRadius just in case we have rogue particles
+                rad = CLAMP(rad, arg_minParticleRadius, arg_maxParticleRadius);
+
+                // According to Thiago Ize, we have to filter particles
+                // where the ratio of the position from the origin
+                // and radius is bigger than 10^7
+                if ((AiV3Length(position) / rad) > filterSmallParticles)
+                    continue;
+
+                //AiArraySetFlt(radarr , i, rad);
+                if (hasRadiusPP)
+                    radiiVector.push_back(rad);
+                pointsVector.push_back(position);
+                validPointsVector.push_back(i);
+            }
+        }
+
+        const int newPointCount = static_cast<int>(pointsVector.size());
+        AiMsgInfo("[partioGenerator] Filtered %i of %i particles", pointCount - newPointCount, pointCount);
+        pointCount = newPointCount;
+
+        if (pointCount == 0)
+            return currentInstance;
+
+        AtArray* pointarr = 0;
+        AtArray* radarr = 0;
+
+        bool can_accelerate = false;
+
+        ////////////////
+        /// Velocity
+        if ((global_motionBlurSteps > 1) && (arg_velFrom.length() > 0) &&
+            (points->attributeInfo(arg_velFrom.c_str(), velocityAttr) ||
+             points->attributeInfo("velocity", velocityAttr) || points->attributeInfo("Velocity", velocityAttr)) &&
+            (velocityAttr.count > 2) &&
+            (velocityAttr.type == PARTIO::FLOAT || velocityAttr.type == PARTIO::VECTOR))
+        {
+            AiMsgInfo("[partioGenerator] found velocity attr, motion blur is a GO!!");
+            canMotionBlur = true;
+
+            ////////////////////
+            /// Acceleration
+            if (points->attributeInfo(arg_accFrom.c_str(), accelerationAttr) && (accelerationAttr.count > 2) &&
+                (accelerationAttr.type == PARTIO::FLOAT || accelerationAttr.type == PARTIO::VECTOR))
+            {
+                AiMsgInfo("[partioGenerator] found acceleration attr, motion blur is a GO!!");
+                can_accelerate = true;
+            }
+        }
+
+        if (canMotionBlur)
+        {
+            if (can_accelerate)
+                pointarr = AiArrayAllocate(static_cast<AtUInt32>(pointCount), static_cast<AtByte>(global_motionBlurSteps), AI_TYPE_POINT);
+            else
+                pointarr = AiArrayAllocate(static_cast<AtUInt32>(pointCount), 2, AI_TYPE_POINT);
+        }
+        else
+            pointarr = AiArrayConvert(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_POINT, &pointsVector[0]);
+
+        if (hasRadiusPP)
+            radarr = AiArrayConvert(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_FLOAT, &radiiVector[0]);
+        else
+        {
+            radarr = AiArrayAllocate(1, 1, AI_TYPE_FLOAT);
+            AiArraySetFlt(radarr, 0, singleRadius);
+        }
+
+        const float motion_blur_time = (1.0f / global_fps) * global_motionByFrame * arg_motionBlurMult;
+        std::vector<double> motion_step_times;
+        if (can_accelerate)
+        {
+            motion_step_times.resize(static_cast<size_t>(global_motionBlurSteps), 0.0f);
+            for (int st = 0; st < global_motionBlurSteps; ++st)
+            {
+                motion_step_times[st] = -0.5 + ((double)st / ((double)global_motionBlurSteps - 1.0)) * motion_blur_time;
+            }
+        }
+
+        if (canMotionBlur)
+        {
+            if (can_accelerate)
+            {
+                for (int i = 0; i < pointCount; ++i)
+                {
+                    const int id = validPointsVector[i];
+
+                    const AtVector point = pointsVector[i];
+                    const float* partioAcc = points->data<float>(accelerationAttr, static_cast<size_t>(id));
+                    const AtVector acceleration = {partioAcc[0], partioAcc[1], partioAcc[2]};
+                    const float* partioVelo = points->data<float>(velocityAttr, static_cast<size_t>(id));
+                    AtVector velocity = {partioVelo[0], partioVelo[1], partioVelo[2]};
+
+                    for (int st = 0; st < global_motionBlurSteps; ++st)
+                    {
+                        const float current_time = static_cast<float>(motion_step_times[st]);
+                        AiArraySetPnt(pointarr, static_cast<AtUInt32>(i + st * pointCount),
+                                      point + velocity * current_time + acceleration * current_time * current_time / 2.0);
+                    }
+                }
             }
             else
             {
-                velocitySubstep.x = partioVelo[0];
-                velocitySubstep.y = partioVelo[1];
-                velocitySubstep.z = partioVelo[2];
-            }
+                for (int i = 0; i < pointCount; ++i)
+                {
+                    const int id = validPointsVector[i];
+                    const AtVector point = pointsVector[i];
+                    const float* partioVelo = points->data<float>(velocityAttr, static_cast<size_t>(id));
+                    AtVector velocity = {partioVelo[0], partioVelo[1], partioVelo[2]};
+                    velocity *= motion_blur_time * 0.5f;
+                    // global fps inverse, motion by frame
+                    // motion blur multiplier and half to have the original
+                    // particle position as center
 
-            velocitySubstep /= global_fps;
-            velocitySubstep *=  global_motionByFrame; // motion by frame
-
-            // we need to use this to offset the position below to export the position on "Center" motion blur step
-            velocity = velocitySubstep;
-            if ( global_motionBlurSteps > 1 )
-            {
-                velocitySubstep /= global_motionBlurSteps-1;
-            }
-
-            velocitySubstep *= arg_motionBlurMult;
-
-            for ( int s = 0; s < global_motionBlurSteps; s++ )
-            {
-                AtPoint newPoint = ( point- ( velocity*.5 ) ) + velocitySubstep*s;
-                AiArraySetPnt ( pointarr, ( ( s*pointCount ) +i ), newPoint );
-            }
-        }
-        else
-        {
-            for ( int s = 0; s < global_motionBlurSteps; s++ )
-            {
-                AiArraySetPnt ( pointarr, ( ( s*pointCount ) +i ), point );
+                    AiArraySetPnt(pointarr, static_cast<AtUInt32>(i), point - velocity);
+                    AiArraySetPnt(pointarr, static_cast<AtUInt32>(i + pointCount), point + velocity);
+                }
             }
         }
 
+        PARTIO::ParticleAttribute rgbAttr;
         /// RGBPP
-        if ( hasRgbPP )
+        if ((arg_rgbFrom.length() > 0) && points->attributeInfo(arg_rgbFrom.c_str(), rgbAttr))
         {
-            const float * partioRGB = points->data<float> ( rgbAttr, i );
-            AtRGB color;
-            if ( rgbAttr.count > 1 )
+            AiNodeDeclare(currentInstance, "rgbPP", "uniform RGB");
+            AiMsgInfo("[partioGenerator] found rgbPP attr...");
+
+            AtArray* rgbArr = AiArrayAllocate(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_RGB);
+            for (int i = 0; i < pointCount; ++i)
             {
-                color.r = partioRGB[0];
-                color.g = partioRGB[1];
-                color.b = partioRGB[2];
-            }
-            else
-            {
-                color.r = partioRGB[0];
-                color.g = partioRGB[0];
-                color.b = partioRGB[0];
+                const int id = validPointsVector[i];
+                const float* partioRGB = points->data<float>(rgbAttr, static_cast<AtUInt32>(id));
+                AtRGB color;
+                if (rgbAttr.count > 2)
+                {
+                    color.r = partioRGB[0];
+                    color.g = partioRGB[1];
+                    color.b = partioRGB[2];
+                }
+                else
+                {
+                    color.r = partioRGB[0];
+                    color.g = partioRGB[0];
+                    color.b = partioRGB[0];
+                }
+                AiArraySetRGB(rgbArr, static_cast<AtUInt32>(i), color);
             }
 
-            // currently no support for motion blur of arbitrary attrs in points
-            //for (int s = 0; s < global_motionBlurSteps; s++)
-            //{
-            //	AiArraySetRGB(rgbArr,((s*pointCount)+i), color);
-            //}
-            AiArraySetRGB ( rgbArr, i, color );
+            AiNodeSetArray(currentInstance, "rgbPP", rgbArr);
+            AiMsgDebug("[partioGenerator] rgbPP array set");
         }
-        /// INCANDESCENCE 
-        if ( hasIncandPP )
+        else
         {
-            const float * partioRGB = points->data<float> ( incandAttr, i );
-            AtRGB incand;
-            if ( incandAttr.count > 1 )
+            AiNodeDeclare(currentInstance, "rgbPP", "constant RGB");
+            AiNodeSetRGB(currentInstance, "rgbPP", arg_defaultColor.r, arg_defaultColor.g, arg_defaultColor.b);
+        }
+
+        /// INCANDESCENCE
+        PARTIO::ParticleAttribute incandAttr;
+        if ((arg_incandFrom.length() > 0) && points->attributeInfo(arg_incandFrom.c_str(), incandAttr))
+        {
+            AiNodeDeclare(currentInstance, "incandescencePP", "uniform RGB");
+            AiMsgInfo("[partioGenerator] found incandescencePP attr...");
+            AtArray* incandArr = AiArrayAllocate(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_RGB);
+            for (int i = 0; i < pointCount; ++i)
             {
-                incand.r = partioRGB[0];
-                incand.g = partioRGB[1];
-                incand.b = partioRGB[2];
-            }
-            else
-            {
-                incand.r = partioRGB[0];
-                incand.g = partioRGB[0];
-                incand.b = partioRGB[0];
+                const int id = validPointsVector[i];
+                const float* partioRGB = points->data<float>(incandAttr, static_cast<size_t>(id));
+                AtRGB incand;
+                if (incandAttr.count > 2)
+                {
+                    incand.r = partioRGB[0];
+                    incand.g = partioRGB[1];
+                    incand.b = partioRGB[2];
+                }
+                else
+                {
+                    incand.r = partioRGB[0];
+                    incand.g = partioRGB[0];
+                    incand.b = partioRGB[0];
+                }
+                AiArraySetRGB(incandArr, static_cast<AtUInt32>(i), incand);
             }
 
-            // currently no support for motion blur of arbitrary attrs in points
-            //for (int s = 0; s < global_motionBlurSteps; s++)
-            //{
-            //	AiArraySetRGB(rgbArr,((s*pointCount)+i), color);
-            //}
-            AiArraySetRGB ( incandArr, i, incand );
+            AiNodeSetArray(currentInstance, "incandescencePP", incandArr);
+            AiMsgDebug("[partioGenerator] incandescencePP array set");
+        }
+        else
+        {
+            AiNodeDeclare(currentInstance, "incandescencePP", "constant RGB");
+            AiNodeSetRGB(currentInstance, "incandescencePP", 0.0f, 0.0f, 0.0f);
         }
 
         /// opacityPP
-        if ( hasOpacPP )
+        PARTIO::ParticleAttribute opacityAttr;
+        if ((arg_opacFrom.length() > 0) && points->attributeInfo(arg_opacFrom.c_str(), opacityAttr))
         {
-            const float * partioOpac = points->data<float> ( opacityAttr,i );
-            float opac;
-            if ( opacityAttr.count == 1 )
+            AiNodeDeclare(currentInstance, "opacityPP", "uniform Float");
+            AiMsgInfo("[partioGenerator] found opacityPP attr...");
+
+            AtArray* opacityArr = AiArrayAllocate(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_FLOAT);
+
+            for (int i = 0; i < pointCount; ++i)
             {
-                opac = partioOpac[0];
+                const int id = validPointsVector[i];
+                const float* partioOpac = points->data<float>(opacityAttr, static_cast<size_t>(id));
+                float opac;
+                if (opacityAttr.count > 2)
+                    opac = (partioOpac[0] * 0.2126f) + (partioOpac[1] * 0.7152f) + (partioOpac[2] * .0722f);
+                else
+                    opac = partioOpac[0];
+
+                AiArraySetFlt(opacityArr, static_cast<AtUInt32>(i), opac);
+            }
+
+            AiNodeSetArray(currentInstance, "opacityPP", opacityArr);
+            AiMsgDebug("[partioGenerator] OpacityPP array set");
+        }
+        else
+        {
+            AiNodeDeclare(currentInstance, "opacityPP", "constant Float");
+            AiNodeSetFlt(currentInstance, "opacityPP", arg_defaultOpac);
+        }
+
+        std::istringstream os(arg_extraPPAttrs);
+        std::string part;
+        while (os >> part)
+        {
+            PARTIO::ParticleAttribute user;
+            if (points->attributeInfo(part.c_str(), user))
+            {
+                // we don't want to double export these
+                if (user.name != "position" &&
+                    user.name != "velocity" &&
+                    user.name != "rgbPP" &&
+                    user.name != "incandescencePP" &&
+                    user.name != "opacityPP" &&
+                    user.name != "radiusPP")
+                {
+                    if (user.type == PARTIO::FLOAT && user.count == 1)
+                    {
+                        AiNodeDeclare(currentInstance, part.c_str(), "uniform Float");
+                        AtArray* arnoldArray = AiArrayAllocate(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_FLOAT);
+                        for (int i = 0; i < pointCount; ++i)
+                        {
+                            const int id = validPointsVector[i];
+                            const float* partioFLOAT = points->data<float>(user, static_cast<size_t>(id));
+                            float floatVal = partioFLOAT[0];
+                            AiArraySetFlt(arnoldArray, static_cast<AtUInt32>(i), floatVal);
+                        }
+
+                        AiNodeSetArray(currentInstance, user.name.c_str(), arnoldArray);
+                        AiMsgDebug("[partioGenerator] %s array set", user.name.c_str());
+                    }
+                    else if (user.type == PARTIO::VECTOR || (user.type == PARTIO::FLOAT && user.count == 3))
+                    {
+                        AiNodeDeclare(currentInstance, part.c_str(), "uniform Vector");
+                        AtArray* arnoldArray = AiArrayAllocate(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_VECTOR);
+                        for (int i = 0; i < pointCount; ++i)
+                        {
+                            const int id = validPointsVector[i];
+                            const float* partioVEC = points->data<float>(user, static_cast<size_t>(id));
+                            AtVector vecVal;
+                            vecVal.x = partioVEC[0];
+                            vecVal.y = partioVEC[1];
+                            vecVal.z = partioVEC[2];
+                            AiArraySetVec(arnoldArray, static_cast<AtUInt32>(i), vecVal);
+                        }
+
+                        AiNodeSetArray(currentInstance, user.name.c_str(), arnoldArray);
+                        AiMsgDebug("[partioGenerator] %s array set", user.name.c_str());
+                    }
+                }
+                else
+                    AiMsgWarning("[partioGenerator] caught double export call for %s, skipping....", part.c_str());
             }
             else
-            {
-                opac = float ( ( partioOpac[0]*0.2126 ) + ( partioOpac[1]*0.7152 ) + ( partioOpac[2]*.0722 ) );
-            }
-
-            //for (int s = 0; s < global_motionBlurSteps; s++)
-            //{
-            // hack to make bad particles which were set to 0,0,0  transparent
-            if ( badParticle )
-            {
-                //AiArraySetFlt(opacityArr ,((s*pointCount)+i), 0.0f);
-                AiArraySetFlt ( opacityArr ,i , 0.0f );
-            }
-            else
-            {
-                //AiArraySetFlt(opacityArr ,((s*pointCount)+i), opac);
-                AiArraySetFlt ( opacityArr ,i ,opac );
-            }
-            //}
+                AiMsgWarning("[partioGenerator] export ppAttr %s skipped, it doesn't exist  in the cache",
+                             part.c_str());
         }
-		for (int x = 0; x < extraAttrs.size(); x++)
-        {
-			if (extraAttrs[x].type == FLOAT)
-            {
-					
-				const float * partioFLOAT = points->data<float> ( extraAttrs[x],i );
-				float floatVal = partioFLOAT[0];
-				AiArraySetFlt ( arnoldArrays[x] , i , floatVal );
-            }
-			else if (extraAttrs[x].type == VECTOR)
-            {
-				const float * partioVEC = points->data<float> ( extraAttrs[x], i );
-				AtVector vecVal;
-				vecVal.x = partioVEC[0];
-				vecVal.y = partioVEC[0];
-				vecVal.z = partioVEC[0];
-				AiArraySetVec( arnoldArrays[x], i, vecVal);
-			}
-        }
-    } // for loop per particle
 
+        AiMsgDebug("[partioGenerator] Done looping thru particles");
 
-    if ( hasRgbPP )
-    {
-        AiNodeSetArray ( currentInstance, "rgbPP", rgbArr );
-    }
-    if ( hasIncandPP )
-    {
-        AiNodeSetArray ( currentInstance, "incandescencePP", incandArr );
-    }
-    if ( hasOpacPP )
-    {
-        AiNodeSetArray ( currentInstance, "opacityPP", opacityArr );
+        AiNodeSetArray(currentInstance, "radius", radarr);
+        AiMsgDebug("[partioGenerator] radiusPP array set");
+
+        /// these  will always be here
+        AiNodeSetArray(currentInstance, "points", pointarr);
+        AiMsgDebug("[partioGenerator] Points array set with %i points", pointarr->nelements);
+
+        AiNodeSetInt(currentInstance, "mode", arg_renderType);
+        AiNodeSetBool(currentInstance, "opaque", false);
+
+        if (arg_stepSize > 0.0f)
+            AiNodeSetFlt(currentInstance, "step_size", arg_stepSize);
+
+        AiMsgDebug("[partioGenerator] Done with partioGeneration! ");
+        return currentInstance;
     }
 
-    AiNodeSetArray ( currentInstance, "radius", radarr );
-
-
-	for (int x = 0; x < arnoldArrays.size(); x++)
-	{
-		AiNodeSetArray( currentInstance, extraAttrs[x].name.c_str(), arnoldArrays[x]);
-	}
-
-	
-
-    /// these  will always be here
-    AiNodeSetArray ( currentInstance, "points", pointarr );
-    //AiNodeSetArray ( currentInstance, "position",pointarr );  // we want to enable this when they fix some stuff on particles
-
-    AiNodeSetInt ( currentInstance, "mode", arg_renderType );
-    AiNodeSetBool ( currentInstance, "opaque", false );
-
-    if ( arg_stepSize > 0.0f )
+    bool partioCacheExists(const std::string& fileName)
     {
-        AiNodeSetFlt ( currentInstance, "step_size", arg_stepSize );
+        struct stat fileInfo;
+        return stat(fileName.c_str(), &fileInfo) == 0;
     }
+};
 
-    return currentInstance;
+// read parameter values from node and load partio cache if it exists
+static int MyInit(AtNode* mynode, void** user_ptr)
+{
+    PartioData* data = new PartioData();
+    *user_ptr = data;
+    return data->init(mynode);
+}
+
+// close  partio cache
+static int MyCleanup(void* user_ptr)
+{
+    PartioData* data = reinterpret_cast<PartioData*>(user_ptr);
+    delete data;
+    return true;
+}
+
+static int MyNumNodes(void*)
+{
+    return 1;
+}
+
+// call function to copy values from cache read into AI-Arrays
+static AtNode* MyGetNode(void* user_ptr, int)
+{
+    return reinterpret_cast<PartioData*>(user_ptr)->getNode();
 }
 
 // vtable passed in by proc_loader macro define
 proc_loader
 {
-    vtable->Init     = MyInit;
-    vtable->Cleanup  = MyCleanup;
+    vtable->Init = MyInit;
+    vtable->Cleanup = MyCleanup;
     vtable->NumNodes = MyNumNodes;
-    vtable->GetNode  = MyGetNode;
-    strcpy ( vtable->version, AI_VERSION );
+    vtable->GetNode = MyGetNode;
+    strcpy(vtable->version, AI_VERSION);
     return true;
 }
 

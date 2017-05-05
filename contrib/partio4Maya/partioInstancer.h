@@ -89,173 +89,187 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "partio4MayaShared.h"
 #include "iconArrays.h"
 
-class partioInstReaderCache
-{
+class partioInstReaderCache {
 public:
     partioInstReaderCache();
+
     MBoundingBox bbox;
     int dList;
-    Partio::ParticlesDataMutable* particles;
-    Partio::ParticleAttribute positionAttr;
-    Partio::ParticleAttribute idAttr;
-    Partio::ParticleAttribute velocityAttr;
-    Partio::ParticleAttribute rotationAttr;
-	Partio::ParticleAttribute aimDirAttr;
-	Partio::ParticleAttribute aimPosAttr;
-	Partio::ParticleAttribute aimAxisAttr;
-	Partio::ParticleAttribute aimUpAttr;
-	Partio::ParticleAttribute aimWorldUpAttr;
-	Partio::ParticleAttribute lastRotationAttr;
-    Partio::ParticleAttribute scaleAttr;
-	Partio::ParticleAttribute lastScaleAttr;
-	Partio::ParticleAttribute lastAimDirAttr;
-	Partio::ParticleAttribute lastAimPosAttr;
-    Partio::ParticleAttribute indexAttr;
-//    Partio::ParticleAttribute shaderIndexAttr;
-    float* flipPos;
+    PARTIO::ParticlesDataMutable* particles;
+    PARTIO::ParticleAttribute positionAttr;
+    PARTIO::ParticleAttribute idAttr;
+    PARTIO::ParticleAttribute velocityAttr;
+    PARTIO::ParticleAttribute angularVelocityAttr;
+    PARTIO::ParticleAttribute rotationAttr;
+    PARTIO::ParticleAttribute aimDirAttr;
+    PARTIO::ParticleAttribute aimPosAttr;
+    PARTIO::ParticleAttribute aimAxisAttr;
+    PARTIO::ParticleAttribute aimUpAttr;
+    PARTIO::ParticleAttribute aimWorldUpAttr;
+    PARTIO::ParticleAttribute lastRotationAttr;
+    PARTIO::ParticleAttribute scaleAttr;
+    PARTIO::ParticleAttribute lastScaleAttr;
+    PARTIO::ParticleAttribute lastAimDirAttr;
+    PARTIO::ParticleAttribute lastAimPosAttr;
+    PARTIO::ParticleAttribute lastPosAttr;
+    PARTIO::ParticleAttribute indexAttr;
+    PARTIO::ParticleAttribute displayColorAttr;
+//  PARTIO::ParticleAttribute shaderIndexAttr;
     MFnArrayAttrsData instanceData;
     MObject instanceDataObj;
-
-
 };
 
 
-class partioInstancerUI : public MPxSurfaceShapeUI
-{
+class partioInstancerUI : public MPxSurfaceShapeUI {
 public:
 
     partioInstancerUI();
+
     virtual ~partioInstancerUI();
-    virtual void draw(const MDrawRequest & request, M3dView & view) const;
-    virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
-    void 	drawBoundingBox() const;
-    void 	drawPartio(partioInstReaderCache* pvCache, int drawStyle, M3dView &view) const;
-    static void * creator();
-    virtual bool	select( MSelectInfo &selectInfo,
-                         MSelectionList &selectionList,
-                         MPointArray &worldSpaceSelectPts ) const;
+
+    virtual void draw(const MDrawRequest& request, M3dView& view) const;
+
+    virtual void getDrawRequests(const MDrawInfo& info, bool objectAndActiveOnly, MDrawRequestQueue& requests);
+
+    void drawBoundingBox() const;
+
+    void drawPartio(partioInstReaderCache* pvCache, int drawStyle, M3dView& view) const;
+
+    static void* creator();
+
+    virtual bool select(MSelectInfo& selectInfo,
+                        MSelectionList& selectionList,
+                        MPointArray& worldSpaceSelectPts) const;
 
 };
 
-class partioInstancer : public MPxSurfaceShape
-{
+class partioInstancer : public MPxSurfaceShape {
 public:
     partioInstancer();
+
     virtual ~partioInstancer();
 
-    virtual MStatus   		compute( const MPlug& plug, MDataBlock& block );
-    virtual bool            isBounded() const;
-    virtual MBoundingBox    boundingBox() const;
-    static  void *          creator();
-    static  MStatus         initialize();
-    static void 			reInit(void *data);
-    void 					initCallback();
-    virtual void 			postConstructor();
+    virtual MStatus compute(const MPlug& plug, MDataBlock& block);
+
+    virtual bool isBounded() const;
+
+    virtual MBoundingBox boundingBox() const;
+
+    static void* creator();
+
+    static MStatus initialize();
+
+    static void reInit(void* data);
+
+    void initCallback();
+
+    virtual void postConstructor();
 
     bool GetPlugData();
-    void addParticleAttr(int attrIndex, MString attrName );
+
     partioInstReaderCache* updateParticleCache();
-
-	void updateInstanceDataVector ( partioInstReaderCache &pvCache, MVectorArray &arrayToCheck, MString arrayChannel );
-	void updateInstanceDataDouble ( partioInstReaderCache &pvCache, MDoubleArray &arrayToCheck, MString arrayChannel );
-
 
     MCallbackId partioInstancerOpenCallback;
     MCallbackId partioInstancerImportCallback;
     MCallbackId partioInstancerReferenceCallback;
-
-
 /// ATTRS
-    static MObject  time;
-	static MObject  aByFrame;
-    static MObject  aSize;         // The size of the logo
-    static MObject  aFlipYZ;
-	static MObject  aDrawStyle;
-	static MObject  aPointSize;
+    static MObject time;
+    static MObject aByFrame;
+    static MObject aSize;         // The size of the logo
+    static MObject aFlipYZ;
+    static MObject aDrawStyle;
+    static MObject aPointSize;
 
 /// Cache file related stuff
-    static MObject 	aUpdateCache;
-    static MObject 	aCacheDir;
-    static MObject 	aCacheFile;
-	static MObject 	aCacheActive;
-    static MObject 	aCacheOffset;
-    static MObject  aCacheStatic;
-    static MObject 	aCacheFormat;
-	static MObject  aForceReload;
-	static MObject  aRenderCachePath;
+    static MObject aUpdateCache;
+    static MObject aCacheDir;
+    static MObject aCacheFile;
+    static MObject aCacheActive;
+    static MObject aCacheOffset;
+    static MObject aCacheStatic;
+    static MObject aCacheFormat;
+    static MObject aForceReload;
+    static MObject aRenderCachePath;
 
 /// point position / velocity
-	static MObject  aComputeVeloPos;
-	static MObject  aVeloMult;
+    static MObject aComputeVeloPos;
+    static MObject aVelocityMult;
 
 /// attributes
-    static MObject 	aPartioAttributes;
-	static MObject	aScaleFrom;
-	static MObject  aRotationType;
+    static MObject aPartioAttributes;
+    static MObject aScaleFrom;
+    static MObject aRotationType;
 
-    static MObject	aRotationFrom;
-	static MObject  aAimDirectionFrom;
-	static MObject  aAimPositionFrom;
-	static MObject  aAimAxisFrom;
-	static MObject  aAimUpAxisFrom;
-	static MObject  aAimWorldUpFrom;
+    static MObject aRotationFrom;
+    static MObject aAimDirectionFrom;
+    static MObject aAimPositionFrom;
+    static MObject aAimAxisFrom;
+    static MObject aAimUpAxisFrom;
+    static MObject aAimWorldUpFrom;
 
-	static MObject	aLastScaleFrom;
-	static MObject	aLastRotationFrom;
-	static MObject  aLastAimDirectionFrom;
-	static MObject  aLastAimPositionFrom;
+    static MObject aLastScaleFrom;
+    static MObject aLastRotationFrom;
+    static MObject aLastAimDirectionFrom;
+    static MObject aLastAimPositionFrom;
+    static MObject aLastPositionFrom;
+    static MObject aVelocityFrom;
+    static MObject aAngularVelocityFrom;
+    static MObject aAngularVelocityMult;
+    static MObject aDisplayColorFrom;
 
-    static MObject	aIndexFrom;
+    static MObject aIndexFrom;
 
 /// not implemented yet
-//	static MObject 	aJitterPos;
-//  static MObject 	aJitterFreq;
-//	static MObject	aShaderIndexFrom;
-//	static MObject	aInMeshInstances;
-//	static MObject	aOutMesh;
+//  static MObject  aJitterPos;
+//  static MObject  aJitterFreq;
+//  static MObject  aShaderIndexFrom;
+//  static MObject  aInMeshInstances;
+//  static MObject  aOutMesh;
 
 //  output data to instancer
-    static MObject	aInstanceData;
+    static MObject aInstanceData;
+    static MObject aExportAttributes;
+    static MObject aVelocitySource;
+    static MObject aAngularVelocitySource;
 
-
-    static	MTypeId			id;
-    float 					multiplier;
-    bool 					cacheChanged;
-    partioInstReaderCache  	pvCache;
-	int  drawError;
-
-
+    static MTypeId id;
+    partioInstReaderCache pvCache;
 private:
+    MStringArray m_attributeList;
+    MString m_lastFileLoaded;
+    MString m_lastPath;
+    MString m_lastFile;
+    MString m_lastExt;
+    MString m_lastExportAttributes;
+    MString m_lastRotationType;
+    MString m_lastRotationFrom;
+    MString m_lastLastRotationFrom;
+    MString m_lastAimDirectionFrom;
+    MString m_lastLastAimDirectionFrom;
+    MString m_lastAimPositionFrom;
+    MString m_lastLastAimPositionFrom;
+    MString m_lastAimAxisFrom;
+    MString m_lastAimUpAxisFrom;
+    MString m_lastAimWorldUpFrom;
+    MString m_lastScaleFrom;
+    MString m_lastLastScaleFrom;
+    MString m_lastIndexFrom;
+    MString m_lastAngularVelocityFrom;
+    MString m_lastDisplayColorFrom;
+    float m_lastAngularVelocityMult;
+    short m_lastAngularVelocitySource;
+    bool m_lastFlipStatus;
+    bool m_flipped;
+    bool m_frameChanged;
+    bool m_canMotionBlur;
 
-    MString mLastFileLoaded;
-    MString mLastPath;
-    MString mLastFile;
-    MString mLastExt;
-    bool mLastFlipStatus;
-    bool mFlipped;
-    bool  frameChanged;
-    MStringArray attributeList;
-	int mLastRotationTypeIndex;
-    int mLastRotationFromIndex;
-	int mLastLastRotationFromIndex;
-	int mLastAimDirectionFromIndex;
-	int mLastLastAimDirecitonFromIndex;
-	int mLastAimPositionFromIndex;
-	int mLastLastAimPositionFromIndex;
-	int mLastAimAxisFromIndex;
-	int mLastAimUpAxisFromIndex;
-	int mLastAimWorldUpFromIndex;
-    int mLastScaleFromIndex;
-	int mLastLastScaleFromIndex;
-    int mLastIndexFromIndex;
-    bool canMotionBlur;
-	//    int mLastShaderIndexFromIndex;
+public:
+    float m_multiplier;
+    int m_drawError;
+    bool m_cacheChanged;
 
 protected:
-
-    int dUpdate;
-    GLuint dList;
-
+    int m_dUpdate;
 };
 
 #endif

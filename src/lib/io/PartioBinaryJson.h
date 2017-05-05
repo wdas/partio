@@ -50,7 +50,7 @@ infringement.
 #include <typeinfo>
 #include <sstream>
 #include <stdexcept>
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
 /// TODO: figure out what this isfor
 template<class TDERIVED>
@@ -491,4 +491,4 @@ struct PrintParser:public JSONParser<PrintParser>
     }
 };
 
-} // namespace Partio
+EXIT_PARTIO_NAMESPACE

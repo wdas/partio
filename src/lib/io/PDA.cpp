@@ -42,8 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <cassert>
 #include <memory>
 
-namespace Partio
-{
+ENTER_PARTIO_NAMESPACE
 
 using namespace std;
 
@@ -192,4 +191,4 @@ bool writePDA(const char* filename,const ParticlesData& p,const bool compressed)
 
 }
 
-}
+EXIT_PARTIO_NAMESPACE

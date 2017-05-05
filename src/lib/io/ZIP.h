@@ -41,8 +41,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <map>
 #include <stdexcept>
 #include <vector>
+#include "../PartioConfig.h"
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
+
 struct ZipFileHeader;
 //#####################################################################
 // Functions Gzip_Out/Gzip_In - Create streams that read/write .gz
@@ -83,5 +85,7 @@ private:
     bool Find_And_Read_Central_Header();
 //#####################################################################
 };
-}
+
+EXIT_PARTIO_NAMESPACE
+
 #endif

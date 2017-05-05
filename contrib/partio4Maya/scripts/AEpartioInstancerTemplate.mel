@@ -30,76 +30,92 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 global proc AEpartioInstancerTemplate( string $nodeName )
 {
-	editorTemplate -callCustom pioInstLogoHeader pioInstLogoHeader $nodeName;
-	editorTemplate -beginLayout "Global" -collapse 0;
-	editorTemplate -addControl "cacheActive";
-	editorTemplate -addControl "staticCache";
-	//editorTemplate -addControl "flipYZ";
-	editorTemplate -addControl "computeVeloPos";
-	editorTemplate -addControl -l "Velocity Mult" "veloMult";
-	editorTemplate -callCustom pioAEoutpathNew pioAEoutpathReplace cacheDir;
-	editorTemplate -addControl "cachePrefix";
-	editorTemplate -addControl "cacheOffset";
-	editorTemplate -addControl "byFrame";
-	editorTemplate -addControl "cacheFormat";
-	editorTemplate -addControl "iconSize";
-	editorTemplate -callCustom pioInstForceUpdate pioInstForceUpdate $nodeName;
+    editorTemplate -callCustom pioInstLogoHeader pioInstLogoHeader;
+
+    editorTemplate -beginScrollLayout;
+
+    editorTemplate -beginLayout "Global" -collapse 0;
+    editorTemplate -addControl "cacheActive";
+    editorTemplate -addControl "staticCache";
+    //editorTemplate -addControl "flipYZ";
+    editorTemplate -addControl "computeVeloPos";
+    editorTemplate -addControl "velocitySource";
+    editorTemplate -addControl "angularVelocitySource";
+    editorTemplate -addControl -l "Velocity Mult" "veloMult";
+    editorTemplate -addControl -l "Angular Velocity Mult" "angVeloMult";
+    editorTemplate -callCustom pioAEoutpathNew pioAEoutpathReplace cacheDir;
+    editorTemplate -addControl "cachePrefix";
+    editorTemplate -addControl "cacheOffset";
+    editorTemplate -addControl "byFrame";
+    editorTemplate -addControl "cacheFormat";
+    editorTemplate -addControl "iconSize";
+    editorTemplate -callCustom pioInstForceUpdate pioInstForceUpdate message;
+
+    editorTemplate -endLayout;
+
+        editorTemplate -beginLayout "General Parameters" -collapse 0;
+            editorTemplate -addControl "pointSize";
+            editorTemplate -addControl "drawStyle";
+            //editorTemplate -addControl "useEmitterTransform";
+            //editorTemplate -addControl -l "Jitter Position Magnitude" "jitterPos" ;
+            //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
+        editorTemplate -endLayout;
+        editorTemplate -beginLayout "Instancer Channels" -collapse 0;
+        editorTemplate -callCustom "pioInstCustomAttrsManage" "pioInstCustomAttrsManage" message;
+        editorTemplate -endLayout;
+
+    // include/call base class/node attributes
+    //AEdependNodeTemplate $nodeName;
+    editorTemplate -beginLayout ("Render Stats");
+        editorTemplate -beginNoOptimize;
+        editorTemplate -addControl "castsShadows";
+        editorTemplate -addControl "receiveShadows";
+        editorTemplate -addControl "motionBlur";
+        editorTemplate -addControl "primaryVisibility";
+        editorTemplate -addControl "smoothShading";
+        editorTemplate -addControl "visibleInReflections";
+        editorTemplate -addControl "visibleInRefractions";
+    editorTemplate -endLayout;
+
+    AEshapeTemplate $nodeName;  // adds place for renderer specific controls
+
+    editorTemplate -suppress "compInstObjGroups";
+    editorTemplate -suppress "ignoreSelfShadowing";
+    editorTemplate -suppress "geometryAntialiasingOverride";
+    editorTemplate -suppress "antialiasingLevel";
+    editorTemplate -suppress "shadingSamplesOverride";
+    editorTemplate -suppress "shadingSamples";
+    editorTemplate -suppress "maxShadingSamples";
+    editorTemplate -suppress "volumeSamplesOverride";
+    editorTemplate -suppress "volumeSamples";
+    editorTemplate -suppress "depthJitter";
+    editorTemplate -suppress "maxVisibilitySamplesOverride";
+    editorTemplate -suppress "maxVisibilitySamples";
+    editorTemplate -suppress "localPosition";
+    editorTemplate -suppress "localScale";
 
 
-	editorTemplate -endLayout;
-
-	editorTemplate -beginScrollLayout;
-
-		editorTemplate -beginLayout "General Parameters" -collapse 0;
-			editorTemplate -addControl "pointSize";
-			editorTemplate -addControl "drawStyle";
-		    //editorTemplate -addControl "useEmitterTransform";
-		    //editorTemplate -addControl -l "Jitter Position Magnitude" "jitterPos" ;
-		    //editorTemplate -addControl -l "Jitter Position Frequency" "jitterFreq";
-		editorTemplate -endLayout;
-		editorTemplate -beginLayout "Instancer Channels" -collapse 0;
-		editorTemplate -callCustom "pioInstCustomAttrsManage" "pioInstCustomAttrsManage" $nodeName;
-		editorTemplate -endLayout;
-
-	// include/call base class/node attributes
-	//AEdependNodeTemplate $nodeName;
-	editorTemplate -beginLayout ("Render Stats");
-		editorTemplate -beginNoOptimize;
-		editorTemplate -addControl "castsShadows";
-		editorTemplate -addControl "receiveShadows";
-		editorTemplate -addControl "motionBlur";
-		editorTemplate -addControl "primaryVisibility";
-		editorTemplate -addControl "smoothShading";
-		editorTemplate -addControl "visibleInReflections";
-		editorTemplate -addControl "visibleInRefractions";
-	editorTemplate -endLayout;
-
-	AEshapeTemplate $nodeName;  // adds place for renderer specific controls
-
-	editorTemplate -suppress "compInstObjGroups";
-	editorTemplate -suppress "ignoreSelfShadowing";
-	editorTemplate -suppress "geometryAntialiasingOverride";
-	editorTemplate -suppress "antialiasingLevel";
-	editorTemplate -suppress "shadingSamplesOverride";
-	editorTemplate -suppress "shadingSamples";
-	editorTemplate -suppress "maxShadingSamples";
-	editorTemplate -suppress "volumeSamplesOverride";
-	editorTemplate -suppress "volumeSamples";
-	editorTemplate -suppress "depthJitter";
-	editorTemplate -suppress "maxVisibilitySamplesOverride";
-	editorTemplate -suppress "maxVisibilitySamples";
-	editorTemplate -suppress "localPosition";
-	editorTemplate -suppress "localScale";
-
-
-	editorTemplate -addExtraControls;
-	editorTemplate -endScrollLayout;
+    editorTemplate -addExtraControls;
+    editorTemplate -endScrollLayout;
 }
 
-
-global proc pioInstCustomAttrsManage (string $nodeName)
+proc generateAttributesMenu(string $nodeName, string $attrNameList[], string $labels[], string $attributes[])
 {
-    $nodeName = pioStripNodeName ($nodeName);
+    int $i = 0;
+    for ($i = 0; $i < size($attributes); ++$i)
+    {
+        attrControlGrp -annotation $labels[$i] -attribute ($nodeName + "." + $attributes[$i]);
+        popupMenu;
+        for ($attr in $attrNameList)
+        {
+            menuItem -label $attr -c ("setAttr -type \"string\" " + $nodeName + "." + $attributes[$i] + " " + $attr);
+        }
+    }
+}
+
+global proc pioInstCustomAttrsManage (string $attrName)
+{
+    string $nodeName = plugNode($attrName);
     if (`columnLayout -q -exists "foobar"`)
     { deleteUI "foobar"; }
 
@@ -107,318 +123,99 @@ global proc pioInstCustomAttrsManage (string $nodeName)
 
     string $multiList[] = `listAttr -multi ($nodeName+".partioCacheAttributes")`;
 
-    int $scaleFrom = `getAttr ($nodeName+".scaleFrom")` + 2;
-	int $lastScaleFrom = `getAttr ($nodeName+".lastScaleFrom")` + 2;
-	int $rotationType = `getAttr ($nodeName+".rotationType")` + 2;
-	int $rotationFrom = `getAttr ($nodeName+".rotationFrom")` + 2;
-	int $lastRotationFrom = `getAttr ($nodeName+".lastRotationFrom")` + 2;
-	int $aimDirectionFrom = `getAttr ($nodeName+".aimDirectionFrom")` + 2;
-	int $lastAimDirectionFrom = `getAttr ($nodeName+".lastAimDirectionFrom")` + 2;
-	int $aimPositionFrom = `getAttr ($nodeName+".aimPositionFrom")` + 2;
-	int $lastAimPositionFrom = `getAttr ($nodeName+".lastAimPositionFrom")` + 2;
-	int $aimAxisFrom = `getAttr ($nodeName+".aimAxisFrom")` + 2;
-	int $aimUpAxisFrom = `getAttr ($nodeName+".aimUpAxisFrom")` + 2;
-	int $aimWorldUpFrom = `getAttr ($nodeName+".aimWorldUpFrom")` + 2;
-	int $indexFrom  = `getAttr ($nodeName+".indexFrom")` + 2;
-
-///  General attrs
-frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "General Channels" ;
-/// SCALE
-	columnLayout;
-    string $scaleMenu = `optionMenuGrp -label "Scale"`;
-	menuItem -l "None";
+    string $attrNameList[] = {};
+    int $id = 0;
     for ($multi in $multiList)
     {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
+        $attrNameList[$id] = `getAttr ($nodeName + "." + $multi)`;
+        $id = $id + 1;
     }
-    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 0 + " " + $scaleMenu)  $scaleMenu;
 
-setParent ..;
-setParent ..;
-/// ROTATION stuff
-frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l  "Rotation Channels" ;
-columnLayout;
-/// ROT TYPE
-	string $rotationTypeMenu = `optionMenuGrp -label "RotationType"`;
-	menuItem -l "None";
+    ///  General attrs
+    frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "General Channels" ;
+    /// SCALE
+    columnLayout;
+    string $scaleAttributes[] = {"scaleFrom"};
+    string $scaleLabels[] = {"Scale"};
+    generateAttributesMenu($nodeName, $attrNameList, $scaleLabels, $scaleAttributes);
+    setParent ..;
+    setParent ..;
+    /// ROTATION stuff
+    frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l  "Rotation Channels" ;
+    columnLayout;
+    /// ROT TYPE
+    string $rotationAttributes[] = {"rotationType", "rotationFrom", "aimDirectionFrom", "aimPositionFrom", "aimAxisFrom", "aimUpAxisFrom", "aimWorldUpFrom"};
+    string $rotationLabels[] = {"Rotation Type", "Rotation", "Aim Direction", "Aim Position", "Aim Axis", "Aim Up Axis", "Aim World Up"};
+    generateAttributesMenu($nodeName, $attrNameList, $rotationLabels, $rotationAttributes);
 
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 1 + " " + $rotationTypeMenu)  $rotationTypeMenu;
+    setParent ..;
+    setParent ..;
 
-/// ROT
-	string $rotationMenu = `optionMenuGrp  -label "Rotation"`;
-	menuItem -l "None";
+    /// INDEX
+    frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "Index Channels" ;
+    columnLayout;
+    string $indexAttributes[] = {"indexFrom"};
+    string $indexLabels[] = {"Index"};
+    generateAttributesMenu($nodeName, $attrNameList, $indexLabels, $indexAttributes);
+    setParent ..;
+    setParent ..;
 
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 2 + " " + $rotationMenu)  $rotationMenu;
+    /// LAST ATTRIBUTES
+    frameLayout -collapse 1 -collapsable 1 -borderVisible 0 -w 450 -l "Motion blur Channels (if left blank they will inherit above channels)" ;
+    columnLayout;
+    string $lastAttributes[] = {"velocityFrom", "lastPositionFrom", "angularVelocityFrom", "lastRotationFrom", "lastAimDirectionFrom", "lastAimPositionFrom"};
+    string $lastLabels[] = {"Velocity", "Last Position", "Angular Velocity", "Last Rotation", "Last Aim Direction", "Last Aim Position"};
+    generateAttributesMenu($nodeName, $attrNameList, $lastLabels, $lastAttributes);
+    setParent ..;
+    setParent ..;
 
-/// AimDirection
-	string $aimDirMenu = `optionMenuGrp  -label "Aim Direction"`;
-	menuItem -l "None";
+    /// VIEWPORT ATTRIBUTES
+    frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "Viewport Channels" ;
+    columnLayout;
+    string $viewportAttributes[] = {"displayColorFrom"};
+    string $viewportLabels[] = {"Display Color"};
+    generateAttributesMenu($nodeName, $attrNameList, $viewportLabels, $viewportAttributes);
+    setParent ..;
+    setParent ..;
 
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 3 + " " + $aimDirMenu)  $aimDirMenu;
+    frameLayout -collapse 1 -borderVisible 0 -w 450 -l "Custom Attributes Export";
 
-/// Aim Position
+    attrControlGrp -attribute ($nodeName+".exportAttributes") "ExportAttributesCtrlGrp";
 
-	string $aimPosMenu = `optionMenuGrp -label "Aim Position"`;
-	menuItem -l "None";
-
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 4 + " " + $aimPosMenu)  $aimPosMenu;
-
-/// Aim Axis
-
-	string $aimAxisMenu = `optionMenuGrp -label "Aim Axis"`;
-	menuItem -l "None";
-
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 5 + " " + $aimAxisMenu)  $aimAxisMenu;
-
-/// Aim UP Axis
-
-	string $aimUpAxisMenu = `optionMenuGrp -label "Aim UpAxis"`;
-	menuItem -l "None";
-
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 6 + " " + $aimUpAxisMenu)  $aimUpAxisMenu;
-
-/// Aim world Up
-
-	string $aimWorldUpMenu = `optionMenuGrp -label "Aim WorldUp"`;
-	menuItem -l "None";
-
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 7 + " " + $aimWorldUpMenu)  $aimWorldUpMenu;
-
-setParent ..;
-setParent ..;
-
-///  INDEX
-frameLayout -collapse 0 -collapsable 0 -borderVisible 0 -w 450 -l "Index Channels" ;
-
-	columnLayout;
-	string $indexMenu = `optionMenuGrp -label "index"`;
-	menuItem -l "None";
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 8 + " " + $indexMenu)  $indexMenu;
-
-setParent ..;
-setParent ..;
-
-/// LAST ATTRIBUTES
-frameLayout -collapse 1 -collapsable 1 -borderVisible 0 -w 450 -l "Motion blur Channels (if left blank they will inherit above channels)" ;
-columnLayout;
-/// LAST SCALE
-	string $lastScaleMenu = `optionMenuGrp -label "Last Scale"`;
-	menuItem -l "None";
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-    optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 9 + " " + $lastScaleMenu)  $lastScaleMenu;
-
-/// LAST ROT
-	string $lastRotationMenu = `optionMenuGrp -label "Last Rotation"`;
-	menuItem -l "None";
-
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 10 + " " + $lastRotationMenu)  $lastRotationMenu;
-
-/// LAST Aim Direction
-	string $lastAimDirMenu = `optionMenuGrp -label "Last Aim Direction"`;
-	menuItem -l "None";
-
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 11 + " " + $lastAimDirMenu)  $lastAimDirMenu;
-
-/// LAST Aim Position
-	string $lastAimPosMenu = `optionMenuGrp  -label "Last Aim Position"`;
-	menuItem -l "None";
-
-    for ($multi in $multiList)
-    {
-		string $tok[];
-		tokenize $multi "[" $tok;
-		string $index = $tok[1];
-		$index = substituteAllString($index, "]", "");
-		string $attr = `getAttr ($nodeName+"."+$multi)`;
-       	 menuItem -label $attr;
-    }
-	optionMenuGrp -e -cc ("pioInstSwitchAttributeFrom " + $nodeName + " " + 12 + " " + $lastAimPosMenu)  $lastAimPosMenu;
-
-	setParent ..;
-	setParent ..;
-
-	if (`size($multiList)`)
-	{
-		optionMenuGrp -e -sl $scaleFrom $scaleMenu;
-		optionMenuGrp -e -sl $rotationType $rotationTypeMenu;
-		optionMenuGrp -e -sl $rotationFrom  $rotationMenu;
-		optionMenuGrp -e -sl $aimDirectionFrom $aimDirMenu;
-		optionMenuGrp -e -sl $aimPositionFrom $aimPosMenu;
-		optionMenuGrp -e -sl $aimAxisFrom $aimAxisMenu;
-		optionMenuGrp -e -sl $aimUpAxisFrom $aimUpAxisMenu;
-		optionMenuGrp -e -sl $aimWorldUpFrom $aimWorldUpMenu;
-		optionMenuGrp -e -sl $indexFrom  $indexMenu;
-		optionMenuGrp -e -sl $lastScaleFrom $lastScaleMenu;
-		optionMenuGrp -e -sl $lastRotationFrom  $lastRotationMenu;
-		optionMenuGrp -e -sl $lastAimDirectionFrom $lastAimDirMenu;
-		optionMenuGrp -e -sl $lastAimPositionFrom $lastAimPosMenu;
-
-	}
-
+    setParent ..;
+    setParent ..;
 }
 
-global proc pioInstSwitchAttributeFrom(string $nodeName, int $attr, string $menu)
+global proc pioInstForceUpdate(string $attrName)
 {
-	string $attrList[] = {	"scaleFrom",
-							"rotationType",
-							"rotationFrom",
-							"aimDirectionFrom",
-							"aimPositionFrom",
-							"aimAxisFrom",
-							"aimUpAxisFrom",
-							"aimWorldUpFrom",
-							"indexFrom",
-							"lastScaleFrom",
-							"lastRotationFrom",
-							"lastAimDirectionFrom",
-							"lastAimPositionFrom"
-							};
-	int $sel = `optionMenuGrp -q -sl $menu`;
-
-	setAttr ($nodeName+"."+$attrList[$attr]) ($sel-2);
-
+    string $nodeName = plugNode($attrName);
+    if (!`button -q -exists  pioInstReloadButton`)
+    {   rowLayout -nc 1 ;
+        button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioInstReloadButton;
+    }
 }
 
-global proc pioInstForceUpdate(string $nodeName)
+global proc  pioInstLogoHeader()
 {
-	$nodeName = pioStripNodeName ($nodeName);
-	if (!`button -q -exists  pioInstReloadButton`)
-	{	rowLayout -nc 1 ;
-		button -ebg true -bgc 1 0.678 0.125 -w 100 -l "---<Force Reload>---"  -c ("setAttr "+$nodeName+".forceReload  true") pioInstReloadButton;
-	}
+    if (!`symbolButton -q -exists  pioInstHeaderIcon`)
+    {   rowLayout -nc 2 ;
+        symbolButton -h 45 -w 235 -c "pioInstSwapAboutText()" -image "partioInstancer_logo.png" pioInstHeaderIcon;
+        text -fn "smallBoldLabelFont" -l "Partio Instancer!!" pioInstAboutText;
+    }
 }
-
-global proc  pioInstLogoHeader(string $nodeName)
-{
-	if (!`symbolButton -q -exists  pioInstHeaderIcon`)
-	{	rowLayout -nc 2 ;
-		symbolButton -h 45 -w 235 -c "pioInstSwapAboutText()" -image "partioInstancer_logo.png" pioInstHeaderIcon;
-		text -fn "smallBoldLabelFont" -l "Partio Instancer!!" pioInstAboutText;
-	}
-}
-
 
 global proc  pioInstSwapAboutText()
 {
+    string $text1 =  "Partio Instancer!!";
+    string $text2 =  "Partio Instancer by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2012";
 
-	string $text1 =  "Partio Instancer!!";
-	string $text2 =  "Partio Instancer by: \n John Cassella  (redpawfx)\n  with Luma-Pictures  2012";
-
-	string $text = `text -q -l pioInstAboutText`;
-	if (`gmatch $text "Partio Instancer!!"`)
-	{
-		text -e -l $text2  pioInstAboutText;
-	}
-	else
-	{
-		text -e -l $text1 pioInstAboutText;
-	}
-
+    string $text = `text -q -l pioInstAboutText`;
+    if (`gmatch $text "Partio Instancer!!"`)
+    {
+        text -e -l $text2  pioInstAboutText;
+    }
+    else
+    {
+        text -e -l $text1 pioInstAboutText;
+    }
 }
-
-
-
-

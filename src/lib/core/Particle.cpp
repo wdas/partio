@@ -40,7 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <iostream>
 #include <string>
 #include <cassert>
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
 //ParticlesDataMutable::~ParticlesDataMutable()
 //{}
@@ -124,5 +124,4 @@ print(const ParticlesData* particles)
     }
 }
 
-
-}
+EXIT_PARTIO_NAMESPACE

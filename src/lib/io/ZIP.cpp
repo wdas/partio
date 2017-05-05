@@ -49,7 +49,7 @@ extern "C"{
 
 #include "ZIP.h"
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
 
     
@@ -616,4 +616,5 @@ Gzip_Out(const std::string& filename,std::ios::openmode mode)
 //#####################################################################
 
 #endif
-} // namespace Partio
+
+EXIT_PARTIO_NAMESPACE

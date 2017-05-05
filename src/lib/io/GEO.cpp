@@ -44,8 +44,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <memory>
 
 
-namespace Partio
-{
+ENTER_PARTIO_NAMESPACE
 
 using namespace std;
 
@@ -326,4 +325,4 @@ bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed)
     return true;
 }
 
-}
+EXIT_PARTIO_NAMESPACE

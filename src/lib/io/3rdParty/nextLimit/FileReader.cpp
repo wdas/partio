@@ -15,6 +15,8 @@ static int64_t PGetFilePointer(FILE* fp) { return ftello64(fp); }
 
 #define FILE_READER_CACHE_SIZE		(1024*1024)
 
+ENTER_PARTIO_NAMESPACE
+
 FileReader::FileReader()
 {
 	m_fp = NULL;
@@ -139,3 +141,5 @@ const void* FileReader::GetBuffer(uint32_t* availableBytes)
 	*availableBytes = m_cacheLen - (int)cacheOffset;
 	return m_cache + cacheOffset;
 }
+
+EXIT_PARTIO_NAMESPACE

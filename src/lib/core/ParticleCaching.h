@@ -36,9 +36,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifndef _ParticleCaching_h_
 #define _ParticleCaching_h_
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
+
 class Particles;
 void freeCached(ParticlesInfo* particles);
-}
+
+EXIT_PARTIO_NAMESPACE
 
 #endif

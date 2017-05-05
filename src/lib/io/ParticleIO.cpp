@@ -39,7 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "../Partio.h"
 #include "readers.h"
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 using namespace std;
 
 // reader and writer code
@@ -182,4 +182,4 @@ write(const char* c_filename,const ParticlesData& particles,const bool forceComp
     (*i->second)(c_filename,particles,forceCompressed || endsWithGz);
 }
 
-} // namespace Partio
+EXIT_PARTIO_NAMESPACE

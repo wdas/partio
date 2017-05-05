@@ -85,27 +85,33 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <PartioIterator.h>
 
 #include "partio4MayaShared.h"
-#include "iconArrays.h"
+
+enum {
+	PARTIO_DRAW_STYLE_POINTS = 0,
+	PARTIO_DRAW_STYLE_RADIUS,
+	PARTIO_DRAW_STYLE_DISK,
+    PARTIO_DRAW_STYLE_BOUNDING_BOX,
+	PARTIO_DRAW_STYLE_SPHERE,
+	PARTIO_DRAW_STYLE_VELOCITY,
+};
 
 class partioVizReaderCache
 {
 public:
     partioVizReaderCache();
+	void clear();
     MBoundingBox bbox;
-    int dList;
-    Partio::ParticlesDataMutable* particles;
-    Partio::ParticleAttribute positionAttr;
-    Partio::ParticleAttribute colorAttr;
-    Partio::ParticleAttribute opacityAttr;
-    Partio::ParticleAttribute radiusAttr;
-	Partio::ParticleAttribute incandescenceAttr;
-    float* rgb;
-    float* rgba;
-    MFloatArray radius;
-    float* flipPos;
-
+    PARTIO::ParticlesDataMutable* particles;
+    PARTIO::ParticleAttribute positionAttr;
+    PARTIO::ParticleAttribute colorAttr;
+    PARTIO::ParticleAttribute opacityAttr;
+    PARTIO::ParticleAttribute radiusAttr;
+	PARTIO::ParticleAttribute incandescenceAttr;
+	PARTIO::ParticleAttribute normalAttr;
+    std::vector<float> rgba;
+    std::vector<float> radius;
+	std::vector<float> normal;
 };
-
 
 class partioVisualizerUI : public MPxSurfaceShapeUI
 {
@@ -113,16 +119,14 @@ public:
 
     partioVisualizerUI();
     virtual ~partioVisualizerUI();
-    virtual void draw(const MDrawRequest & request, M3dView & view) const;
-    virtual void getDrawRequests(const MDrawInfo & info, bool objectAndActiveOnly, MDrawRequestQueue & requests);
-    void 	drawBoundingBox() const;
-    void    drawBillboardCircleAtPoint(MVector position, float radius, int num_segments, int drawType) const;
-    void 	drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
-    static void * creator();
-    virtual bool	select( MSelectInfo &selectInfo,
-                         MSelectionList &selectionList,
-                         MPointArray &worldSpaceSelectPts ) const;
-
+    virtual void draw(const MDrawRequest& request, M3dView& view) const;
+    virtual void getDrawRequests(const MDrawInfo& info, bool objectAndActiveOnly, MDrawRequestQueue& requests);
+    void drawBoundingBox() const;
+    void drawPartio(partioVizReaderCache* pvCache, int drawStyle) const;
+    static void* creator();
+    virtual bool select(MSelectInfo &selectInfo,
+                        MSelectionList &selectionList,
+                        MPointArray &worldSpaceSelectPts) const;
 };
 
 class partioVisualizer : public MPxSurfaceShape
@@ -147,69 +151,65 @@ public:
     MCallbackId partioVisualizerImportCallback;
     MCallbackId partioVisualizerReferenceCallback;
 
-    static MObject  time;
-	static MObject  aByFrame;
-    static MObject  aSize;         // The size of the logo
-    static MObject  aDrawSkip;
-    static MObject  aFlipYZ;
-    static MObject 	aUpdateCache;
-    static MObject 	aCacheDir;
-    static MObject 	aCacheFile;
-    static MObject 	aUseTransform;
-    static MObject 	aCacheActive;
-    static MObject 	aCacheOffset;
-    static MObject  aCacheStatic;
-    static MObject 	aCacheFormat;
-    static MObject 	aJitterPos;
-    static MObject 	aJitterFreq;
-    static MObject 	aPartioAttributes;
-    static MObject  aColorFrom;
-    static MObject  aAlphaFrom;
-	static MObject  aIncandFrom;
-    static MObject  aRadiusFrom;
-    static MObject  aPointSize;
-    static MObject  aDefaultPointColor;
-    static MObject  aDefaultAlpha;
-    static MObject  aDefaultRadius;
-    static MObject  aInvertAlpha;
-    static MObject  aDrawStyle;
-    static MObject  aForceReload;
-    static MObject  aRenderCachePath;
-
+    static MObject time;
+	static MObject aByFrame;
+    static MObject aSize;         // The size of the logo
+    static MObject aDrawSkip;
+    static MObject aFlipYZ;
+    static MObject aUpdateCache;
+    static MObject aCacheDir;
+    static MObject aCacheFile;
+    static MObject aUseTransform;
+    static MObject aCacheActive;
+    static MObject aCacheOffset;
+    static MObject aCacheStatic;
+    static MObject aCacheFormat;
+    static MObject aJitterPos;
+    static MObject aJitterFreq;
+    static MObject aPartioAttributes;
+	static MObject aVelocityFrom;
+	static MObject aAccelerationFrom;
+    static MObject aColorFrom;
+    static MObject aAlphaFrom;
+	static MObject aIncandFrom;
+    static MObject aRadiusFrom;
+	static MObject aNormalFrom;
+    static MObject aPointSize;
+    static MObject aDefaultPointColor;
+    static MObject aDefaultAlpha;
+    static MObject aDefaultRadius;
+    static MObject aInvertAlpha;
+    static MObject aDrawStyle;
+    static MObject aForceReload;
+    static MObject aRenderCachePath;
 
     static	MTypeId			id;
     float 					multiplier;
     bool 					cacheChanged;
     partioVizReaderCache  	pvCache;
 	int drawError;
-
-
+	static MString drawDbClassification;
 private:
-
     MString mLastFileLoaded;
     MString mLastPath;
     MString mLastFile;
     MString mLastExt;
     bool mLastStatic;
-    int mLastColorFromIndex;
-    int mLastAlphaFromIndex;
-    int mLastRadiusFromIndex;
-	int mLastIncandFromIndex;
+    MString mLastColorFromIndex;
+    MString mLastAlphaFromIndex;
+    MString mLastRadiusFromIndex;
+	MString mLastIncandFromIndex;
+	MString mLastNormalFromIndex;
     MFloatVector mLastColor;
     float mLastAlpha;
     bool mLastInvertAlpha;
     float mLastRadius;
     bool mLastFlipStatus;
     bool mFlipped;
-    bool  frameChanged;
+    bool mFrameChanged;
     MStringArray attributeList;
-
-
 protected:
-
     int dUpdate;
-    GLuint dList;
-
 };
 
 #endif

@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <cassert>
 #include <iostream>
 
-using namespace Partio;
+ENTER_PARTIO_NAMESPACE
 
 ParticleHeaders::
 ParticleHeaders()
@@ -201,3 +201,4 @@ dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
     assert(false);
 }
 
+EXIT_PARTIO_NAMESPACE

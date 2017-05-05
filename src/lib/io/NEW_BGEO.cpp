@@ -48,7 +48,7 @@ infringement.
 #include <cstring>
 #include <Partio.h>
 
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
 struct BGEOAttributeType:public JSONParser<BGEOAttributeType>
 {
@@ -329,7 +329,7 @@ struct BGEOMainParser:public JSONParser<BGEOMainParser>
     int64 pointcount,vertexcount,primitivecount;
     Partio::ParticlesDataMutable* particles;
 
-    BGEOMainParser(JSONParserState& state,::Partio::ParticlesDataMutable* particles)
+    BGEOMainParser(JSONParserState& state, ParticlesDataMutable* particles)
         :JSONParser<BGEOMainParser>(state),particles(particles)
     {}
 
@@ -439,4 +439,4 @@ ParticlesDataMutable*  testRead(const char* filename)
     return particles;
 }
 
-}
+EXIT_PARTIO_NAMESPACE

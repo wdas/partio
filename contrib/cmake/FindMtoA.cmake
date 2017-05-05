@@ -14,9 +14,31 @@ find_package(PackageHandleStandardArgs)
 ## Obtain MtoA install location
 ##
 find_path(MTOA_LOCATION include/render/AOV.h
-    "$ENV{MTOA_ROOT}"
+    HINTS ENV MTOA_ROOT
     NO_DEFAULT_PATH
     NO_SYSTEM_ENVIRONMENT_PATH)
+
+if(NOT MTOA_LOCATION)
+    # mtd file lives with the plugin and has consistent cross-platform extension
+    find_path(_plugin_path mtoa.mtd
+        HINTS ENV MAYA_PLUG_IN_PATH
+        NO_DEFAULT_PATH
+        NO_SYSTEM_ENVIRONMENT_PATH)
+    if(_plugin_path)
+        get_filename_component(MTOA_LOCATION ${_plugin_path} PATH)
+    endif()
+endif()
+
+if(NOT MTOA_LOCATION)
+    # mtd file lives with the plugin and has consistent cross-platform extension
+    find_path(_plugin_path mtoa_shaders.mtd
+        HINTS ENV ARNOLD_PLUGIN_PATH
+        NO_DEFAULT_PATH
+        NO_SYSTEM_ENVIRONMENT_PATH)
+    if(_plugin_path)
+        get_filename_component(MTOA_LOCATION ${_plugin_path} PATH)
+    endif()
+endif()
 
 find_package_handle_standard_args(MtoA
     REQUIRED_VARS MTOA_LOCATION)
@@ -37,6 +59,6 @@ if(MTOA_FOUND)
     set(MTOA_INCLUDE_DIR "${MTOA_LOCATION}/include"
         CACHE STRING "MtoA include path")
         message(STATUS "MTOA location: ${MTOA_LOCATION}")
-		message(STATUS "MTOA LIB dir:  ${MTOA_mtoa_api_LIBRARY}")
+		message(STATUS "MTOA LIB:      ${MTOA_mtoa_api_LIBRARY}")
 		message(STATUS "MTOA INCLUDE:  ${MTOA_INCLUDE_DIR}")
 endif()

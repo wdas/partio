@@ -46,8 +46,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include "KdTree.h"
 
-
-using namespace Partio;
+ENTER_PARTIO_NAMESPACE
 
 ParticlesSimple::
 ParticlesSimple()
@@ -353,3 +352,4 @@ indexedStrs(const ParticleAttribute& attr) const
     return table.strings;
 }
 
+EXIT_PARTIO_NAMESPACE

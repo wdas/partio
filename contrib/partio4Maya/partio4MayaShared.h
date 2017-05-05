@@ -65,8 +65,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <maya/MGlobal.h>
 #include <maya/MStringArray.h>
 #include <maya/MTime.h>
+#include <maya/MBoundingBox.h>
 
-#include "iconArrays.h"
 #include "Partio.h"
 
 extern const int kTableMask;
@@ -87,6 +87,7 @@ public:
     static MString 	setExt(short extNum);
     static void 	buildSupportedExtensionList(std::map<short,MString> &formatExtMap,bool write);
     static void 	drawPartioLogo(float multiplier);
+    static MBoundingBox partioLogoBoundingBox();
     static MVector 	jitterPoint(int id, float freq, float offset, float jitterMag);
     static float  	noiseAtValue( float x);
     static void   	initTable( long seed );

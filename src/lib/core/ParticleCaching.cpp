@@ -38,7 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "../Partio.h"
 
 //#####################################################################
-namespace Partio{
+ENTER_PARTIO_NAMESPACE
 
 namespace
 {
@@ -118,4 +118,4 @@ void endCachedAccess(ParticlesData* particles)
     // TODO: for future use
 }
 
-} // namespace Partio
+EXIT_PARTIO_NAMESPACE

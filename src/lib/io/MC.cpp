@@ -48,8 +48,7 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 #include <cassert>
 #include <memory>
 
-namespace Partio
-{
+ENTER_PARTIO_NAMESPACE
 //#define PartioBIG_ENDIAN
 
 using namespace std;
@@ -363,4 +362,4 @@ int main(){
 
 */
 
-}
+EXIT_PARTIO_NAMESPACE
