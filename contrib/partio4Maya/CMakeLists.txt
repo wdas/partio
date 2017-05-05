@@ -90,15 +90,17 @@ if (WIN32)
     set_target_properties(${PLUGIN_NAME} PROPERTIES LINK_FLAGS "/export:initializePlugin /export:uninitializePlugin")
 endif ()
 
+find_path(GLEW_INCLUDE_DIR NAMES GL/glew.h)
 find_library(GLEW_STATIC_LIBRARY NAMES libGLEW.a)
 
-TARGET_LINK_LIBRARIES(${PLUGIN_NAME}
+target_link_libraries(${PLUGIN_NAME}
                       ${GLEW_STATIC_LIBRARY}
                       ${ZLIB}
                       ${PARTIO_LIBRARIES}
                       ${MAYA_LIBS}
                       ${OPENGL_gl_LIBRARY}
                       ${OPENGL_glu_LIBRARY})
+target_include_directories(${PLUGIN_NAME} PRIVATE ${GLEW_INCLUDE_DIR})
 
 file(GLOB PARTIO4MAYA_SCRIPTS "scripts/*.mel")
 file(GLOB PARTIO4MAYA_ICONS "icons/*")

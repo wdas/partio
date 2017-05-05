@@ -22,4 +22,3 @@ DLLEXPORT void deinitializeExtension(CExtension& extension)
 }
 
 }
-

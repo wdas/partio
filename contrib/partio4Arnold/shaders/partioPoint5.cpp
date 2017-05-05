@@ -50,7 +50,7 @@ namespace {
                 AiSamplerDestroy(sampler);
             }
 
-            sampler = AiSampler(AiNodeGetInt(node, "occSamples"), 2);
+            sampler = AiSampler(static_cast<uint32_t>(AiNodeGetInt(node, "occSamples")), 2, 2);
             aov_emission = AtString(AiNodeGetStr(node, "aov_emission"));
         }
 
@@ -67,40 +67,43 @@ namespace {
 
     void setup_opacity(AtShaderGlobals* sg, AtNode* node)
     {
+        const static AtString opacityPP("opacityPP");
+        AtRGB out_opacity;
         if (AiShaderEvalParamBool(p_overrideOpacityPP)) {
-            sg->out_opacity = AiShaderEvalParamRGB(p_particleOpacity);
-        } else if (AiUDataGetFlt("opacityPP", &sg->out_opacity.r)) {
-            sg->out_opacity.b = sg->out_opacity.g = sg->out_opacity.r;
+            out_opacity = AiShaderEvalParamRGB(p_particleOpacity);
+        } else if (AiUDataGetFlt(opacityPP, out_opacity.r)) {
+            out_opacity.b = out_opacity.g = out_opacity.r;
         }
-        AiColorClipToZero(sg->out_opacity);
+#warning TODO!
+        AiColorClipToZero(out_opacity);
     }
 }
 
 node_parameters
 {
-    AiParameterBOOL("overrideRgbPP", false);
+    AiParameterBool("overrideRgbPP", false);
     AiParameterRGB("particleColor", 1.0f, 1.0f, 1.0f);
-    AiParameterBOOL("overrideOpacityPP", false);
+    AiParameterBool("overrideOpacityPP", false);
     AiParameterRGB("particleOpacity", 1.0f, 1.0f, 1.0f);
-    AiParameterBOOL("doShadowOpacity", false);
-    AiParameterBOOL("useLighting", true);
-    AiParameterFLT("Kd", 0.8f);
-    AiParameterFLT("Ki", 1.0f);
-    AiParameterFLT("Ks", 1.0f);
-    AiParameterFLT("shiny", 10.0f);
-    AiParameterFLT("KOcc", 1.0f);
-    AiParameterINT("occSamples", 5);
-    AiParameterFLT("occSpread", 90.0f);
-    AiParameterFLT("occFalloff", 0.0f);
-    AiParameterFLT("occMinDist", 0.0f);
-    AiParameterFLT("occMaxDist", 2.0f);
-    AiParameterBOOL("invertOcc", false);
+    AiParameterBool("doShadowOpacity", false);
+    AiParameterBool("useLighting", true);
+    AiParameterFlt("Kd", 0.8f);
+    AiParameterFlt("Ki", 1.0f);
+    AiParameterFlt("Ks", 1.0f);
+    AiParameterFlt("shiny", 10.0f);
+    AiParameterFlt("KOcc", 1.0f);
+    AiParameterInt("occSamples", 5);
+    AiParameterFlt("occSpread", 90.0f);
+    AiParameterFlt("occFalloff", 0.0f);
+    AiParameterFlt("occMinDist", 0.0f);
+    AiParameterFlt("occMaxDist", 2.0f);
+    AiParameterBool("invertOcc", false);
     AiParameterRGB("emission", 0.0f, 0.0f, 0.0f);
-    AiParameterBOOL("emColorFromIncand", false);
-    AiParameterSTR("aov_emission", "emission");
+    AiParameterBool("emColorFromIncand", false);
+    AiParameterStr("aov_emission", "emission");
 
-    AiMetaDataSetStr(mds, NULL, "maya.classification", "shader/surface");
-    AiMetaDataSetStr(mds, NULL, "maya.name", "partioPoint");
+    AiMetaDataSetStr(nentry, nullptr, "maya.classification", "shader/surface");
+    AiMetaDataSetStr(nentry, nullptr, "maya.name", "partioPoint");
     //AiMetaDataSetInt(mds, NULL, "maya.id", NULL);
 }
 
@@ -138,8 +141,8 @@ shader_evaluate
     const ShaderData* data = (const ShaderData*)AiNodeGetLocalData(node);
 
     sg->out_opacity = AI_RGB_WHITE;
-    sg->out.RGB = AI_RGB_BLACK;
-    sg->out.RGBA.a = 1.0f;
+    sg->out.RGB() = AI_RGB_BLACK;
+    sg->out.RGBA().a = 1.0f;
 
     setup_opacity(sg, node);
 
@@ -157,18 +160,18 @@ shader_evaluate
         const float Kd = AiShaderEvalParamFlt(p_Kd);
         const float Ki = AiShaderEvalParamFlt(p_Ki);
         if (Kd > 0.0f) {
-            lighting += AiDirectDiffuse(&sg->Nf, sg) * Kd;
+            lighting += AiDirectDiffuse(sg->Nf, sg) * Kd;
         }
         if (Ki > 0.0f) {
-            lighting += AiIndirectDiffuse(&sg->Nf, sg) * Ki;
+            lighting += AiIndirectDiffuse(sg->Nf, sg) * Ki;
         }
 
-        sg->out.RGB *= lighting;
+        sg->out.RGB() *= lighting;
 
         const float Ks = AiShaderEvalParamFlt(p_Ks);
         if (Ks > 0.0f) {
             const float shiny_val = AiShaderEvalParamFlt(p_shiny);
-            const float shiny = CLAMP((shiny_val * shiny_val), 2.0f, 100000.0f);
+            const float shiny = AiClamp((shiny_val * shiny_val), 2.0f, 100000.0f);
             sg->out.RGB += AiStretchedPhongIntegrate(&sg->Nf, sg, shiny) * Ks;
         }
     }
@@ -180,8 +183,8 @@ shader_evaluate
         const float spread = AiShaderEvalParamFlt(p_occSpread);
         const float falloff = AiShaderEvalParamFlt(p_occFalloff);
 
-        const float radians = CLAMP(spread, 0.0f, 90.0f) * AI_DTOR;
-        AtRGB occ = AiOcclusion(&sg->Nf, &sg->Ngf, sg, minDist, maxDist, radians, falloff, data->sampler, 0) * KOcc;
+        const float radians = AiClamp(spread, 0.0f, 90.0f) * AI_DTOR;
+        AtRGB occ = AiOcclusion(sg->Nf, sg->Ngf, sg, minDist, maxDist, radians, falloff, data->sampler, 0) * KOcc;
 
         // normal values of occlusion are flipped  so allow us to use either one..
         if (!AiShaderEvalParamBool(p_invertOcc)) {
@@ -191,16 +194,18 @@ shader_evaluate
         }
 
         AiColorClipToZero(occ);
-        sg->out.RGB *= occ;
+        sg->out.RGB() *= occ;
     }
+
+    const static AtString incandescencePP("incandescencePP");
 
     AtRGB emission_color = AI_RGB_WHITE;
     if (AiShaderEvalParamBool(p_emFromIncand)) {
-        if (!AiUDataGetRGB("incandescencePP", &emission_color))
-            AiUDataGetVec("incandescencePP", reinterpret_cast<AtVector*>(&emission_color));
+        if (!AiUDataGetRGB(incandescencePP, emission_color))
+            AiUDataGetVec(incandescencePP, reinterpret_cast<AtVector&>(emission_color));
     }
     emission_color *= AiShaderEvalParamRGB(p_emission);
     AiColorClipToZero(emission_color);
-    sg->out.RGB += emission_color;
+    sg->out.RGB() += emission_color;
     AiAOVSetRGB(sg, data->aov_emission, emission_color);
 }
