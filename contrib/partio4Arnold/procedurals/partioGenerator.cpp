@@ -15,6 +15,7 @@
 #include <sstream>
 #include <utility>
 #include <sys/stat.h>
+#include <boost/regex.hpp>
 
 template<typename T>
 void getParam(T&, AtNode*, const char*)
@@ -165,6 +166,54 @@ struct PartioData {
         {
             AiMsgInfo("[partioGenerator] %s cache doesn't exists.", arg_file.c_str());
             return false;
+        }
+    }
+
+    static bool isBuiltinAttribute(const std::string& channel)
+    {
+        return channel == "position" ||
+               channel == "velocity" ||
+               channel == "rgbPP" ||
+               channel == "incandescencePP" ||
+               channel == "opacityPP" ||
+               channel == "radiusPP";
+    }
+
+    void exportUserParam(AtNode* currentInstance, const PARTIO::ParticleAttribute& user,
+                         const std::vector<int>& validPointsVector, AtUInt32 pointCount)
+    {
+        if (user.type == PARTIO::FLOAT && user.count == 1)
+        {
+            AiNodeDeclare(currentInstance, user.name.c_str(), "uniform Float");
+            AtArray* arnoldArray = AiArrayAllocate(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_FLOAT);
+            for (AtUInt32 i = 0; i < pointCount; ++i)
+            {
+                const int id = validPointsVector[i];
+                const float* partioFLOAT = points->data<float>(user, static_cast<size_t>(id));
+                float floatVal = partioFLOAT[0];
+                AiArraySetFlt(arnoldArray, static_cast<AtUInt32>(i), floatVal);
+            }
+
+            AiNodeSetArray(currentInstance, user.name.c_str(), arnoldArray);
+            AiMsgDebug("[partioGenerator] %s array set", user.name.c_str());
+        }
+        else if (user.type == PARTIO::VECTOR || (user.type == PARTIO::FLOAT && user.count == 3))
+        {
+            AiNodeDeclare(currentInstance, user.name.c_str(), "uniform Vector");
+            AtArray* arnoldArray = AiArrayAllocate(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_VECTOR);
+            for (AtUInt32 i = 0; i < pointCount; ++i)
+            {
+                const int id = validPointsVector[i];
+                const float* partioVEC = points->data<float>(user, static_cast<size_t>(id));
+                AtVector vecVal;
+                vecVal.x = partioVEC[0];
+                vecVal.y = partioVEC[1];
+                vecVal.z = partioVEC[2];
+                AiArraySetVec(arnoldArray, static_cast<AtUInt32>(i), vecVal);
+            }
+
+            AiNodeSetArray(currentInstance, user.name.c_str(), arnoldArray);
+            AiMsgDebug("[partioGenerator] %s array set", user.name.c_str());
         }
     }
 
@@ -479,50 +528,39 @@ struct PartioData {
         std::string part;
         while (os >> part)
         {
+            bool is_glob = false;
+            for (size_t it = part.find('*'); it != std::string::npos; it = part.find('*', it + 2))
+            {
+                part.replace(it, it + 1, ".*");
+                is_glob = true;
+            }
             PARTIO::ParticleAttribute user;
-            if (points->attributeInfo(part.c_str(), user))
+            if (is_glob)
+            {
+                boost::regex reg(part);
+                const int numAttributes = points->numAttributes();
+                for (int i = 0; i < numAttributes; ++i)
+                {
+                    if (points->attributeInfo(i, user))
+                    {
+                        if (isBuiltinAttribute(user.name))
+                            continue;
+                        if (!boost::regex_match(user.name, reg))
+                            continue;
+                        if (AiNodeLookUpUserParameter(currentInstance, user.name.c_str()) != 0)
+                            continue;
+                        exportUserParam(currentInstance, user, validPointsVector, static_cast<AtUInt32>(pointCount));
+                    }
+                }
+            }
+            else if (points->attributeInfo(part.c_str(), user))
             {
                 // we don't want to double export these
-                if (user.name != "position" &&
-                    user.name != "velocity" &&
-                    user.name != "rgbPP" &&
-                    user.name != "incandescencePP" &&
-                    user.name != "opacityPP" &&
-                    user.name != "radiusPP")
+                if (!isBuiltinAttribute(part))
                 {
-                    if (user.type == PARTIO::FLOAT && user.count == 1)
-                    {
-                        AiNodeDeclare(currentInstance, part.c_str(), "uniform Float");
-                        AtArray* arnoldArray = AiArrayAllocate(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_FLOAT);
-                        for (int i = 0; i < pointCount; ++i)
-                        {
-                            const int id = validPointsVector[i];
-                            const float* partioFLOAT = points->data<float>(user, static_cast<size_t>(id));
-                            float floatVal = partioFLOAT[0];
-                            AiArraySetFlt(arnoldArray, static_cast<AtUInt32>(i), floatVal);
-                        }
-
-                        AiNodeSetArray(currentInstance, user.name.c_str(), arnoldArray);
-                        AiMsgDebug("[partioGenerator] %s array set", user.name.c_str());
-                    }
-                    else if (user.type == PARTIO::VECTOR || (user.type == PARTIO::FLOAT && user.count == 3))
-                    {
-                        AiNodeDeclare(currentInstance, part.c_str(), "uniform Vector");
-                        AtArray* arnoldArray = AiArrayAllocate(static_cast<AtUInt32>(pointCount), 1, AI_TYPE_VECTOR);
-                        for (int i = 0; i < pointCount; ++i)
-                        {
-                            const int id = validPointsVector[i];
-                            const float* partioVEC = points->data<float>(user, static_cast<size_t>(id));
-                            AtVector vecVal;
-                            vecVal.x = partioVEC[0];
-                            vecVal.y = partioVEC[1];
-                            vecVal.z = partioVEC[2];
-                            AiArraySetVec(arnoldArray, static_cast<AtUInt32>(i), vecVal);
-                        }
-
-                        AiNodeSetArray(currentInstance, user.name.c_str(), arnoldArray);
-                        AiMsgDebug("[partioGenerator] %s array set", user.name.c_str());
-                    }
+                    if (AiNodeLookUpUserParameter(currentInstance, part.c_str()) != 0)
+                        continue;
+                    exportUserParam(currentInstance, user, validPointsVector, static_cast<AtUInt32>(pointCount));
                 }
                 else
                     AiMsgWarning("[partioGenerator] caught double export call for %s, skipping....", part.c_str());

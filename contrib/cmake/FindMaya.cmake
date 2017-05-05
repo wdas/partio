@@ -140,12 +140,11 @@ foreach(version ${_maya_TEST_VERSIONS})
     endif()
 endforeach(version)
 
-
 # search for maya executable within the MAYA_LOCATION and PATH env vars and test paths
 find_program(MAYA_EXECUTABLE maya
     PATHS $ENV{MAYA_LOCATION} ${MAYA_LOCATION} ${_maya_TEST_PATHS}
     PATH_SUFFIXES bin
-    #NO_SYSTEM_ENVIRONMENT_PATH
+    NO_SYSTEM_ENVIRONMENT_PATH
     DOC "Maya's executable path")
 
 if(MAYA_EXECUTABLE)

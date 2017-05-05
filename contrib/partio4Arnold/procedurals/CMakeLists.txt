@@ -35,7 +35,7 @@ if (UNIX)
     set(PLUGIN_SUFFIX ".so")
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
     set(SUFFIX ".so")
-    add_definitions(-Wall -Werror -Wextra)
+    add_definitions(-Wall -Wextra) # -Werror
 endif()
 
 include_directories(${STD_INCLUDES} ${ARNOLD_INCLUDE_DIR})
@@ -50,11 +50,24 @@ elseif (UNIX)
     set(PARTIO_LIB libpartio.a)
 endif ()
 
-add_library(${PLUGIN_NAME} SHARED "partioGenerator.cpp")
+# Boost for regex based features, gcc 4.8's regex is unstable
+set(Boost_USE_STATIC_LIBS ON)
+find_package(Boost
+        COMPONENTS regex)
+
+include_directories(${Boost_INCLUDE_DIR})
+
+if (ARNOLD_VERSION_ARCH_NUM VERSION_GREATER "4")
+    set(SRC partioGenerator5.cpp)
+else ()
+    set(SRC partioGenerator.cpp)
+endif ()
+
+add_library(${PLUGIN_NAME} SHARED ${SRC})
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ./ )
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
 
-target_link_libraries(${PLUGIN_NAME} ${PARTIO_LIBRARIES} ${ARNOLD_LIBRARY})
+target_link_libraries(${PLUGIN_NAME} ${PARTIO_LIBRARIES} ${ARNOLD_LIBRARY} ${Boost_LIBRARIES})
 
 set(PARTIO4ARNOLD_OUTPUT_PATH "arnold/procedurals")
 if (BUILD_PARTIO_ARNOLD)

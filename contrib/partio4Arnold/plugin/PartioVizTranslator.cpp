@@ -120,6 +120,7 @@ void CPartioVizTranslator::Export(AtNode* anode)
         ExportProcedural(anode, false);
 }
 
+#ifdef MTOA12
 void CPartioVizTranslator::ExportMotion(AtNode* anode, unsigned int step)
 {
     ExportMatrix(anode, step);
@@ -137,6 +138,12 @@ void CPartioVizTranslator::UpdateMotion(AtNode* anode, unsigned int step)
 {
     ExportMatrix(anode, step);
 }
+#elif MTOA14
+void CPartioVizTranslator::ExportMotion(AtNode* anode)
+{
+    ExportMatrix(anode);
+}
+#endif
 
 // Deprecated : Arnold support procedural instance, but it's not safe.
 //
@@ -146,7 +153,11 @@ AtNode* CPartioVizTranslator::ExportInstance(AtNode* instance, const MDagPath& m
 
     AiNodeSetStr(instance, "name", m_dagPath.partialPathName().asChar());
 
+#ifdef MTOA12
     ExportMatrix(instance, 0);
+#elif MTOA14
+    ExportMatrix(instance);
+#endif
 
     AiNodeSetPtr(instance, "node", masterNode);
     AiNodeSetBool(instance, "inherit_xform", false);
@@ -165,7 +176,11 @@ void CPartioVizTranslator::ExportShaders()
 {
     AiMsgWarning("[mtoa] Shaders untested with new multitranslator and standin code.");
     /// TODO: Test shaders with standins.
+#if MTOA12
     ExportPartioVizShaders(GetArnoldRootNode());
+#elif MTOA14
+    ExportPartioVizShaders(GetArnoldNode());
+#endif
 }
 
 void CPartioVizTranslator::ExportPartioVizShaders(AtNode* procedural)
@@ -177,7 +192,11 @@ void CPartioVizTranslator::ExportPartioVizShaders(AtNode* procedural)
     MPlug shadingGroupPlug = GetNodeShadingGroup(m_dagPath.node(), instanceNum);
     if (!shadingGroupPlug.isNull())
     {
+#if MTOA12
         AtNode* shader = ExportNode(shadingGroupPlug);
+#elif MTOA14
+        AtNode* shader = ExportConnectedNode(shadingGroupPlug);
+#endif
         if (shader != 0)
         {
             AiNodeSetPtr(procedural, "shader", shader);
@@ -187,31 +206,10 @@ void CPartioVizTranslator::ExportPartioVizShaders(AtNode* procedural)
         {
             AiMsgWarning("[mtoa] [translator %s] ShadingGroup %s has no surfaceShader input",
                          GetTranslatorName().asChar(), MFnDependencyNode(shadingGroupPlug.node()).name().asChar());
-            /*AiMsgWarning("[mtoa] ShadingGroup %s has no surfaceShader input.",
-                  fnDGNode.name().asChar());*/
             AiNodeSetPtr(procedural, "shader", 0);
         }
     }
 }
-
-// THIS MAY NOT REALLY BE NEEDED ANYMORE BUT LEAVING IT FOR NOW
-void CPartioVizTranslator::ExportBoundingBox(AtNode* procedural)
-{
-    MBoundingBox boundingBox = m_DagNode.boundingBox();
-    MPoint bbMin = boundingBox.min();
-    MPoint bbMax = boundingBox.max();
-
-    float minCoords[4];
-    float maxCoords[4];
-
-    bbMin.get(minCoords);
-    bbMax.get(maxCoords);
-
-    AiNodeSetPnt(procedural, "min", minCoords[0], minCoords[1], minCoords[2]);
-    AiNodeSetPnt(procedural, "max", maxCoords[0], maxCoords[1], maxCoords[2]);
-
-}
-
 
 AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
 {
@@ -219,20 +217,16 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
 
     AiNodeSetStr(procedural, "name", m_dagPath.partialPathName().asChar());
 
+#if MTOA12
     ExportMatrix(procedural, 0);
+#elif MTOA14
+    ExportMatrix(procedural);
+#endif
     ProcessRenderFlags(procedural);
-
     ExportPartioVizShaders(procedural);
-
 
     if (!update)
     {
-        /// TODO: figure out how to  use a  env variable to path just the .so name correctly
-        //MFileObject envProcFilePath;
-        //envProcFilePath.setRawPath("${MTOA_PROCEDURALS_PATH}");
-        //MString envProcPath =envProcFilePath.resolvedPath();
-        //MString dso = envProcPath+(MString("/partioGenerator.so"));
-
         MString dso = "[PARTIO_ARNOLD_PROCEDURAL]";
 
         // we add this here so we can add in a custom   particle reading procedural instead of the default one
@@ -386,26 +380,13 @@ AtNode* CPartioVizTranslator::ExportProcedural(AtNode* procedural, bool update)
             AiNodeDeclare(procedural, "arg_extraPPAttrs", "constant STRING");
             AiNodeSetStr(procedural, "arg_extraPPAttrs", m_customAttrs.asChar());
         }
-
-        /// right now because we're using  load at init, we don't need to export the bounding box
-        //ExportBoundingBox(procedural);
-
     }
     return procedural;
 }
 
-
 bool CPartioVizTranslator::fileCacheExists(const char* fileName)
 {
     struct stat fileInfo;
-    bool statReturn;
-    int intStat;
-
-    intStat = stat(fileName, &fileInfo);
-    if (intStat == 0)
-        statReturn = true;
-    else
-        statReturn = false;
-
-    return (statReturn);
+    int intStat = stat(fileName, &fileInfo);
+    return intStat == 0;
 }
