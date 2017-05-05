@@ -4,8 +4,8 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 2.4.6 )
 
 if(COMMAND cmake_policy)
-     cmake_policy(SET CMP0003 NEW)
-	 cmake_policy(SET CMP0015 NEW)  # to supress relative library directory warnings
+    cmake_policy(SET CMP0003 NEW)
+    cmake_policy(SET CMP0015 NEW)  # to supress relative library directory warnings
 endif(COMMAND cmake_policy)
 
 set(CMAKE_CXX_WARNING_LEVEL 4)
@@ -23,45 +23,44 @@ set(PLUGIN_NAME "partioShaders")
 set(CMAKE_PROJECT_NAME "partioShaders")
 
 if (APPLE)
-	set(PLUGIN_SUFFIX ".bundle")
-	set(CMAKE_SHARED_LIBRARY_SUFFIX ".bundle")
-	set(SUFFIX ".bundle")
+    set(PLUGIN_SUFFIX ".bundle")
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".bundle")
+    set(SUFFIX ".bundle")
 endif ()
 
 if (WIN32)
-	set(PLUGIN_SUFFIX ".dll")
-	set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
-	set(SUFFIX ".dll")
+    set(PLUGIN_SUFFIX ".dll")
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
+    set(SUFFIX ".dll")
 endif ()
 
 if (UNIX)
-	set(PLUGIN_SUFFIX ".so")
-	set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
-	set(SUFFIX ".so")
+    set(PLUGIN_SUFFIX ".so")
+    set(CMAKE_SHARED_LIBRARY_SUFFIX ".so")
+    set(SUFFIX ".so")
 endif ()
 
 set(PARTIO_INCLUDE ${INCLUDE_OUTPUT_PATH})
 set(PARTIO_LIBDIR  ${LIBRARY_OUTPUT_PATH})
 
-file(GLOB partio4ArnoldCPP "*.cpp")
-file(GLOB partio4ArnoldINCLUDES "*.h")
-
-include_directories(${STD_INCLUDES} ${partio4ArnoldINCLUDES} ${ARNOLD_INCLUDE_DIR}  ${PARTIO_INCLUDE})
-link_directories(${STD_LIB}  ${ARNOLD_LIBRARY}  ${PARTIO_LIBDIR} ${ZLIB_LIBRARY_DIR})
-
-set(TARGET_H ${partio4ArnoldINCLUDES})
-set(TARGET_SRC ${partio4ArnoldCPP})
-
-if (WIN32)
-	set(PARTIO_LIB partio)
-elseif (APPLE)
-	set(PARTIO_LIB libpartio.a)
-elseif (UNIX)
-	set(PARTIO_LIB libpartio.a)
+if (ARNOLD_VERSION_ARCH_NUM VERSION_GREATER "4")
+    set(TARGET_SRC Loader5.cpp partioCacherSampler5.cpp)# partioPoint5.cpp)
+else ()
+    set(TARGET_SRC Loader.cpp partioCacherSampler.cpp partioPoint.cpp)
 endif ()
 
+include_directories(${STD_INCLUDES} ${ARNOLD_INCLUDE_DIR}  ${PARTIO_INCLUDE})
+link_directories(${STD_LIB} ${ARNOLD_LIBRARY} ${PARTIO_LIBDIR} ${ZLIB_LIBRARY_DIR})
 
-add_library(${PLUGIN_NAME} SHARED ${TARGET_H} ${TARGET_SRC})
+if (WIN32)
+    set(PARTIO_LIB partio)
+elseif (APPLE)
+    set(PARTIO_LIB libpartio.a)
+elseif (UNIX)
+    set(PARTIO_LIB libpartio.a)
+endif ()
+
+add_library(${PLUGIN_NAME} SHARED ${TARGET_SRC})
 set_target_properties(${PLUGIN_NAME} PROPERTIES LIBRARY_OUTPUT_DIRECTORY ./)
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
 
