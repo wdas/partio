@@ -26,9 +26,6 @@ public:
     virtual bool Read(const SdfLayerBasePtr& layerBase,
                       const std::string& resolvedPath,
                       bool metadataOnly) const override;
-
-    virtual bool ReadFromString(const SdfLayerBasePtr& layerBase,
-                                const std::string& str) const override;
 protected:
     SDF_FILE_FORMAT_FACTORY_ACCESS;
 
