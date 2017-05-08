@@ -95,6 +95,11 @@ namespace {
         a.push_back(GfVec3f(v[0], v[1], v[2]));
     }
 
+    template <> inline
+    void _appendValue<long>(partio_t& points, const attr_t& attr, int id, VtArray<long>& a) {
+        a.push_back(*points->data<int>(attr, id));
+    }
+
     template <typename to> inline
     VtArray<to> _convertAttribute(partio_t& points, int numParticles, const attr_t& attr) {
         VtArray<to> a;
