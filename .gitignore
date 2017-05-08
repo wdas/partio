@@ -6,7 +6,6 @@
 *~
 *.o
 /*.kdev*
-*.cmake
 cmake_install.*
 *.make
 *.marks
