@@ -6,11 +6,6 @@
 
 #include <Partio.h>
 
-#include <memory>
-#include <exception>
-#include <sstream>
-
-
 PXR_NAMESPACE_OPEN_SCOPE
 
 TF_DEFINE_PUBLIC_TOKENS(
@@ -68,7 +63,6 @@ namespace {
             for (const auto& name : names) { ss << name << " "; }
             ss << ")";
             TF_WARN("[partIO] Required attribute %s can't be found with type %i", ss.str().c_str(), AT);
-            throw std::exception();
         }
         return false;
     }
@@ -155,52 +149,47 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
         return false;
     }
 
-    // Cleaner code structure is preferred. We will only see performance drops when something fails.
-    try {
-        PARTIO::ParticleAttribute attr;
-        _getAttribute<PARTIO::VECTOR>(points, _positionNames, attr, true);
-        pointsSchema.GetPointsAttr().Set(_convertAttribute<GfVec3f>(points, pointCount, attr));
+    PARTIO::ParticleAttribute attr;
+    if (!_getAttribute<PARTIO::VECTOR>(points, _positionNames, attr, true)) { return false; }
+    pointsSchema.GetPointsAttr().Set(_convertAttribute<GfVec3f>(points, pointCount, attr));
 
-        if (_getAttribute<PARTIO::VECTOR>(points, _velocityNames, attr)) {
-            pointsSchema.GetVelocitiesAttr().Set(_convertAttribute<GfVec3f>(points, pointCount, attr));
-        }
-
-        if (_getAttribute<PARTIO::FLOAT>(points, _radiusNames, attr)) {
-            auto radii = _convertAttribute<float>(points, pointCount, attr);
-            for (auto& radius : radii) {
-                radius = radius * 2.0f;
-            }
-            pointsSchema.GetWidthsAttr().Set(radii);
-        }
-
-        if (_getAttribute<PARTIO::INT>(points, _idNames, attr)) {
-            pointsSchema.GetIdsAttr().Set(_convertAttribute<long>(points, pointCount, attr));
-        }
-
-        const auto numAttributes = points->numAttributes();
-
-        for (auto i = decltype(numAttributes){0}; i < numAttributes; ++i) {
-            if (!points->attributeInfo(i, attr) || _isBuiltinAttribute(attr.name)) { continue; }
-
-            if (_attributeIsType<PARTIO::INT>(attr)) {
-                _addAttr(pointsSchema, attr.name, SdfValueTypeNames->IntArray,
-                         _convertAttribute<int>(points, pointCount, attr));
-            } else if (_attributeIsType<PARTIO::FLOAT>(attr)) {
-                _addAttr(pointsSchema, attr.name, SdfValueTypeNames->FloatArray,
-                         _convertAttribute<float>(points, pointCount, attr));
-            } else if (_attributeIsType<PARTIO::VECTOR>(attr)) {
-                _addAttr(pointsSchema, attr.name, SdfValueTypeNames->Vector3fArray,
-                         _convertAttribute<GfVec3f>(points, pointCount, attr));
-            } else if (attr.type == PARTIO::FLOAT && attr.count == 4) {
-                _addAttr(pointsSchema, attr.name, SdfValueTypeNames->Float4Array,
-                         _convertAttribute<GfVec4f>(points, pointCount, attr));
-            }
-        }
-
-        TfDynamic_cast<SdfLayerHandle>(layerBase)->TransferContent(layer);
-    } catch (...) {
-        return false;
+    if (_getAttribute<PARTIO::VECTOR>(points, _velocityNames, attr)) {
+        pointsSchema.GetVelocitiesAttr().Set(_convertAttribute<GfVec3f>(points, pointCount, attr));
     }
+
+    if (_getAttribute<PARTIO::FLOAT>(points, _radiusNames, attr)) {
+        auto radii = _convertAttribute<float>(points, pointCount, attr);
+        for (auto& radius : radii) {
+            radius = radius * 2.0f;
+        }
+        pointsSchema.GetWidthsAttr().Set(radii);
+    }
+
+    if (_getAttribute<PARTIO::INT>(points, _idNames, attr)) {
+        pointsSchema.GetIdsAttr().Set(_convertAttribute<long>(points, pointCount, attr));
+    }
+
+    const auto numAttributes = points->numAttributes();
+
+    for (auto i = decltype(numAttributes){0}; i < numAttributes; ++i) {
+        if (!points->attributeInfo(i, attr) || _isBuiltinAttribute(attr.name)) { continue; }
+
+        if (_attributeIsType<PARTIO::INT>(attr)) {
+            _addAttr(pointsSchema, attr.name, SdfValueTypeNames->IntArray,
+                     _convertAttribute<int>(points, pointCount, attr));
+        } else if (_attributeIsType<PARTIO::FLOAT>(attr)) {
+            _addAttr(pointsSchema, attr.name, SdfValueTypeNames->FloatArray,
+                     _convertAttribute<float>(points, pointCount, attr));
+        } else if (_attributeIsType<PARTIO::VECTOR>(attr)) {
+            _addAttr(pointsSchema, attr.name, SdfValueTypeNames->Vector3fArray,
+                     _convertAttribute<GfVec3f>(points, pointCount, attr));
+        } else if (attr.type == PARTIO::FLOAT && attr.count == 4) {
+            _addAttr(pointsSchema, attr.name, SdfValueTypeNames->Float4Array,
+                     _convertAttribute<GfVec4f>(points, pointCount, attr));
+        }
+    }
+
+    TfDynamic_cast<SdfLayerHandle>(layerBase)->TransferContent(layer);
 
     return true;
 }
