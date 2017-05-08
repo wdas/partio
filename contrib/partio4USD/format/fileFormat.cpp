@@ -71,6 +71,7 @@ namespace {
     const attr_names_t _velocityNames = {"velocity", "Velocity"};
     const attr_names_t _radiusNames = {"radius", "radiusPP"};
     const attr_names_t _idNames = {"id", "particleId"};
+    const SdfPath _pointsPath("/points");
 
     inline
     bool _isBuiltinAttribute(const std::string& attrName) {
@@ -135,7 +136,8 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
     auto layer = SdfLayer::CreateAnonymous(".usda");
     auto stage = UsdStage::Open(layer);
 
-    auto pointsSchema = UsdGeomPoints::Define(stage, SdfPath("/points"));
+    auto pointsSchema = UsdGeomPoints::Define(stage, _pointsPath);
+    stage->SetDefaultPrim(pointsSchema.GetPrim());
     partio_t points(
         PARTIO::read(resolvedPath.c_str()), [](PARTIO::ParticlesData* d) { d->release(); });
     if (points == nullptr) {
