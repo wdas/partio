@@ -44,7 +44,12 @@ namespace {
     // or type of float with at least 3 elements.
     template <>
     bool _attributeIsType<PARTIO::VECTOR>(const attr_t& attr) {
-        return attr.count > 2 && (attr.type == PARTIO::FLOAT || attr.type == PARTIO::VECTOR);
+        return attr.count == 3 && (attr.type == PARTIO::FLOAT || attr.type == PARTIO::VECTOR);
+    }
+
+    template <>
+    bool _attributeIsType<PARTIO::FLOAT>(const attr_t& attr) {
+        return attr.count == 1 && attr.type == PARTIO::FLOAT;
     }
 
     template <PARTIO::ParticleAttributeType AT>
@@ -84,9 +89,9 @@ namespace {
                _findInVec(_idNames);
     }
 
-    template <typename to> inline
-    void _appendValue(partio_t& points, const attr_t& attr, int id, VtArray<to>& a) {
-        a.push_back(*points->data<to>(attr, id));
+    template <typename T> inline
+    void _appendValue(partio_t& points, const attr_t& attr, int id, VtArray<T>& a) {
+        a.push_back(*points->data<T>(attr, id));
     };
 
     template <> inline
@@ -96,19 +101,31 @@ namespace {
     }
 
     template <> inline
+    void _appendValue<GfVec4f>(partio_t& points, const attr_t& attr, int id, VtArray<GfVec4f>& a) {
+        const auto* v = points->data<float>(attr, id);
+        a.push_back(GfVec4f(v[0], v[1], v[2], v[3]));
+    }
+
+    template <> inline
     void _appendValue<long>(partio_t& points, const attr_t& attr, int id, VtArray<long>& a) {
         a.push_back(*points->data<int>(attr, id));
     }
 
-    template <typename to> inline
-    VtArray<to> _convertAttribute(partio_t& points, int numParticles, const attr_t& attr) {
-        VtArray<to> a;
+    template <typename T> inline
+    VtArray<T> _convertAttribute(partio_t& points, int numParticles, const attr_t& attr) {
+        VtArray<T> a;
         a.reserve(numParticles);
         for (auto i = decltype(numParticles){0}; i < numParticles; ++i) {
-            _appendValue<to>(points, attr, i, a);
+            _appendValue<T>(points, attr, i, a);
         }
         return a;
     };
+
+    template <typename T> inline
+    void _addAttr(UsdGeomPoints& points, const std::string& name, const SdfValueTypeName& typeName,
+                  const VtArray<T>& a) {
+        points.GetPrim().CreateAttribute(TfToken(name), typeName, false, SdfVariabilityVarying).Set(a);
+    }
 }
 
 UsdPartIOFileFormat::~UsdPartIOFileFormat() {
@@ -158,6 +175,26 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
 
         if (_getAttribute<PARTIO::INT>(points, _idNames, attr)) {
             pointsSchema.GetIdsAttr().Set(_convertAttribute<long>(points, pointCount, attr));
+        }
+
+        const auto numAttributes = points->numAttributes();
+
+        for (auto i = decltype(numAttributes){0}; i < numAttributes; ++i) {
+            if (!points->attributeInfo(i, attr) || _isBuiltinAttribute(attr.name)) { continue; }
+
+            if (_attributeIsType<PARTIO::INT>(attr)) {
+                _addAttr(pointsSchema, attr.name, SdfValueTypeNames->IntArray,
+                         _convertAttribute<int>(points, pointCount, attr));
+            } else if (_attributeIsType<PARTIO::FLOAT>(attr)) {
+                _addAttr(pointsSchema, attr.name, SdfValueTypeNames->FloatArray,
+                         _convertAttribute<float>(points, pointCount, attr));
+            } else if (_attributeIsType<PARTIO::VECTOR>(attr)) {
+                _addAttr(pointsSchema, attr.name, SdfValueTypeNames->Vector3fArray,
+                         _convertAttribute<GfVec3f>(points, pointCount, attr));
+            } else if (attr.type == PARTIO::FLOAT && attr.count == 4) {
+                _addAttr(pointsSchema, attr.name, SdfValueTypeNames->Float4Array,
+                         _convertAttribute<GfVec4f>(points, pointCount, attr));
+            }
         }
 
         TfDynamic_cast<SdfLayerHandle>(layerBase)->TransferContent(layer);
