@@ -9,8 +9,7 @@
             ],
             "displayName": "Loading particles via PartIO",
             "extensions": [
-              "bhclassic", "bgeo", "geo", "hclassic", "pdb", "pdb32", "pdb64", "pda", "mc",
-              "ptc", "pdc", "prt", "bin", "pts", "xyz", "pcd", "ptf", "itbl", "atbl", "rpc"
+              @PARTIO_SUPPORTED_FORMAT_LIST@
             ],
             "formatId": "pio",
             "primary": true,
