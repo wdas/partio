@@ -6,6 +6,8 @@
 
 #include <Partio.h>
 
+#include <boost/regex.hpp>
+
 PXR_NAMESPACE_OPEN_SCOPE
 
 TF_DEFINE_PUBLIC_TOKENS(
@@ -118,8 +120,8 @@ namespace {
 
     template <typename T> inline
     void _addAttr(UsdGeomPoints& points, const std::string& name, const SdfValueTypeName& typeName,
-                  const VtArray<T>& a) {
-        points.GetPrim().CreateAttribute(TfToken(name), typeName, false, SdfVariabilityVarying).Set(a);
+                  const VtArray<T>& a, const UsdTimeCode& usdTime) {
+        points.GetPrim().CreateAttribute(TfToken(name), typeName, false, SdfVariabilityVarying).Set(a, usdTime);
     }
 }
 
@@ -151,12 +153,31 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
         return false;
     }
 
+    // We are trying to guess the frame of the cache here.
+    // Also, regex in gcc 4.8.x is unreliable! So we have to use boost here.
+    std::stringstream ss_re;
+    ss_re << "\\.([0-9]+)\\.(";
+    const auto supportedFormats = PARTIO::supportedReadFormats();
+    assert(supportedFormats.size() != 0);
+    auto formatIt = supportedFormats.begin();
+    ss_re << *formatIt;
+    for (; formatIt != supportedFormats.end(); ++formatIt) {
+        ss_re << "|" << *formatIt;
+    }
+    ss_re << ")$";
+    boost::regex re(ss_re.str().c_str());
+    UsdTimeCode outTime = UsdTimeCode::Default();
+    boost::cmatch match;
+    if (boost::regex_search(resolvedPath.c_str(), match, re)) {
+        outTime = std::atoi(match[1].first);
+    }
+
     PARTIO::ParticleAttribute attr;
     if (!_getAttribute<PARTIO::VECTOR>(points, _positionNames, attr, true)) { return false; }
-    pointsSchema.GetPointsAttr().Set(_convertAttribute<GfVec3f>(points, pointCount, attr));
+    pointsSchema.GetPointsAttr().Set(_convertAttribute<GfVec3f>(points, pointCount, attr), outTime);
 
     if (_getAttribute<PARTIO::VECTOR>(points, _velocityNames, attr)) {
-        pointsSchema.GetVelocitiesAttr().Set(_convertAttribute<GfVec3f>(points, pointCount, attr));
+        pointsSchema.GetVelocitiesAttr().Set(_convertAttribute<GfVec3f>(points, pointCount, attr), outTime);
     }
 
     if (_getAttribute<PARTIO::FLOAT>(points, _radiusNames, attr)) {
@@ -164,11 +185,11 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
         for (auto& radius : radii) {
             radius = radius * 2.0f;
         }
-        pointsSchema.GetWidthsAttr().Set(radii);
+        pointsSchema.GetWidthsAttr().Set(radii, outTime);
     }
 
     if (_getAttribute<PARTIO::INT>(points, _idNames, attr)) {
-        pointsSchema.GetIdsAttr().Set(_convertAttribute<long>(points, pointCount, attr));
+        pointsSchema.GetIdsAttr().Set(_convertAttribute<long>(points, pointCount, attr), outTime);
     }
 
     const auto numAttributes = points->numAttributes();
@@ -178,16 +199,16 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
 
         if (_attributeIsType<PARTIO::INT>(attr)) {
             _addAttr(pointsSchema, attr.name, SdfValueTypeNames->IntArray,
-                     _convertAttribute<int>(points, pointCount, attr));
+                     _convertAttribute<int>(points, pointCount, attr), outTime);
         } else if (_attributeIsType<PARTIO::FLOAT>(attr)) {
             _addAttr(pointsSchema, attr.name, SdfValueTypeNames->FloatArray,
-                     _convertAttribute<float>(points, pointCount, attr));
+                     _convertAttribute<float>(points, pointCount, attr), outTime);
         } else if (_attributeIsType<PARTIO::VECTOR>(attr)) {
             _addAttr(pointsSchema, attr.name, SdfValueTypeNames->Vector3fArray,
-                     _convertAttribute<GfVec3f>(points, pointCount, attr));
+                     _convertAttribute<GfVec3f>(points, pointCount, attr), outTime);
         } else if (attr.type == PARTIO::FLOAT && attr.count == 4) {
             _addAttr(pointsSchema, attr.name, SdfValueTypeNames->Float4Array,
-                     _convertAttribute<GfVec4f>(points, pointCount, attr));
+                     _convertAttribute<GfVec4f>(points, pointCount, attr), outTime);
         }
     }
 
