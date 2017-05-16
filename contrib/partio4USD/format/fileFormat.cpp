@@ -7,6 +7,7 @@
 #include <Partio.h>
 
 #include <boost/regex.hpp>
+#include <functional>
 
 PXR_NAMESPACE_OPEN_SCOPE
 
@@ -123,6 +124,12 @@ namespace {
                   const VtArray<T>& a, const UsdTimeCode& usdTime) {
         points.GetPrim().CreateAttribute(TfToken(name), typeName, false, SdfVariabilityVarying).Set(a, usdTime);
     }
+
+    struct ScopeExit {
+        ScopeExit(std::function<void()> _f) : f(_f) { }
+        ~ScopeExit() { f(); }
+        std::function<void()> f;
+    };
 }
 
 UsdPartIOFileFormat::~UsdPartIOFileFormat() {
@@ -147,10 +154,11 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
         return false;
     }
 
+    ScopeExit scopeExit([&layerBase, &layer]() { TfDynamic_cast<SdfLayerHandle>(layerBase)->TransferContent(layer); });
     const auto pointCount = points->numParticles();
     if (pointCount < 1) {
         TF_WARN("[partIO] Particle count is zero in %s", resolvedPath.c_str());
-        return false;
+        return true;
     }
 
     // We are trying to guess the frame of the cache here.
@@ -211,8 +219,6 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
                      _convertAttribute<GfVec4f>(points, pointCount, attr), outTime);
         }
     }
-
-    TfDynamic_cast<SdfLayerHandle>(layerBase)->TransferContent(layer);
 
     return true;
 }
