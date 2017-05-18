@@ -70,20 +70,22 @@ namespace {
         return false;
     }
 
-    const attr_names_t _positionNames = {"position", "Position"};
-    const attr_names_t _velocityNames = {"velocity", "Velocity"};
-    const attr_names_t _radiusNames = {"radius", "radiusPP"};
-    const attr_names_t _idNames = {"id", "particleId"};
+    const attr_names_t _positionNames = {"position", "Position", "P"};
+    const attr_names_t _velocityNames = {"velocity", "Velocity", "v", "vel"};
+    const attr_names_t _radiusNames = {"radius", "radiusPP", "pscale"};
+    const attr_names_t _scaleNames = {"scale", "scalePP"};
+    const attr_names_t _idNames = {"id", "particleId", "ID", "Id"};
     const SdfPath _pointsPath("/points");
 
     inline
     bool _isBuiltinAttribute(const std::string& attrName) {
         auto _findInVec = [&attrName] (const attr_names_t& names) -> bool {
-            return std::find(_positionNames.begin(), _positionNames.end(), attrName) != _positionNames.end();
+            return std::find(names.begin(), names.end(), attrName) != _positionNames.end();
         };
         return _findInVec(_positionNames) ||
                _findInVec(_velocityNames) ||
                _findInVec(_radiusNames) ||
+               _findInVec(_scaleNames) ||
                _findInVec(_idNames);
     }
 
@@ -192,6 +194,15 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
         auto radii = _convertAttribute<float>(points, pointCount, attr);
         for (auto& radius : radii) {
             radius = radius * 2.0f;
+        }
+        pointsSchema.GetWidthsAttr().Set(radii, outTime);
+    } else if (_getAttribute<PARTIO::VECTOR>(points, _scaleNames, attr)) {
+        VtArray<float> radii;
+        radii.reserve(pointCount);
+        for (auto i = decltype(pointCount){0}; i < pointCount; ++i) {
+            const auto* scale = points->data<float>(attr, i);
+            // Using the more complex logic for clarity. The compiler will optimize this. Hopefully.
+            radii.push_back(2.0f * (scale[0] + scale[1] + scale[2]) / 3.0f);
         }
         pointsSchema.GetWidthsAttr().Set(radii, outTime);
     }
