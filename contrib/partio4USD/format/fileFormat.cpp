@@ -3,6 +3,8 @@
 #include <pxr/usd/usd/usdaFileFormat.h>
 #include <pxr/usd/usd/stage.h>
 #include <pxr/usd/usdGeom/points.h>
+#include <pxr/usd/usdGeom/primvar.h>
+#include <pxr/usd/usdGeom/tokens.h>
 
 #include <Partio.h>
 
@@ -122,9 +124,12 @@ namespace {
     };
 
     template <typename T> inline
-    void _addAttr(UsdGeomPoints& points, const std::string& name, const SdfValueTypeName& typeName,
-                  const VtArray<T>& a, const UsdTimeCode& usdTime) {
-        points.GetPrim().CreateAttribute(TfToken(name), typeName, false, SdfVariabilityVarying).Set(a, usdTime);
+    void _addPrimvar(UsdGeomPoints& points, const std::string& name, const SdfValueTypeName& typeName,
+                     const VtArray <T>& a, const UsdTimeCode& usdTime) {
+        const std::string _primvars("primvars:");
+        auto attr = points.GetPrim().CreateAttribute(TfToken(_primvars + name), typeName, false, SdfVariabilityVarying);
+        UsdGeomPrimvar(attr).SetInterpolation(UsdGeomTokens->vertex);
+        attr.Set(a, usdTime);
     }
 
     struct ScopeExit {
@@ -217,17 +222,17 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
         if (!points->attributeInfo(i, attr) || _isBuiltinAttribute(attr.name)) { continue; }
 
         if (_attributeIsType<PARTIO::INT>(attr)) {
-            _addAttr(pointsSchema, attr.name, SdfValueTypeNames->IntArray,
-                     _convertAttribute<int>(points, pointCount, attr), outTime);
+            _addPrimvar(pointsSchema, attr.name, SdfValueTypeNames->IntArray,
+                        _convertAttribute<int>(points, pointCount, attr), outTime);
         } else if (_attributeIsType<PARTIO::FLOAT>(attr)) {
-            _addAttr(pointsSchema, attr.name, SdfValueTypeNames->FloatArray,
-                     _convertAttribute<float>(points, pointCount, attr), outTime);
+            _addPrimvar(pointsSchema, attr.name, SdfValueTypeNames->FloatArray,
+                        _convertAttribute<float>(points, pointCount, attr), outTime);
         } else if (_attributeIsType<PARTIO::VECTOR>(attr)) {
-            _addAttr(pointsSchema, attr.name, SdfValueTypeNames->Vector3fArray,
-                     _convertAttribute<GfVec3f>(points, pointCount, attr), outTime);
+            _addPrimvar(pointsSchema, attr.name, SdfValueTypeNames->Vector3fArray,
+                        _convertAttribute<GfVec3f>(points, pointCount, attr), outTime);
         } else if (attr.type == PARTIO::FLOAT && attr.count == 4) {
-            _addAttr(pointsSchema, attr.name, SdfValueTypeNames->Float4Array,
-                     _convertAttribute<GfVec4f>(points, pointCount, attr), outTime);
+            _addPrimvar(pointsSchema, attr.name, SdfValueTypeNames->Float4Array,
+                        _convertAttribute<GfVec4f>(points, pointCount, attr), outTime);
         }
     }
 
