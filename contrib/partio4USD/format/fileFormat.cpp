@@ -80,7 +80,7 @@ namespace {
     inline
     bool _isBuiltinAttribute(const std::string& attrName) {
         auto _findInVec = [&attrName] (const attr_names_t& names) -> bool {
-            return std::find(names.begin(), names.end(), attrName) != _positionNames.end();
+            return std::find(names.begin(), names.end(), attrName) != names.end();
         };
         return _findInVec(_positionNames) ||
                _findInVec(_velocityNames) ||
