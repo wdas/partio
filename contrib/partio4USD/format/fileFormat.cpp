@@ -72,7 +72,7 @@ namespace {
 
     const attr_names_t _positionNames = {"position", "Position", "P"};
     const attr_names_t _velocityNames = {"velocity", "Velocity", "v", "vel"};
-    const attr_names_t _radiusNames = {"radius", "radiusPP", "pscale"};
+    const attr_names_t _radiusNames = {"radius", "radiusPP", "pscale", "scale", "scalePP"};
     const attr_names_t _scaleNames = {"scale", "scalePP"};
     const attr_names_t _idNames = {"id", "particleId", "ID", "Id"};
     const SdfPath _pointsPath("/points");
