@@ -126,7 +126,7 @@ namespace {
     template <typename T> inline
     void _addPrimvar(UsdGeomPoints& points, const std::string& name, const SdfValueTypeName& typeName,
                      const VtArray <T>& a, const UsdTimeCode& usdTime) {
-        const std::string _primvars("primvars:");
+        const static std::string _primvars("primvars:");
         auto attr = points.GetPrim().CreateAttribute(TfToken(_primvars + name), typeName, false, SdfVariabilityVarying);
         UsdGeomPrimvar(attr).SetInterpolation(UsdGeomTokens->vertex);
         attr.Set(a, usdTime);
