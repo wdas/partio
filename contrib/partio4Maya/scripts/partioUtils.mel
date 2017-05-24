@@ -110,7 +110,7 @@ global  proc string[]  partioGetBaseFileName(string $inFileName)
 
 
 	$l = `size $breakdownFileName`;
-	string $last = `substring $breakdownFileName $l $l`;
+	$last = `substring $breakdownFileName $l $l`;
 
 	if ( $last == "_" || $last == ".")
 	{
