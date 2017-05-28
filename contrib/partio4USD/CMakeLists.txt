@@ -3,7 +3,13 @@ add_compile_options(-Wall -std=c++11 -DBUILD_OPTLEVEL_OPT -DBUILD_COMPONENT_SRC_
 include_directories($ENV{USD_ROOT}/include)
 link_directories($ENV{USD_ROOT}/lib)
 
-add_subdirectory(format)
+if (BUILD_PARTIO_USD)
+    add_subdirectory(fileFormat)
+endif ()
+
+if (BUILD_PARTIO_USD_MAYA)
+    add_subdirectory(primWriter)
+endif ()
 
 install(FILES plugInfo.json
         DESTINATION ./)
