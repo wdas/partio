@@ -7,6 +7,12 @@
                         "mayaPlugin": "partio4Maya",
                         "providesTranslator": [ "partioVisualizer" ]
                     }
+                },
+                "Types": {
+                    "partioVisualizerWriter" : {
+                        "bases": ["MayaPrimWriter"],
+                        "displayName": "Writer for PartIO Visualizer"
+                    }
                 }
             },
             "LibraryPath": "../@PLUGIN_NAME@.so",
