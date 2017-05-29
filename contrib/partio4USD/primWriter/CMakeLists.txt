@@ -27,4 +27,4 @@ set(PLUGINFO_OUT ${CMAKE_CURRENT_BINARY_DIR}/plugInfo.json)
 configure_file(plugInfo.json.in ${PLUGINFO_OUT})
 
 install(FILES ${PLUGINFO_OUT}
-        DESTINATION .) #${PLUGIN_NAME})
+        DESTINATION ${PLUGIN_NAME}/resources)

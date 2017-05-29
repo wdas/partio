@@ -9,9 +9,11 @@
                     }
                 }
             },
+            "LibraryPath": "../@PLUGIN_NAME@.so",
             "Name": "@PLUGIN_NAME@",
-            "Type": "library",
-            "LibraryPath": "@PLUGIN_NAME@.so"
+            "ResourcePath": "resources",
+            "Root": "..",
+            "Type": "library"
         }
     ]
 }

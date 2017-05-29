@@ -7,9 +7,9 @@ if (BUILD_PARTIO_USD)
     add_subdirectory(fileFormat)
 endif ()
 
-if (BUILD_PARTIO_USD_MAYA)
+#if (BUILD_PARTIO_USD_MAYA)
     add_subdirectory(primWriter)
-else ()
+#else ()
     install(FILES plugInfo.json
             DESTINATION ./)
-endif ()
+#endif ()
