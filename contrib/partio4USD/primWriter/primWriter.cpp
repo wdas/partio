@@ -5,6 +5,11 @@
 
 PXR_NAMESPACE_USING_DIRECTIVE
 
+__attribute__((constructor))
+static void doSomeStuff() {
+    std::cerr << "I'm doing stuff!" << std::endl;
+}
+
 namespace {
     class partioVisualizerWriter : public MayaTransformWriter {
     public:

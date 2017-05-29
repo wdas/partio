@@ -9,7 +9,7 @@ endif ()
 
 if (BUILD_PARTIO_USD_MAYA)
     add_subdirectory(primWriter)
+else ()
+    install(FILES plugInfo.json
+            DESTINATION ./)
 endif ()
-
-install(FILES plugInfo.json
-        DESTINATION ./)

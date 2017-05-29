@@ -18,7 +18,7 @@ include_directories(SYSTEM ${TBB_INCLUDE_DIRS})
 
 add_library(${PLUGIN_NAME} SHARED primWriter.cpp)
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
-target_link_libraries(${PLUGIN_NAME} ${PARTIO_LIBRARIES} ${Boost_LIBRARIES} ${MAYA_LIBS} tf gf sdf usd usdGeom usdMaya)
+target_link_libraries(${PLUGIN_NAME} ${Boost_LIBRARIES} ${MAYA_LIBS} tf gf sdf usd usdGeom usdMaya)
 
 install(TARGETS ${PLUGIN_NAME}
         DESTINATION .)
@@ -27,4 +27,4 @@ set(PLUGINFO_OUT ${CMAKE_CURRENT_BINARY_DIR}/plugInfo.json)
 configure_file(plugInfo.json.in ${PLUGINFO_OUT})
 
 install(FILES ${PLUGINFO_OUT}
-        DESTINATION ${PLUGIN_NAME}/resources/)
+        DESTINATION .) #${PLUGIN_NAME})
