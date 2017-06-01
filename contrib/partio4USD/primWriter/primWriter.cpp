@@ -1,10 +1,8 @@
 #include <pxr/pxr.h>
 #include <pxr/base/tf/fileUtils.h>
+#include <pxr/usd/usd/clipsAPI.h>
 
 #include <usdMaya/primWriterRegistry.h>
-#include <usdMaya/MayaTransformWriter.h>
-
-#include <maya/MFnDagNode.h>
 
 #include <Partio.h>
 
@@ -22,7 +20,7 @@ namespace {
     template <size_t N>
     std::string searchFile(const std::string& prefix, const std::string& suffix, const std::array<std::string, N>& extensions) {
         for (const auto& ext : extensions) {
-            std::stringstream ss; ss << prefix << "result" << suffix << ext;
+            std::stringstream ss; ss << prefix << "result.topology" << suffix << ext;
             const auto ret = ss.str();
             if (TfIsFile(ret)) {
                 return ret;
@@ -59,11 +57,18 @@ namespace {
                                          dgNode.findPlug(_cachePrefix).asString()).asChar());
             boost::cmatch match;
             if (boost::regex_search(cacheFile.c_str(), match, re)) {
-                const auto stitchPath = searchFile(match[1].str(), match[3].str(), _extensionList);
-                if (stitchPath.empty()) {
+                const auto manifestPath = searchFile(match[1].str(), match[3].str(), _extensionList);
+                if (manifestPath.empty()) {
                     TF_WARN("Stitched path does not exists for cache %s", cacheFile.c_str());
                 } else {                    
-                    mUsdPrim.GetReferences().AppendReference(SdfReference(stitchPath, SdfPath("/points")));
+                    mUsdPrim.GetReferences().AppendReference(SdfReference(manifestPath));
+                    UsdClipsAPI clips(mUsdPrim);
+                    clips.SetClipManifestAssetPath(SdfAssetPath(manifestPath));
+                    clips.SetClipPrimPath("/points");
+                    clips.SetClipTemplateAssetPath(match[1].str() + "#" + match[3].str() + match[4].str());
+                    clips.SetClipTemplateStartTime(getArgs().startTime);
+                    clips.SetClipTemplateEndTime(getArgs().endTime);
+                    clips.SetClipTemplateStride(1);
                 }
             } else {
                 TF_WARN("%s is not a valid path to a PartIO cache.", cacheFile.c_str());
