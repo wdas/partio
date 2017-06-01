@@ -8,6 +8,8 @@ if (BUILD_PARTIO_USD)
 endif ()
 
 add_subdirectory(primWriter)
+
+if (NOT BUILD_PARTIO_USD_MAYA)
 install(FILES plugInfo.json
         DESTINATION ./)
-
+endif ()

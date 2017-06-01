@@ -4,7 +4,7 @@
             "Info" : {
                 "UsdMaya" : {
                     "PrimWriter" : {
-                        "mayaPlugin": "partio4Maya",
+                        "mayaPlugin": "partioVisualizerWriter",
                         "providesTranslator": [ "partioVisualizer" ]
                     }
                 },
@@ -15,10 +15,8 @@
                     }
                 }
             },
-            "LibraryPath": "../@PLUGIN_NAME@.so",
+            "LibraryPath": "plug-ins/@PLUGIN_NAME@.so",
             "Name": "@PLUGIN_NAME@",
-            "ResourcePath": "resources",
-            "Root": "..",
             "Type": "library"
         }
     ]
