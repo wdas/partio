@@ -36,6 +36,9 @@ namespace {
     public:
         partioVisualizerWriter(const MDagPath & iDag, const SdfPath& uPath, bool instanceSource, usdWriteJobCtx& jobCtx) :
             MayaTransformWriter(iDag, uPath, instanceSource, jobCtx) {
+            mUsdPrim = getUsdStage()->DefinePrim(getUsdPath());
+            TF_AXIOM(mUsdPrim);
+
             static boost::regex re;
             static std::once_flag once_flag;
             std::call_once(once_flag, []() {
@@ -59,9 +62,7 @@ namespace {
                 const auto stitchPath = searchFile(match[1].str(), match[3].str(), _extensionList);
                 if (stitchPath.empty()) {
                     TF_WARN("Stitched path does not exists for cache %s", cacheFile.c_str());
-                } else {
-                    mUsdPrim = getUsdStage()->DefinePrim(getUsdPath());
-                    TF_AXIOM(mUsdPrim);
+                } else {                    
                     mUsdPrim.GetReferences().AppendReference(SdfReference(stitchPath, SdfPath("/points")));
                 }
             } else {
