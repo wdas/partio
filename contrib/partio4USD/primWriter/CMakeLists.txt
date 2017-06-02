@@ -8,14 +8,6 @@ link_directories(${MAYA_LIBRARY_DIR})
 
 set(MAYA_LIBS OpenMaya Foundation OpenMayaAnim OpenMayaFX OpenMayaUI OpenMayaRender)
 
-find_package(Boost COMPONENTS regex REQUIRED)
-find_package(PythonLibs REQUIRED)
-find_package(TBB REQUIRED)
-
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-include_directories(SYSTEM ${PYTHON_INCLUDE_DIRS})
-include_directories(SYSTEM ${TBB_INCLUDE_DIRS})
-
 file(GLOB SRC *.cpp)
 
 add_library(${PLUGIN_NAME} SHARED ${SRC})

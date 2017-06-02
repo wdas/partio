@@ -1,13 +1,5 @@
 set(PLUGIN_NAME usdPartIO)
 
-find_package(Boost COMPONENTS regex REQUIRED)
-find_package(PythonLibs REQUIRED)
-find_package(TBB REQUIRED)
-
-include_directories(SYSTEM ${Boost_INCLUDE_DIRS})
-include_directories(SYSTEM ${PYTHON_INCLUDE_DIRS})
-include_directories(SYSTEM ${TBB_INCLUDE_DIRS})
-
 add_library(${PLUGIN_NAME} SHARED fileFormat.cpp)
 set_target_properties(${PLUGIN_NAME} PROPERTIES PREFIX "")
 target_link_libraries(${PLUGIN_NAME} ${PARTIO_LIBRARIES} ${Boost_LIBRARIES} tf gf sdf usd usdGeom)
