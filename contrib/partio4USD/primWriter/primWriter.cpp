@@ -65,7 +65,12 @@ namespace {
                     UsdClipsAPI clips(mUsdPrim);
                     clips.SetClipManifestAssetPath(SdfAssetPath(manifestPath));
                     clips.SetClipPrimPath("/points");
-                    clips.SetClipTemplateAssetPath(match[1].str() + "#" + match[3].str() + match[4].str());
+                    std::stringstream ss;
+                    ss << match[1].str();
+                    const auto numDigits = match[2].str().length();
+                    for (auto i = decltype(numDigits){0}; i < numDigits; ++i) { ss << "#"; }
+                    ss << match[3].str() << match[4].str();
+                    clips.SetClipTemplateAssetPath(ss.str());
                     clips.SetClipTemplateStartTime(getArgs().startTime);
                     clips.SetClipTemplateEndTime(getArgs().endTime);
                     clips.SetClipTemplateStride(1);
