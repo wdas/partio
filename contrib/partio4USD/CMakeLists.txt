@@ -21,7 +21,7 @@ if (BUILD_PARTIO_USD)
     add_subdirectory(topologyGenerator)
 endif ()
 
-if (BUIOLD_PARTIO_MAYA_USD)
+if (BUILD_PARTIO_USD_MAYA)
     add_subdirectory(primWriter)
 endif ()
 
