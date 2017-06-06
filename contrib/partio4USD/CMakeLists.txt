@@ -19,11 +19,10 @@ include_directories(SYSTEM ${TBB_INCLUDE_DIRS})
 if (BUILD_PARTIO_USD)
     add_subdirectory(fileFormat)
     add_subdirectory(topologyGenerator)
+    install(FILES plugInfo.json
+            DESTINATION .)
 endif ()
 
 if (BUILD_PARTIO_USD_MAYA)
     add_subdirectory(primWriter)
 endif ()
-
-install(FILES plugInfo.json
-        DESTINATION ./)

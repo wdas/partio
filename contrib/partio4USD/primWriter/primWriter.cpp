@@ -17,11 +17,24 @@ namespace {
     constexpr auto _cachePrefix = "cachePrefix";
     const std::array<std::string, 3> _extensionList = {"usd", "usda", "usdc"};
 
+    auto createFileName = [](const std::string& dir, const std::string& prefix, const std::string& suffix, const std::string& ext) -> std::string {
+        std::stringstream ss; ss << dir << prefix << "result.topology" << suffix << ext;
+        return ss.str();
+    };
+
+    auto clearRegex = [](const std::string& in) -> std::string {
+        std::string ret = in;
+        size_t pos = -2;
+        while ((pos = ret.find('.', pos + 2)) != std::string::npos) {
+            ret.replace(pos, 1, "\\.");
+        }
+        return ret;
+    };
+
     template <size_t N>
-    std::string searchFile(const std::string& prefix, const std::string& suffix, const std::array<std::string, N>& extensions) {
+    std::string searchFile(const std::string& dir, const std::string& prefix, const std::string& suffix, const std::array<std::string, N>& extensions) {
         for (const auto& ext : extensions) {
-            std::stringstream ss; ss << prefix << "result.topology" << suffix << ext;
-            const auto ret = ss.str();
+            const auto ret = createFileName(dir, prefix, suffix, ext);
             if (TfIsFile(ret)) {
                 return ret;
             }
@@ -53,29 +66,43 @@ namespace {
                 re = boost::regex(ss.str().c_str());
             });
             MFnDagNode dgNode(iDag);
-            const std::string cacheFile((dgNode.findPlug(_cacheDir).asString() +
-                                         dgNode.findPlug(_cachePrefix).asString()).asChar());
+            std::string cacheDir = dgNode.findPlug(_cacheDir).asString().asChar();
+            if (cacheDir.size() > 0 && cacheDir.back() != '/') { cacheDir += "/"; }
+            const std::string cachePrefix = dgNode.findPlug(_cachePrefix).asString().asChar();
             boost::cmatch match;
-            if (boost::regex_search(cacheFile.c_str(), match, re)) {
-                const auto manifestPath = searchFile(match[1].str(), match[3].str(), _extensionList);
+            if (boost::regex_search(cachePrefix.c_str(), match, re)) {
+                const auto match_1 = match[1].str();
+                const auto match_3 = match[3].str();
+                const auto match_4 = match[4].str();
+                auto manifestPath = searchFile(cacheDir, match_1, match_3, _extensionList);
                 if (manifestPath.empty()) {
-                    TF_WARN("Stitched path does not exists for cache %s", cacheFile.c_str());
-                } else {                    
-                    mUsdPrim.GetReferences().AppendReference(SdfReference(manifestPath));
-                    UsdClipsAPI clips(mUsdPrim);
-                    clips.SetClipManifestAssetPath(SdfAssetPath(manifestPath));
-                    clips.SetClipPrimPath("/points");
+                    // We will try to stitch the file together using partusdtopology.
+                    manifestPath = createFileName(cacheDir, match_1, match_3, _extensionList.front());
                     std::stringstream ss;
-                    ss << match[1].str();
-                    const auto numDigits = match[2].str().length();
-                    for (auto i = decltype(numDigits){0}; i < numDigits; ++i) { ss << "#"; }
-                    ss << match[3].str() << match[4].str();
-                    clips.SetClipTemplateAssetPath(ss.str());
-                    clips.SetClipTemplateStartTime(getArgs().startTime);
-                    clips.SetClipTemplateEndTime(getArgs().endTime);
-                    clips.SetClipTemplateStride(1);
+                    ss << "partusdtopology " << "\"" << cacheDir << clearRegex(match_1) << "[0-9]+"
+                       << clearRegex(match_3) << match_4 << "\" \"" << manifestPath << "\"";
+                    std::cerr << "Runing command : " << ss.str() << std::endl;
+                    const auto ret = system(ss.str().c_str());
+                    if (ret != 0 || !TfIsFile(manifestPath)) {
+                        TF_WARN("Manifest file does not exists and/or can't be created. %s", manifestPath.c_str());
+                        return;
+                    }
                 }
+                mUsdPrim.GetReferences().AppendReference(SdfReference(manifestPath));
+                UsdClipsAPI clips(mUsdPrim);
+                clips.SetClipManifestAssetPath(SdfAssetPath(manifestPath));
+                clips.SetClipPrimPath("/points");
+                std::stringstream ss;
+                ss << cacheDir << match_1;
+                const auto numDigits = match[2].str().length();
+                for (auto i = decltype(numDigits){0}; i < numDigits; ++i) { ss << "#"; }
+                ss << match_3 << match_4;
+                clips.SetClipTemplateAssetPath(ss.str());
+                clips.SetClipTemplateStartTime(getArgs().startTime);
+                clips.SetClipTemplateEndTime(getArgs().endTime);
+                clips.SetClipTemplateStride(1);
             } else {
+                const auto cacheFile = cacheDir + cachePrefix;
                 TF_WARN("%s is not a valid path to a PartIO cache.", cacheFile.c_str());
             }
         }
