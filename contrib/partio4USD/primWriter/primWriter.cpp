@@ -106,10 +106,11 @@ namespace {
                 clips.SetClipManifestAssetPath(SdfAssetPath(manifestPath));
                 clips.SetClipPrimPath("/points");
                 mPathBuffer.resize(mFormatString.length() + 1, '\0');
-                const auto numberOfFrames = std::max(1ul, static_cast<size_t>(getArgs().endTime - getArgs().startTime));
-                mClipTimes.reserve(numberOfFrames);
-                mClipAssetPaths.reserve(numberOfFrames);
-                mClipActive.reserve(numberOfFrames);
+                // We can't reserve anything here, because these parameters are only available in an internal, Luma branch.
+                // const auto numberOfFrames = std::max(1ul, static_cast<size_t>(getArgs().endTime - getArgs().startTime));
+                // mClipTimes.reserve(numberOfFrames);
+                // mClipAssetPaths.reserve(numberOfFrames);
+                // mClipActive.reserve(numberOfFrames);
 
             } else {
                 const auto cacheFile = cacheDir + cachePrefix;
