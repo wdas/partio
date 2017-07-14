@@ -152,27 +152,38 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
 
     PARTIO::ParticleAttribute attr;
     if (!_getAttribute<PARTIO::VECTOR>(points, _positionNames, attr, true)) { return false; }
-    pointsSchema.GetPointsAttr().Set(_convertAttribute<GfVec3f>(points, pointCount, attr), outTime);
+    const auto positions = _convertAttribute<GfVec3f>(points, pointCount, attr);
+    pointsSchema.GetPointsAttr().Set(positions, outTime);
 
     if (_getAttribute<PARTIO::VECTOR>(points, _velocityNames, attr)) {
         pointsSchema.GetVelocitiesAttr().Set(_convertAttribute<GfVec3f>(points, pointCount, attr), outTime);
     }
 
+    VtArray<float> widths;
     if (_getAttribute<PARTIO::FLOAT>(points, _radiusNames, attr)) {
-        auto radii = _convertAttribute<float>(points, pointCount, attr);
-        for (auto& radius : radii) {
-            radius = radius * 2.0f;
+        widths = _convertAttribute<float>(points, pointCount, attr);
+        for (auto& width : widths) {
+            width = width * 2.0f;
         }
-        pointsSchema.GetWidthsAttr().Set(radii, outTime);
+        pointsSchema.GetWidthsAttr().Set(widths, outTime);
     } else if (_getAttribute<PARTIO::VECTOR>(points, _scaleNames, attr)) {
-        VtArray<float> radii;
-        radii.reserve(pointCount);
+        widths.reserve(pointCount);
         for (auto i = decltype(pointCount){0}; i < pointCount; ++i) {
             const auto* scale = points->data<float>(attr, i);
             // Using the more complex logic for clarity. The compiler will optimize this. Hopefully.
-            radii.push_back(2.0f * (scale[0] + scale[1] + scale[2]) / 3.0f);
+            widths.push_back(2.0f * (scale[0] + scale[1] + scale[2]) / 3.0f);
         }
-        pointsSchema.GetWidthsAttr().Set(radii, outTime);
+        pointsSchema.GetWidthsAttr().Set(widths, outTime);
+    }
+
+    // In case there are no widths supplied
+    if (widths.size() != positions.size()) {
+        widths.resize(positions.size());
+    }
+
+    VtArray<GfVec3f> extent;
+    if (pointsSchema.ComputeExtent(positions, widths, &extent)) {
+        pointsSchema.GetExtentAttr().Set(extent, outTime);
     }
 
     if (_getAttribute<PARTIO::INT>(points, _idNames, attr)) {
