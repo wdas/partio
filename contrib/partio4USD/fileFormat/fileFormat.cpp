@@ -112,11 +112,11 @@ bool UsdPartIOFileFormat::CanRead(const std::string &file) const {
 bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
                                const std::string& resolvedPath,
                                bool metadataOnly) const {
-    auto layer = SdfLayer::CreateAnonymous(".usda");
-    auto stage = UsdStage::Open(layer);
+    auto layerBaseHandle = TfDynamic_cast<SdfLayerHandle>(layerBase);
+    if (!TF_VERIFY(layerBaseHandle)) {
+        return false;
+    }
 
-    auto pointsSchema = UsdGeomPoints::Define(stage, _pointsPath);
-    stage->SetDefaultPrim(pointsSchema.GetPrim());
     partio_t points(
         PARTIO::read(resolvedPath.c_str()), [](PARTIO::ParticlesData* d) { d->release(); });
     if (points == nullptr) {
@@ -124,7 +124,14 @@ bool UsdPartIOFileFormat::Read(const SdfLayerBasePtr& layerBase,
         return false;
     }
 
-    ScopeExit scopeExit([&layerBase, &layer]() { TfDynamic_cast<SdfLayerHandle>(layerBase)->TransferContent(layer); });
+    auto layer = SdfLayer::CreateAnonymous(".usda");
+    auto stage = UsdStage::Open(layer);
+
+    auto pointsSchema = UsdGeomPoints::Define(stage, _pointsPath);
+    stage->SetDefaultPrim(pointsSchema.GetPrim());
+
+    ScopeExit scopeExit([&layerBaseHandle, &layer]() { layerBaseHandle->TransferContent(layer); });
+
     const auto pointCount = points->numParticles();
     if (pointCount < 1) {
         TF_WARN("[partIO] Particle count is zero in %s", resolvedPath.c_str());
