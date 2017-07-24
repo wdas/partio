@@ -838,7 +838,8 @@ MStatus partioInstancer::compute(const MPlug& plug, MDataBlock& block)
                 {
                     if ((pvCache.particles->attributeInfo("velocity", pvCache.velocityAttr) ||
                          pvCache.particles->attributeInfo("Velocity", pvCache.velocityAttr)) ||
-                        pvCache.particles->attributeInfo("V", pvCache.velocityAttr))
+                         pvCache.particles->attributeInfo("V", pvCache.velocityAttr) ||
+                         pvCache.particles->attributeInfo("v", pvCache.velocityAttr))
                     {
                         if (pvCache.velocityAttr.type == PARTIO::VECTOR)
                             m_canMotionBlur = true;

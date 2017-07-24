@@ -104,7 +104,7 @@ public:
 
     typedef ParticleIterator<true> const_iterator;
 
-	//virtual ParticlesData* reset() const = 0;
+    //virtual ParticlesData* reset() const = 0;
 
     //! Fill the user supplied values array with data corresponding to the given
     //! list of particles. Specify whether or not your indices are sorted.
@@ -112,7 +112,7 @@ public:
     template<class T> inline void data(const ParticleAttribute& attribute,
         const int indexCount,const ParticleIndex* particleIndices,const bool sorted,T* values)
     {
-    	assert(typeCheck<T>(attribute.type));
+        assert(typeCheck<T>(attribute.type));
         dataInternalMultiple(attribute,indexCount,particleIndices,sorted,(char*)values);
     }
 
@@ -188,7 +188,7 @@ public:
 
     typedef ParticleIterator<false> iterator;
 
-	//virtual ParticlesDataMutable* reset() const = 0;
+    //virtual ParticlesDataMutable* reset() const = 0;
 
     //! Get a pointer to the data corresponding to the given particleIndex and
     //! attribute given by the attribute handle.
@@ -251,7 +251,7 @@ ParticlesInfo* readHeaders(const char* filename);
 
 //! Provides access to a particle set stored in a file
 //! if filename ends with .gz or forceCompressed is true, the file is compressed.
-void write(const char* filename,const ParticlesData&,const bool forceCompressed=false);
+void write(const char* filename, const ParticlesData&, const bool forceCompressed=false);
 
 /// TODO:  this could be implemented as a logger function that takes a custom  input function from the  program using partio
 //! Provides  feedback on load progress
@@ -264,7 +264,7 @@ void reportLoadProgress(float progress);
   p->release(); (will not be deleted if others are also holding).
   If you want to do finding neighbors give true to sort
 */
-ParticlesData* readCached(const char* filename,const bool sort);
+ParticlesData* readCached(const char* filename, const bool sort);
 
 //! Begin accessing data in a cached file
 /*!
@@ -287,7 +287,13 @@ void endCachedAccess(ParticlesData* particles);
 void print(const ParticlesData* particles);
 
 //! TODO: this is a temporary hack to develop binary json support
-Partio::ParticlesDataMutable*  testRead(const char* filename);
+Partio::ParticlesDataMutable* testRead(const char* filename);
+
+//! Returns the list of supported read formats.
+std::vector<std::string> supportedReadFormats();
+
+//! Returns the list of supported write formats.
+std::vector<std::string> supportedWriteFormats();
 
 EXIT_PARTIO_NAMESPACE
 

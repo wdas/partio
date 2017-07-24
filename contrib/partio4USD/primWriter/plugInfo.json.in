@@ -1,0 +1,23 @@
+{
+    "Plugins": [
+        {
+            "Info" : {
+                "UsdMaya" : {
+                    "PrimWriter" : {
+                        "mayaPlugin": "partioVisualizerWriter",
+                        "providesTranslator": [ "partioVisualizer" ]
+                    }
+                },
+                "Types": {
+                    "partioVisualizerWriter" : {
+                        "bases": ["MayaPrimWriter"],
+                        "displayName": "Writer for PartIO Visualizer"
+                    }
+                }
+            },
+            "LibraryPath": "plug-ins/@PLUGIN_NAME@.so",
+            "Name": "@PLUGIN_NAME@",
+            "Type": "library"
+        }
+    ]
+}
