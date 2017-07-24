@@ -40,7 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "readers.h"
 
 ENTER_PARTIO_NAMESPACE
-using namespace std;
 
 // reader and writer code
 typedef ParticlesDataMutable* (*READER_FUNCTION)(const char*,const bool);
@@ -48,91 +47,91 @@ typedef bool (*WRITER_FUNCTION)(const char*,const ParticlesData&,const bool);
 
 PartioMutex initializationMutex;
 
-map<string,READER_FUNCTION>&
+std::map<std::string, READER_FUNCTION>&
 readers()
 {
-    static map<string,READER_FUNCTION> data;
-    static bool initialized=false;
+    static std::map<std::string, READER_FUNCTION> data;
+    static bool initialized = false;
     if(!initialized){
     initializationMutex.lock();
-        data["bgeo"]		=readBGEO;
-        data["bhclassic"]	=readBGEO;
-        data["geo"]			=readGEO;
-        data["hclassic"]	=readGEO;
-        data["pdb"]			=readPDB;
-        data["pdb32"]		=readPDB32;
-        data["pdb64"]		=readPDB64;
-        data["pda"]			=readPDA;
-        data["mc"]			=readMC;
-        data["ptc"]			=readPTC;
-        data["pdc"]			=readPDC;
-        data["prt"]			=readPRT;
-        data["bin"]			=readBIN;
-        data["pts"]			=readPTS;
-		data["xyz"]			=readXYZ;
-		data["pcd"]			=readPCD;
-        data["ptf"]			=readPTC;
-        data["itbl"]		=readBGEO;
-        data["atbl"]		=readBGEO;
-		data["rpc"]			=readRPC;
-	initialized=true;
-	initializationMutex.unlock();
+        data["bgeo"]        = readBGEO;
+        data["bhclassic"]   = readBGEO;
+        data["geo"]         = readGEO;
+        data["hclassic"]    = readGEO;
+        data["pdb"]         = readPDB;
+        data["pdb32"]       = readPDB32;
+        data["pdb64"]       = readPDB64;
+        data["pda"]         = readPDA;
+        data["mc"]          = readMC;
+        data["ptc"]         = readPTC;
+        data["pdc"]         = readPDC;
+        data["prt"]         = readPRT;
+        data["bin"]         = readBIN;
+        data["pts"]         = readPTS;
+        data["xyz"]         = readXYZ;
+        data["pcd"]         = readPCD;
+        data["ptf"]         = readPTC;
+        data["itbl"]        = readBGEO;
+        data["atbl"]        = readBGEO;
+        data["rpc"]         = readRPC;
+        initialized = true;
+        initializationMutex.unlock();
     }
     return data;
 }
 
-map<string,WRITER_FUNCTION>&
+std::map<std::string, WRITER_FUNCTION>&
 writers()
 {
-    static map<string,WRITER_FUNCTION> data;
+    static std::map<std::string, WRITER_FUNCTION> data;
     static bool initialized=false;
     if(!initialized){
     initializationMutex.lock();
-        data["bgeo"]		=writeBGEO;
-		data["bhclassic"] 	=writeBGEO;
-        data["geo"]			=writeGEO;
-        data["pdb"]			=writePDB;
-        data["pdb32"]		=writePDB32;
-        data["pdb64"]		=writePDB64;
-        data["pda"]			=writePDA;
-        data["ptc"]			=writePTC;
-        data["rib"]			=writeRIB;
-        data["pdc"]			=writePDC;
-        data["prt"]			=writePRT;
-        data["bin"]			=writeBIN;
-		data["pcd"]			=writePCD;
-        data["ptf"]			=writePTC;
-        data["itbl"]		=writeBGEO;
-        data["atbl"]		=writeBGEO;
-		//data["rpc"]		=writeRPC;
-	initialized=true;
-	initializationMutex.unlock();
+        data["bgeo"]        = writeBGEO;
+        data["bhclassic"]   = writeBGEO;
+        data["geo"]         = writeGEO;
+        data["pdb"]         = writePDB;
+        data["pdb32"]       = writePDB32;
+        data["pdb64"]       = writePDB64;
+        data["pda"]         = writePDA;
+        data["ptc"]         = writePTC;
+        data["rib"]         = writeRIB;
+        data["pdc"]         = writePDC;
+        data["prt"]         = writePRT;
+        data["bin"]         = writeBIN;
+        data["pcd"]         = writePCD;
+        data["ptf"]         = writePTC;
+        data["itbl"]        = writeBGEO;
+        data["atbl"]        = writeBGEO;
+        //data["rpc"]       = writeRPC;
+        initialized = true;
+        initializationMutex.unlock();
     }
     return data;
 }
 
 //! Gives extension of a file ignoring any trailing .gz
 //! i.e. for 'foo.pdb.gz' it gives 'pdb', for 'foo.pdb' it gives 'pdb'
-bool extensionIgnoringGz(const string& filename,string& ret,bool &endsWithGz)
+bool extensionIgnoringGz(const std::string& filename, std::string& ret, bool& endsWithGz)
 {
     size_t period=filename.rfind('.');
     endsWithGz=false;
-    if(period==string::npos){
-        cerr<<"Partio: No extension detected in filename"<<endl;
+    if (period == std::string::npos) {
+        std::cerr << "Partio: No extension detected in filename" << std::endl;
         return false;
     }
-    string extension=filename.substr(period+1);
-    if(extension=="gz"){
+    std::string extension = filename.substr(period+1);
+    if (extension == "gz") {
         endsWithGz=true;
         size_t period2=filename.rfind('.',period-1);
-        if(period2==string::npos){
-            cerr<<"Partio: No extension detected in filename"<<endl;
+        if (period2 == std::string::npos) {
+            std::cerr << "Partio: No extension detected in filename" << std::endl;
             return false;
         }
-        string extension2=filename.substr(period2+1,period-period2-1);
-        ret=extension2;
-    }else{
-        ret=extension;
+        std::string extension2 = filename.substr(period2 + 1, period - period2 - 1);
+        ret = extension2;
+    } else {
+        ret = extension;
     }
     return true;
 }
@@ -140,13 +139,13 @@ bool extensionIgnoringGz(const string& filename,string& ret,bool &endsWithGz)
 ParticlesDataMutable*
 read(const char* c_filename)
 {
-    string filename(c_filename);
-    string extension;
+    std::string filename(c_filename);
+    std::string extension;
     bool endsWithGz;
-    if(!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
-    map<string,READER_FUNCTION>::iterator i=readers().find(extension);
-    if(i==readers().end()){
-        cerr<<"Partio READ: No reader defined for extension "<<extension<<endl;
+    if (!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
+    std::map<std::string, READER_FUNCTION>::iterator i = readers().find(extension);
+    if (i == readers().end()) {
+        std::cerr << "Partio READ: No reader defined for extension " << extension << std::endl;
         return 0;
     }
     return (*i->second)(c_filename,false);
@@ -155,31 +154,55 @@ read(const char* c_filename)
 ParticlesInfo*
 readHeaders(const char* c_filename)
 {
-    string filename(c_filename);
-    string extension;
+    std::string filename(c_filename);
+    std::string extension;
     bool endsWithGz;
-    if(!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
-    map<string,READER_FUNCTION>::iterator i=readers().find(extension);
-    if(i==readers().end()){
-        cerr<<"Partio READ HEADERS: No reader defined for extension "<<extension<<endl;
+    if (!extensionIgnoringGz(filename,extension,endsWithGz)) return 0;
+    std::map<std::string, READER_FUNCTION>::iterator i = readers().find(extension);
+    if (i == readers().end()){
+        std::cerr << "Partio READ HEADERS: No reader defined for extension " << extension << std::endl;
         return 0;
     }
     return (*i->second)(c_filename,true);
 }
 
 void
-write(const char* c_filename,const ParticlesData& particles,const bool forceCompressed)
+write(const char* c_filename, const ParticlesData& particles, const bool forceCompressed)
 {
-    string filename(c_filename);
-    string extension;
+    std::string filename(c_filename);
+    std::string extension;
     bool endsWithGz;
     if(!extensionIgnoringGz(filename,extension,endsWithGz)) return;
-    map<string,WRITER_FUNCTION>::iterator i=writers().find(extension);
-    if(i==writers().end()){
-        cerr<<"Partio: No writer defined for extension "<<extension<<endl;
+    std::map<std::string, WRITER_FUNCTION>::iterator i = writers().find(extension);
+    if (i == writers().end()){
+        std::cerr << "Partio: No writer defined for extension " << extension << std::endl;
         return;
     }
     (*i->second)(c_filename,particles,forceCompressed || endsWithGz);
+}
+
+std::vector<std::string>
+supportedReadFormats() {
+    std::map<std::string, READER_FUNCTION>& _readers = readers();
+    std::vector<std::string> ret;
+    ret.reserve(_readers.size());
+    for (std::map<std::string, READER_FUNCTION>::iterator it = _readers.begin(); it != _readers.end(); ++it) {
+        ret.push_back(it->first);
+    }
+
+    return ret;
+}
+
+std::vector<std::string>
+supportedWriteFormats() {
+    std::map<std::string, WRITER_FUNCTION>& _writers = writers();
+    std::vector<std::string> ret;
+    ret.reserve(_writers.size());
+    for (std::map<std::string, WRITER_FUNCTION>::iterator it = _writers.begin(); it != _writers.end(); ++it) {
+        ret.push_back(it->first);
+    }
+
+    return ret;
 }
 
 EXIT_PARTIO_NAMESPACE

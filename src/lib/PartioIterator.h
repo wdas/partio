@@ -150,7 +150,7 @@ public:
 
     //! Copy constructor. NOTE: Invalidates any accessors that have been registered with it
     ParticleIterator(const ParticleIterator& other)
-		:particles(other.particles),index(other.index),indexEnd(other.indexEnd),accessors(0)
+        :particles(other.particles),index(other.index),indexEnd(other.indexEnd),accessors(0)
     {}
 
     //! Construct an iterator with iteration parameters. This is typically only
