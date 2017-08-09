@@ -87,9 +87,9 @@ ParticlesDataMutable* readPDA(const char* filename,const bool headersOnly,std::o
 
         if(word=="V"){
             attrs.push_back(simple->addAttribute(attrNames[index].c_str(),Partio::VECTOR,3));
-        }else if("R"){
+        }else if(word=="R"){
             attrs.push_back(simple->addAttribute(attrNames[index].c_str(),Partio::FLOAT,1));
-        }else if("I"){
+        }else if(word=="I"){
             attrs.push_back(simple->addAttribute(attrNames[index].c_str(),Partio::INT,1));
         }
 
