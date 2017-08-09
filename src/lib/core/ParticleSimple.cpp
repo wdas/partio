@@ -262,8 +262,12 @@ addParticle()
 {
     if(allocatedCount==particleCount){
         allocatedCount=std::max(10,std::max(allocatedCount*3/2,particleCount));
-        for(unsigned int i=0;i<attributes.size();i++)
-            attributeData[i]=(char*)realloc(attributeData[i],(size_t)attributeStrides[i]*(size_t)allocatedCount);
+        for(unsigned int i=0;i<attributes.size();i++) {
+            char *memory = (char*)realloc(attributeData[i],(size_t)attributeStrides[i]*(size_t)allocatedCount);
+            if(memory){
+                attributeData[i]=memory;
+            }
+        }
     }
     ParticleIndex index=particleCount;
     particleCount++;
