@@ -105,8 +105,8 @@ bool ReadAttrHeader(std::istream& input, Attribute_Header& attribute){
 
 int CharArrayLen(char** charArray){
     int i = 0;
-    if(charArray != false){
-        while(charArray[i] != '\0'){
+    if(charArray != NULL){
+        while(charArray[i] != NULL){
             i++;
         }
     }
