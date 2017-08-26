@@ -3,6 +3,7 @@
 /bin
 /CMakeFiles
 /src/doc/doc
+/Makefile.config
 /Darwin-*
 /kbuild.*
 /*.kdev*
