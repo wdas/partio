@@ -1,12 +1,13 @@
 /.sconsign.dblite
-/kbuild.*
-/src/doc/doc
-/Linux-*
-/Darwin-*
 /build
-*~
-*.o
+/bin
+/CMakeFiles
+/src/doc/doc
+/Darwin-*
+/kbuild.*
 /*.kdev*
+/Linux-*
+*.o
 *.cmake
 *.txt
 *.make
@@ -18,6 +19,4 @@
 *.check_cache
 *.out
 *.log
-/bin
-/CMakeFiles
-Makefile
+*~
