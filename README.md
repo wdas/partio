@@ -1,6 +1,5 @@
-===================================================================
 Partio - A library for particle IO and manipulation
-===================================================================
+===================================================
 
 This is the initial source code release of partio a tool we used for particle
 reading/writing.  It started out as an abstraction for the commonalities in
@@ -23,7 +22,7 @@ Super impatient building guide
     make -j prefix=$prefix RP_SeExpr=$prefix install
 
 Getting Started
-==============
+===============
 
 CMake is used to build the project, but we provide a top-level Makefile
 for convenience that takes care of all the steps.
