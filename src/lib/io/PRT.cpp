@@ -148,7 +148,7 @@ static bool write_buffer(std::ostream& os, z_stream& z, char* out_buf, void* p, 
 
 ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
-    std::auto_ptr<std::istream> input(new std::ifstream(filename,std::ios::in|std::ios::binary));
+    std::unique_ptr<std::istream> input(new std::ifstream(filename,std::ios::in|std::ios::binary));
     if (!*input) {
         if(errorStream) *errorStream<<"Partio: Unable to open file "<<filename<<std::endl;
         return 0;
@@ -350,7 +350,7 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
     int numParts = p.numParticles();
     if (numParts)
     {
-        std::auto_ptr<std::ostream> output(
+        std::unique_ptr<std::ostream> output(
         new std::ofstream(filename,std::ios::out|std::ios::binary));
 
         if (!*output) {

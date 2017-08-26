@@ -91,7 +91,7 @@ string GetString(istream& input,bool& error)
 template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
 
-    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
+    unique_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
         if(errorStream) *errorStream<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
@@ -174,7 +174,7 @@ template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,cons
 template<int bits>
 bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream)
 {
-    auto_ptr<ostream> output(
+    unique_ptr<ostream> output(
         compressed ? 
         Gzip_Out(filename,ios::out|ios::binary)
         :new ofstream(filename,ios::out|ios::binary));
@@ -264,7 +264,7 @@ bool writePDB64(const char* filename,const ParticlesData& p,const bool compresse
 
 ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
-    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
+    unique_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
         if(errorStream) *errorStream <<"Partio: Unable to open file "<<filename<<endl;
         return 0;

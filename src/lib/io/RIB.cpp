@@ -38,7 +38,7 @@ using namespace std;
 
 bool writeRIB(const char* filename, const ParticlesData& p, const bool compressed,std::ostream* errorStream)
 {
-    auto_ptr<ostream> output(
+    unique_ptr<ostream> output(
         compressed ? Gzip_Out(filename, ios::out | ios::binary)
         : new ofstream(filename, ios::out | ios::binary));
 

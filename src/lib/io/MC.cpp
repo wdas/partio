@@ -131,7 +131,7 @@ static const int HEADER_SIZE = 56;
 
 ParticlesDataMutable* readMC(const char* filename, const bool headersOnly,std::ostream* errorStream){
 
-    std::auto_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
+    std::unique_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
     if(!*input){
         if(errorStream) *errorStream << "Partio: Unable to open file " << filename << std::endl;
         return 0;

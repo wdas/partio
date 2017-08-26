@@ -81,7 +81,7 @@ bool ParseSpec(const string& spec,string& typeName,string& name)
 
 ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
-    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
+    unique_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if(!*input){
         if(errorStream) *errorStream <<"Partio: Unable to open file "<<filename<<endl;
         return 0;
@@ -237,7 +237,7 @@ bool writePTC(const char* filename,const ParticlesData& p,const bool compressed,
 {
     //ofstream output(filename,ios::out|ios::binary);
 
-    auto_ptr<ostream> output(
+    unique_ptr<ostream> output(
         compressed ? 
         Gzip_Out(filename,ios::out|ios::binary)
         :new ofstream(filename,ios::out|ios::binary));

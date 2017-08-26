@@ -56,7 +56,7 @@ using namespace std;
 
 ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
-    auto_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
+    unique_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
     if (!*input)
     {
         if(errorStream) *errorStream<<"Partio: Can't open particle data file: "<<filename<<endl;
@@ -248,7 +248,7 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly,std::o
 /*
 bool writePTS(const char* filename,const ParticlesData& p,const bool compressed)
 {
-    auto_ptr<ostream> output(
+    unique_ptr<ostream> output(
         compressed ?
         Gzip_Out(filename,ios::out|ios::binary)
         :new ofstream(filename,ios::out|ios::binary));
