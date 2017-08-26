@@ -48,6 +48,9 @@ SET( ${PROJECT_NAME}_PATCH_LEVEL 0 )
 
 include(GNUInstallDirs)
 
+# PARTIO_SE_ENABLED enables SeExpr support
+option(PARTIO_SE_ENABLED "PARTIO_SE_ENABLED" false)
+
 ## Setup platform specific helper defines build variants
 IF(WIN32)
   ADD_DEFINITIONS (-DPARTIO_WIN32 -D_USE_MATH_DEFINES)
@@ -95,11 +98,14 @@ SET( PARTIO_LIBRARIES partio ${ZLIB_LIBRARY} )
 # make it so partio can be found
 INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/lib )
 
-SET(SEEXPR_BASE "c:/aselle/seexpr-inst" CACHE STRING "path to SeExpr")
-SET(SEEXPR_INCLUDE_PATH ${SEEXPR_BASE}/include)
-SET(SEEXPR_LIBDIR ${CMAKE_INSTALL_LIBDIR})
-SET(SEEXPR_LINK_PATH ${SEEXPR_BASE}/${SEEXPR_LIBDIR})
-SET(SEEXPR_LIBS "SeExpr")
+if (${PARTIO_SE_ENABLED})
+    add_definitions(-DPARTIO_SE_ENABLED=1)
+    SET(SEEXPR_BASE "c:/aselle/seexpr-inst" CACHE STRING "path to SeExpr")
+    SET(SEEXPR_INCLUDE_PATH ${SEEXPR_BASE}/include)
+    SET(SEEXPR_LIBDIR ${CMAKE_INSTALL_LIBDIR})
+    SET(SEEXPR_LINK_PATH ${SEEXPR_BASE}/${SEEXPR_LIBDIR})
+    SET(SEEXPR_LIBS "SeExpr")
+endif ()
 
 
 ## Traverse subdirectories

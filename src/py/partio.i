@@ -40,7 +40,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 %{
 #include <Partio.h>
 #include <PartioIterator.h>
+#if PARTIO_SE_ENABLED
 #include <PartioSe.h>
+#endif
 #include <sstream>
 namespace Partio{
 typedef uint64_t ParticleIndex;
@@ -553,6 +555,7 @@ void print(const ParticlesData* particles);
 %feature("docstring","Creates a clustered particle set");
 ParticlesDataMutable* computeClustering(ParticlesDataMutable* particles,const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density)=0;
 
+#if PARTIO_SE_ENABLED
 class PartioSe{
   public:
     PartioSe(ParticlesDataMutable* parts,const char* expr);
@@ -562,3 +565,4 @@ class PartioSe{
     bool runRange(int istart,int iend);
     void setTime(float val);
 };
+#endif
