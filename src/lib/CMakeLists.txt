@@ -52,4 +52,4 @@ endif ()
 ENDIF(SEEXPR_BASE)
 
 FILE(GLOB public_includes "*.h")
-INSTALL (FILES ${public_includes} DESTINATION include)
+INSTALL (FILES ${public_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
