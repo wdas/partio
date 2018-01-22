@@ -1,5 +1,5 @@
-Partio - A library for particle IO and manipulation
-===================================================
+[Partio](https://www.disneyanimation.com/technology/partio.html) - A library for particle IO and manipulation
+=============================================================================================================
 
 This is the initial source code release of partio a tool we used for particle
 reading/writing.  It started out as an abstraction for the commonalities in
