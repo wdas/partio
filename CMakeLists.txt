@@ -78,6 +78,8 @@ IF(NOT CMAKE_BUILD_TYPE)
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
       FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
+find_package(dcmake REQUIRED)
+wdas_setup()
 
 ## Set install location
 IF (NOT DEFINED CMAKE_INSTALL_PREFIX)

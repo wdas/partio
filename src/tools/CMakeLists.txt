@@ -53,4 +53,6 @@ target_link_libraries(partconv ${PARTIO_LIBRARIES})
 ADD_EXECUTABLE(partattr partattr.cpp)
 target_link_libraries(partattr ${PARTIO_LIBRARIES})
 
+install(PROGRAMS partedit.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partedit)
+
 install(TARGETS partattr partconv partinfo DESTINATION bin)
