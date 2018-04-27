@@ -34,7 +34,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 import sys
-import papi
+import partio
 
 if __name__=="__main__":
     filename=None
@@ -45,13 +45,13 @@ if __name__=="__main__":
         sys.exit(1)
 
     # read particle name
-    p=papi.read(filename)
+    p=partio.read(filename)
 
     for i in range(p.numAttributes()):
         attr=p.attributeInfo(i)
         typeStr="NONE"
-        if attr.type==papi.VECTOR: typeStr="VECTOR"
-        if attr.type==papi.FLOAT: typeStr="FLOAT"
-        if attr.type==papi.INT: typeStr="INT"
+        if attr.type==partio.VECTOR: typeStr="VECTOR"
+        if attr.type==partio.FLOAT: typeStr="FLOAT"
+        if attr.type==partio.INT: typeStr="INT"
         print "%10s[%d] %-30s "%(typeStr,attr.count,attr.name)
 
