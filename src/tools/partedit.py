@@ -13,8 +13,8 @@ Supported FLAGS:
 """
 
 # TODO:
-# Tooltips on column headers with attribute info
 # Support for indexed strings
+# Support for fixed attributes
 # Tighten up whitespace usage (smaller font? popup matrix?)
 # Hook into aurora gui
 
@@ -39,6 +39,15 @@ from Qt.QtWidgets import QShortcut, QApplication, QMainWindow, \
     QComboBox, QCheckBox, QTableWidgetItem
 from Qt.QtCore import Qt, QSize, QObject#, pyqtSignal
 from PyQt5.QtCore import pyqtSignal
+
+#------------------------------------------------------------------------------
+_attrTypeNames = ['None', 'Vector', 'Float', 'Integer', 'Indexed String']
+def attrTypeName(attrType):
+    """ Returns the attribute type as a string given its enumerated valued """
+    try:
+        return _attrTypeNames[attrType]
+    except IndexError:
+        return 'invalid type index: {}'.format(attrType)
 
 #------------------------------------------------------------------------------
 def copy(srcData):
@@ -431,8 +440,11 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
         self.setRowCount(numParticles)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
         for col, (_, attr) in enumerate(self.attrs):
-            self.setHorizontalHeaderItem(col, QTableWidgetItem(attr.name))
-            #self.horizontalHeader().setSectionResizeMode(col, QHeaderView.ResizeToContents)
+            item = QTableWidgetItem(attr.name)
+            tooltip = '<p><tt>&nbsp;Name: {}<br>&nbsp;Type: {}<br>Count: {}</tt></p>'.\
+                      format(attr.name, attrTypeName(attr.type), attr.count)
+            item.setToolTip(tooltip)
+            self.setHorizontalHeaderItem(col, item)
         self.horizontalHeader().setStretchLastSection(False)
         self.setVerticalHeaderLabels([str(pnum+1) for pnum in range(numParticles)])
         self.setTabKeyNavigation(True)
