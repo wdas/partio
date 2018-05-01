@@ -343,7 +343,7 @@ class AttrWidget(QFrame): # pylint:disable=R0903
         self.name = 'AttrWidget{}'.format(AttrWidget.widgetNumber)
         self.setObjectName(self.name)
         AttrWidget.widgetNumber += 1
-        self.withBorderStyle = '#%s {border: 1px solid blue;}' % self.name
+        self.withBorderStyle = '#%s {border: 1px solid dodgerblue;}' % self.name
         self.noBorderStyle = '#%s {border: 0px;}' % self.name
         self.setStyleSheet(self.noBorderStyle)
 
@@ -547,6 +547,7 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
         numParticles = self.data.numParticles()
         self.setRowCount(numParticles)
         self.populateParticle(numParticles-1, True)
+        self.verticalHeader().resizeSections(QHeaderView.ResizeToContents)
 
     #--------------------------------------------------------------------------
     def attributeAddedSlot(self, name): # pylint:disable=W0613
@@ -561,6 +562,7 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
         self.setHorizontalHeaderItem(numAttrs-1, QTableWidgetItem(attr.name))
         for pnum in range(self.data.numParticles()):
             self.populateAttribute(pnum, anum, attr, True)
+        self.verticalHeader().resizeSections(QHeaderView.ResizeToContents)
 
     #--------------------------------------------------------------------------
     def dataResetSlot(self):
