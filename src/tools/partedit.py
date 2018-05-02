@@ -124,8 +124,13 @@ class ParticleData(QObject):
             print 'Invalid filename: {}'.format(filename)
             return
 
+        data = partio.read(filename)
+        if not data:
+            print 'Invalid particle file:', filename
+            data = partio.create()
+
         self.filename = filename
-        self.setData(partio.read(filename))
+        self.setData(data)
         self.setDirty(False)
 
     #--------------------------------------------------------------------------
@@ -325,7 +330,6 @@ class NumericalEdit(QLineEdit): # pylint:disable=R0903
         elif isinstance(value, float):
             self.setValidator(QDoubleValidator())
 
-
 #------------------------------------------------------------------------------
 class AttrWidget(QFrame): # pylint:disable=R0903
     """ The primary widget for table entries representing a particle attribute """
@@ -353,12 +357,14 @@ class AttrWidget(QFrame): # pylint:disable=R0903
 
         idx = 0
         self.items = []
+        self.textValues = []
         numRows = int(math.ceil(len(value) / float(numColumns)))
         for _ in range(numRows):
             row = QHBoxLayout()
             layout.addLayout(row)
             for _ in range(numColumns):
                 item = NumericalEdit(value[idx])
+                self.textValues.append(str(value[idx]))
                 item.editingFinished.connect(self.applyEdit)
                 row.addWidget(item, Qt.AlignHCenter|Qt.AlignTop)
                 self.items.append(item)
@@ -371,16 +377,20 @@ class AttrWidget(QFrame): # pylint:disable=R0903
         """ Callback when editing finished on a cell. Sets data value. """
 
         newValue = []
-        for item in self.items:
+        changed = False
+        for i, item in enumerate(self.items):
             text = item.text()
+            if text != self.textValues[i]:
+                changed = True
             if isinstance(self.value[0], int):
                 newValue.append(int(text))
             else:
                 newValue.append(float(text))
             item.clearFocus()
-        self.value = tuple(newValue)
-        self.data.set(self.attr, self.particleNum, self.value)
-        self.drawBorder(True)
+        if changed:
+            self.value = tuple(newValue)
+            self.data.set(self.attr, self.particleNum, self.value)
+            self.drawBorder(True)
 
     #--------------------------------------------------------------------------
     def drawBorder(self, border):
