@@ -181,7 +181,7 @@ print(const ParticlesData* particles)
     for(size_t k=0;k<attrs.size();k++) accessors.push_back(ParticleAccessor(attrs[k]));
     for(size_t k=0;k<attrs.size();k++) it.addAccessor(accessors[k]);
 
-    for(int i=0;i<numToPrint && it != end;i++){
+    for(int i=0;i<numToPrint && it != end;i++, it++){
         std::cout<<i<<": ";
         for(unsigned int k=0;k<attrs.size();k++){
             switch(attrs[k].type){
