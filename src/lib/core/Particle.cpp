@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <string>
 #include <cstring>
 #include <cassert>
+#include <vector>
 namespace Partio{
 
 std::string
@@ -159,18 +160,27 @@ printAttr(const ParticlesData* p,const ParticleAttribute& attr,const int particl
     for(int k=0;k<attr.count;k++) std::cout<<" "<<data[k];
 }
 
+std::vector<ParticleAttribute>
+getAttrs(const ParticlesData& particles)
+{
+    std::vector<ParticleAttribute> attrs(particles.numAttributes());
+    for(int i=0;i<particles.numAttributes();i++){
+        particles.attributeInfo(i,attrs[i]);
+    }
+    return attrs;
+}
+
 void
 print(const ParticlesData* particles)
 {
     std::cout<<"Particle count "<<particles->numParticles()<<std::endl;
     std::cout<<"Attribute count "<<particles->numAttributes()<<std::endl;
 
-    std::vector<ParticleAttribute> attrs;
-    for(int i=0;i<particles->numAttributes();i++){
-        ParticleAttribute attr;
-        particles->attributeInfo(i,attr);
-        attrs.push_back(attr);
-        std::cout<<"attribute "<<attr.name<<" "<<int(attr.type)<<" "<<attr.count<<std::endl;
+    std::vector<ParticleAttribute> attrs = getAttrs(*particles);
+    for (const ParticleAttribute& attr : attrs) {
+        std::cout << "attribute " << attr.name
+                  << " type=" << TypeName(attr.type)
+                  << " count=" << attr.count << std::endl;
     }
 
     int numToPrint=std::min(10,particles->numParticles());
@@ -184,19 +194,32 @@ print(const ParticlesData* particles)
     for(int i=0;i<numToPrint && it != end;i++, it++){
         std::cout<<i<<": ";
         for(unsigned int k=0;k<attrs.size();k++){
+            std::cout<<attrs[k].name<<"=";
+            if (attrs[k].count > 1) std::cout<<"(";
             switch(attrs[k].type){
             case NONE:break;
             case FLOAT:
             case VECTOR:
-                for(int c=0;c<attrs[k].count;c++) std::cout<<accessors[k].raw<float>(it)[c];
+                for(int c=0;c<attrs[k].count;c++) {
+                    if (c) std::cout << ",";
+                    std::cout<<accessors[k].raw<float>(it)[c];
+                }
                 break;
             case INT:
-                for(int c=0;c<attrs[k].count;c++) std::cout<<accessors[k].raw<int>(it)[c];
+                for(int c=0;c<attrs[k].count;c++) {
+                    if (c) std::cout << ",";
+                    std::cout<<accessors[k].raw<int>(it)[c]<<",";
+                }
                 break;
             case INDEXEDSTR:
-                for(int c=0;c<attrs[k].count;c++) std::cout<<accessors[k].raw<int>(it)[c];
+                for(int c=0;c<attrs[k].count;c++) {
+                    if (c) std::cout << ",";
+                    std::cout<<accessors[k].raw<int>(it)[c]<<",";
+                }
                 break;
             }
+            if (attrs[k].count > 1) std::cout<<")";
+            std::cout<<"\t";
         }
         std::cout<<std::endl;
     }
