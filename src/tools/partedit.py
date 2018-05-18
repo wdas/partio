@@ -456,7 +456,7 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
             item.setToolTip(tooltip)
             self.setHorizontalHeaderItem(col, item)
         self.horizontalHeader().setStretchLastSection(False)
-        self.setVerticalHeaderLabels([str(pnum+1) for pnum in range(numParticles)])
+        self.setVerticalHeaderLabels([str(pnum) for pnum in range(numParticles)])
         self.setTabKeyNavigation(True)
         self.horizontalHeader().setSectionsMovable(False)
 
