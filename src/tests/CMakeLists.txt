@@ -31,10 +31,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
+require_disney_system_package(gtest)
 link_directories(${CMAKE_BINARY_DIR}/src/lib)
 
-foreach(item testiterator test testcache testclonecopy teststr makecircle makeline testkdtree)
+foreach(item testiterator test testcache testclonecopy teststr makecircle makeline testkdtree testmerge)
     ADD_EXECUTABLE(${item} "${item}.cpp")
-    target_link_libraries(${item} ${PARTIO_LIBRARIES})
-    install(TARGETS ${item} DESTINATION share/partio/test)
+    target_link_libraries(${item} partio ${ZLIB_LIBRARY} gtest) #${PARTIO_LIBRARIES})
+    install(TARGETS ${item} DESTINATION share/test/partio)
 endforeach(item)

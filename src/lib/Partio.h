@@ -316,5 +316,18 @@ void endCachedAccess(ParticlesData* particles);
 //! Prints a subset of particle data in a textual form
 void print(const ParticlesData* particles);
 
+
+//! Merges one particle set into another
+/*!
+  Given a ParticleSetMutable, merges it with a second ParticleSet,
+  copying particles and attributes that align with the base particle
+  set. If an identifier is provided, that will be used as a key
+  to replace the particle in the base set with the particle in the second
+  set with the same identifier attribute value. If the identifier is not
+  provided or the particle's attribute value is not found in the base set,
+  a new particle is added. If used, the identifier must be a single INT.
+*/
+void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier=std::string());
+
 }
 #endif

@@ -566,6 +566,10 @@ void write(const char* filename,const ParticlesData&,const bool=false);
 %feature("docstring","Print a summary of particle file");
 void print(const ParticlesData* particles);
 
+%feature("autodoc");
+%feature("docstring","Merge two particle sets");
+void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier=std::string());
+
 class PartioSe{
   public:
     PartioSe(ParticlesDataMutable* parts,const char* expr);
