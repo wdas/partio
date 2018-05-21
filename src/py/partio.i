@@ -41,6 +41,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <Partio.h>
 #include <PartioIterator.h>
 #include <PartioSe.h>
+#include <PartioAttribute.h>
 #include <sstream>
 namespace Partio{
 typedef uint64_t ParticleIndex;
@@ -569,6 +570,14 @@ void print(const ParticlesData* particles);
 %feature("autodoc");
 %feature("docstring","Merge two particle sets");
 void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier=std::string());
+
+%feature("autodoc");
+%feature("docstring","Clone a particle set");
+ParticlesDataMutable* clone(const ParticlesData& other, bool particles);
+
+%feature("autodoc");
+%feature("docstring","Return string name of given attribute type");
+std::string TypeName(ParticleAttributeType attrType);
 
 class PartioSe{
   public:
