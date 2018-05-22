@@ -55,9 +55,12 @@ target_link_libraries(partattr ${PARTIO_LIBRARIES})
 
 install(PROGRAMS partedit.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partedit)
 
+install(PROGRAMS partjson.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partjson)
+
 install(TARGETS partattr partconv partinfo DESTINATION bin)
 
 EXECUTE_PROCESS(COMMAND python -c "import sys;print('%s.%s'%sys.version_info[0:2])"
                 OUTPUT_VARIABLE PYTHON_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
 SET(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION}/site-packages" )
 INSTALL(FILES partedit.py DESTINATION ${PYTHON_DEST})
+INSTALL(FILES partjson.py DESTINATION ${PYTHON_DEST})
