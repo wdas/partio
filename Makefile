@@ -32,6 +32,9 @@ all::
 install: all
 	$(MAKE) -C $(builddir) DESTDIR=$(DESTDIR) install
 
+test: all
+	$(MAKE) -C $(builddir) DESTDIR=$(DESTDIR) test
+
 $(builddir)/stamp:
 	mkdir -p $(builddir)
 	cd $(builddir) && cmake $(CMAKE_FLAGS) ../..

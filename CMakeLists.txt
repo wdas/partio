@@ -80,6 +80,8 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 find_package(dcmake REQUIRED)
 wdas_setup()
+include(CTest)
+enable_testing()
 
 ## Set install location
 IF (NOT DEFINED CMAKE_INSTALL_PREFIX)

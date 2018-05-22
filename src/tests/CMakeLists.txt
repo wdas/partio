@@ -40,4 +40,9 @@ foreach(item testiterator test testcache testclonecopy teststr makecircle makeli
     install(TARGETS ${item} DESTINATION share/test/partio)
 endforeach(item)
 
+
 install(PROGRAMS testpartjson.py DESTINATION share/test/partio RENAME testpartjson)
+
+foreach(item testiterator test testcache testclonecopy teststr  testkdtree testmerge testpartjson)
+    add_test(NAME ${item} COMMAND ${item})
+endforeach(item)
