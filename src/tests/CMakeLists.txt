@@ -39,3 +39,5 @@ foreach(item testiterator test testcache testclonecopy teststr makecircle makeli
     target_link_libraries(${item} partio ${ZLIB_LIBRARY} gtest) #${PARTIO_LIBRARIES})
     install(TARGETS ${item} DESTINATION share/test/partio)
 endforeach(item)
+
+install(PROGRAMS testpartjson.py DESTINATION share/test/partio RENAME testpartjson)
