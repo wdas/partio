@@ -21,12 +21,3 @@
 /bin
 /CMakeFiles
 Makefile
-.mentor.*
-report.html
-/src/tests/testenv/*/test*.txt
-/src/tests/testenv/*/test*-txt-diff.html
-/src/tests/testenv/*/image*
-/src/tests/testenv/*/*.bb
-/src/tests/testenv/*/*geo*
-/src/tests/testenv/*/*.ptc*
-/src/tests/testenv/*/*.pdb*
