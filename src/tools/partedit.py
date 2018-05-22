@@ -41,7 +41,7 @@ from Qt.QtGui import QKeySequence, QIcon, QIntValidator, QDoubleValidator
 from Qt.QtWidgets import QShortcut, QApplication, QMainWindow, \
     QPushButton, QTableWidget, QLabel, QWidget, QVBoxLayout, QHeaderView,\
     QHBoxLayout, QLineEdit, QFileDialog, QFrame, QDialog, QFormLayout, \
-    QComboBox, QCheckBox, QTableWidgetItem
+    QComboBox, QCheckBox, QTableWidgetItem, QSplitter
 from Qt.QtCore import Qt, QSize, QObject#, pyqtSignal
 from PyQt5.QtCore import pyqtSignal
 
@@ -884,16 +884,14 @@ class PartEdit(QMainWindow):
         toolbar.addWidget(addAttributeButton)
         addAttributeButton.clicked.connect(self.addAttributeSlot)
 
-        mainWidget = QWidget(self)
-        hbox = QHBoxLayout(mainWidget)
-        mainWidget.setLayout(hbox)
-        self.setCentralWidget(mainWidget)
+        splitter = QSplitter(self)
+        self.setCentralWidget(splitter)
 
         particleTable = ParticleTableWidget(self.data, self)
-        hbox.addWidget(particleTable)
+        splitter.addWidget(particleTable)
 
         right = QWidget(self)
-        hbox.addWidget(right)
+        splitter.addWidget(right)
         vbox = QVBoxLayout(right)
         right.setLayout(vbox)
 
