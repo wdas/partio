@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<?mentor version="2.0" ?>
+<testspecs toplevel="true" project="partio"> 
+    <plugins path="MentorPlugins"/> 
+</testspecs> 
