@@ -11,6 +11,8 @@ Supported FLAGS:
     -h/--help    : Print this help message
 """
 
+# TODO: Unicode compliance
+
 __copyright__ = """
 CONFIDENTIAL INFORMATION: This software is the confidential and
 proprietary information of Walt Disney Animation Studios ("WDAS").
@@ -30,12 +32,7 @@ def toJson(particleSet):
     data = {}
 
     # Put types in json just for readability
-    data['__types__'] = { 0 : 'NONE',
-                          1 : 'VECTOR',
-                          2 : 'FLOAT',
-                          3 : 'INT',
-                          4 : 'INDEXED_STR',
-                        }
+    data['__types__'] = { i : partio.TypeName(i) for i in range(5) }
 
     # Convert fixed attributes
     fixedAttributes = {}
@@ -48,7 +45,7 @@ def toJson(particleSet):
                                      }
 
         # Convert indexed string attributse
-        if attr.type == 4:
+        if attr.type == partio.INDEXEDSTR:
             fixedIndexedStrings[attr.name] = particleSet.fixedIndexedStrs(attr)
 
     if fixedAttributes:
@@ -66,7 +63,7 @@ def toJson(particleSet):
         attributes[attr.name] = {'type': attr.type, 'count': attr.count }
 
         # Convert indexed string attributse
-        if attr.type == 4:
+        if attr.type == partio.INDEXEDSTR:
             indexedStrings[attr.name] = particleSet.indexedStrs(attr)
 
     if attributes:
@@ -97,7 +94,7 @@ def fromJson(data):
     # Convert fixed attributes
     fixedAttributes = {}
     if 'fixedAttributes' in data:
-        for attrName, attrInfo in data['fixedAttributes'].iteritems():
+        for attrName, attrInfo in data['fixedAttributes'].items():
             attrName = str(attrName)
             attr = particleSet.addFixedAttribute(attrName, attrInfo['type'], attrInfo['count'])
             fixedAttributes[attrName] = attr
@@ -109,14 +106,14 @@ def fromJson(data):
     # Convert attributes
     attributes = {}
     if 'attributes' in data:
-        for attrName, attrInfo in data['attributes'].iteritems():
+        for attrName, attrInfo in data['attributes'].items():
             attrName = str(attrName)
             attr = particleSet.addAttribute(attrName, attrInfo['type'], attrInfo['count'])
             attributes[attrName] = attr
 
     # Convert fixed indexed strings
     if 'fixedIndexedStrings' in data:
-        for attrName, strings in data['fixedIndexedStrings'].iteritems():
+        for attrName, strings in data['fixedIndexedStrings'].items():
             if attrName not in fixedAttributes:
                 sys.stderr.write('Could not match fixed indexed string {} with any defined fixed attribute. Skipping.\n'.format(attrName))
                 continue
@@ -125,7 +122,7 @@ def fromJson(data):
 
     # Convert indexed strings
     if 'indexedStrings' in data:
-        for attrName, strings in data['indexedStrings'].iteritems():
+        for attrName, strings in data['indexedStrings'].items():
             if attrName not in attributes:
                 sys.stderr.write('Could not match indexed string {} with any defined attribute. Skipping.\n'.format(attrName))
                 continue
@@ -135,9 +132,9 @@ def fromJson(data):
     # Convert particles
     if 'particles' in data:
         particleSet.addParticles(len(data['particles']))
-        for pnum, particle in data['particles'].iteritems():
+        for pnum, particle in data['particles'].items():
             pnum = int(pnum)
-            for attrName, value in particle.iteritems():
+            for attrName, value in particle.items():
                 try:
                     attr = attributes[attrName]
                 except IndexError:

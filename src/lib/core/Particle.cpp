@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <cassert>
 #include <vector>
 #include <unordered_map>
+#include <memory>
 
 namespace Partio{
 
@@ -351,14 +352,14 @@ void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::st
             size_t size = Partio::TypeSize(attr.base.type) * attr.base.count;
             void *dst = base.dataWrite<void>(attr.base, index);
             const void* src;
-            int* newIndices;
+            std::unique_ptr<int> newIndices;
             if (attr.base.type == INDEXEDSTR) {
-                newIndices = new int[attr.base.count];
+                newIndices.reset(new int[attr.base.count]);
                 const int* indices = delta.data<int>(attr.delta, i);
                 for (int j=0; j<attr.delta.count; ++j) {
-                    newIndices[j] = stringToString[attr.base.name][indices[j]];
+                    newIndices.get()[j] = stringToString[attr.base.name][indices[j]];
                 }
-                src = (void*)newIndices;
+                src = (void*)(newIndices.get());
             }
             else {
                 src = delta.data<void>(attr.delta, i);
