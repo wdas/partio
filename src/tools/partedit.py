@@ -13,10 +13,14 @@ Supported FLAGS:
 """
 
 # TODO:
+# Support for fixed attribute delete and rename
 # Support for indexed strings
-# Support for fixed attributes
-# Tighten up whitespace usage (smaller font? popup matrix?)
-# Hook into aurora gui
+# Tighten up particle table whitespace usage (smaller font? popup matrix?)
+# Performance - delay widget construction
+
+# NEXT UP:
+# - delete fixed attribute
+# - rename fixed attribute
 
 __copyright__ = """
 CONFIDENTIAL INFORMATION: This software is the confidential and
@@ -66,6 +70,53 @@ def copy(srcData):
             dstData.set(dstAttrs[anum], pnum, srcData.get(srcAttr, pnum))
     return dstData
 
+#--------------------------------------------------------------------------
+def getAttrs(numAttributesFunc, attributeInfoFunc, sort=False):
+    """ Return list of tuples of (attributeNum, attribute) """
+    attrs = []
+    numAttr = numAttributesFunc()
+
+    nameToIndex = {attributeInfoFunc(anum).name:anum for anum in range(numAttr)}
+    names = nameToIndex.keys()
+    if sort:
+        names.sort()
+
+    id_offset = 0
+    for name in names:
+        anum = nameToIndex[name]
+        attr = attributeInfoFunc(anum)
+        if sort and attr.name == 'id':
+            attrs.insert(0, (anum, attr))
+            id_offset += 1
+        elif sort and 'id' in attr.name:
+            attrs.insert(id_offset, (anum, attr))
+            id_offset += 1
+        else:
+            attrs.append((anum, attr))
+
+    return attrs
+
+#--------------------------------------------------------------------------
+def copyParticles(src, dst):
+    """ Copy particles from src to dst. """
+
+    # Identify the attributes that are in both src and dst
+    srcAttrs = [src.attributeInfo(i) for i in range(src.numAttributes())]
+    dstAttrs = [dst.attributeInfo(i) for i in range(dst.numAttributes())]
+    srcAttrs = {attr.name:attr for attr in srcAttrs}
+    dstAttrs = {attr.name:attr for attr in dstAttrs}
+    attrs = {'src':[], 'dst':[]}
+    for name, srcAttr in srcAttrs.iteritems():
+        if name in dstAttrs:
+            attrs['src'].append(srcAttr)
+            attrs['dst'].append(dstAttrs[name])
+
+    numParticles = src.numParticles()
+    dst.addParticles(numParticles)
+    for pnum in range(numParticles):
+        for anum in range(len(attrs)):
+            dst.set(attrs['dst'][anum], pnum, src.get(attrs['src'][anum], pnum))
+
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 class ParticleData(QObject):
@@ -73,6 +124,7 @@ class ParticleData(QObject):
 
     particleAdded = pyqtSignal(int)
     attributeAdded = pyqtSignal(str)
+    fixedAttributeAdded = pyqtSignal(str)
     dataReset = pyqtSignal()
     dirtied = pyqtSignal(bool)
 
@@ -105,9 +157,12 @@ class ParticleData(QObject):
         """ Facades methods through to data """
 
         self.get = self.data.get
+        self.getFixed = self.data.getFixed
         self.numAttributes = self.data.numAttributes
+        self.numFixedAttributes = self.data.numFixedAttributes
         self.numParticles = self.data.numParticles
         self.attributeInfo = self.data.attributeInfo
+        self.fixedAttributeInfo = self.data.fixedAttributeInfo
 
     #--------------------------------------------------------------------------
     def set(self, *args):
@@ -117,16 +172,23 @@ class ParticleData(QObject):
         self.data.set(*args)
 
     #--------------------------------------------------------------------------
+    def setFixed(self, *args):
+        """ Sets a fixed attribute value on the partio data, marking dirty. """
+
+        self.setDirty(True)
+        self.data.setFixed(*args)
+
+    #--------------------------------------------------------------------------
     def read(self, filename):
         """ Opens a file from disk and populates the UI """
 
         if not os.path.exists(filename):
-            print 'Invalid filename: {}'.format(filename)
+            sys.stderr.write('Invalid filename: {}\n'.format(filename))
             return
 
         data = partio.read(filename)
         if not data:
-            print 'Invalid particle file:', filename
+            sys.stderr.write('Invalid particle file: {}\n'.format(filename))
             data = partio.create()
 
         self.filename = filename
@@ -254,10 +316,12 @@ class ParticleData(QObject):
             to construct all new data sans the given particle
         """
 
+        for anum in range(self.data.numAttributes()):
+            attr = self.data.attributeInfo(anum)
         attributes = [self.data.attributeInfo(anum) for anum in range(self.data.numAttributes())]
 
         want = [pnum for pnum in range(self.data.numParticles()) if pnum not in indices ]
-        newData = partio.create()
+        newData = partio.clone(self.data, False)
         for attr in attributes:
             newData.addAttribute(attr.name, attr.type, attr.count)
         newData.addParticles(len(want))
@@ -274,49 +338,71 @@ class ParticleData(QObject):
             handle to the new attribute.
         """
 
-        if fixed:
-            attr = self.data.addFixedAttribute(name, attrType, count)
-        else:
-            attr = self.data.addAttribute(name, attrType, count)
-
         if not isinstance(defaultValue, tuple):
             defaultValue = (defaultValue,)
-        for pnum in range(self.numParticles()):
-            self.data.set(attr, pnum, defaultValue)
 
-        self.attributeAdded.emit(attr.name)
+        if fixed:
+            attr = self.data.addFixedAttribute(name, attrType, count)
+            self.data.setFixed(attr, defaultValue)
+            self.fixedAttributeAdded.emit(attr.name)
+        else:
+            attr = self.data.addAttribute(name, attrType, count)
+            for pnum in range(self.numParticles()):
+                self.data.set(attr, pnum, defaultValue)
+            self.attributeAdded.emit(attr.name)
+
         self.setDirty(True)
 
     #--------------------------------------------------------------------------
     def removeAttributes(self, names):
-        """ Removes the attributes at the given indices.
+        """ Removes the attributes with the given names.
             partio doesn't support removing data, so we have
-            to construct all new data sans the given attribute.
+            to construct all new data sans the given attribute(s).
         """
 
         newData = partio.create()
-        attributes = []
         for anum in range(self.numAttributes()):
             attr = self.attributeInfo(anum)
             if attr.name not in names:
-                attributes.append(attr)
+                newData.addAttribute(attr.name, attr.type, attr.count)
 
-        newData = partio.create()
+        # Copy particle data with new attributes
+        copyParticles(src=self.data, dst=newData)
 
-        # Create new attributes for the new partio set
-        attrs = [newData.addAttribute(attr.name, attr.type, attr.count) for attr in attributes]
-
-        # Populate the particles
-        numParticles = self.data.numParticles()
-        newData.addParticles(numParticles)
-        for pnum in range(numParticles):
-            for anum, attr in enumerate(attrs):
-                # Set new attribute but pull from old attribute
-                newData.set(attr, pnum, self.data.get(attributes[anum], pnum))
+        # Copy fixed attributes
+        for anum in range(self.data.numFixedAttributes()):
+            oldAttr = self.data.fixedAttributeInfo(anum)
+            newAttr = newData.addFixedAttribute(oldAttr.name, oldAttr.type, oldAttr.count)
+            newData.setFixed(newAttr, self.data.getFixed(oldAttr))
 
         self.setData(newData)
         self.setDirty(True)
 
+
+    #--------------------------------------------------------------------------
+    def removeFixedAttributes(self, names):
+        """ Removes the fixed attributes with the given names.
+            partio doesn't support removing data, so we have
+            to construct all new data sans the given attribute(s).
+        """
+
+        newData = partio.create()
+
+        # Copy the regular (non-fixed) attributes and particles
+        for anum in range(self.data.numAttributes()):
+            attr = self.attributeInfo(anum)
+            newData.addAttribute(attr.name, attr.type, attr.count)
+        copyParticles(src=self.data, dst=newData)
+
+        # Create new fixed attributes
+        for anum in range(self.data.numFixedAttributes()):
+            srcAttr = self.fixedAttributeInfo(anum)
+            if srcAttr.name not in names:
+                dstAttr = newData.addFixedAttribute(srcAttr.name, srcAttr.type, srcAttr.count)
+                newData.setFixed(dstAttr, self.data.getFixed(srcAttr))
+
+        self.setData(newData)
+        self.setDirty(True)
 
 #------------------------------------------------------------------------------
 class NumericalEdit(QLineEdit): # pylint:disable=R0903
@@ -389,7 +475,10 @@ class AttrWidget(QFrame): # pylint:disable=R0903
             item.clearFocus()
         if changed:
             self.value = tuple(newValue)
-            self.data.set(self.attr, self.particleNum, self.value)
+            if self.particleNum >= 0:
+                self.data.set(self.attr, self.particleNum, self.value)
+            else:
+                self.data.setFixed(self.attr, self.value)
             self.drawBorder(True)
 
     #--------------------------------------------------------------------------
@@ -402,8 +491,10 @@ class AttrWidget(QFrame): # pylint:disable=R0903
             self.setStyleSheet(self.noBorderStyle)
 
 #------------------------------------------------------------------------------
-def getWidget(value, data, attr, particleNum):
-    """ Returns the correct type of QWidget based off of the item type """
+def getWidget(value, data, attr, particleNum=-1):
+    """ Returns the correct type of QWidget based off of the item type.
+        A particleNum<0 means a fixed attribute.
+    """
 
     if isinstance(value, tuple):
         size = len(value)
@@ -445,7 +536,7 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
         numAttr = self.data.numAttributes()
         numParticles = self.data.numParticles()
 
-        self.getAttrs(True)
+        self.attrs = getAttrs(self.data.numAttributes, self.data.attributeInfo, True)
         self.setColumnCount(numAttr)
         self.setRowCount(numParticles)
         self.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
@@ -485,32 +576,6 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
             widget.drawBorder(border)
         self.setCellWidget(pnum, col, widget)
         self.widgets.append(widget)
-
-    #--------------------------------------------------------------------------
-    def getAttrs(self, sort=False):
-        """ Return list of tuples of (attributeNum, attribute) """
-        attrs = []
-        numAttr = self.data.numAttributes()
-
-        nameToIndex = {self.data.attributeInfo(anum).name:anum for anum in range(numAttr)}
-        names = nameToIndex.keys()
-        if sort:
-            names.sort()
-
-        id_offset = 0
-        for name in names:
-            anum = nameToIndex[name]
-            attr = self.data.attributeInfo(anum)
-            if sort and attr.name == 'id':
-                attrs.insert(0, (anum, attr))
-                id_offset += 1
-            elif sort and 'id' in attr.name:
-                attrs.insert(id_offset, (anum, attr))
-                id_offset += 1
-            else:
-                attrs.append((anum, attr))
-
-        self.attrs = attrs
 
     #--------------------------------------------------------------------------
     def keyPressEvent(self, event):
@@ -590,12 +655,98 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
                 widget.drawBorder(False)
 
 #------------------------------------------------------------------------------
+class FixedAttributesWidget(QWidget):
+    """ A widget for viewing/editing fixed attributes (non-varying) """
+
+    def __init__(self, data, parent=None):
+        QWidget.__init__(self, parent)
+        self.data = data
+        self.table = None
+
+        vbox = QVBoxLayout()
+        self.setLayout(vbox)
+        title = QLabel('Fixed Attributes')
+        vbox.addWidget(title)
+
+        self.frame = QFrame()
+        vbox.addWidget(self.frame)
+        self.vbox = QVBoxLayout()
+        self.frame.setLayout(self.vbox)
+        self.frame.setFrameShape(QFrame.Panel)
+        self.frame.setFrameShadow(QFrame.Sunken)
+
+        self.table = QTableWidget()
+        self.table.horizontalHeader().hide()
+        self.vbox.addWidget(self.table)
+        self.table.hide()
+
+        self.noAttrLabel = QLabel('<i>No fixed attributes</i>')
+        self.vbox.addWidget(self.noAttrLabel)
+
+
+        self.widgets = []
+        self.populate()
+
+        self.data.fixedAttributeAdded.connect(self.fixedAttributeAddedSlot)
+        self.data.dataReset.connect(self.dataResetSlot)
+        self.data.dirtied.connect(self.dataDirtiedSlot)
+
+    def dataDirtiedSlot(self, dirty):
+        """ SLOT when the particle data is dirtied or cleaned."""
+        if not dirty:
+            for widget in self.widgets:
+                widget.drawBorder(False)
+
+    def dataResetSlot(self):
+        """ SLOT when particle data is reconstructed """
+        self.populate()
+
+    def fixedAttributeAddedSlot(self, name): #pylint:disable=W0613
+        """ SLOT when a fixed attribute is added to the particle set """
+        self.populate()
+
+    def populate(self):
+        """ Populates the table of fixed attributes """
+
+        self.widgets = []
+
+        # If no widgets, just drop that in
+        numAttrs = self.data.numFixedAttributes()
+        if not numAttrs:
+            self.table.hide()
+            self.noAttrLabel.show()
+            return
+
+        self.table.show()
+        self.noAttrLabel.hide()
+        self.table.setColumnCount(1)
+        self.table.setRowCount(numAttrs)
+        self.attrs = getAttrs(self.data.numFixedAttributes, self.data.fixedAttributeInfo, True)
+
+        for row, (_, attr) in enumerate(self.attrs):
+            item = QTableWidgetItem(attr.name)
+            tooltip = '<p><tt>&nbsp;Name: {}<br>&nbsp;Type: {}<br>Count: {}</tt></p>'.\
+                      format(attr.name, attrTypeName(attr.type), attr.count)
+            item.setToolTip(tooltip)
+            self.table.setVerticalHeaderItem(row, item)
+            value = self.data.getFixed(attr)
+            widget = getWidget(value, self.data, attr)
+            self.table.setCellWidget(row, 0, widget)
+            self.widgets.append(widget)
+        self.table.horizontalHeader().setStretchLastSection(False)
+        self.table.setTabKeyNavigation(True)
+        self.table.horizontalHeader().setSectionsMovable(False)
+
+        self.table.horizontalHeader().resizeSections(QHeaderView.ResizeToContents)
+        self.table.verticalHeader().resizeSections(QHeaderView.ResizeToContents)
+
+#------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
 class PartEdit(QMainWindow):
     """ Main window / editor """
 
-    def __init__(self):
-        QMainWindow.__init__(self)
+    def __init__(self, parent=None):
+        QMainWindow.__init__(self, parent)
 
         self.data = ParticleData()
 
@@ -644,13 +795,25 @@ class PartEdit(QMainWindow):
         toolbar.addWidget(addAttributeButton)
         addAttributeButton.clicked.connect(self.addAttributeSlot)
 
-        self.main = QWidget(self)
-        self.layout = QVBoxLayout(self.main)
-        self.main.setLayout(self.layout)
-        self.setCentralWidget(self.main)
+        mainWidget = QWidget(self)
+        hbox = QHBoxLayout(mainWidget)
+        mainWidget.setLayout(hbox)
+        self.setCentralWidget(mainWidget)
 
-        self.table = ParticleTableWidget(self.data, self)
-        self.layout.addWidget(self.table)
+        particleTable = ParticleTableWidget(self.data, self)
+        hbox.addWidget(particleTable)
+
+        right = QWidget(self)
+        hbox.addWidget(right)
+        vbox = QVBoxLayout(right)
+        right.setLayout(vbox)
+
+        fixedAttrWidget = FixedAttributesWidget(self.data, self)
+        vbox.addWidget(fixedAttrWidget)
+
+        vbox.addStretch()
+
+        # TODD: SCROLLABLE AREAS FOR EVERYTHING
 
         self.data.dirtied.connect(self.dataDirtiedSlot)
 
@@ -663,7 +826,7 @@ class PartEdit(QMainWindow):
             dirname = os.path.dirname(self.data.filename)
         else:
             dirname = os.getcwd()
-        filename = QFileDialog.getOpenFileName(self, "Open particle file", dirname, "(*.bgeo *.bhclassic *.geo)")
+        filename = QFileDialog.getOpenFileName(self, "Open particle file", dirname, "(*.bgeo *.geo *.bhclassic *.ptc *.pdb)")
         if filename:
             if isinstance(filename, tuple):
                 filename = filename[0]
@@ -675,6 +838,12 @@ class PartEdit(QMainWindow):
 
         self.data.read(filename)
         self.setWindowTitle(filename)
+
+    #--------------------------------------------------------------------------
+    def setData(self, particleSet):
+        """ Uses the given particle set as its data """
+
+        self.data.setData(particleSet)
 
     #--------------------------------------------------------------------------
     def saveSlot(self):
@@ -689,7 +858,12 @@ class PartEdit(QMainWindow):
     #--------------------------------------------------------------------------
     def save(self, delta):
         """ Saves the file, either as full or delta """
-        filename = QFileDialog.getSaveFileName(self, "Save particle file", self.data.filename)
+        if self.data.filename:
+            filename = self.data.filename
+        else:
+            filename = os.getcwd()
+        filename = QFileDialog.getSaveFileName(self, "Save particle file", filename,
+                                               'Particle Files (*.bgeo *.geo *.bhclassic *.ptc *.pdb );;All files(*)')
         if isinstance(filename, tuple):
             filename = filename[0]
         filename = str(filename)
@@ -713,15 +887,12 @@ class PartEdit(QMainWindow):
         layout = QVBoxLayout()
         dialog.setLayout(layout)
 
-        types = {'Integer': partio.INT,
-                 'Float': partio.FLOAT,
-                 'Vector': partio.VECTOR,
-                }
         form = QFormLayout()
         nameBox = QLineEdit()
         typeCombo = QComboBox()
-        for t in types:
-            typeCombo.addItem(t)
+        for typeName in _attrTypeNames:
+            typeCombo.addItem(typeName)
+        typeCombo.setCurrentIndex(2) # Float
         countBox = QLineEdit()
         countBox.setValidator(QIntValidator())
         countBox.setText('1')
@@ -754,16 +925,22 @@ class PartEdit(QMainWindow):
             print 'Please supply a name for the new attribute' # TODO: prompt
             return
 
-        attrType = types[str(typeCombo.currentText())]
+        attrType = _attrTypeNames.index(str(typeCombo.currentText()))
         count = int(countBox.text())
         fixed = fixedCheckbox.isChecked()
-        if attrType == partio.INT:
-            value = int(valueBox.text())
-        elif attrType == partio.FLOAT or attrType == partio.VECTOR:
-            value = float(valueBox.text()) # pylint:disable=R0204
-        else:
-            value = 0.0 # pylint:disable=R0204
-        value = tuple([value] * count)
+        values = list(str(valueBox.text()).strip().split())
+        for i in range(count):
+            if i < len(values):
+                value = values[i]
+            else:
+                value = values[-1]
+            if attrType == partio.INT or attrType == partio.INDEXEDSTR:
+                values[i] = int(value)
+            elif attrType == partio.FLOAT or attrType == partio.VECTOR:
+                values[i] = float(value) # pylint:disable=R0204
+            else:
+                values[i] = 0.0 # pylint:disable=R0204
+        value = tuple(values)
 
         self.data.addAttribute(name, attrType, count, fixed, value)
 
