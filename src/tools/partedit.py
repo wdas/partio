@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# pylint:disable=C0302
 
 """
 An interactive spreadsheet for viewing, editing, and saving
@@ -44,14 +45,8 @@ from Qt.QtWidgets import QShortcut, QApplication, QMainWindow, \
 from Qt.QtCore import Qt, QSize, QObject#, pyqtSignal
 from PyQt5.QtCore import pyqtSignal
 
-#------------------------------------------------------------------------------
-_attrTypeNames = ['None', 'Vector', 'Float', 'Integer', 'Indexed String']
-def attrTypeName(attrType):
-    """ Returns the attribute type as a string given its enumerated valued """
-    try:
-        return _attrTypeNames[attrType]
-    except IndexError:
-        return 'invalid type index: {}'.format(attrType)
+#------------------------------------------------------------------------------_
+_attrTypes = [partio.NONE, partio.VECTOR, partio.FLOAT, partio.INT, partio.INDEXEDSTR]
 
 #------------------------------------------------------------------------------
 def copy(srcData):
@@ -163,6 +158,7 @@ class ParticleData(QObject):
         self.numParticles = self.data.numParticles
         self.attributeInfo = self.data.attributeInfo
         self.fixedAttributeInfo = self.data.fixedAttributeInfo
+        self.indexedStrs = self.data.indexedStrs
 
     #--------------------------------------------------------------------------
     def set(self, *args):
@@ -543,7 +539,7 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
         for col, (_, attr) in enumerate(self.attrs):
             item = QTableWidgetItem(attr.name)
             tooltip = '<p><tt>&nbsp;Name: {}<br>&nbsp;Type: {}<br>Count: {}</tt></p>'.\
-                      format(attr.name, attrTypeName(attr.type), attr.count)
+                      format(attr.name, partio.TypeName(attr.type), attr.count)
             item.setToolTip(tooltip)
             self.setHorizontalHeaderItem(col, item)
         self.horizontalHeader().setStretchLastSection(False)
@@ -661,7 +657,6 @@ class FixedAttributesWidget(QWidget):
     def __init__(self, data, parent=None):
         QWidget.__init__(self, parent)
         self.data = data
-        self.table = None
 
         vbox = QVBoxLayout()
         self.setLayout(vbox)
@@ -726,13 +721,107 @@ class FixedAttributesWidget(QWidget):
         for row, (_, attr) in enumerate(self.attrs):
             item = QTableWidgetItem(attr.name)
             tooltip = '<p><tt>&nbsp;Name: {}<br>&nbsp;Type: {}<br>Count: {}</tt></p>'.\
-                      format(attr.name, attrTypeName(attr.type), attr.count)
+                      format(attr.name, partio.TypeName(attr.type), attr.count)
             item.setToolTip(tooltip)
             self.table.setVerticalHeaderItem(row, item)
             value = self.data.getFixed(attr)
             widget = getWidget(value, self.data, attr)
             self.table.setCellWidget(row, 0, widget)
             self.widgets.append(widget)
+        self.table.horizontalHeader().setStretchLastSection(False)
+        self.table.setTabKeyNavigation(True)
+        self.table.horizontalHeader().setSectionsMovable(False)
+
+        self.table.horizontalHeader().resizeSections(QHeaderView.ResizeToContents)
+        self.table.verticalHeader().resizeSections(QHeaderView.ResizeToContents)
+
+
+class IndexedStringsWidget(QWidget):
+    """ Holds the list of indexed string attributes """
+    def __init__(self, data, parent=None):
+        QWidget.__init__(self, parent)
+        self.data = data
+
+        vbox = QVBoxLayout()
+        self.setLayout(vbox)
+        title = QLabel('Indexed Strings')
+        vbox.addWidget(title)
+
+        self.frame = QFrame()
+        vbox.addWidget(self.frame)
+        self.vbox = QVBoxLayout()
+        self.frame.setLayout(self.vbox)
+        self.frame.setFrameShape(QFrame.Panel)
+        self.frame.setFrameShadow(QFrame.Sunken)
+
+        self.table = QTableWidget()
+        self.table.horizontalHeader().hide()
+        self.vbox.addWidget(self.table)
+        self.table.hide()
+
+        self.noStringsLabel = QLabel('<i>No indexed strings</i>')
+        self.vbox.addWidget(self.noStringsLabel)
+
+        self.widgets = []
+        self.populate()
+
+        self.data.attributeAdded.connect(self.attributeAddedSlot)
+        self.data.dataReset.connect(self.dataResetSlot)
+        self.data.dirtied.connect(self.dataDirtiedSlot)
+
+    def dataDirtiedSlot(self, dirty):
+        """ SLOT when the particle data is dirtied or cleaned."""
+        if not dirty:
+            for widget in self.widgets:
+                widget.drawBorder(False)
+
+    def dataResetSlot(self):
+        """ SLOT when particle data is reconstructed """
+        self.populate()
+
+    def attributeAddedSlot(self, name): #pylint:disable=W0613
+        """ SLOT when an attribute is added to the particle set """
+        attr = self.data.attributeInfo(name)
+        if attr.type == partio.INDEXEDSTR:
+            self.populate()
+
+    def populate(self):
+        """ Populates the table of indexed strings """
+
+        self.widgets = []
+
+        # If no widgets, just drop that in
+        attrs = []
+        for anum in range(self.data.numAttributes()):
+            attr = self.data.attributeInfo(anum)
+            if attr.type == partio.INDEXEDSTR:
+                attrs.append(attr)
+
+        if not attrs:
+            self.table.hide()
+            self.noStringsLabel.show()
+            return
+
+        self.table.show()
+        self.noStringsLabel.hide()
+        self.table.setColumnCount(1)
+        self.table.setRowCount(len(attrs))
+
+        for row, attr in enumerate(attrs):
+            item = QTableWidgetItem(attr.name)
+            self.table.setVerticalHeaderItem(row, item)
+            strings = self.data.indexedStrs(attr)
+            table = QTableWidget()
+            table.setColumnCount(1)
+            table.setRowCount(len(strings))
+            table.horizontalHeader().hide()
+            table.setVerticalHeaderLabels([str(i) for i in range(len(strings))])
+            for i, string in enumerate(strings):
+                widget = QLabel(string)
+                table.setCellWidget(i, 0, widget)
+                self.widgets.append(widget)
+            self.table.setCellWidget(row, 0, table)
+
         self.table.horizontalHeader().setStretchLastSection(False)
         self.table.setTabKeyNavigation(True)
         self.table.horizontalHeader().setSectionsMovable(False)
@@ -810,6 +899,9 @@ class PartEdit(QMainWindow):
 
         fixedAttrWidget = FixedAttributesWidget(self.data, self)
         vbox.addWidget(fixedAttrWidget)
+
+        indexedStrings = IndexedStringsWidget(self.data, self)
+        vbox.addWidget(indexedStrings)
 
         vbox.addStretch()
 
@@ -890,9 +982,10 @@ class PartEdit(QMainWindow):
         form = QFormLayout()
         nameBox = QLineEdit()
         typeCombo = QComboBox()
-        for typeName in _attrTypeNames:
+        for attrType in _attrTypes:
+            typeName = partio.TypeName(attrType)
             typeCombo.addItem(typeName)
-        typeCombo.setCurrentIndex(2) # Float
+        typeCombo.setCurrentIndex(partio.FLOAT)
         countBox = QLineEdit()
         countBox.setValidator(QIntValidator())
         countBox.setText('1')
@@ -925,7 +1018,7 @@ class PartEdit(QMainWindow):
             print 'Please supply a name for the new attribute' # TODO: prompt
             return
 
-        attrType = _attrTypeNames.index(str(typeCombo.currentText()))
+        attrType = typeCombo.currentIndex()
         count = int(countBox.text())
         fixed = fixedCheckbox.isChecked()
         values = list(str(valueBox.text()).strip().split())
