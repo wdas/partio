@@ -496,6 +496,8 @@ def getWidget(value, data, attr, particleNum=-1):
         size = len(value)
         if size == 16:
             result = AttrWidget(value, data, attr, particleNum, 4)
+        elif size == 9:
+            result = AttrWidget(value, data, attr, particleNum, 3)
         else:
             result = AttrWidget(value, data, attr, particleNum, size)
     else:
