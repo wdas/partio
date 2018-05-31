@@ -561,7 +561,7 @@ ParticlesInfo* readHeaders(const char* filename,bool verbose=true,std::ostream& 
 
 %feature("autodoc");
 %feature("docstring","Writes a particle set to disk");
-void write(const char* filename,const ParticlesData&,const bool=false);
+void write(const char* filename,const ParticlesData&,const bool=false,const bool=true);
 
 %feature("autodoc");
 %feature("docstring","Print a summary of particle file");
