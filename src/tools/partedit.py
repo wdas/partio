@@ -909,6 +909,11 @@ class PartEdit(QMainWindow):
 
         self.data.dirtied.connect(self.dataDirtiedSlot)
 
+
+        # Configure ctrl-w to close the window
+        QShortcut( QKeySequence(Qt.CTRL + Qt.Key_W), self, self.close )
+
+
     #--------------------------------------------------------------------------
     def openSlot(self):
         """ Callback from Open button """
