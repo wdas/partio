@@ -31,25 +31,38 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-FILE(GLOB io_cpp "io/*.cpp")
-FILE(GLOB core_cpp "core/*.cpp")
-ADD_LIBRARY (partio SHARED ${io_cpp} ${core_cpp})
-SET_TARGET_PROPERTIES(partio PROPERTIES OUTPUT_NAME partio)
-IF(ZLIB_FOUND)
-target_link_libraries(partio ${ZLIB_LIBRARY})
-ENDIF(ZLIB_FOUND)
-INSTALL (TARGETS partio DESTINATION ${CMAKE_INSTALL_LIBDIR})
+file(GLOB io_cpp "io/*.cpp")
+file(GLOB core_cpp "core/*.cpp")
 
-IF(SEEXPR_BASE)
-INCLUDE_DIRECTORIES(${SEEXPR_INCLUDE_PATH})
-LINK_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
-LINK_DIRECTORIES(${SEEXPR_LINK_PATH})
-if (${PARTIO_SE_ENABLED})
-    ADD_LIBRARY (partioSe SHARED PartioSe.cpp)
-    target_link_libraries(partioSe ${PARTIO_LIBRARIES} ${SEEXPR_LIBS})
-    INSTALL (TARGETS partioSe DESTINATION ${CMAKE_INSTALL_LIBDIR})
-endif ()
-ENDIF(SEEXPR_BASE)
+add_library(partio SHARED ${io_cpp} ${core_cpp})
+set_target_properties(partio PROPERTIES OUTPUT_NAME partio)
 
-FILE(GLOB public_includes "*.h")
-INSTALL (FILES ${public_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
+target_include_directories(partio
+    PUBLIC
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>)
+
+if (ZLIB_FOUND)
+    target_include_directories(partio
+        PUBLIC
+            $<INSTALL_INTERFACE:${ZLIB_INCLUDE_DIR}>
+            $<BUILD_INTERFACE:${ZLIB_INCLUDE_DIR}>)
+    target_link_libraries(partio PUBLIC ${ZLIB_LIBRARY})
+endif (ZLIB_FOUND)
+
+install(TARGETS partio DESTINATION ${CMAKE_INSTALL_LIBDIR})
+
+if (SEEXPR_BASE)
+    if (${PARTIO_SE_ENABLED})
+        add_library(partioSe SHARED PartioSe.cpp)
+        target_include_directories(partioSe
+            PUBLIC
+                $<INSTALL_INTERFACE:${SEEXPR_INCLUDE_PATH}>
+                $<BUILD_INTERFACE:${SEEXPR_INCLUDE_DIR}>)
+            target_link_libraries(partioSe PUBLIC partio ${SEEXPR_LIBS})
+        install(TARGETS partioSe DESTINATION ${CMAKE_INSTALL_LIBDIR})
+    endif ()
+endif (SEEXPR_BASE)
+
+file(GLOB public_includes "*.h")
+install(FILES ${public_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

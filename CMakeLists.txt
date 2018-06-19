@@ -39,24 +39,31 @@ SET( CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS TRUE )
 ## disable rpath when linking
 SET( CMAKE_SKIP_RPATH TRUE )
 
-
 ## project name & version
 PROJECT( partio )
 SET( ${PROJECT_NAME}_MAJOR_VERSION 0 )
 SET( ${PROJECT_NAME}_MINOR_VERSION 1 )
 SET( ${PROJECT_NAME}_PATCH_LEVEL 0 )
-
 include(GNUInstallDirs)
 
 # PARTIO_SE_ENABLED enables SeExpr support
 option(PARTIO_SE_ENABLED "PARTIO_SE_ENABLED" false)
+
+# Enable C++11
+if (CMAKE_VERSION VERSION_LESS "3.1")
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    endif ()
+else ()
+    set(CMAKE_CXX_STANDARD 11)
+endif ()
 
 ## Setup platform specific helper defines build variants
 IF(WIN32)
   ADD_DEFINITIONS (-DPARTIO_WIN32 -D_USE_MATH_DEFINES)
 ELSE(WIN32)
   ADD_DEFINITIONS (-Wextra -Wno-unused-parameter)
-  SET( CMAKE_CXX_FLAGS "-fPIC")
+  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 ENDIF(WIN32)
 
 ## Choose build options
@@ -86,7 +93,6 @@ find_package(OpenGL REQUIRED)
 find_package(ZLIB)
 IF(ZLIB_FOUND)
     ADD_DEFINITIONS (-DPARTIO_USE_ZLIB)
-    INCLUDE_DIRECTORIES ( ${ZLIB_INCLUDE_DIR} )
 ELSE(ZLIB_FOUND)
     SET (ZLIB_LIBRARY "")
 ENDIF(ZLIB_FOUND)
@@ -94,9 +100,6 @@ ENDIF(ZLIB_FOUND)
 ## Make modules able to see partio library
 # Setup environment variable to link partio
 SET( PARTIO_LIBRARIES partio ${ZLIB_LIBRARY} )
-
-# make it so partio can be found
-INCLUDE_DIRECTORIES( ${CMAKE_SOURCE_DIR}/src/lib )
 
 if (${PARTIO_SE_ENABLED})
     add_definitions(-DPARTIO_SE_ENABLED=1)
