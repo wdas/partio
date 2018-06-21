@@ -40,6 +40,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "PartioEndian.h"
 #include "ZIP.h"
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>

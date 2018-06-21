@@ -34,7 +34,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 #include <Partio.h>
 #include <SeExpression.h>
+#include <algorithm>
 #include <map>
+#include <vector>
 
 namespace Partio{
 

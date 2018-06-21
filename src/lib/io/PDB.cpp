@@ -42,6 +42,7 @@ namespace PDB{
 }
 #include "PartioEndian.h"
 #include "ZIP.h"
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>

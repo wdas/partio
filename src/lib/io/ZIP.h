@@ -39,6 +39,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <string>
 #include <stdexcept>
 #include <vector>
 

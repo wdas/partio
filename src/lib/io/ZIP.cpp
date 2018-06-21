@@ -39,6 +39,7 @@ extern "C"{
 }
 #endif
 
+#include <algorithm>
 #include <cassert>
 #include <fstream>
 #include <iomanip>

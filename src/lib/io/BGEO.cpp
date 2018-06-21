@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include "../core/ParticleHeaders.h"
 #include "ZIP.h"
 
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
