@@ -56,6 +56,8 @@ if (CMAKE_VERSION VERSION_LESS "3.1")
     endif ()
 else ()
     set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD_REQUIRED YES)
+    set(CMAKE_CXX_EXTENSIONS NO)
 endif ()
 
 ## Setup platform specific helper defines build variants
