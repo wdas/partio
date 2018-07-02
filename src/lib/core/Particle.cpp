@@ -329,11 +329,11 @@ computeClustering(ParticlesDataMutable* particles, const int numNeighbors,const 
             }
         }
     }
-    if (!hasPosAttr || posAttr.type != VECTOR && posAttr.type != FLOAT || posAttr.count !=3) {
+    if (!hasPosAttr || (posAttr.type != VECTOR && posAttr.type != FLOAT) || posAttr.count !=3) {
         cluster->release();
         return 0;
     }
-    if (!hasIdAttr ||idAttr.type != INT || idAttr.count != 1) {
+    if (!hasIdAttr || idAttr.type != INT || idAttr.count != 1) {
         cluster->release();
         return 0;
     }
