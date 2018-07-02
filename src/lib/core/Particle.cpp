@@ -295,6 +295,9 @@ void addClusterAttribute(ParticlesDataMutable* cluster, ParticleAttribute& clust
             }
             break;
         }
+    case Partio::NONE:
+    default:
+        break;
     }
 }
 
