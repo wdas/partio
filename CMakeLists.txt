@@ -101,6 +101,8 @@ ELSE(ZLIB_FOUND)
     SET (ZLIB_LIBRARY "")
 ENDIF(ZLIB_FOUND)
 
+option(BUILD_SHARED_LIBS "Enabled shared libraries" ON)
+
 ## Make modules able to see partio library
 # Setup environment variable to link partio
 SET( PARTIO_LIBRARIES partio ${ZLIB_LIBRARY} )
