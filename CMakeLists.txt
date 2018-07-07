@@ -56,6 +56,8 @@ if (CMAKE_VERSION VERSION_LESS "3.1")
     endif ()
 else ()
     set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD_REQUIRED YES)
+    set(CMAKE_CXX_EXTENSIONS NO)
 endif ()
 
 ## Setup platform specific helper defines build variants
@@ -63,7 +65,6 @@ IF(WIN32)
   ADD_DEFINITIONS (-DPARTIO_WIN32 -D_USE_MATH_DEFINES)
 ELSE(WIN32)
   ADD_DEFINITIONS (-Wextra -Wno-unused-parameter)
-  SET( CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 ENDIF(WIN32)
 
 ## Choose build options

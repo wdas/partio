@@ -94,10 +94,10 @@ public:
 };
 
 
-std::ostream& operator<<(std::ostream& stream,const Vec3& v)
+inline std::ostream& operator<<(std::ostream& stream,const Vec3& v)
 {return stream<<v.x<<" "<<v.y<<" "<<v.z;}
 
-Vec3 operator*(const float a,const Vec3& v)
+inline Vec3 operator*(const float a,const Vec3& v)
 {
     return Vec3(a*v.x,a*v.y,a*v.z);
 }

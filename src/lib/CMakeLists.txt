@@ -34,8 +34,8 @@
 file(GLOB io_cpp "io/*.cpp")
 file(GLOB core_cpp "core/*.cpp")
 
-add_library(partio SHARED ${io_cpp} ${core_cpp})
-set_target_properties(partio PROPERTIES OUTPUT_NAME partio)
+add_library(partio ${io_cpp} ${core_cpp})
+set_target_properties(partio PROPERTIES OUTPUT_NAME partio POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(partio
     PUBLIC
@@ -54,7 +54,8 @@ install(TARGETS partio DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
 if (SEEXPR_BASE)
     if (${PARTIO_SE_ENABLED})
-        add_library(partioSe SHARED PartioSe.cpp)
+        add_library(partioSe PartioSe.cpp)
+        set_target_properties(partioSe POSITION_INDEPENDENT_CODE ON)
         target_include_directories(partioSe
             PUBLIC
                 $<INSTALL_INTERFACE:${SEEXPR_INCLUDE_PATH}>
