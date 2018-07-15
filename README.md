@@ -56,7 +56,7 @@ src/
    doc/      Doxygen documentation and (the start of) a manual
    tests/    Start of regression tests (I need more)
    tools/    Useful tools 
-             partconv <input format> <output format>
+             partconvert <input format> <output format>
              partinfo <particle file>
              partview <particle file>
 

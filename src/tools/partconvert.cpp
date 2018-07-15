@@ -32,19 +32,19 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
-#include "Partio.h"
+#include <Partio.h>
 #include <iostream>
-#include <iomanip>
 
 int main(int argc,char *argv[])
 {
-    if(argc!=2){
-        std::cerr<<"Usage is: "<<argv[0]<<" <filename>"<<std::endl;
+    if(argc!=3){
+        std::cerr<<"Usage is: "<<argv[0]<<" <filename in> <filename out>"<<std::endl;
         return 1;
     }
-    Partio::ParticlesDataMutable* p=Partio::read(argv[1]);
+    Partio::ParticlesData* p=Partio::read(argv[1]);
     if(p){
-        Partio::write(argv[1],*p);
+        Partio::print(p);
+        Partio::write(argv[2],*p);
         p->release();
     }
     

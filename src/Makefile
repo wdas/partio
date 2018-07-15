@@ -25,4 +25,4 @@ reader/BGEO.o: reader/BGEO.cpp Particle.h ParticleSimple.h \
 reader/PDB.o: reader/PDB.cpp Particle.h ParticleSimple.h \
   reader/../Particle.h reader/pdb.h
 partinfo.o: partinfo.cpp Particle.h
-partconv.o: partconf.cpp Particle.h
+partconvert.o: partconf.cpp Particle.h

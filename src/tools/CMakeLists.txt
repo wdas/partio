@@ -47,10 +47,10 @@ ENDIF(GLUT_FOUND AND OPENGL_FOUND)
 ADD_EXECUTABLE(partinfo partinfo.cpp)
 target_link_libraries(partinfo ${PARTIO_LIBRARIES})
 
-ADD_EXECUTABLE(partconv partconv.cpp)
-target_link_libraries(partconv ${PARTIO_LIBRARIES})
+ADD_EXECUTABLE(partconvert partconvert.cpp)
+target_link_libraries(partconvert ${PARTIO_LIBRARIES})
 
 ADD_EXECUTABLE(partattr partattr.cpp)
 target_link_libraries(partattr ${PARTIO_LIBRARIES})
 
-install(TARGETS partattr partconv partinfo DESTINATION ${CMAKE_INSTALL_BINDIR})
+install(TARGETS partattr partconvert partinfo DESTINATION ${CMAKE_INSTALL_BINDIR})
