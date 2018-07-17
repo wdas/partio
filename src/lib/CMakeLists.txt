@@ -55,7 +55,7 @@ install(TARGETS partio DESTINATION ${CMAKE_INSTALL_LIBDIR})
 if (SEEXPR_BASE)
     if (${PARTIO_SE_ENABLED})
         add_library(partioSe PartioSe.cpp)
-        set_target_properties(partioSe POSITION_INDEPENDENT_CODE ON)
+        set_target_properties(partioSe PROPERTIES POSITION_INDEPENDENT_CODE ON)
         target_include_directories(partioSe
             PUBLIC
                 $<INSTALL_INTERFACE:${SEEXPR_INCLUDE_PATH}>
