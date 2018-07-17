@@ -60,7 +60,7 @@ if (SEEXPR_BASE)
             PUBLIC
                 $<INSTALL_INTERFACE:${SEEXPR_INCLUDE_PATH}>
                 $<BUILD_INTERFACE:${SEEXPR_INCLUDE_DIR}>)
-            target_link_libraries(partioSe PUBLIC partio ${SEEXPR_LIBS})
+        target_link_libraries(partioSe PUBLIC partio ${SEEXPR_LIB})
         install(TARGETS partioSe DESTINATION ${CMAKE_INSTALL_LIBDIR})
     endif ()
 endif (SEEXPR_BASE)
