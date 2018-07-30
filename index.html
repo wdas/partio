@@ -1,1 +1,212 @@
-Test
+<html>
+<head>
+<title>Walt Disney Animation Studios</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf8">
+
+<link rel="stylesheet" type="text/css" href="styles.css">
+
+<script src="SpryAssets/SpryCollapsiblePanel.js" type="text/javascript"></script>
+<link href="SpryAssets/SpryCollapsiblePanel.css" rel="stylesheet" type="text/css">
+
+<script src="includes/prototype.js" type="text/javascript"></script>
+<script src="includes/cufon-yui.js" type="text/javascript"></script>
+<script src="includes/Century_Gothic_400.font.js" type="text/javascript"></script>
+
+<style>
+pre
+{
+font-weight:bold;
+color:white;
+background-color: #554422;
+font-family: courier;
+}
+
+</style>
+
+</head>
+<body class="oss" bgcolor="#FFFFFF" leftmargin="0" topmargin="0" marginwidth="0" marginheight="0">
+<center><br/><br/>
+<div id="wrapper" style="text-align:center;">
+<div id="paperBGgrad">
+<div class="h1_light"   style="text-align:left;"><img src="partio/images/partioWhite.png" alt="Partio"></div>
+
+<table width="796" border="0" cellspacing="0" cellpadding="8px" style="margin-left: 75px;">
+<tr>
+    <td style="text-align: justify;color: white;font-family: helvetica, arial, sans-serif;font-size: 13px;vertical-align: top;">
+    </td>
+</tr>
+
+<tr>
+<td style="text-align: justify;color: white;font-family: helvetica, arial, sans-serif;font-size: 13px;vertical-align: top;">
+<p>
+
+
+ Particles are an important part of effects work, because they
+allow free-form information in 3D space. Unfortunately, there is no
+standard format for particles akin to Wavefront .obj.  Most animation
+systems have their own proprietary particle formats. For example Maya
+uses the binary and ascii particle database formats .pdb and .pda file
+formats. Houdini uses the .geo and .bgeo geometry uber
+formats. Renderers typically have their own point cloud format such as
+RenderMan's PTC format and Houdini's .pc.  All of these formats share a common theme. They allow
+particles to be iterated or indexed and associate a customizable set
+of attributes with them. The goal of Partio is to provide a unified
+interface akin to unified image libraries that makes it easier to
+load, save, and manipulate particle files.  
+
+<h2>Motivation</h2>
+
+At Walt Disney Animation Studios, we had used a mix of PDB formats, PTC formats
+and BGEO formats, depending on the authoring environments. Many of our tools
+supported more than one of these, but the code was scattered and copied to read
+these formats. Additionally, some of these formats required linking to large
+libraries to use.  For this reason we desired a library that could read and
+write all of these file formats in a simple way.  This would allow all of our
+tools to easily support all the possible formats that we could throw at them. It
+also allowed more flexibility in moving particles into proprietary packages
+without having to write an importer/exporter for every different tool.
+
+<h2>Major Features</h2>
+
+<ul>
+<li>Supports Houdini's GEO and BGEO, Maya's PDB and PDA, RenderMan's PTC
+<li>Arbitrary back end in-memory/cached formats can be supported from a single interface
+<li>A Python API for easy scripting of particle manipulation
+<li>A C++ API for high performance particle manipulation
+<li>Nearest Neighbor Lookups for density estimation, Voronoi computation, etc.
+</ul>
+
+<h2>Future Plans</h2>
+
+A goal we have is to have an efficient cached and ordered format that allows
+nearest neighbor searches without an initial KD-Tree search and also can have
+only part of the particle set in memory at once.   In our initial version of
+Partio, we have not created that format, because we would instead like to 
+collaborate to design the appropriate format in the context of open source.
+
+
+<h2>Get Started</h2>
+
+<table width="100%">
+<tr><td>
+
+<ul><li>Source Code at  <a href="https://github.com/wdas/partio/">github</a></li>
+
+<li>Documentation</li>
+<ul>
+<li><a href="doxygen">Main API Documentation</a>
+<li><a href="doxygen/pytut.html">Python Tutorial</a>
+<li><a href="doxygen/cpptut.html">C++ Tutorial</a>
+</ul>
+
+<li>Google Groups Discussion</li>
+<ul>
+<li><a href="https://groups.google.com/group/partio-discuss">partio-discuss</a>
+<li><a href="https://groups.google.com/group/partio-announce">partio-announce</a>
+</ul>
+</ul>
+
+
+</td>
+</tr></table>
+
+<h2>Usage Examples</h2>
+
+<h3>Tools</h3>
+
+One handy thing that the Partio provides is simple command line tools to manipulate and example particle data.  For example you can get information on a particle file of any type by
+<pre>
+$ partinfo test.bgeo
+Number of particles:  9998
+
+Type      Count     Name                          
+----      -----     ----                          
+VECTOR    3         position                      
+VECTOR    3         v                             
+INT       1         id                            
+INT       1         parent                        
+FLOAT     3         Cd                            
+
+particle 0 position 0.536567 1.17344 0.523275
+particle 1 position 0.495414 0.913424 0.434151
+</pre>
+You can also view particles in a simple standalone (and very quick to load) particle viewer
+<pre>
+$ partview test.bgeo
+</pre>
+<center><img src="partio/images/partio_view.png" alt="Screenshot of Partio View"></center><br>
+
+Particles can easily be converted from one format to another such as from bgeo to RenderMan PTC as
+<pre>
+$ partconv test.bgeo test.ptc
+</pre>
+
+<h3>C++ API</h3>
+
+In C++ particle files can be created and added in a similar way. We have an
+iterator that allows quick iteration through data in the same way regardless of
+the internal format.
+
+As an example of computing the average position of all particles in a set.
+<pre>
+// open file
+ParticleData* simple=Partio::read("test.pdb");
+if(!simple) die("failed to open test.pdb");
+
+// prepare iteration
+ParticlesDataMutable::iterator iterator=simple->begin(),end=simple->end();
+ParticleAttribute posAttr;
+if(!simple->attributeInfo("position",attr) || attr.type != VECTOR || attr.count != 3) 
+     die("failed to get position as vector of size 3");
+ParticleAccessor posAcc(); // should attributeInfo() return
+iterator.addAccessor(posAcc);
+
+// compute sum
+float avg[3]={0,0,0};
+int cnt=0;
+for(ParticlesData::iterator it=simple->begin();it!=simple->end();++it){
+    float* data=posAcc.raw<float>(it);
+    for(int k=0;k<3;k++) avg[k]+=data[k];
+    cnt++;
+}
+for(int k=0;k<3;k++) data[k]/=cnt;
+
+simple->release();
+</pre>
+
+
+<h3>Python API</h3>
+
+Often particles need to be manipulated after the fact to have additional or fewer attributes. To compute aggregate statistics on a file etc. The python API to partio allows you to do this very quickly. The following code increases the radii on particles by 2, if within a distance of one of the origin.
+<pre>
+#!/bin/env python
+import partio
+
+filenameIn,filenameOut=sys.argv[1:]
+p=partio.read(filenameIn)
+pos,radius=p.attributeInfo("position"),p.attributeInfo("radius")
+for i in p.numParticles():
+    if dist(p.get(pos))<=1:
+        p.set(i,radius,(p.get(i,radius)[0]*2,))
+partio.write(filenameOut,p)
+</pre>
+
+</td>
+</tr>
+</table>
+
+            </div></div>
+    
+<br/>
+<br/><br/>
+
+<div class="footer" align="center">
+        &copy; Disney. All Rights Reserved.<br/>
+        <a target="_blank" href="http://www.disney.com" class="footer">Disney.com</a> |
+        <a href="http://corporate.disney.go.com/corporate/pp.html" class="footer">
+                Privacy Policy/Your California Privacy Rights
+        </a>
+</div>
+
+</body>
+</html>
