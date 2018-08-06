@@ -31,10 +31,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-include_directories(
-   ${CMAKE_SOURCE_DIR}/src/lib
-)
-
+include_directories(${CMAKE_SOURCE_DIR}/src/lib)
 link_directories(${CMAKE_BINARY_DIR}/src/lib)
 
 IF(GLUT_FOUND AND OPENGL_FOUND)
@@ -54,3 +51,13 @@ ADD_EXECUTABLE(partattr partattr.cpp)
 target_link_libraries(partattr ${PARTIO_LIBRARIES})
 
 install(TARGETS partattr partconvert partinfo DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+install(PROGRAMS partedit.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partedit)
+
+install(PROGRAMS partjson.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partjson)
+
+EXECUTE_PROCESS(COMMAND python -c "import sys;print('%s.%s'%sys.version_info[0:2])"
+                OUTPUT_VARIABLE PYTHON_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
+SET(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION}/site-packages" )
+INSTALL(FILES partedit.py DESTINATION ${PYTHON_DEST})
+INSTALL(FILES partjson.py DESTINATION ${PYTHON_DEST})

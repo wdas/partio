@@ -39,6 +39,7 @@ PROJECT( partio LANGUAGES CXX VERSION 0.1.1 )
 
 # PARTIO_SE_ENABLED enables SeExpr support
 option(PARTIO_SE_ENABLED "PARTIO_SE_ENABLED" false)
+option(GTEST_ENABLED "Enable GTest for tests" false)
 
 # Enable C++11
 SET(CMAKE_CXX_STANDARD 11)
@@ -66,6 +67,9 @@ IF(NOT CMAKE_BUILD_TYPE)
       "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
       FORCE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
+
+include(CTest)
+enable_testing()
 
 ## Set install location
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -103,6 +107,12 @@ if (${PARTIO_SE_ENABLED})
     find_library(SEEXPR_LIB SeExpr HINTS ${SEEXPR_LINK_PATH})
 endif ()
 
+if (${GTEST_ENABLED})
+    set($GEST_LOCATION "/usr" CACHE STRING "gtest installation prefix")
+    set(GTEST_INCLUDE_PATH ${GTEST_BASE}/include)
+    set(GTEST_LIBDIR ${CMAKE_INSTALL_LIBDIR})
+    set(GTEST_LINK_PATH ${GTEST_LOCATION}/${GTEST_LIBDIR} CACHE STRING "gtest library directory")
+endif()
 
 ## Traverse subdirectories
 ADD_SUBDIRECTORY (src/lib)

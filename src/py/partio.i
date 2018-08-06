@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #if PARTIO_SE_ENABLED
 #include <PartioSe.h>
 #endif
+#include <PartioAttribute.h>
 #include <sstream>
 namespace Partio{
 typedef uint64_t ParticleIndex;
@@ -83,6 +84,23 @@ public:
 
     // internal use
     //int attributeIndex; 
+};
+
+%feature("docstring","A handle for operating on fixed attribbutes of a particle set");
+class FixedAttribute
+{
+public:
+    %feature("docstring","Type of the particle data (VECTOR,INT,FLOAT)");
+    ParticleAttributeType type;
+
+    %feature("docstring","Number of primitives (int's or float's)");
+    int count;
+
+    %feature("docstring","Attribute name");
+    std::string name;
+
+    // internal use
+    //int attributeIndex;
 };
 
 
@@ -453,7 +471,7 @@ public:
 
     %feature("autodoc");
     %feature("docstring","Searches for and returns the attribute handle for a named fixed attribute");
-    %newobject attributeInfo;
+    %newobject fixedAttributeInfo;
     FixedAttribute* fixedAttributeInfo(const char* name)
     {
         FixedAttribute a;
@@ -479,7 +497,7 @@ public:
 
     %feature("autodoc");
     %feature("docstring","Returns the fixed attribute handle by index");
-    %newobject attributeInfo;
+    %newobject fixedAttributeInfo;
     FixedAttribute* fixedAttributeInfo(const int index)
     {
         if(index<0 || index>=$self->numFixedAttributes()){
@@ -537,7 +555,6 @@ ParticlesDataMutable* read(const char* filename,bool verbose=true,std::ostream& 
     }
 %}
 
-
 %feature("autodoc");
 %feature("docstring","Reads a particle set headers from disk");
 %newobject readHeaders;
@@ -545,7 +562,7 @@ ParticlesInfo* readHeaders(const char* filename,bool verbose=true,std::ostream& 
 
 %feature("autodoc");
 %feature("docstring","Writes a particle set to disk");
-void write(const char* filename,const ParticlesData&,const bool=false);
+void write(const char* filename,const ParticlesData&,const bool=false,const bool=true);
 
 %feature("autodoc");
 %feature("docstring","Print a summary of particle file");
@@ -555,7 +572,20 @@ void print(const ParticlesData* particles);
 %feature("docstring","Creates a clustered particle set");
 ParticlesDataMutable* computeClustering(ParticlesDataMutable* particles,const int numNeighbors,const double radiusSearch,const double radiusInside,const int connections,const double density)=0;
 
+%feature("autodoc");
+%feature("docstring","Merge two particle sets");
+void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier=std::string());
+
+%feature("autodoc");
+%feature("docstring","Clone a particle set");
+ParticlesDataMutable* clone(const ParticlesData& other, bool particles);
+
+%feature("autodoc");
+%feature("docstring","Return string name of given attribute type");
+std::string TypeName(ParticleAttributeType attrType);
+
 #if PARTIO_SE_ENABLED
+
 class PartioSe{
   public:
     PartioSe(ParticlesDataMutable* parts,const char* expr);
@@ -565,4 +595,5 @@ class PartioSe{
     bool runRange(int istart,int iend);
     void setTime(float val);
 };
+
 #endif

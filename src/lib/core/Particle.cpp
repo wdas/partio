@@ -43,6 +43,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <string>
 #include <cstring>
 #include <cassert>
+#include <vector>
+#include <unordered_map>
+#include <memory>
+
 namespace Partio{
 
 std::string
@@ -161,18 +165,27 @@ printAttr(const ParticlesData* p,const ParticleAttribute& attr,const int particl
     for(int k=0;k<attr.count;k++) std::cout<<" "<<data[k];
 }
 
+std::vector<ParticleAttribute>
+getAttrs(const ParticlesData& particles)
+{
+    std::vector<ParticleAttribute> attrs(particles.numAttributes());
+    for(int i=0;i<particles.numAttributes();i++){
+        particles.attributeInfo(i,attrs[i]);
+    }
+    return attrs;
+}
+
 void
 print(const ParticlesData* particles)
 {
     std::cout<<"Particle count "<<particles->numParticles()<<std::endl;
     std::cout<<"Attribute count "<<particles->numAttributes()<<std::endl;
 
-    std::vector<ParticleAttribute> attrs;
-    for(int i=0;i<particles->numAttributes();i++){
-        ParticleAttribute attr;
-        particles->attributeInfo(i,attr);
-        attrs.push_back(attr);
-        std::cout<<"attribute "<<attr.name<<" "<<int(attr.type)<<" "<<attr.count<<std::endl;
+    std::vector<ParticleAttribute> attrs = getAttrs(*particles);
+    for (const ParticleAttribute& attr : attrs) {
+        std::cout << "attribute " << attr.name
+                  << " type=" << TypeName(attr.type)
+                  << " count=" << attr.count << std::endl;
     }
 
     int numToPrint=std::min(10,particles->numParticles());
@@ -183,22 +196,35 @@ print(const ParticlesData* particles)
     for(size_t k=0;k<attrs.size();k++) accessors.push_back(ParticleAccessor(attrs[k]));
     for(size_t k=0;k<attrs.size();k++) it.addAccessor(accessors[k]);
 
-    for(int i=0;i<numToPrint && it != end;i++){
+    for(int i=0;i<numToPrint && it != end;i++, it++){
         std::cout<<i<<": ";
         for(unsigned int k=0;k<attrs.size();k++){
+            std::cout<<attrs[k].name<<"=";
+            if (attrs[k].count > 1) std::cout<<"(";
             switch(attrs[k].type){
             case NONE:break;
             case FLOAT:
             case VECTOR:
-                for(int c=0;c<attrs[k].count;c++) std::cout<<accessors[k].raw<float>(it)[c];
+                for(int c=0;c<attrs[k].count;c++) {
+                    if (c) std::cout << ",";
+                    std::cout<<accessors[k].raw<float>(it)[c];
+                }
                 break;
             case INT:
-                for(int c=0;c<attrs[k].count;c++) std::cout<<accessors[k].raw<int>(it)[c];
+                for(int c=0;c<attrs[k].count;c++) {
+                    if (c) std::cout << ",";
+                    std::cout<<accessors[k].raw<int>(it)[c]<<",";
+                }
                 break;
             case INDEXEDSTR:
-                for(int c=0;c<attrs[k].count;c++) std::cout<<accessors[k].raw<int>(it)[c];
+                for(int c=0;c<attrs[k].count;c++) {
+                    if (c) std::cout << ",";
+                    std::cout<<accessors[k].raw<int>(it)[c]<<",";
+                }
                 break;
             }
+            if (attrs[k].count > 1) std::cout<<")";
+            std::cout<<"\t";
         }
         std::cout<<std::endl;
     }
@@ -402,6 +428,147 @@ computeClustering(ParticlesDataMutable* particles, const int numNeighbors,const 
         }
     }
     return cluster;;
+}
+
+template<typename T>
+struct AttributePair {
+    T base;
+    T delta;
+};
+
+void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier)
+{
+    // Build a map from the identifier value to the particle index
+    // and locate the identifier attribute in the base.
+    // This assumes unique identifiers per particle.
+    std::unordered_map<int,int> idToParticleIndex;
+    ParticleAttribute baseIdAttr;
+    bool baseHasIdentifier = base.attributeInfo(identifier.c_str(), baseIdAttr);
+    if (baseHasIdentifier) {
+        if (baseIdAttr.type == INT) {
+            for (int i=0; i<base.numParticles(); i++) {
+                idToParticleIndex[base.data<int>(baseIdAttr,i)[0]] = i;
+            }
+        } else {
+            baseHasIdentifier = false;
+        }
+    }
+
+    // Locate the identifier attribute in the delta
+    ParticleAttribute deltaIdAttr;
+    bool deltaHasIdentifier = delta.attributeInfo(identifier.c_str(), deltaIdAttr);
+    if (deltaHasIdentifier) {
+        deltaHasIdentifier &= deltaIdAttr.type == INT;
+    }
+    bool hasIdentifier = baseHasIdentifier && deltaHasIdentifier;
+
+    // Identify the attributes to be copied (base present in delta)
+    std::vector<AttributePair<ParticleAttribute>> attrs;
+    std::vector<size_t> indexStrAttrs; /* indexes into attrs */
+    for (int i=0; i<base.numAttributes(); ++i) {
+        ParticleAttribute baseAttr, deltaAttr;
+        base.attributeInfo(i, baseAttr);
+        if (delta.attributeInfo(baseAttr.name.c_str(), deltaAttr)) {
+            if (baseAttr.type == INDEXEDSTR) {
+                indexStrAttrs.push_back(attrs.size());
+            }
+            attrs.emplace_back(AttributePair<ParticleAttribute>({std::move(baseAttr), std::move(deltaAttr)}));
+        }
+    }
+
+    // Identify fixed attributes to override
+    for (int i=0; i<base.numFixedAttributes(); ++i) {
+        FixedAttribute baseAttr, deltaAttr;
+        base.fixedAttributeInfo(i, baseAttr);
+        if (delta.fixedAttributeInfo(baseAttr.name.c_str(), deltaAttr)) {
+            size_t size = Partio::TypeSize(baseAttr.type) * baseAttr.count;
+            const void *src = delta.fixedData<void>(deltaAttr);
+            void *dst = base.fixedDataWrite<void>(baseAttr);
+            std::memcpy(dst, src, size);
+        }
+    }
+
+    // Identify fixed attributes to extend
+    for (int i=0; i<delta.numFixedAttributes(); ++i) {
+        FixedAttribute baseAttr, deltaAttr;
+        delta.fixedAttributeInfo(i, deltaAttr);
+        if (!base.fixedAttributeInfo(deltaAttr.name.c_str(), baseAttr)) {
+            baseAttr = base.addFixedAttribute(deltaAttr.name.c_str(), deltaAttr.type, deltaAttr.count);
+            size_t size = Partio::TypeSize(deltaAttr.type) * deltaAttr.count;
+            const void *src = delta.fixedData<void>(deltaAttr);
+            void *dst = base.fixedDataWrite<void>(baseAttr);
+            std::memcpy(dst, src, size);
+        }
+    }
+
+    // Merge the indexed strings. If the delta holds new strings for the same attribute,
+    // we have to re-index it and extend the base string list with the new strings.
+    // If the string exists in both, we still have to map the delta index to the base index.
+    std::unordered_map</*attr_name*/std::string,
+                       std::unordered_map</*delta_index*/int, /*base_index*/int> > stringToString;
+    for (size_t index : indexStrAttrs) {
+        const AttributePair<ParticleAttribute>& attr = attrs[index];
+
+        /* For each string in the delta, add to base if missing. And re-index. */
+        const std::vector<std::string>& baseStrs = base.indexedStrs(attr.base);
+        // Map source indices name->index for faster searching
+        std::unordered_map<std::string, size_t> indexInBase;
+        for (size_t i=0; i<baseStrs.size(); ++i) {
+            indexInBase[baseStrs[i]] = i;
+        }
+
+        // Loop through delta strs and reindex
+        const std::vector<std::string>& deltaStrs = delta.indexedStrs(attr.delta);
+        for (size_t i=0; i<deltaStrs.size(); ++i) {
+            const std::string& deltaStr = deltaStrs[i];
+
+            auto it = indexInBase.find(deltaStr);
+            if (it != indexInBase.end()) {
+                stringToString[attr.base.name][i] = it->second;
+            } else {
+                int newIndex = base.registerIndexedStr(attr.base, deltaStr.c_str());
+                stringToString[attr.base.name][i] = newIndex;
+            }
+        }
+    }
+
+
+    // Loop through the delta particles and incorporate into the base
+    for (int i=0; i<delta.numParticles(); ++i) {
+
+        // Grab index into base particle set - either existing or new
+        int index(-1);
+        if (hasIdentifier) {
+            int idValue = *(delta.data<int>(deltaIdAttr, i));
+            auto it = idToParticleIndex.find(idValue);
+            if (it != idToParticleIndex.end()) {
+                index = it->second;
+            }
+        }
+        if (index == -1) {
+            index = base.addParticle();
+        }
+
+        // Copy the attributes to the new/overridden particle
+        for (const AttributePair<ParticleAttribute>& attr : attrs) {
+            size_t size = Partio::TypeSize(attr.base.type) * attr.base.count;
+            void *dst = base.dataWrite<void>(attr.base, index);
+            const void* src;
+            std::unique_ptr<int> newIndices;
+            if (attr.base.type == INDEXEDSTR) {
+                newIndices.reset(new int[attr.base.count]);
+                const int* indices = delta.data<int>(attr.delta, i);
+                for (int j=0; j<attr.delta.count; ++j) {
+                    newIndices.get()[j] = stringToString[attr.base.name][indices[j]];
+                }
+                src = (void*)(newIndices.get());
+            }
+            else {
+                src = delta.data<void>(attr.delta, i);
+            }
+            std::memcpy(dst, src, size);
+        }
+    }
 }
 
 }
