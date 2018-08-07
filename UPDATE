@@ -1,6 +1,0 @@
-1.  fetch github-wdas/master
-2.  reset master from github-wdas master
-3.  push master to origin/master (origin/master should be identical to github-wdas/master at this point)
-4.  merge master into disney
-5.  push disney to origin/disney (do this without creating code review branch:
-    git push origin disney:disney)
