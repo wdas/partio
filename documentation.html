@@ -1,10 +1,17 @@
-<!DOCTYPE html>
-<html>
-
 <head>
   <title>Walt Disney Animation Studios</title>
   <meta charset="utf-8">
   <link rel="stylesheet" type="text/css" href="style.css">
+
+  <style>
+    pre {
+      font-family: "Ubuntu Mono", "Monaco", monospace;
+      padding: 1em;
+      color: #443e3a;
+      background-color: #e8e5d9;
+    }
+  </style>
+
 </head>
 
 <body>
@@ -25,25 +32,125 @@
 
 <section>
   <div class="left">
-    <h1>Partio</h1>
+
+  <h2>Documentation</h2>
+  <ul>
+  <li><a href="doxygen">Main API Documentation</a>
+  <li><a href="doxygen/pytut.html">Python Tutorial</a>
+  <li><a href="doxygen/cpptut.html">C++ Tutorial</a>
+  </ul>
+
+  <h2>Google Groups Discussion</h2>
+  <ul>
+  <li><a href="https://groups.google.com/group/partio-discuss">partio-discuss</a>
+  <li><a href="https://groups.google.com/group/partio-announce">partio-announce</a>
+  </ul>
+
+  <h2>Usage Examples</h2>
+  <br>
+  <h3>Tools</h3>
+
+  <p>
+    One handy thing that the Partio provides is simple command line tools to
+    manipulate and example particle data.  For example you can get information on
+    a particle file of any type by using "partinfo".
+  </p>
+
+<pre>
+$ partinfo test.bgeo
+Number of particles:  9998
+
+Type      Count     Name                          
+----      -----     ----                          
+VECTOR    3         position                      
+VECTOR    3         v                             
+INT       1         id                            
+INT       1         parent                        
+FLOAT     3         Cd                            
+
+particle 0 position 0.536567 1.17344 0.523275
+particle 1 position 0.495414 0.913424 0.434151
+</pre>
+
+You can also view particles in a simple standalone (and very quick to load) particle viewer
+<pre>
+$ partview test.bgeo
+</pre>
+
+<p>
+  <center>
+    <img src="partio/images/partio_view.png" alt="Screenshot of Partio View" border=0>
+  </center>
+</p>
+
+Particles can easily be converted from one format to another such as from bgeo to RenderMan PTC.
+<pre>
+$ partconv test.bgeo test.ptc
+</pre>
+
+<h2>C++ API</h2>
+
+<p>
+In C++ particle files can be created and added in a similar way. We have an
+iterator that allows quick iteration through data in the same way regardless of
+the internal format.
+
+As an example of computing the average position of all particles in a set.
+<pre>
+  // open file
+  ParticleData* simple=Partio::read("test.pdb");
+  if(!simple) die("failed to open test.pdb");
+
+  // prepare iteration
+  auto iterator=simple-&gt;begin(), end=simple-&gt;end();
+  ParticleAttribute posAttr;
+  if(!simple-&gt;attributeInfo("position",attr) || attr.type != VECTOR || attr.count != 3)
+       die("failed to get position as vector of size 3");
+
+  ParticleAccessor posAcc;
+  iterator.addAccessor(posAcc);
+
+  // compute sum
+  float avg[3] = {0,0,0};
+  int cnt=0;
+  for (auto it=simple-&gt;begin(); it!=simple-&gt;end(); ++it) {
+      float* data = posAcc.raw&lt;float&gt;(it);
+      for(int k=0; k &lt; 3; k++) {
+          avg[k] += data[k];
+      }
+      cnt++;
+  }
+  for (int k=0; k &lt; 3; k++) {
+      data[k] /= cnt;
+  }
+
+  simple-&gt;release();
+</pre>
+
+
+<h2>Python API</h2>
+<p>
+Often particles need to be manipulated after the fact to have additional or
+fewer attributes. To compute aggregate statistics on a file etc. The python
+API to partio allows you to do this very quickly. The following code increases
+the radii on particles by 2, if within a distance of one of the origin.
+</p>
+
+<pre>
+#!/bin/env python
+import partio
+
+filenameIn,filenameOut=sys.argv[1:]
+p=partio.read(filenameIn)
+pos,radius=p.attributeInfo("position"),p.attributeInfo("radius")
+for i in p.numParticles():
+    if dist(p.get(pos)) &lt;= 1:
+        p.set(i,radius,(p.get(i,radius)[0]*2,))
+partio.write(filenameOut,p)
+</pre>
+
   </div>
-  <div class="right">
-    <p>
-      Partio is an open source C++ library for reading, writing and manipulating a
-      variety of standard particle formats (GEO, BGEO, PTC, PDB, PDA).
-    </p>
-    <p>
-      Partio has a Python API and a collection of simple command-line tools.
-    </p>
-    <p>
-      <a href="https://github.com/wdas/partio">
-        <button class="btn btn-light">Github</button>
-      </a>
-      <a href="https://github.com/wdas/partio/blob/master/LICENSE">
-        <button class="btn btn-light">License</button>
-      </a>
-    </p>
-  </div>
+  <div class="right"></div>
 </section>
 
 <footer>
@@ -87,4 +194,5 @@
 </footer>
 
 </body>
+
 </html>

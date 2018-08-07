@@ -1,6 +1,3 @@
-<!DOCTYPE html>
-<html>
-
 <head>
   <title>Walt Disney Animation Studios</title>
   <meta charset="utf-8">
@@ -25,25 +22,57 @@
 
 <section>
   <div class="left">
-    <h1>Partio</h1>
+
+  <h2>Overview</h2>
+  <p>
+      Particles are an important part of effects work, because they allow
+      free-form information in 3D space. Unfortunately, there is no standard
+      format for particles akin to Wavefront .obj.  Most animation systems
+      have their own proprietary particle formats. For example Maya uses the
+      binary and ascii particle database formats .pdb and .pda file formats.
+      Houdini uses the .geo and .bgeo geometry uber formats. Renderers
+      typically have their own point cloud format such as RenderMan's PTC
+      format and Houdini's .pc.  All of these formats share a common theme.
+      They allow particles to be iterated or indexed and associate a
+      customizable set of attributes with them. The goal of Partio is to
+      provide a unified interface akin to unified image libraries that makes
+      it easier to load, save, and manipulate particle files.
+  </p>
+
+  <h2>Motivation</h2>
+  <p>
+    At Walt Disney Animation Studios, we had used a mix of PDB formats, PTC
+    formats and BGEO formats, depending on the authoring environments. Many of
+    our tools supported more than one of these, but the code was scattered and
+    copied to read these formats. Additionally, some of these formats required
+    linking to large libraries to use.  For this reason we desired a library
+    that could read and write all of these file formats in a simple way.  This
+    would allow all of our tools to easily support all the possible formats
+    that we could throw at them. It also allowed more flexibility in moving
+    particles into proprietary packages without having to write an
+    importer/exporter for every different tool.
+  </p>
+
+  <h2>Major Features</h2>
+  <ul>
+  <li>Supports Houdini's GEO and BGEO, Maya's PDB and PDA, RenderMan's PTC
+  <li>Arbitrary back end in-memory/cached formats can be supported from a single interface
+  <li>A Python API for easy scripting of particle manipulation
+  <li>A C++ API for high performance particle manipulation
+  <li>Nearest Neighbor Lookups for density estimation, Voronoi computation, etc.
+  </ul>
+
+  <h2>Future Plans</h2>
+  <p>
+    A goal we have is to have an efficient cached and ordered format that
+    allows nearest neighbor searches without an initial KD-Tree search and
+    also can have only part of the particle set in memory at once.   In our
+    initial version of Partio, we have not created that format, because we
+    would instead like to collaborate to design the appropriate format in the
+    context of open source.
+  </p>
   </div>
-  <div class="right">
-    <p>
-      Partio is an open source C++ library for reading, writing and manipulating a
-      variety of standard particle formats (GEO, BGEO, PTC, PDB, PDA).
-    </p>
-    <p>
-      Partio has a Python API and a collection of simple command-line tools.
-    </p>
-    <p>
-      <a href="https://github.com/wdas/partio">
-        <button class="btn btn-light">Github</button>
-      </a>
-      <a href="https://github.com/wdas/partio/blob/master/LICENSE">
-        <button class="btn btn-light">License</button>
-      </a>
-    </p>
-  </div>
+  <div class="right"></div>
 </section>
 
 <footer>
@@ -87,4 +116,5 @@
 </footer>
 
 </body>
+
 </html>
