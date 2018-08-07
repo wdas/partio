@@ -52,7 +52,7 @@ public:
 
     void SetUp() {
         // Read in base and delta files
-        std::string datadir = std::string(getenv("PARTIO")) + "/src/data/";
+        std::string datadir(PARTIO_DATA_DIR "/src/data/");
         std::string base_geo = datadir + "base.bgeo";
         std::string delta_geo = datadir + "delta.bgeo";
         base  = Partio::read(base_geo.c_str());

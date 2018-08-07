@@ -24,7 +24,9 @@ class test(unittest.TestCase):
     def testPartJson(self):
         """ Test round-tripping """
 
-        filename = os.path.join(os.getenv('PARTIO'), 'src/data/json.bgeo')
+        testdir = os.path.dirname(os.path.abspath(__file__))
+        srcdir = os.path.dirname(testdir)
+        filename = os.path.join(srcdir, 'src', 'data', 'json.bgeo')
         particleSet = partio.read(filename)
         json1 = partjson.toJson(particleSet)
         particleSet2 = partjson.fromJson(json1)
