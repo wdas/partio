@@ -1,7 +1,11 @@
 prefix ?= $(CURDIR)/build
 flags ?=
 
+JEKYLL ?= jekyll
+
+-include config.mak
+
 all:: install
 
 install:
-	jekyll build --destination "$(prefix)" $(flags)
+	$(JEKYLL) build --destination "$(prefix)" $(flags)
