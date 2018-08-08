@@ -35,7 +35,7 @@ nav {
   width: 100vw;
   height: 75px;
   background: #22201F;
-  position: fixed;
+  position: absolute;
   top: 0;
   left: 0;
   padding: 0 20px;
