@@ -39,6 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <iomanip>
 #include <stdlib.h>
 
+#define MAXPARTICLES 10
+
 int main(int argc,char *argv[])
 {
     if(argc != 3){
@@ -50,17 +52,33 @@ int main(int argc,char *argv[])
         Partio::ParticleAttribute attrhandle;
         p->attributeInfo(argv[2], attrhandle);
 
-        for(int i = 0; i < std::min(10, p->numParticles()); i++){
-            const float* data = p->data<float>(attrhandle,i);
-            std::cout << argv[2] << i << " ";
-            for(int j = 0; j < attrhandle.count; j++){
-                std::cout << data[j] << " "; 
+        if (attrhandle.type == Partio::INT){
+            for(int i = 0; i < std::min(MAXPARTICLES, p->numParticles()); i++){
+                const int* data = p->data<int>(attrhandle,i);
+                std::cout << argv[2] << ":"<< i << " ";
+                std::cout << data[0] << " " << std::endl;
+            }
+        }
+        else if (attrhandle.type == Partio::INDEXEDSTR){
+           for(int i = 0; i < std::min(MAXPARTICLES, p->numParticles());i++){
+                const int* data = p->data<int>(attrhandle,i);
+                std::cout << argv[2] << ":" << i << " '"<< p->indexedStrs(attrhandle)[i]<<"'";
+                std::cout<<std::endl;
+           }
+        }
+        else {
+            for(int i = 0; i < std::min(MAXPARTICLES, p->numParticles());i++){
+                const float* data = p->data<float>(attrhandle,i);
+                std::cout << argv[2] << ":" << i << " ";
+                for(int j = 0; j < attrhandle.count; j++){
+                    std::cout << data[j] << " ";
+                }
             }
             std::cout << std::endl;
         }
 
         p->release();
     }
-    
+
     return 0;
 }
