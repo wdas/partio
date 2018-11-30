@@ -167,65 +167,96 @@ class FilterModel(QtCore.QSortFilterProxyModel):
 
 
 #--------------------------------------------------------------------------------------
-dialog=None
-treeView=None
-hasParticles=False
-lineEdit=None
-def spreadsheet(parent, filename, attrsOnly=False):
+class Spreadsheet(QtWidgets.QDialog):
     """ Makes a spreadsheet data view using partio of the particle file specified.
         Normally, displays attribute per column, particle per row.
         If attrsOnly is True, display attribute per row and attribute info per column.
     """
 
-    global dialog
-    if not dialog:
-        dialog = QtWidgets.QDialog(parent)
+    def __init__(self, filename, attrsOnly=False, parent=None):
+        QtWidgets.QDialog.__init__(self, parent)
+        self.treeView = None
+        self.hasParticles = False
+        self.lineEdit = None
+        self.attrsOnly = attrsOnly
+        self.filename = None
+
         vbox = QtWidgets.QVBoxLayout()
-        dialog.setLayout(vbox)
+        self.setLayout(vbox)
         hbox = QtWidgets.QHBoxLayout()
         vbox.addLayout(hbox)
         hbox.addWidget(QtWidgets.QLabel("Attribute Filter:"))
-        global lineEdit
-        lineEdit = QtWidgets.QLineEdit()
-        hbox.addWidget(lineEdit)
+        self.lineEdit = QtWidgets.QLineEdit()
+        hbox.addWidget(self.lineEdit)
 
         # Configure ctrl-w to close window
-        QtWidgets.QShortcut( QKeySequence(Qt.CTRL + Qt.Key_W), dialog, dialog.accept )
+        QtWidgets.QShortcut( QKeySequence(Qt.CTRL + Qt.Key_W), self, self.accept )
 
+        self.setFile(filename)
 
-    global treeView
+    def setFile(self, filename):
+        """ Redraws the spreadsheet with a new particle file """
 
-    # reusing empty list causes column resizing problem so delete it
-    global hasParticles
-    if treeView and not hasParticles:
-        dialog.layout().removeWidget(treeView)
-        del treeView
-        treeView = None
-    if not treeView:
-        treeView = QtWidgets.QTreeView()
-        treeView.setRootIsDecorated(False)
-        treeView.setUniformRowHeights(True)
-        dialog.layout().addWidget(treeView)
+        if filename == self.filename:
+            return
+        self.filename = filename
 
-    p = partio.read(filename)
-    if not p:
-        p = partio.create()
-        hasParticles = False
+        # reusing empty list causes column resizing problem so delete it
+        if self.treeView and not self.hasParticles:
+            self.layout().removeWidget(self.treeView)
+            del self.treeView
+            self.treeView = None
+        if not self.treeView:
+            self.treeView = QtWidgets.QTreeView()
+            self.treeView.setRootIsDecorated(False)
+            self.treeView.setUniformRowHeights(True)
+            self.layout().addWidget(self.treeView)
+
+        p = partio.read(filename)
+        if not p:
+            p = partio.create()
+            self.hasParticles = False
+        else:
+            self.hasParticles = True
+
+        model = PartioTreeModel(self.treeView, p, self.attrsOnly)
+        proxyModel = FilterModel(self.lineEdit, self.attrsOnly, self)
+        self.lineEdit.textChanged.connect(proxyModel.filter)
+        proxyModel.setSourceModel(model)
+        self.treeView.setModel(proxyModel)
+        for i in range(model.columnCount(self.treeView)):
+            self.treeView.resizeColumnToContents(i)
+        self.setWindowTitle(filename)
+        self.show()
+
+_particleSpreadsheet = None
+_attrSpreadsheet = None
+
+def spreadsheet(filename=None, attrsOnly=False, parent=None):
+    """ Return a singleton copy of a Spreadsheet object """
+    if attrsOnly:
+        global _attrSpreadsheet
+        if not filename and _attrSpreadsheet:
+            return _attrSpreadsheet
+        if not _attrSpreadsheet:
+            _attrSpreadsheet = Spreadsheet(filename, attrsOnly, parent)
+        else:
+            _attrSpreadsheet.setFile(filename)
+        return _attrSpreadsheet
+
+    global _particleSpreadsheet
+    if not filename and _particleSpreadsheet:
+        return _particleSpreadsheet
+    if not _particleSpreadsheet:
+        _particleSpreadsheet = Spreadsheet(filename, attrsOnly, parent)
     else:
-        hasParticles = True
+        _particleSpreadsheet.setFile(filename)
 
-    model = PartioTreeModel(treeView, p, attrsOnly)
-    proxyModel = FilterModel(lineEdit, attrsOnly, dialog)
-    lineEdit.textChanged.connect(proxyModel.filter)
-    proxyModel.setSourceModel(model)
-    treeView.setModel(proxyModel)
-    for i in range(model.columnCount(treeView)):
-        treeView.resizeColumnToContents(i)
-    dialog.setWindowTitle(filename)
-    # without this it is extremely slow for counting attribs
-    dialog.show()
-
-    return dialog
+def isVisible(attrsOnly=False):
+    """ See if a spreadsheet was built and is visible """
+    if attrsOnly:
+        return _attrSpreadsheet and _attrSpreadsheet.isVisible()
+    return _particleSpreadsheet and _particleSpreadsheet.isVisible()
 
 #--------------------------------------------------------------------------------------
 #--------------------------------------------------------------------------------------
@@ -259,10 +290,10 @@ def main():
 
     # Create the dialog
     app = QtWidgets.QApplication(newArgs)
-    dlg = spreadsheet(None, filename, attrsOnly)
+    dialog = Spreadsheet(filename, attrsOnly)
 
     # Configure ctrl-q to quit
-    QtWidgets.QShortcut( QKeySequence(Qt.CTRL + Qt.Key_Q), dlg, dlg.close )
+    QtWidgets.QShortcut( QKeySequence(Qt.CTRL + Qt.Key_Q), dialog, dialog.close )
     app.exec_()
 
 if __name__=="__main__":
