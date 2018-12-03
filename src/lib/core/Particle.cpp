@@ -476,15 +476,29 @@ void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::st
         }
     }
 
+    // Identify the attributes to be added (in delta, not present in base)
+    double empty[16]{0};
+    for (int i=0; i<delta.numAttributes(); ++i) {
+        ParticleAttribute baseAttr, deltaAttr;
+        delta.attributeInfo(i, deltaAttr);
+        if (!base.attributeInfo(deltaAttr.name.c_str(), baseAttr)) {
+            baseAttr = base.addAttribute(deltaAttr.name.c_str(), deltaAttr.type, deltaAttr.count);
+            attrs.emplace_back(AttributePair<ParticleAttribute>({std::move(baseAttr), std::move(deltaAttr)}));
+
+            // Set the attribute to a default value in the base particle set
+            for (int p=0; p<base.numParticles(); ++p) {
+                base.set(baseAttr, p, empty);
+            }
+        }
+    }
+
     // Identify fixed attributes to override
     for (int i=0; i<base.numFixedAttributes(); ++i) {
         FixedAttribute baseAttr, deltaAttr;
         base.fixedAttributeInfo(i, baseAttr);
         if (delta.fixedAttributeInfo(baseAttr.name.c_str(), deltaAttr)) {
-            size_t size = Partio::TypeSize(baseAttr.type) * baseAttr.count;
             const void *src = delta.fixedData<void>(deltaAttr);
-            void *dst = base.fixedDataWrite<void>(baseAttr);
-            std::memcpy(dst, src, size);
+            base.setFixed(baseAttr, src);
         }
     }
 
@@ -494,10 +508,8 @@ void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::st
         delta.fixedAttributeInfo(i, deltaAttr);
         if (!base.fixedAttributeInfo(deltaAttr.name.c_str(), baseAttr)) {
             baseAttr = base.addFixedAttribute(deltaAttr.name.c_str(), deltaAttr.type, deltaAttr.count);
-            size_t size = Partio::TypeSize(deltaAttr.type) * deltaAttr.count;
             const void *src = delta.fixedData<void>(deltaAttr);
-            void *dst = base.fixedDataWrite<void>(baseAttr);
-            std::memcpy(dst, src, size);
+            base.setFixed(baseAttr, src);
         }
     }
 

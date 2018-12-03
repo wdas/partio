@@ -45,6 +45,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <vector>
 #include <map>
 #include <stdint.h>
+#include <string.h>
 #include "PartioAttribute.h"
 #include "PartioIterator.h"
 
@@ -215,6 +216,18 @@ public:
     {
         // TODO: add type checking
         return static_cast<T*>(fixedDataInternal(attribute));
+    }
+
+    /// Set particle value for attribute
+    template<class T> inline void set(const ParticleAttribute& attribute,
+                                      const ParticleIndex particleIndex, const T* data) {
+        T* ptr = static_cast<T*>(dataInternal(attribute, particleIndex));
+        memcpy(ptr, data, attribute.count * TypeSize(attribute.type));
+    }
+
+    template<class T> inline void setFixed(const FixedAttribute& attribute, const T* data) {
+        T* ptr = static_cast<T*>(fixedDataInternal(attribute));
+        memcpy(ptr, data, attribute.count * TypeSize(attribute.type));
     }
 
     /// Returns a token for the given string. This allows efficient storage of string data

@@ -52,9 +52,9 @@ public:
 
     void SetUp() {
         // Read in base and delta files
-        std::string datadir(PARTIO_DATA_DIR "/src/data/");
-        std::string base_geo = datadir + "base.bgeo";
-        std::string delta_geo = datadir + "delta.bgeo";
+        std::string datadir(PARTIO_DATA_DIR);
+        std::string base_geo = datadir + "/base.bgeo";
+        std::string delta_geo = datadir + "/delta.bgeo";
         base  = Partio::read(base_geo.c_str());
         delta = Partio::read(delta_geo.c_str());
 
@@ -65,6 +65,8 @@ public:
         ASSERT_TRUE(delta->attributeInfo("life", delta_life_attr));
         ASSERT_TRUE(base->attributeInfo("position", base_pos_attr));
         ASSERT_TRUE(delta->attributeInfo("position", delta_pos_attr));
+        ASSERT_FALSE(base->attributeInfo("new", base_new_attr));
+        ASSERT_TRUE(delta->attributeInfo("new", delta_new_attr));
         for (int i=0; i<5; i++) {
             ASSERT_EQ(base_values_life[i], base->data<float>(base_life_attr, i)[0]);
             ASSERT_EQ(base_values_posx[i], base->data<float>(base_pos_attr, i)[0]);
@@ -82,8 +84,8 @@ public:
 
     Partio::ParticlesDataMutable* base;
     Partio::ParticlesDataMutable* delta;
-    ParticleAttribute base_life_attr, base_pos_attr;
-    ParticleAttribute delta_life_attr, delta_pos_attr;
+    ParticleAttribute base_life_attr, base_pos_attr, base_new_attr;
+    ParticleAttribute delta_life_attr, delta_pos_attr, delta_new_attr;
     std::vector<float> base_values_life{ -1.2, -0.2, 0.8, 1.8, 2.8 };
     std::vector<float> base_values_posx{ 0.0, 0.1, 0.2, 0.3, 0.4 };
     std::vector<float> delta_values_life{ 1.0, 3.0, 5.0 };
@@ -104,9 +106,12 @@ TEST_F(PartioTest, merge)
     ASSERT_EQ(6, base->numParticles());
     std::vector<float> expected_life({-1.2, 1.0, 0.8, 3.0, 2.8, 5.0});
     std::vector<float> expected_posx({0.0, 0.1, 0.2, 0.3, 0.4, 0.5});
+    std::vector<int> expected_new({0,1,0,2,0,3});
+    ASSERT_TRUE(base->attributeInfo("new", base_new_attr));
     for (int i=0; i<6; i++) {
         ASSERT_EQ(expected_life[i], base->data<float>(base_life_attr, i)[0]);
         ASSERT_EQ(expected_posx[i], base->data<float>(base_pos_attr, i)[0]);
+        ASSERT_EQ(expected_new[i], base->data<int>(base_new_attr, i)[0]);
     }
 
     int numFixed = base->numFixedAttributes();
