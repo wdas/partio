@@ -26,7 +26,7 @@ class test(unittest.TestCase):
 
         testdir = os.path.dirname(os.path.abspath(__file__))
         srcdir = os.path.dirname(testdir)
-        filename = os.path.join(srcdir, 'src', 'data', 'json.bgeo')
+        filename = os.path.join(srcdir, 'data', 'json.bgeo')
         particleSet = partio.read(filename)
         json1 = partjson.toJson(particleSet)
         particleSet2 = partjson.fromJson(json1)
