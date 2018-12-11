@@ -43,42 +43,48 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 int main(int argc,char *argv[])
 {
-    if(argc != 3){
-        std::cerr<<"Usage is: "<<argv[0]<<" <filename> <attrname> { particle attribute to print info } "<<std::endl;
+    if (argc != 3 && argc != 4){
+        std::cerr<<"Usage is: "<<argv[0]<<" <filename> <attrname> [numParticles (default " << MAXPARTICLES << ")\n";
         return 1;
     }
+    int maxParticles = (argc == 4) ? atoi(argv[3]) : MAXPARTICLES;
+    std::string attrName = argv[2];
     Partio::ParticlesDataMutable* p=Partio::read(argv[1]);
-    if(p){
-        Partio::ParticleAttribute attrhandle;
-        p->attributeInfo(argv[2], attrhandle);
-
-        if (attrhandle.type == Partio::INT){
-            for(int i = 0; i < std::min(MAXPARTICLES, p->numParticles()); i++){
-                const int* data = p->data<int>(attrhandle,i);
-                std::cout << argv[2] << ":"<< i << " ";
-                std::cout << data[0] << " " << std::endl;
-            }
-        }
-        else if (attrhandle.type == Partio::INDEXEDSTR){
-           for(int i = 0; i < std::min(MAXPARTICLES, p->numParticles());i++){
-                const int* data = p->data<int>(attrhandle,i);
-                std::cout << argv[2] << ":" << i << " '"<< p->indexedStrs(attrhandle)[i]<<"'";
-                std::cout<<std::endl;
-           }
-        }
-        else {
-            for(int i = 0; i < std::min(MAXPARTICLES, p->numParticles());i++){
-                const float* data = p->data<float>(attrhandle,i);
-                std::cout << argv[2] << ":" << i << " ";
-                for(int j = 0; j < attrhandle.count; j++){
-                    std::cout << data[j] << " ";
-                }
-            }
-            std::cout << std::endl;
-        }
-
-        p->release();
+    if (!p) {
+        std::cerr << "Cannot read " << argv[1] << std::endl;
+        return 1;
     }
+
+    Partio::ParticleAttribute attrhandle;
+    p->attributeInfo(attrName.c_str(), attrhandle);
+    maxParticles = std::min(maxParticles, p->numParticles());
+
+    if (attrhandle.type == Partio::INT) {
+        for(int i = 0; i < maxParticles; i++){
+            const int* data = p->data<int>(attrhandle,i);
+            std::cout << attrName << "[" << i << "]=" << data[0] << std::endl;
+        }
+    }
+    else if (attrhandle.type == Partio::INDEXEDSTR){
+        const std::vector<std::string>& indexedStrs = p->indexedStrs(attrhandle);
+        for(int i = 0; i < std::min(maxParticles, p->numParticles());i++){
+            const int index = p->data<int>(attrhandle,i)[0];
+            std::cout << attrName << "[" << i << "]='" << indexedStrs[index]<<"'\n";
+       }
+    }
+    else {
+        for(int i = 0; i < std::min(maxParticles, p->numParticles());i++){
+            const float* data = p->data<float>(attrhandle,i);
+            std::cout << attrName << "[" << i << "]=(";
+            for(int j = 0; j < attrhandle.count; j++) {
+                if (j) std::cout << ",";
+                std::cout << data[j];
+            }
+            std::cout << ")\n";
+        }
+    }
+
+    p->release();
 
     return 0;
 }
