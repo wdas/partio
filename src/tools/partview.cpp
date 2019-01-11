@@ -143,18 +143,18 @@ static void render()
                     //std::cerr<<"Failed to find color attribute "<<std::endl;
                     colorMissing = true;
                 }
-                if (!particles->attributeInfo("opacity", colorAttr) &
-                        !particles->attributeInfo("opacityPP", colorAttr) &
-                        !particles->attributeInfo("alpha", colorAttr) &
-                        !particles->attributeInfo("alphaPP", colorAttr) &
-                        !particles->attributeInfo("pointOpacity", colorAttr))
-                    glEnable(GL_BLEND);
-                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
+                if (!particles->attributeInfo("opacity", alphaAttr) &
+                        !particles->attributeInfo("opacityPP", alphaAttr) &
+                        !particles->attributeInfo("alpha", alphaAttr) &
+                        !particles->attributeInfo("alphaPP", alphaAttr) &
+                        !particles->attributeInfo("pointOpacity", alphaAttr))
                 {
-                    alphaMissing = true;
-                    //std::cerr<<"Failed to find opacity/alpha attribute "<<std::endl;
+                    glEnable(GL_BLEND);
+                    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+                    alphaMissing = false;
+                } else {
                     glDisable(GL_BLEND);
+                    alphaMissing = true;
                 }
             }
         }
