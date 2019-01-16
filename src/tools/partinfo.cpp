@@ -36,96 +36,171 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <iostream>
 #include <iomanip>
 #include <stdlib.h>
+#include <set>
 
-int main(int argc,char *argv[])
+void help()
 {
-    if(argc<2){
-        std::cerr<<"Usage is: "<<argv[0]<<" <filename> { particle indices to print full info } "<<std::endl;
+    std::cerr << "Usage: partinfo <filename> [FLAGS] { particle indices to print full info }\n";
+    std::cerr << "Supported FLAGS:\n";
+    std::cerr << "  -a/--all    : Print all particles\n";
+    std::cerr << "  -s/--strings: Print all indexed string values (default=5)\n";
+    std::cerr << "  -h/--help   : Print this help message\n";
+}
+
+void printParticle(int particleIndex, Partio::ParticlesDataMutable* p, size_t widest)
+{
+    std::cout << "---------------------------" << std::endl;
+    std::cout << "Particle " << particleIndex << ":" << std::endl;
+    if (particleIndex >= p->numParticles() || particleIndex < 0) {
+        std::cout << "OUT OF RANGE" << std::endl;
+    } else {
+        for (int i = 0; i < p->numAttributes(); i++) {
+            Partio::ParticleAttribute attr;
+            p->attributeInfo(i, attr);
+            std::cout << std::setw(10) << Partio::TypeName(attr.type) << " " << std::setw(widest) << attr.name << " ";
+            if (attr.count > 1)
+                std::cout << "[ ";
+            for (int ii = 0; ii < attr.count; ii++) {
+                if (ii)
+                    std::cout << ", ";
+                if (attr.type == Partio::INDEXEDSTR) {
+                    int val = p->data<int>(attr, particleIndex)[ii];
+                    std::cout << val << "='" << p->indexedStrs(attr)[val] << "'";
+                } else if (attr.type == Partio::INT)
+                    std::cout << p->data<int>(attr, particleIndex)[ii];
+                else
+                    std::cout << p->data<float>(attr, particleIndex)[ii];
+            }
+            if (attr.count > 1)
+                std::cout << " ]";
+            std::cout << std::endl;
+        }
+    }
+}
+
+#define FLAG(shortFlag, longFlag) strcmp(argv[i], shortFlag) == 0 || strcmp(argv[i], longFlag) == 0
+
+int main(int argc, char* argv[])
+{
+    const char* filename(nullptr);
+    std::set<int> particleIndices;
+    bool printAllStrings(false);
+    bool printAllParticles(false);
+    if (argc < 2) {
+        help();
         return 1;
     }
-    Partio::ParticlesDataMutable* p=Partio::read(argv[1]);
-    if(p){
-        std::cout<<std::setiosflags(std::ios::left)<<"Number of particles:  "<<p->numParticles()<<std::endl;
-        int numAttr=p->numAttributes();
-        std::cout<<std::setw(12)<<"Type"<<std::setw(10)<<"Count"<<std::setw(30)<<"Name"<<std::endl;
-        std::cout<<std::setw(12)<<"----"<<std::setw(10)<<"-----"<<std::setw(30)<<"----"<<std::endl;
-        for(int i=0;i<numAttr;i++){
-            Partio::ParticleAttribute attr;
-            p->attributeInfo(i,attr);
-            std::cout<<std::setw(12)<<Partio::TypeName(attr.type)
-                     <<std::setw(10)<<attr.count
-                     <<std::setw(30)<<attr.name<<std::endl;;
+    for (int i = 1; i < argc; ++i) {
+        if (FLAG("-h", "--help")) {
+            help();
+            return 0;
+        } else if (FLAG("-a", "--all")) {
+            printAllParticles = true;
+        } else if (FLAG("-s", "--strings")) {
+            printAllStrings = true;
+        } else if (argv[i][0] == '-') {
+            std::cerr << "Unknown flag: " << argv[i] << std::endl;
+        } else if (!filename) {
+            filename = argv[i];
+        } else {
+            particleIndices.insert(atoi(argv[i]));
         }
-
-        Partio::ParticleAttribute positionhandle;
-        p->attributeInfo("position",positionhandle);
-        if(argc==2){
-            for(int i=0;i<std::min(10,p->numParticles());i++){
-                const float* data=p->data<float>(positionhandle,i);;
-                std::cout<<"particle "<<i<<" data "<<data[0]<<" "<<data[1]<<" "<<data[2]<<std::endl;
-            }
-        }else{
-            for(int j=2;j<argc;j++){
-                int particleIndex=atoi(argv[j]);
-                std::cout<<"---------------------------"<<std::endl;
-                std::cout<<"Particle "<<particleIndex<<":"<<std::endl;
-                if(particleIndex>p->numParticles() || particleIndex<0){
-                    std::cout<<"OUT OF RANGE"<<std::endl;
-                }else{
-                    for(int i=0;i<numAttr;i++){
-                        Partio::ParticleAttribute attr;
-                        p->attributeInfo(i,attr);
-                        std::cout<<std::setw(10)<<Partio::TypeName(attr.type)<<" "<<std::setw(10)<<attr.name;
-                        for(int ii=0;ii<attr.count;ii++){
-                            if(attr.type==Partio::INDEXEDSTR){
-                                int val=p->data<int>(attr,particleIndex)[ii];
-                                std::cout<<" "<<val;
-                                for(size_t index=0;index<p->indexedStrs(attr).size();index++){
-                                    std::cout<<std::endl<<" "<<index<<" '"<<p->indexedStrs(attr)[index]<<"'";
-                                }
-                            }else if(attr.type==Partio::INT) std::cout<<" "<<p->data<int>(attr,particleIndex)[ii];
-                            else std::cout<<" "<<p->data<float>(attr,particleIndex)[ii];
-                        }
-                        std::cout<<std::endl;
-                    }
-                }
-            }
-        }
-
-        int numFixedAttr=p->numFixedAttributes();
-        if (numFixedAttr) {
-            std::cout<<"---------------------------"<<std::endl;
-            std::cout<<"Fixed Attributes"<<std::endl;
-            std::cout<<std::setw(12)<<"Type"<<std::setw(10)<<"Count"<<std::setw(30)<<"Name"<<std::endl;
-            std::cout<<std::setw(12)<<"----"<<std::setw(10)<<"-----"<<std::setw(30)<<"----"<<std::endl;
-            for(int i=0;i<numFixedAttr;i++){
-                Partio::FixedAttribute attr;
-                p->fixedAttributeInfo(i,attr);
-                std::cout<<std::setw(12)<<Partio::TypeName(attr.type)
-                         <<std::setw(10)<<attr.count
-                         <<std::setw(30)<<attr.name<<std::endl;;
-            }
-
-            for(int i=0;i<numFixedAttr;i++){
-                Partio::FixedAttribute attr;
-                p->fixedAttributeInfo(i,attr);
-                std::cout<<std::setw(10)<<Partio::TypeName(attr.type)<<" "<<std::setw(10)<<attr.name;
-                for(int ii=0;ii<attr.count;ii++){
-                    if(attr.type==Partio::INDEXEDSTR){
-                        int val=p->fixedData<int>(attr)[ii];
-                        std::cout<<" "<<val;
-                        for(size_t index=0;index<p->fixedIndexedStrs(attr).size();index++){
-                            std::cout<<std::endl<<" "<<index<<" '"<<p->fixedIndexedStrs(attr)[index]<<"'";
-                        }
-                    }else if(attr.type==Partio::INT) std::cout<<" "<<p->fixedData<int>(attr)[ii];
-                    else std::cout<<" "<<p->fixedData<float>(attr)[ii];
-                }
-                std::cout<<std::endl;
-            }
-        }
-
-        p->release();
+    }
+    Partio::ParticlesDataMutable* p = Partio::read(filename);
+    if (!p) {
+        std::cerr << "Unable to read \"" << filename << "\"\n";
+        return 1;
     }
 
+    std::cout << std::setiosflags(std::ios::left) << "Number of particles:  " << p->numParticles() << std::endl;
+    int numAttr = p->numAttributes();
+    std::cout << std::setw(12) << "Type" << std::setw(10) << "Count" << std::setw(30) << "Name" << std::endl;
+    std::cout << std::setw(12) << "----" << std::setw(10) << "-----" << std::setw(30) << "----" << std::endl;
+    for (int i = 0; i < numAttr; i++) {
+        Partio::ParticleAttribute attr;
+        p->attributeInfo(i, attr);
+        std::cout << std::setw(12) << Partio::TypeName(attr.type) << std::setw(10) << attr.count << std::setw(30)
+                  << attr.name << std::endl;
+        ;
+    }
+
+    // Get widest attribute name for better formatting
+    size_t widest(0);
+    for (int i = 0; i < p->numAttributes(); ++i) {
+        Partio::ParticleAttribute attr;
+        p->attributeInfo(i, attr);
+        widest = std::max(widest, attr.name.size());
+    }
+    widest++;
+
+    if (printAllParticles) {
+        for (int i = 0; i < p->numParticles(); ++i)
+            printParticle(i, p, widest);
+    } else if (!particleIndices.empty()) {
+        for (int i : particleIndices)
+            printParticle(i, p, widest);
+    } else {
+        int numFixedAttr = p->numFixedAttributes();
+        if (numFixedAttr) {
+            std::cout << "---------------------------" << std::endl;
+            std::cout << "Fixed Attributes" << std::endl;
+            std::cout << std::setw(12) << "Type" << std::setw(10) << "Count" << std::setw(widest) << "Name"
+                      << std::endl;
+            std::cout << std::setw(12) << "----" << std::setw(10) << "-----" << std::setw(widest) << "----"
+                      << std::endl;
+            for (int i = 0; i < numFixedAttr; i++) {
+                Partio::FixedAttribute attr;
+                p->fixedAttributeInfo(i, attr);
+                std::cout << std::setw(12) << Partio::TypeName(attr.type) << std::setw(10) << attr.count
+                          << std::setw(widest) << attr.name << std::endl;
+                ;
+            }
+
+            for (int i = 0; i < numFixedAttr; i++) {
+                Partio::FixedAttribute attr;
+                p->fixedAttributeInfo(i, attr);
+                std::cout << std::setw(10) << Partio::TypeName(attr.type) << " " << std::setw(widest) << attr.name;
+                for (int ii = 0; ii < attr.count; ii++) {
+                    if (attr.type == Partio::INDEXEDSTR) {
+                        int val = p->fixedData<int>(attr)[ii];
+                        std::cout << " " << val;
+                        for (size_t index = 0; index < p->fixedIndexedStrs(attr).size(); index++) {
+                            std::cout << std::endl << " " << index << " '" << p->fixedIndexedStrs(attr)[index] << "'";
+                        }
+                    } else if (attr.type == Partio::INT)
+                        std::cout << " " << p->fixedData<int>(attr)[ii];
+                    else
+                        std::cout << " " << p->fixedData<float>(attr)[ii];
+                }
+                std::cout << std::endl;
+            }
+        }
+
+        // Display indexed strings
+        bool printedTitle(false);
+        for (int i = 0; i < p->numAttributes(); ++i) {
+            Partio::ParticleAttribute attr;
+            p->attributeInfo(i, attr);
+            if (attr.type == Partio::INDEXEDSTR) {
+                if (!printedTitle) {
+                    std::cout << "\nINDEXED STRINGS:\n";
+                    printedTitle = true;
+                }
+                const std::vector<std::string> indexedStrs = p->indexedStrs(attr);
+                std::cout << attr.name << " (" << indexedStrs.size() << ") = [";
+                if (!indexedStrs.empty())
+                    std::cout << std::endl;
+                size_t numStrings = printAllStrings ? indexedStrs.size() : std::min((size_t)5, indexedStrs.size());
+                for (size_t i = 0; i < numStrings; ++i) {
+                    std::cout << "  " << indexedStrs[i] << std::endl;
+                }
+                if (indexedStrs.size() > 5)
+                    std::cout << "  ...\n";
+                std::cout << "]\n";
+            }
+        }
+    }
+
+    p->release();
     return 0;
 }
