@@ -52,7 +52,7 @@ IF(WIN32)
 ELSE(WIN32)
   ADD_COMPILE_OPTIONS (-Wextra -Wno-unused-parameter)
 ENDIF(WIN32)
-IF(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+IF(APPLE)
   set (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
 ENDIF()
 
