@@ -277,7 +277,7 @@ public:
         while(strm.avail_out!=0){
             if(strm.avail_in==0){ // buffer empty, read some more from file
                 istream.read((char*)in,part_of_zip_file?std::min((unsigned int)buffer_size,header.compressed_size-total_read):(unsigned int)buffer_size);
-                strm.avail_in=istream.gcount();
+                strm.avail_in=static_cast<uInt>(istream.gcount());
                 total_read+=strm.avail_in;
                 strm.next_in=(Bytef*)in;}
             int ret=inflate(&strm,Z_NO_FLUSH); // decompress
@@ -296,14 +296,14 @@ public:
         return unzip_count;}
     else{ // uncompressed, so just read
         istream.read((char*)(out+4),std::min(buffer_size-4,header.uncompressed_size-total_read));
-        int count=istream.gcount();
+        int count=static_cast<int>(istream.gcount());
         total_read+=count;
         return count;}
-    return 1;}
+    }
 
     virtual int underflow()
     {if(gptr() && (gptr()<egptr())) return traits_type::to_int_type(*gptr()); // if we already have data just use it
-    int put_back_count=gptr()-eback();
+    int put_back_count=static_cast<int>(gptr()-eback());
     if(put_back_count>4) put_back_count=4;
     std::memmove(out+(4-put_back_count),gptr()-put_back_count,put_back_count);
     int num=process();
@@ -311,8 +311,11 @@ public:
     if(num<=0) return EOF;
     return traits_type::to_int_type(*gptr());}
 
-    virtual int overflow(int c=EOF)
+    virtual int overflow(int)
     {assert(false);return EOF;}
+
+	// assignment operator declared and not defined, to suppress warning 4512 for Visual Studio
+	ZipStreambufDecompress& operator=(const ZipStreambufDecompress& _Right);
 
 //#####################################################################
 };
@@ -346,8 +349,8 @@ public:
         setg(0,0,0);
         setp((char*)in,(char*)(in+buffer_size-4)); // we want to be 4 aligned
         // Write appropriate header
-        if(header){header->header_offset=stream.tellp();header->Write(ostream,false);}
-        else{header_offset=stream.tellp();gzip_header.Write(ostream);}
+        if(header){header->header_offset=static_cast<unsigned int>(stream.tellp());header->Write(ostream,false);}
+        else{header_offset=static_cast<unsigned int>(stream.tellp());gzip_header.Write(ostream);}
         uncompressed_size=crc=0;
     }
 
@@ -369,7 +372,7 @@ protected:
     int process(bool flush)
     {if(!valid) return -1;
     strm.next_in=(Bytef*)pbase();
-    strm.avail_in=pptr()-pbase();
+    strm.avail_in=static_cast<uInt>(pptr()-pbase());
     while(strm.avail_in!=0 || flush){
         strm.avail_out=buffer_size;
         strm.next_out=(Bytef*)out;
@@ -378,12 +381,12 @@ protected:
             valid=false;
             std::cerr<<"gzip: gzip error "<<strm.msg<<std::endl;;
             return -1;}
-        int generated_output=strm.next_out-(Bytef*)out;
+        int generated_output=static_cast<int>(strm.next_out-(Bytef*)out);
         ostream.write((char*)out,generated_output);
         if(header) header->compressed_size+=generated_output;
         if(ret==Z_STREAM_END) break;}
     // update counts, crc's and buffers
-    int consumed_input=pptr()-pbase();
+    int consumed_input=static_cast<int>(pptr()-pbase());
     uncompressed_size+=consumed_input;
     crc=crc32(crc,(Bytef*)in,consumed_input);
     setp(pbase(),pbase()+buffer_size-4);return 1;}
@@ -395,9 +398,12 @@ protected:
     {std::runtime_error("Attempt to read write only ostream");return 0;}
 
     virtual int overflow(int c=EOF)
-    {if(c!=EOF){*pptr()=c;pbump(1);}
+    {if(c!=EOF){*pptr()=static_cast<char>(c);pbump(1);}
     if(process(false)==EOF) return EOF;
     return c;}
+
+	// assignment operator declared and not defined, to suppress warning 4512 for Visual Studio
+	ZipStreambufCompress& operator=(const ZipStreambufCompress& _Right);
 
 //#####################################################################
 };
@@ -468,7 +474,7 @@ ZipFileWriter::
 // Function ZipFileWriter
 //#####################################################################
 std::ostream* ZipFileWriter::
-Add_File(const std::string& filename,const bool binary)
+Add_File(const std::string& filename,const bool)
 {
     files.push_back(new ZipFileHeader(filename));
     return new ZIP_FILE_OSTREAM(files.back(),ostream);
@@ -508,7 +514,7 @@ Find_And_Read_Central_Header()
     std::ios::streamoff read_start=max_comment_size+read_size_before_comment;
     if(read_start>end_position) read_start=end_position;
     istream.seekg(end_position-read_start);
-    char *buf=new char[read_start];
+    char *buf=new char[static_cast<unsigned int>(read_start)];
     if(read_start<=0){std::cerr<<"ZIP: Invalid read buffer size"<<std::endl;return false;}
     istream.read(buf,read_start);
     int found=-1;
@@ -543,7 +549,7 @@ Find_And_Read_Central_Header()
 //#####################################################################
 // Function Get_File
 //#####################################################################
-std::istream* ZipFileReader::Get_File(const std::string& filename,const bool binary)
+std::istream* ZipFileReader::Get_File(const std::string& filename,const bool)
 {
     std::map<std::string,ZipFileHeader*>::iterator i=filename_to_header.find(filename);
     if(i!=filename_to_header.end()){

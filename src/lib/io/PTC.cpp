@@ -32,7 +32,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
-#define _USE_MATH_DEFINES
+#ifndef _USE_MATH_DEFINES
+    #define _USE_MATH_DEFINES
+#endif
 #include <cmath>
 
 #include "../Partio.h"
@@ -210,9 +212,9 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly,std::o
 	     float nz = (float)z / 65535.0f;
 	     norm[2] = 2.0f * nz - 1.0f;
 	     float fphi = (float)phi / 65535.0f;
-	     fphi = 2.0 * M_PI * (fphi - 0.5);
+	     fphi = 2.0f * static_cast<float>(M_PI) * (fphi - 0.5f);
 	     //assert(-M_PI-0.0001 <= fphi && fphi <= M_PI+0.0001);
-	     double rxy = sqrt(1.0 - norm[2]*norm[2]);
+	     float rxy = sqrt(1.0f - norm[2]*norm[2]);
 	     norm[0] = rxy * sin(fphi);
 	     norm[1] = rxy * cos(fphi);
 	} else {
@@ -286,7 +288,7 @@ bool writePTC(const char* filename,const ParticlesData& p,const bool compressed,
             else write<LITEND>(*output,(float)0);
     }
     // eye-to-screen
-    const float foo[4][4]={{1.8,0,0,0}, {0,2.41,0,0}, {0,0,1,1}, {0,0,-.1,0}};
+    const float foo[4][4]={{1.8f,0,0,0}, {0,2.41f,0,0}, {0,0,1,1}, {0,0,-.1f,0}};
     for(int i=0;i<4;i++) for(int j=0;j<4;j++){
             write<LITEND>(*output,foo[i][j]);
     }

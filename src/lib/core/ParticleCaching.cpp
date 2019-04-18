@@ -99,12 +99,12 @@ void freeCached(ParticlesData* particles)
     mutex.unlock();
 }
 
-void beginCachedAccess(ParticlesData* particles)
+void beginCachedAccess(ParticlesData*)
 {
     // TODO: for future use
 }
 
-void endCachedAccess(ParticlesData* particles)
+void endCachedAccess(ParticlesData*)
 {
     // TODO: for future use
 }

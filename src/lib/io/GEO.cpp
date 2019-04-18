@@ -225,7 +225,7 @@ ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly,std::o
 
 
 template<class T>
-void writeType(ostream& output,const ParticlesData& p,const ParticleAttribute& attrib,
+void writeType(ostream& output,const ParticlesData&,const ParticleAttribute& attrib,
     const ParticleAccessor& accessor,const ParticlesData::const_iterator& iterator)
 {
     const T* data=accessor.raw<T>(iterator);
