@@ -38,6 +38,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 #include <PartioVec3.h>
 
+#ifdef WIN32
+#define _USE_MATH_DEFINES
+#include <math.h>
+#endif //
+
 #ifdef PARTIO_WIN32
 #define M_PI 3.141592653589793238
 #endif
