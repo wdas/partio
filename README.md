@@ -47,7 +47,7 @@ to enable the PartioSe class.
 
 Source code overview
 ====================
-
+```
 src/
    lib/      Library code (public API in root)
    lib/core  Core library (KDtree traversal, data representations)
@@ -59,20 +59,20 @@ src/
              partconvert <input format> <output format>
              partinfo <particle file>
              partview <particle file>
-
+```
 Class Model
 -----------
 
 The goal of the library is to abstract the particle interface from the data
 representation. That is why Partio represents particles using three classes that
 inherit and provide more functionality
-
+```
 ParticlesInfo - Information about # of particles and attributes
 ParticlesData - Read only access to all particle data
 ParticlesDataMutable - Read/write access to all particle data
-
+```
 The functions used to get particle access are these:
-
+```
 readHeaders() 
    returns ParticlesInfo
    reads only the minimum data necessary to get number of particles and
@@ -86,23 +86,23 @@ readCached()
 create() and read()
    returns ParticlesDataMutable   
    allows read/write access
-
+```
 Behind the scenes you could implement these classes however you like.  Headers
-only representation is called core/ParticleHeader.{h,cpp}.  Simple
-non-interleaved attributes is core/ParticleSimple.{h,cpp}.
+only representation is called `core/ParticleHeader.{h,cpp}`.  Simple
+non-interleaved attributes is `core/ParticleSimple.{h,cpp}`.
 
 Attribute Data Model
 --------------------
 
 All particles have the same data attributes.  They have the model that they are
 of three basic types with a count of how many scalar values they have.
-
+```
 VECTOR[3]    
 FLOAT[d]
 INT[d]
-
-VECTOR[3] and FLOAT[3] have the same data representations.
-VECTOR[4] is invalid however FLOAT[4] is valid as is FLOAT[1...infinity]
+```
+`VECTOR[3]` and `FLOAT[3]` have the same data representations.
+`VECTOR[4]` is invalid however `FLOAT[4]` is valid as is `FLOAT[1...infinity]`
 
 This seems to encompass the most common file formats for particles
 
@@ -120,7 +120,7 @@ some tips
 - Cache ParticleAttributes for quick access instead of calling attributeInfo()
   over a loop of particles
 
-- Use iterators to do linear operations over all particles They are much more
+- Use iterators to do linear operations over all particles. They are much more
   optimized than both data() and the dataAsFloat or
 
 
@@ -136,10 +136,10 @@ structures in these cases.
 Readers/Writers
 ---------------
 
-New readers and writers can be added in the io/ directory. You simply need to
+New readers and writers can be added in the `io/` directory. You simply need to
 implement the interface ParticlesInfo, ParticlesData and ParticlesDataMutable
-(or as many as you need). Editing the io/readers.h to add prototypes and
-io/ParticleIO.cpp to add file extension bindings should be easy.
+(or as many as you need). Editing the `io/readers.h` to add prototypes and
+`io/ParticleIO.cpp` to add file extension bindings should be easy.
 
 
 - Andrew Selle, Walt Disney Animation Studios
