@@ -51,7 +51,7 @@ ParticleHeaders::
 {}
 
 void ParticleHeaders::
-release() const
+release()
 {
     delete this;
 }

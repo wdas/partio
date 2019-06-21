@@ -566,7 +566,7 @@ void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::st
             size_t size = Partio::TypeSize(attr.base.type) * attr.base.count;
             void *dst = base.dataWrite<void>(attr.base, index);
             const void* src;
-            std::unique_ptr<int> newIndices;
+            std::unique_ptr<int[]> newIndices;
             if (attr.base.type == INDEXEDSTR) {
                 newIndices.reset(new int[attr.base.count]);
                 const int* indices = delta.data<int>(attr.delta, i);

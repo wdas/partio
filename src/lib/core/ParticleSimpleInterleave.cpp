@@ -63,9 +63,9 @@ ParticlesSimpleInterleave::
 }
 
 void ParticlesSimpleInterleave::
-release() const
+release()
 {
-    freeCached(const_cast<ParticlesSimpleInterleave*>(this));
+    freeCached(this);
 }
 
 
