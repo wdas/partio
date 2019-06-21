@@ -48,7 +48,8 @@ ParticleHeaders()
 
 ParticleHeaders::
 ~ParticleHeaders()
-{}
+{
+}
 
 void ParticleHeaders::
 release()
