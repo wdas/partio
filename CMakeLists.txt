@@ -37,8 +37,6 @@ SET( CMAKE_SKIP_RPATH TRUE )
 ## project name & version
 PROJECT(partio LANGUAGES CXX VERSION 1.5.2)
 
-# PARTIO_SE_ENABLED enables SeExpr support
-option(PARTIO_SE_ENABLED "PARTIO_SE_ENABLED" false)
 option(GTEST_ENABLED "Enable GTest for tests" false)
 
 # Enable C++11
@@ -107,15 +105,6 @@ option(BUILD_SHARED_LIBS "Enabled shared libraries" ON)
 ## Make modules able to see partio library
 # Setup environment variable to link partio
 SET( PARTIO_LIBRARIES partio ${ZLIB_LIBRARY} )
-
-if (${PARTIO_SE_ENABLED})
-    add_definitions(-DPARTIO_SE_ENABLED=1)
-    SET(SEEXPR_BASE "c:/aselle/seexpr-inst" CACHE STRING "path to SeExpr")
-    SET(SEEXPR_INCLUDE_PATH ${SEEXPR_BASE}/include)
-    SET(SEEXPR_LIBDIR ${CMAKE_INSTALL_LIBDIR})
-    SET(SEEXPR_LINK_PATH ${SEEXPR_BASE}/${SEEXPR_LIBDIR})
-    find_library(SEEXPR_LIB SeExpr HINTS ${SEEXPR_LINK_PATH})
-endif ()
 
 if (${GTEST_ENABLED})
     set($GEST_LOCATION "/usr" CACHE STRING "gtest installation prefix")
