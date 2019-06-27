@@ -54,7 +54,7 @@ public:
     using ParticlesDataMutable::iterator;
     using ParticlesData::const_iterator;
 
-    void release() const;
+    void release();
 
     ParticlesSimpleInterleave();
 

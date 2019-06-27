@@ -68,12 +68,11 @@ class ParticlesInfo
 protected:
     virtual ~ParticlesInfo() {}
 public:
-    friend void freeCached(ParticlesData* particles);
 
     //! Frees the memory if this particle set was created with create() or release()
     //! Reduces reference count if it was obtained with readCached()
     //! and if the ref count hits zero, frees the memory
-    virtual void release() const=0;
+    virtual void release()=0;
 
     //! Number of particles in the structure.
     virtual int numParticles() const=0;
@@ -105,6 +104,7 @@ class ParticlesData:public ParticlesInfo
 protected:
     virtual ~ParticlesData() {}
 public:
+    friend void freeCached(ParticlesData* particles);
 
     typedef ParticleIterator<true> const_iterator;
 
@@ -304,8 +304,8 @@ void write(const char* filename,const ParticlesData&,const bool forceCompressed=
 //! Cached (only one copy) read only way to read a particle file
 /*!
   Loads a file read-only if not already in memory, otherwise returns
-  already loaded item. Pointer is owned by Partio and must be releasedwith
-  p->release(); (will not be deleted if others are also holding).
+  already loaded item. Pointer is owned by Partio and must be released
+  with p->release(); (will not be deleted if others are also holding).
   If you want to do finding neighbors give true to sort
 */
 ParticlesData* readCached(const char* filename,const bool sort,const bool verbose=true,std::ostream& errorStream=std::cerr);

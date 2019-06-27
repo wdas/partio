@@ -64,9 +64,9 @@ ParticlesSimple::
 }
 
 void ParticlesSimple::
-release() const
+release()
 {
-    freeCached(const_cast<ParticlesSimple*>(this));
+    freeCached(this);
 }
 
 int ParticlesSimple::
