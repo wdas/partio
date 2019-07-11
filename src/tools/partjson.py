@@ -157,7 +157,7 @@ def main():
     compress = False
     for arg in sys.argv[1:]:
         if arg in ('-h', '--help'):
-            print __doc__
+            print(__doc__)
             return
 
         if arg in ('-v', '--verbose'):
@@ -171,7 +171,7 @@ def main():
         filenames.append(arg)
 
     if len(filenames) != 2:
-        print __doc__
+        print(__doc__)
         sys.stderr.write('Incorrect number of arguments.\n')
         sys.exit(1)
 
@@ -210,7 +210,7 @@ def main():
             json.dump(data, fp, indent=2, sort_keys=True)
         sys.exit(0)
 
-    print __doc__
+    print(__doc__)
     sys.stderr.write('Unknown file extension(s)')
     sys.exit(1)
 
