@@ -1020,7 +1020,7 @@ class PartEdit(QMainWindow):
 
         name = str(nameBox.text())
         if not name:
-            print 'Please supply a name for the new attribute' # TODO: prompt
+            print('Please supply a name for the new attribute')  # TODO: prompt
             return
 
         attrType = typeCombo.currentIndex()
@@ -1061,7 +1061,7 @@ def main():
     filename = None
     for arg in sys.argv[1:]:
         if arg in ('-h', '--help'):
-            print __doc__
+            print(__doc__)
             sys.exit(0)
 
         filename = arg

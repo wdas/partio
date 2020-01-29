@@ -37,8 +37,6 @@ SET( CMAKE_SKIP_RPATH TRUE )
 ## project name & version
 PROJECT(partio LANGUAGES CXX VERSION 1.5.2)
 
-# PARTIO_SE_ENABLED enables SeExpr support
-option(PARTIO_SE_ENABLED "PARTIO_SE_ENABLED" false)
 option(GTEST_ENABLED "Enable GTest for tests" false)
 
 # Enable C++11
@@ -48,10 +46,16 @@ SET(CMAKE_CXX_EXTENSIONS NO)
 
 ## Setup platform specific helper defines build variants
 IF(WIN32)
-  ADD_DEFINITIONS (-DPARTIO_WIN32 -D_USE_MATH_DEFINES)
-ELSE(WIN32)
+  IF(MSVC)
+    ADD_DEFINITIONS (-DPARTIO_WIN32)
+  ENDIF()
+  ADD_DEFINITIONS (-D_USE_MATH_DEFINES)
+ELSE()
   ADD_COMPILE_OPTIONS (-Wextra -Wno-unused-parameter)
-ENDIF(WIN32)
+ENDIF()
+IF(APPLE)
+  set (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
+ENDIF()
 
 ## Choose build options
 # Disney specific method of choosing variant
@@ -73,8 +77,12 @@ enable_testing()
 
 ## Set install location
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    EXECUTE_PROCESS(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
-    SET(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}")
+    IF(WIN32)
+        set(VARIANT_DIRECTORY "Windows-x86_64")
+    ELSE()
+        execute_process(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
+    ENDIF()
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}")
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 include(GNUInstallDirs)
@@ -97,15 +105,6 @@ option(BUILD_SHARED_LIBS "Enabled shared libraries" ON)
 ## Make modules able to see partio library
 # Setup environment variable to link partio
 SET( PARTIO_LIBRARIES partio ${ZLIB_LIBRARY} )
-
-if (${PARTIO_SE_ENABLED})
-    add_definitions(-DPARTIO_SE_ENABLED=1)
-    SET(SEEXPR_BASE "c:/aselle/seexpr-inst" CACHE STRING "path to SeExpr")
-    SET(SEEXPR_INCLUDE_PATH ${SEEXPR_BASE}/include)
-    SET(SEEXPR_LIBDIR ${CMAKE_INSTALL_LIBDIR})
-    SET(SEEXPR_LINK_PATH ${SEEXPR_BASE}/${SEEXPR_LIBDIR})
-    find_library(SEEXPR_LIB SeExpr HINTS ${SEEXPR_LINK_PATH})
-endif ()
 
 if (${GTEST_ENABLED})
     set($GEST_LOCATION "/usr" CACHE STRING "gtest installation prefix")

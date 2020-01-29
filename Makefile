@@ -23,12 +23,6 @@ endif
 # Installation location: prefix=<path>
 CMAKE_FLAGS += -DCMAKE_INSTALL_PREFIX=$(prefix)
 
-# SeExpr v2 location: RP_SeExpr=<path>
-ifdef RP_SeExpr
-    CMAKE_FLAGS += -DSEEXPR_BASE=$(RP_SeExpr)
-    CMAKE_FLAGS += -DPARTIO_SE_ENABLED=1
-endif
-
 # gtest location: RP_gtest=<path>
 ifdef RP_gtest
     CMAKE_FLAGS += -DGTEST_LOCATION=$(RP_gtest)

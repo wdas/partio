@@ -64,9 +64,9 @@ ParticlesSimple::
 }
 
 void ParticlesSimple::
-release() const
+release()
 {
-    freeCached(const_cast<ParticlesSimple*>(this));
+    freeCached(this);
 }
 
 int ParticlesSimple::
@@ -78,7 +78,7 @@ numParticles() const
 int ParticlesSimple::
 numAttributes() const
 {
-    return attributes.size();
+    return static_cast<int>(attributes.size());
 }
 
 int ParticlesSimple::
@@ -161,11 +161,11 @@ findPoints(const float bboxMin[3],const float bboxMax[3],std::vector<ParticleInd
 
     BBox<3> box(bboxMin);box.grow(bboxMax);
 
-    int startIndex=points.size();
+    int startIndex=static_cast<int>(points.size());
     kdtree->findPoints(points,box);
     // remap points found in findPoints to original index space
     for(unsigned int i=startIndex;i<points.size();i++){
-        points[i]=kdtree->id(points[i]);
+        points[i]=kdtree->id(static_cast<int>(points[i]));
     }
 }
 
@@ -183,7 +183,7 @@ findNPoints(const float center[3],const int nPoints,const float maxRadius,std::v
     float maxDistance=kdtree->findNPoints(points,pointDistancesSquared,center,nPoints,maxRadius);
     // remap all points since findNPoints clears array
     for(unsigned int i=0;i<points.size();i++){
-        ParticleIndex index=kdtree->id(points[i]);
+        ParticleIndex index=kdtree->id(static_cast<int>(points[i]));
         points[i]=index;
     }
     return maxDistance;
@@ -201,7 +201,7 @@ findNPoints(const float center[3],int nPoints,const float maxRadius, ParticleInd
     int count = kdtree->findNPoints (points, pointDistancesSquared, finalRadius2, center, nPoints, maxRadius);
     // remap all points since findNPoints clears array
     for(int i=0; i < count; i++){
-        ParticleIndex index = kdtree->id(points[i]);
+        ParticleIndex index = kdtree->id(static_cast<int>(points[i]));
         points[i]=index;
     }
     return count;
@@ -218,10 +218,10 @@ addAttribute(const char* attribute,ParticleAttributeType type,const int count)
     ParticleAttribute attr;
     attr.name=attribute;
     attr.type=type;
-    attr.attributeIndex=attributes.size(); //  all arrays separate so we don't use this here!
+    attr.attributeIndex=static_cast<int>(attributes.size()); //  all arrays separate so we don't use this here!
     attr.count=count;
     attributes.push_back(attr);
-    nameToAttribute[attribute]=attributes.size()-1;
+    nameToAttribute[attribute]=static_cast<int>(attributes.size()-1);
 
     int stride=TypeSize(type)*count;
     attributeStrides.push_back(stride);
@@ -318,14 +318,14 @@ setupIteratorNextBlock(Partio::ParticleIterator<true>& iterator) const
 
 
 void ParticlesSimple::
-setupAccessor(Partio::ParticleIterator<false>& iterator,ParticleAccessor& accessor)
+setupAccessor(Partio::ParticleIterator<false>&,ParticleAccessor& accessor)
 {
     accessor.stride=accessor.count*sizeof(float);
     accessor.basePointer=attributeData[accessor.attributeIndex];
 }
 
 void ParticlesSimple::
-setupAccessor(Partio::ParticleIterator<true>& iterator,ParticleAccessor& accessor) const
+setupAccessor(Partio::ParticleIterator<true>&,ParticleAccessor& accessor) const
 {
     accessor.stride=accessor.count*sizeof(float);
     accessor.basePointer=attributeData[accessor.attributeIndex];
@@ -347,7 +347,7 @@ fixedDataInternal(const FixedAttribute& attribute) const
 
 void ParticlesSimple::
 dataInternalMultiple(const ParticleAttribute& attribute,const int indexCount,
-    const ParticleIndex* particleIndices,const bool sorted,char* values) const
+    const ParticleIndex* particleIndices,const bool,char* values) const
 {
     assert(attribute.attributeIndex>=0 && attribute.attributeIndex<(int)attributes.size());
 
@@ -368,7 +368,7 @@ dataAsFloat(const ParticleAttribute& attribute,const int indexCount,
         char* attrrawbase=attributeData[attribute.attributeIndex];
         int* attrbase=(int*)attrrawbase;
         int count=attribute.count;
-        for(int i=0;i<indexCount;i++) for(int k=0;k<count;k++) values[i*count+k]=(int)attrbase[particleIndices[i]*count+k];
+        for(int i=0;i<indexCount;i++) for(int k=0;k<count;k++) values[i*count+k]=static_cast<float>(attrbase[particleIndices[i]*count+k]);
     }
 }
 
@@ -378,7 +378,7 @@ registerIndexedStr(const ParticleAttribute& attribute,const char* str)
     IndexedStrTable& table=attributeIndexedStrs[attribute.attributeIndex];
     std::map<std::string,int>::const_iterator it=table.stringToIndex.find(str);
     if(it!=table.stringToIndex.end()) return it->second;
-    int newIndex=table.strings.size();
+    int newIndex=static_cast<int>(table.strings.size());
     table.strings.push_back(str);
     table.stringToIndex[str]=newIndex;
     return newIndex;

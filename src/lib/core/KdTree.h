@@ -211,7 +211,7 @@ template <int k> class KdTree
  public:
     KdTree();
     ~KdTree();
-    int size() const { return _points.size(); }
+    int size() const { return static_cast<int>(_points.size()); }
     const BBox<k>& bbox() const { return _bbox; }
     const float* point(int i) const { return _points[i].p; }
     uint64_t id(int i) const { return _ids[i]; }
@@ -229,7 +229,7 @@ template <int k> class KdTree
     struct ComparePointsById {
 	float* points;
 	ComparePointsById(float* p) : points(p) {}
-	bool operator() (int a, int b) { return points[a*k] < points[b*k]; }
+	bool operator() (uint64_t a, uint64_t b) { return points[a*k] < points[b*k]; }
     };
     void findPoints(std::vector<uint64_t>& result, const BBox<k>& bbox,
 		    int n, int size, int j) const;
@@ -307,14 +307,14 @@ void KdTree<k>::sort()
     _sorted = 1;
 
     // reorder ids to sort points
-    int np = _points.size();
+    int np = static_cast<int>(_points.size());
     if (!np) return;
     if (np > 1) sortSubtree(0, np, 0);
 
     // reorder points to match id order
     std::vector<Point> newpoints(np);
     for (int i = 0; i < np; i++)
-	newpoints[i] = _points[_ids[i]];
+	newpoints[i] = _points[static_cast<unsigned int>(_ids[i])];
     std::swap(_points, newpoints);
 }
 
@@ -332,7 +332,14 @@ void KdTree<k>::sortSubtree(int n, int size, int j)
 
     // sort left and right subtrees using next discriminant
     if (left <= 1) return;
+#ifdef _MSC_VER  
+    #pragma warning (push)  
+    #pragma warning (disable : 4127)  // suppress the warning due to the constant k being tested at runtime, an alternative would be to specialize the template class for k = 0
+#endif  
     if (k > 1) j = (j+1)%k;
+#ifdef _MSC_VER  
+    #pragma warning (pop)  
+#endif  
     sortSubtree(n+1, left, j);
     if (right <= 1) return;
     sortSubtree(n+left+1, right, j);

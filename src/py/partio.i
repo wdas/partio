@@ -40,9 +40,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 %{
 #include <Partio.h>
 #include <PartioIterator.h>
-#if PARTIO_SE_ENABLED
-#include <PartioSe.h>
-#endif
 #include <PartioAttribute.h>
 #include <sstream>
 namespace Partio{
@@ -583,17 +580,3 @@ ParticlesDataMutable* clone(const ParticlesData& other, bool particles);
 %feature("autodoc");
 %feature("docstring","Return string name of given attribute type");
 std::string TypeName(ParticleAttributeType attrType);
-
-#if PARTIO_SE_ENABLED
-
-class PartioSe{
-  public:
-    PartioSe(ParticlesDataMutable* parts,const char* expr);
-    PartioSe(ParticlesDataMutable* partsPairing,ParticlesDataMutable* parts,const char* expr);
-    bool runAll();
-    bool runRandom();
-    bool runRange(int istart,int iend);
-    void setTime(float val);
-};
-
-#endif

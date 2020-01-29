@@ -269,7 +269,7 @@ def main():
     newArgs = [sys.argv[0]]
     for arg in sys.argv[1:]:
         if arg in ('-h', '--help'):
-            print __doc__
+            print(__doc__)
             sys.exit(0)
         if arg in ('-a', '--attrs'):
             attrsOnly = True
@@ -279,12 +279,12 @@ def main():
             newArgs.append(arg)
 
     if not filename:
-        print __doc__
+        print(__doc__)
         sys.stderr.write("Missing filename\n")
         sys.exit(1)
 
     if not os.path.exists(filename):
-        print __doc__
+        print(__doc__)
         sys.stderr.write("Invalid file: {}\n".format(filename))
         sys.exit(1)
 

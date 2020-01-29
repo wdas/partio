@@ -41,7 +41,7 @@ if __name__=="__main__":
     try:
         filename=sys.argv[1]
     except:
-        print "Usage: listAttr.py <filename>"
+        print("Usage: listAttr.py <filename>")
         sys.exit(1)
 
     # read particle name
@@ -53,5 +53,4 @@ if __name__=="__main__":
         if attr.type==partio.VECTOR: typeStr="VECTOR"
         if attr.type==partio.FLOAT: typeStr="FLOAT"
         if attr.type==partio.INT: typeStr="INT"
-        print "%10s[%d] %-30s "%(typeStr,attr.count,attr.name)
-
+        print("%10s[%d] %-30s "%(typeStr,attr.count,attr.name))

@@ -52,20 +52,5 @@ endif (ZLIB_FOUND)
 
 install(TARGETS partio DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-if (SEEXPR_BASE)
-    if (${PARTIO_SE_ENABLED})
-        add_library(partioSe PartioSe.cpp)
-        set_target_properties(partioSe PROPERTIES POSITION_INDEPENDENT_CODE ON)
-        target_include_directories(partioSe
-            PUBLIC
-                $<INSTALL_INTERFACE:${SEEXPR_INCLUDE_PATH}>
-                $<BUILD_INTERFACE:${SEEXPR_INCLUDE_DIR}>
-            PRIVATE
-                ${SEEXPR_INCLUDE_PATH})
-        target_link_libraries(partioSe PUBLIC partio ${SEEXPR_LIB})
-        install(TARGETS partioSe DESTINATION ${CMAKE_INSTALL_LIBDIR})
-    endif ()
-endif (SEEXPR_BASE)
-
 file(GLOB public_includes "*.h")
 install(FILES ${public_includes} DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})

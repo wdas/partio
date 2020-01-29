@@ -1,4 +1,4 @@
-[Partio](https://www.disneyanimation.com/technology/partio.html) - A library for particle IO and manipulation
+[Partio](https://wdas.github.io/partio) - A library for particle IO and manipulation
 =============================================================================================================
 
 This is the initial source code release of partio a tool we used for particle
@@ -9,17 +9,11 @@ entity).
 Super impatient building guide
 ==============================
 
-    # Install Location ~ adjust accordingly
-    prefix=$HOME/local
-    # Partio depends on SeExpr v2.11
-    git clone https://github.com/wdas/seexpr.git
-    pushd seexpr
-      git checkout v2.11
-      make -j prefix=$prefix install
-    popd
-    git clone https://github.com/wdas/partio.git
-    cd partio
-    make -j prefix=$prefix RP_SeExpr=$prefix install
+        # Install Location ~ adjust accordingly
+        prefix=$HOME/local
+        git clone https://github.com/wdas/partio.git
+        cd partio
+        make -j prefix=$prefix install
 
 Getting Started
 ===============
@@ -33,32 +27,22 @@ cmake options.
 The typical usage for an installation into `/usr/local`
 with a temporary staging directory of `/tmp/stage` is:
 
-    make DESTDIR=/tmp/stage RP_SeExpr=/usr/local prefix=/usr/local install
-
-SeExpr
-======
-Partio depends on SeExpr v2 (current `v2.11`).  SeExpr v2 and v3 can co-exist,
-so you can have v2 for building partio installed alongside SeExpr v3+ (master).
-
-SeExpr is not strictly required. SeExpr support is disabled when `RP_SeExpr`
-is not specified to the Makefile.  In CMake, the corresponding variables are
-`-DSEEXPR_BASE=<path>` for the SeExpr location, and `-DPARTIO_SE_ENABLED=1`
-to enable the PartioSe class.
+    make DESTDIR=/tmp/stage prefix=/usr/local install
 
 Source code overview
 ====================
 
-src/
-   lib/      Library code (public API in root)
-   lib/core  Core library (KDtree traversal, data representations)
-   lib/io    Input/Output (Different file formats)
-   py/       SWIG based python bindings
-   doc/      Doxygen documentation and (the start of) a manual
-   tests/    Start of regression tests (I need more)
-   tools/    Useful tools 
-             partconvert <input format> <output format>
-             partinfo <particle file>
-             partview <particle file>
+        src/
+           lib/      Library code (public API in root)
+           lib/core  Core library (KDtree traversal, data representations)
+           lib/io    Input/Output (Different file formats)
+           py/       SWIG based python bindings
+           doc/      Doxygen documentation and (the start of) a manual
+           tests/    Start of regression tests (I need more)
+           tools/    Useful tools
+                     partconvert <input format> <output format>
+                     partinfo <particle file>
+                     partview <particle file>
 
 Class Model
 -----------
@@ -73,19 +57,19 @@ ParticlesDataMutable - Read/write access to all particle data
 
 The functions used to get particle access are these:
 
-readHeaders() 
-   returns ParticlesInfo
-   reads only the minimum data necessary to get number of particles and
-   attributes
+        readHeaders()
+           returns ParticlesInfo
+           reads only the minimum data necessary to get number of particles and
+           attributes
 
-readCached()
-   returns ParticlesData
-   For multiple users in different threads using the same particle file
-   ParticlesData
+        readCached()
+           returns ParticlesData
+           For multiple users in different threads using the same particle file
+           ParticlesData
 
-create() and read()
-   returns ParticlesDataMutable   
-   allows read/write access
+        create() and read()
+           returns ParticlesDataMutable
+           allows read/write access
 
 Behind the scenes you could implement these classes however you like.  Headers
 only representation is called core/ParticleHeader.{h,cpp}.  Simple
@@ -97,12 +81,12 @@ Attribute Data Model
 All particles have the same data attributes.  They have the model that they are
 of three basic types with a count of how many scalar values they have.
 
-VECTOR[3]    
-FLOAT[d]
-INT[d]
+        VECTOR[3]
+        FLOAT[d]
+        INT[d]
 
-VECTOR[3] and FLOAT[3] have the same data representations.
-VECTOR[4] is invalid however FLOAT[4] is valid as is FLOAT[1...infinity]
+        VECTOR[3] and FLOAT[3] have the same data representations.
+        VECTOR[4] is invalid however FLOAT[4] is valid as is FLOAT[1...infinity]
 
 This seems to encompass the most common file formats for particles
 

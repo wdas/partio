@@ -350,9 +350,9 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
             writeHoudiniStr(*output,attr.name);
             if(attr.type==INDEXEDSTR){
                 int houdiniType=4;
-                unsigned short size=attr.count;
+                unsigned short size=static_cast<unsigned short>(attr.count);
                 const std::vector<std::string>& indexTable=p.indexedStrs(attr);
-                int numIndexes=indexTable.size();
+                int numIndexes=static_cast<int>(indexTable.size());
                 write<BIGEND>(*output,size,houdiniType,numIndexes);
                 for(int i=0;i<numIndexes;i++)
                     writeHoudiniStr(*output,indexTable[i]);
@@ -365,7 +365,7 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
                     case INDEXEDSTR:
                     case NONE: assert(false);houdiniType=0;break;
                 }
-                unsigned short size=attr.count;
+                unsigned short size=static_cast<unsigned short>(attr.count);
                 write<BIGEND>(*output,size,houdiniType);
                 for(int i=0;i<attr.count;i++){
                     int defaultValue=0;
@@ -465,7 +465,14 @@ bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed
 
     // Write extra
     write<BIGEND>(*output,(char)0x00);
+#ifdef _MSC_VER  
+	#pragma warning (push)  
+	#pragma warning (disable : 4310 )  // suppress the warning for 0xff being truncated to 0x7f (max value of a signed char)
+#endif  
     write<BIGEND>(*output,(char)0xff);
+#ifdef _MSC_VER  
+	#pragma warning (pop)  
+#endif  
 
     // success
     return true;
