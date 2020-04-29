@@ -451,6 +451,10 @@ public:
         Py_INCREF(Py_None);
         return Py_None;
     }
+
+    %feature("autodoc");
+    %feature("docstring","Workaround to get the address to the ptr to help with interop python binding");
+    unsigned long ptr() const { return (unsigned long)(void*)self; }
 }
 
 %extend ParticlesInfo {

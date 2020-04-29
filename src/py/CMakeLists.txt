@@ -31,51 +31,31 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
+find_package(SWIG)
+if (SWIG_FOUND)
+include(${SWIG_USE_FILE})
 
+set_source_files_properties(partio.i PROPERTIES CPLUSPLUS ON)
+set_source_files_properties(partio.i PROPERTIES SWIG_FLAGS "-includeall")
 
-FIND_PACKAGE(SWIG)
-IF(SWIG_FOUND) 
+swig_add_library(partio_mod LANGUAGE python SOURCES partio.i)
+# We already have a target called "partio" so we call the python module
+# "partio_mod" and set the output name so that we get _partio.so.
+set_target_properties(partio_mod PROPERTIES OUTPUT_NAME partio)
+get_property(swig_files TARGET partio_mod PROPERTY SWIG_SUPPORT_FILES)
 
-FIND_PACKAGE(PythonInterp)
-IF(PythonInterp_FOUND)
+target_include_directories(
+    partio_mod
+    PRIVATE
+        ${PYTHON_INCLUDE_DIRS}
+        ${CMAKE_SOURCE_DIR}/src/lib
+)
+target_link_libraries(partio_mod PRIVATE ${PYTHON_LIBRARIES} partio)
 
-INCLUDE(${SWIG_USE_FILE})
+set(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
 
-# Workaround to find python2/3 until we can use find_package(Python2) / find_package(Python3)
-# with newer versions of cmake.
-EXECUTE_PROCESS(COMMAND
-    ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig as sc; print(sc.get_config_var('INCLUDEPY'))"
-    OUTPUT_VARIABLE PYTHON_INCLUDE_PATH OUTPUT_STRIP_TRAILING_WHITESPACE)
+install(TARGETS partio_mod DESTINATION ${PYTHON_DEST})
+install(FILES partio.i DESTINATION ${CMAKE_INSTALL_DATADIR}/swig)
+install(FILES ${swig_files} DESTINATION ${PYTHON_DEST})
 
-EXECUTE_PROCESS(COMMAND
-    ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig as sc; print(sc.get_config_var('LIBDIR'))"
-    OUTPUT_VARIABLE PYTHON_LIBRARY_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-EXECUTE_PROCESS(COMMAND
-    ${PYTHON_EXECUTABLE} -c "import distutils.sysconfig as sc; print(sc.get_config_var('LDLIBRARY'))"
-    OUTPUT_VARIABLE PYTHON_LIBRARY OUTPUT_STRIP_TRAILING_WHITESPACE)
-
-SET(PYTHON_LIBRARIES ${PYTHON_LIBRARY_DIR}/${PYTHON_LIBRARY})
-
-INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
-INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
-LINK_DIRECTORIES(${CMAKE_BINARY_DIR}/src/lib)
-
-SET(CMAKE_SWIG_FLAGS "")
-
-# setup output path
-SET(LIBRARY_OUTPUT_PATH ${PROJECT_BINARY_DIR}/py)
-SET(CMAKE_SWIG_OUTDIR ${PROJECT_BINARY_DIR}/py)
-
-SET_SOURCE_FILES_PROPERTIES(partio.i PROPERTIES CPLUSPLUS ON)
-SET_SOURCE_FILES_PROPERTIES(partio.i PROPERTIES SWIG_FLAGS "-includeall")
-SWIG_ADD_LIBRARY(partio LANGUAGE python SOURCES partio.i)
-SWIG_LINK_LIBRARIES(partio ${PYTHON_LIBRARIES} partio)
-
-SET(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
-INSTALL(TARGETS _partio DESTINATION ${PYTHON_DEST})
-INSTALL(FILES ${CMAKE_BINARY_DIR}/${outdir}/py/partio.py DESTINATION ${PYTHON_DEST})
-INSTALL(FILES partio.i DESTINATION ${CMAKE_INSTALL_DATADIR}/swig)
-
-ENDIF(PythonInterp_FOUND)
-ENDIF(SWIG_FOUND)
+endif(SWIG_FOUND)
