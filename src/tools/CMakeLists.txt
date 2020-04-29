@@ -34,31 +34,33 @@
 include_directories(${CMAKE_SOURCE_DIR}/src/lib)
 link_directories(${CMAKE_BINARY_DIR}/src/lib)
 
-IF(GLUT_FOUND AND OPENGL_FOUND)
-    INCLUDE_DIRECTORIES(${GLUT_INCLUDE_DIR} ${OPENGL_INCLUDE_DIR})
-    ADD_EXECUTABLE(partview partview.cpp)
-    target_link_libraries(partview ${PARTIO_LIBRARIES} ${GLUT_LIBRARY} ${OPENGL_LIBRARY})
+if (GLUT_FOUND AND OPENGL_FOUND)
+    add_executable(partview partview.cpp)
+    target_link_libraries(
+        partview
+        PRIVATE
+        ${PARTIO_LIBRARIES}
+        GLUT::GLUT
+        OpenGL::OpenGL
+        OpenGL::GLU
+    )
     install(TARGETS partview DESTINATION ${CMAKE_INSTALL_BINDIR})
-ENDIF(GLUT_FOUND AND OPENGL_FOUND)
+endif()
 
-ADD_EXECUTABLE(partinfo partinfo.cpp)
+add_executable(partinfo partinfo.cpp)
 target_link_libraries(partinfo ${PARTIO_LIBRARIES})
 
-ADD_EXECUTABLE(partconvert partconvert.cpp)
+add_executable(partconvert partconvert.cpp)
 target_link_libraries(partconvert ${PARTIO_LIBRARIES})
 
-ADD_EXECUTABLE(partattr partattr.cpp)
+add_executable(partattr partattr.cpp)
 target_link_libraries(partattr ${PARTIO_LIBRARIES})
 
 install(TARGETS partattr partconvert partinfo DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(PROGRAMS partedit.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partedit)
-
 install(PROGRAMS partjson.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partjson)
-
 install(PROGRAMS partinspect.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partinspect)
 
-EXECUTE_PROCESS(COMMAND python -c "import sys;print('%s.%s'%sys.version_info[0:2])"
-                OUTPUT_VARIABLE PYTHON_VERSION OUTPUT_STRIP_TRAILING_WHITESPACE)
-SET(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION}/site-packages" )
-INSTALL(FILES partedit.py partjson.py partinspect.py DESTINATION ${PYTHON_DEST})
+set(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
+install(FILES partedit.py partjson.py partinspect.py DESTINATION ${PYTHON_DEST})

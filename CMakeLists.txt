@@ -31,80 +31,93 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-CMAKE_MINIMUM_REQUIRED( VERSION 3.8.0 )
-SET( CMAKE_SKIP_RPATH TRUE )
+cmake_minimum_required(VERSION 3.15.0)
+project(partio LANGUAGES CXX)
 
-## project name & version
-PROJECT(partio LANGUAGES CXX VERSION 1.5.2)
-
-option(GTEST_ENABLED "Enable GTest for tests" false)
+option(BUILD_SHARED_LIBS "Enabled shared libraries" ON)
+option(GTEST_ENABLED "Enable GTest for tests" OFF)
 
 # Enable C++11
-SET(CMAKE_CXX_STANDARD 11)
-SET(CMAKE_CXX_STANDARD_REQUIRED YES)
-SET(CMAKE_CXX_EXTENSIONS NO)
+if (DEFINED ENV{CXXFLAGS_STD})
+    set(CXXFLAGS_STD $ENV{CXXFLAGS_STD})
+else()
+    set(CXXFLAGS_STD "c++11")
+endif()
+if (${CXXFLAGS_STD} STREQUAL "c++17")
+    set(CMAKE_CXX_STANDARD 17)
+elseif (${CXXFLAGS_STD} STREQUAL "c++14")
+    set(CMAKE_CXX_STANDARD 14)
+else()
+    set(CMAKE_CXX_STANDARD 11)
+endif()
+
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(THREADS_PREFER_PTHREAD_FLAG OFF)
+set(CMAKE_CXX_EXTENSIONS OFF)
+set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS ON)
+set(CMAKE_THREAD_PREFER_PTHREAD ON)
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+set(CMAKE_SKIP_RPATH ON)
+set(CMAKE_INSTALL_MESSAGE LAZY)
 
 ## Setup platform specific helper defines build variants
-IF(WIN32)
-  IF(MSVC)
-    ADD_DEFINITIONS (-DPARTIO_WIN32)
-  ENDIF()
-  ADD_DEFINITIONS (-D_USE_MATH_DEFINES)
-ELSE()
-  ADD_COMPILE_OPTIONS (-Wextra -Wno-unused-parameter)
-ENDIF()
-IF(APPLE)
-  set (CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
-ENDIF()
+if (WIN32)
+    if (MSVC)
+        add_definitions(-DPARTIO_WIN32)
+    endif()
+    add_definitions(-D_USE_MATH_DEFINES)
+else()
+    add_compile_options(-Wextra -Wno-unused-parameter)
+endif()
 
-## Choose build options
-# Disney specific method of choosing variant
-IF("$ENV{FLAVOR}" STREQUAL "optimize")
-    SET(CMAKE_BUILD_TYPE "Release" CACHE STRING "type of build" FORCE)
-ENDIF("$ENV{FLAVOR}" STREQUAL "optimize")
-IF("$ENV{FLAVOR}" STREQUAL "debug")
-    SET(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
-ENDIF("$ENV{FLAVOR}" STREQUAL "debug")
-# Set to release if nothing else defined
-IF(NOT CMAKE_BUILD_TYPE)
-  SET(CMAKE_BUILD_TYPE "Release" CACHE STRING
-      "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel."
-      FORCE)
-ENDIF(NOT CMAKE_BUILD_TYPE)
+if (APPLE)
+  set(CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
+endif()
+
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    # Detect the build type from the $FLAVOR environment variable
+    # Default to optimized Release builds when unspecified.
+    if ("$ENV{FLAVOR}" MATCHES "debug")
+        set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "type of build" FORCE)
+    elseif ("$ENV{FLAVOR}" MATCHES "profile")
+        set(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "type of build" FORCE)
+    else ()
+        set(CMAKE_BUILD_TYPE "Release" CACHE STRING "type of build" FORCE)
+    endif()
+endif()
 
 include(CTest)
 enable_testing()
 
 ## Set install location
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    IF(WIN32)
-        set(VARIANT_DIRECTORY "Windows-x86_64")
-    ELSE()
-        execute_process(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
-    ENDIF()
-    set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}")
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
 include(GNUInstallDirs)
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    if (WIN32)
+        set(VARIANT_DIRECTORY "Windows-x86_64")
+    else()
+        execute_process(COMMAND sh -c "echo `uname`-`uname -r | cut -d'-' -f1`-`uname -m`" OUTPUT_VARIABLE VARIANT_DIRECTORY OUTPUT_STRIP_TRAILING_WHITESPACE)
+    endif()
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/${VARIANT_DIRECTORY}")
+endif()
 
 # Prefer libglvnd for OpenGL
 set(OpenGL_GL_PREFERENCE GLVND)
 
 ## Search for useful libraries
+find_package(Threads REQUIRED)
 find_package(GLUT REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(PythonInterp REQUIRED)
+find_package(PythonLibs REQUIRED)
 find_package(ZLIB)
-IF(ZLIB_FOUND)
-    ADD_DEFINITIONS (-DPARTIO_USE_ZLIB)
-ELSE(ZLIB_FOUND)
-    SET (ZLIB_LIBRARY "")
-ENDIF(ZLIB_FOUND)
+if (ZLIB_FOUND)
+    add_definitions(-DPARTIO_USE_ZLIB)
+else()
+    set(ZLIB_LIBRARY "")
+endif()
 
-option(BUILD_SHARED_LIBS "Enabled shared libraries" ON)
-
-## Make modules able to see partio library
-# Setup environment variable to link partio
-SET( PARTIO_LIBRARIES partio ${ZLIB_LIBRARY} )
+# Make modules able to see partio library
+set(PARTIO_LIBRARIES partio ${ZLIB_LIBRARY})
 
 if (${GTEST_ENABLED})
     set($GEST_LOCATION "/usr" CACHE STRING "gtest installation prefix")
@@ -114,8 +127,8 @@ if (${GTEST_ENABLED})
 endif()
 
 ## Traverse subdirectories
-ADD_SUBDIRECTORY (src/lib)
-ADD_SUBDIRECTORY (src/tools)
-ADD_SUBDIRECTORY (src/py)
-ADD_SUBDIRECTORY (src/tests)
-ADD_SUBDIRECTORY (src/doc)
+add_subdirectory(src/lib)
+add_subdirectory(src/tools)
+add_subdirectory(src/py)
+add_subdirectory(src/tests)
+add_subdirectory(src/doc)
