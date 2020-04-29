@@ -48,7 +48,7 @@ if (ZLIB_FOUND)
             $<INSTALL_INTERFACE:${ZLIB_INCLUDE_DIR}>
             $<BUILD_INTERFACE:${ZLIB_INCLUDE_DIR}>)
     target_link_libraries(partio PUBLIC ${ZLIB_LIBRARY})
-endif (ZLIB_FOUND)
+endif()
 
 install(TARGETS partio DESTINATION ${CMAKE_INSTALL_LIBDIR})
 

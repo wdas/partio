@@ -42,12 +42,12 @@ else()
     foreach(item testiterator testio testcache testclonecopy testcluster teststr makecircle makeline testkdtree testmerge)
         add_executable(${item} "${item}.cpp")
         target_include_directories(${item} PRIVATE ${GTEST_INCLUDE_PATH})
-        target_link_libraries(${item} ${PARTIO_LIBRARIES} ${GTEST_LIB})
+        target_link_libraries(
+            ${item} ${PARTIO_LIBRARIES} ${GTEST_LIB} Threads::Threads)
         target_compile_definitions(${item} PRIVATE -DPARTIO_DATA_DIR="${PROJECT_SOURCE_DIR}/src/data")
         install(TARGETS ${item} DESTINATION ${CMAKE_INSTALL_PARTIO_TESTDIR})
         add_test(NAME ${item} COMMAND ${item})
     endforeach(item)
 
     install(PROGRAMS testpartjson.py DESTINATION ${CMAKE_INSTALL_PARTIO_TESTDIR} RENAME testpartjson)
-
 endif()
