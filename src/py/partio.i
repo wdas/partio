@@ -363,32 +363,36 @@ public:
         
         if(attr.type==Partio::INT || attr.type==Partio::INDEXEDSTR){
             int* p=$self->dataWrite<int>(attr,particleIndex);
-            for(int i=0;i<size;i++){
-                PyObject* o=PySequence_GetItem(tuple,i);
-                if(PyInt_Check(o)){
-                    p[i]=PyInt_AsLong(o);
-                }else{
+            if (p) {
+                for(int i=0;i<size;i++){
+                    PyObject* o=PySequence_GetItem(tuple,i);
+                    if(PyInt_Check(o)){
+                        p[i]=PyInt_AsLong(o);
+                    }else{
+                        Py_XDECREF(o);
+                        PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
+                        return NULL;
+                    }
                     Py_XDECREF(o);
-                    PyErr_SetString(PyExc_ValueError,"Expecting a sequence of ints");
-                    return NULL;
                 }
-                Py_XDECREF(o);
             }
         }else if(attr.type==Partio::FLOAT || attr.type==Partio::VECTOR){
             float* p=$self->dataWrite<float>(attr,particleIndex);
-            for(int i=0;i<size;i++){
-                PyObject* o=PySequence_GetItem(tuple,i);
-                //fprintf(stderr,"checking %d\n",i);
-                if(PyFloat_Check(o)){
-                    p[i]=PyFloat_AsDouble(o);
-                }else if(PyInt_Check(o)){
-                    p[i]=(float)PyInt_AsLong(o);
-                }else{
+            if (p) {
+                for(int i=0;i<size;i++){
+                    PyObject* o=PySequence_GetItem(tuple,i);
+                    //fprintf(stderr,"checking %d\n",i);
+                    if(PyFloat_Check(o)){
+                        p[i]=PyFloat_AsDouble(o);
+                    }else if(PyInt_Check(o)){
+                        p[i]=(float)PyInt_AsLong(o);
+                    }else{
+                        Py_XDECREF(o);
+                        PyErr_SetString(PyExc_ValueError,"Expecting a sequence of floats or ints");
+                        return NULL;
+                    }
                     Py_XDECREF(o);
-                    PyErr_SetString(PyExc_ValueError,"Expecting a sequence of floats or ints");
-                    return NULL;
                 }
-                Py_XDECREF(o);
             }
         }else{
             PyErr_SetString(PyExc_ValueError,"Internal error: invalid attribute type");
