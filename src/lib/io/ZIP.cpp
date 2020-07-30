@@ -97,6 +97,10 @@ struct GZipFileHeader
 
     bool Read(std::istream& istream)
     {Read_Primitive(istream,magic0);
+    if (istream.eof() || istream.fail() || istream.bad()) {
+        std::cerr << "Bad file attempting to read header" << std::endl;
+        return false;
+    }
     Read_Primitive(istream,magic1);
     if(magic0 != 0x1f || magic1 != 0x8b){//std::cerr<<"gzip: did not find gzip magic 0x1f 0x8b"<<std::endl;
         return false;}

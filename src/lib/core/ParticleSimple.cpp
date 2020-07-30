@@ -335,6 +335,12 @@ void* ParticlesSimple::
 dataInternal(const ParticleAttribute& attribute,const ParticleIndex particleIndex) const
 {
     assert(attribute.attributeIndex>=0 && attribute.attributeIndex<(int)attributes.size());
+    if (particleIndex >= (ParticleIndex)numParticles()) {
+        std::cerr << "Invalid attempt to set particle value on index "
+                  << particleIndex << " in data with " << numParticles()
+                  << " particles." << std::endl;
+        return nullptr;
+    }
     return attributeData[attribute.attributeIndex]+attributeStrides[attribute.attributeIndex]*particleIndex;
 }
 
