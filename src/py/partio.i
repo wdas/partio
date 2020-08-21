@@ -36,6 +36,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 %module partio
 %include "std_string.i"
+%include "std_map.i"
 
 %{
 #include <Partio.h>
@@ -581,9 +582,15 @@ ParticlesDataMutable* computeClustering(ParticlesDataMutable* particles,const in
 %feature("docstring","Merge two particle sets");
 void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier=std::string());
 
+%template(attrNameMap) std::map<std::string, std::string>;
+
+%feature("autodoc");
+%feature("docstring","Clone a particle set's attribute schema");
+ParticlesDataMutable* cloneSchema(const ParticlesData& other, const std::map<std::string, std::string>* attrNameMap);
+
 %feature("autodoc");
 %feature("docstring","Clone a particle set");
-ParticlesDataMutable* clone(const ParticlesData& other, bool particles);
+ParticlesDataMutable* clone(const ParticlesData& other, bool particles, const std::map<std::string, std::string>* attrNameMap);
 
 %feature("autodoc");
 %feature("docstring","Return string name of given attribute type");
