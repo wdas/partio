@@ -282,12 +282,14 @@ ParticlesDataMutable* createInterleave();
 
 //! Clone a ParticlesData instance into a new ParticlesDataMutable instance.
 //! This does *not* copy data, it only copies the attribute schema.
-ParticlesDataMutable* cloneSchema(const ParticlesData&);
+//! If attrNameMap is provided, it is used to rename attributes during cloning.
+ParticlesDataMutable* cloneSchema(const ParticlesData&, const std::map<std::string, std::string>* attrNameMap = nullptr);
 
 //! Copy a ParticlesData instance into a new ParticlesDataMutable instance.
 //! clone() copies the detail attributes and particle data by default.
 //! To copy only the detail attributes, pass particles=false.
-ParticlesDataMutable* clone(const ParticlesData&, bool particles=true);
+//! If attrNameMap is provided, it is used to rename attributes during cloning.
+ParticlesDataMutable* clone(const ParticlesData&, bool particles=true, const std::map<std::string, std::string>* attrNameMap = nullptr);
 
 //! Provides read/write access to a particle set stored in a file
 //! freed with p->release()

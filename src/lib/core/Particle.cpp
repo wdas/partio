@@ -74,29 +74,38 @@ createInterleave()
     return new ParticlesSimpleInterleave;
 }
 
+const std::string getMappedName(const std::string& input, const std::map<std::string, std::string>* attrNameMap)
+{
+    if (attrNameMap) {
+        auto it = attrNameMap->find(input);
+        if (it != attrNameMap->end())
+            return it->second;
+    }
+    return input;
+}
 
 ParticlesDataMutable*
-cloneSchema(const ParticlesData& other)
+cloneSchema(const ParticlesData& other, const std::map<std::string, std::string>* attrNameMap)
 {
     ParticlesDataMutable* p = create();
 
     FixedAttribute detail;
     for(int i=0;i<other.numFixedAttributes();++i) {
         other.fixedAttributeInfo(i,detail);
-        p->addFixedAttribute(detail.name.c_str(), detail.type, detail.count);
+        p->addFixedAttribute(getMappedName(detail.name, attrNameMap).c_str(), detail.type, detail.count);
     }
 
     ParticleAttribute attr;
     for(int j=0;j<other.numAttributes();++j) {
         other.attributeInfo(j,attr);
-        p->addAttribute(attr.name.c_str(), attr.type, attr.count);
+        p->addAttribute(getMappedName(attr.name, attrNameMap).c_str(), attr.type, attr.count);
     }
 
     return p;
 }
 
 ParticlesDataMutable*
-clone(const ParticlesData& other, bool particles)
+clone(const ParticlesData& other, bool particles, const std::map<std::string, std::string>* attrNameMap)
 {
     ParticlesDataMutable* p = create();
     // Fixed attributes
@@ -105,7 +114,7 @@ clone(const ParticlesData& other, bool particles)
         other.fixedAttributeInfo(i, srcFixedAttr);
 
         dstFixedAttr = p->addFixedAttribute(
-            srcFixedAttr.name.c_str(), srcFixedAttr.type, srcFixedAttr.count);
+            getMappedName(srcFixedAttr.name, attrNameMap).c_str(), srcFixedAttr.type, srcFixedAttr.count);
         assert(srcFixedAttr.type == dstFixedAttr.type);
         assert(srcFixedAttr.count == dstFixedAttr.count);
         // Register indexed strings
@@ -144,7 +153,7 @@ clone(const ParticlesData& other, bool particles)
             }
         }
         size_t size = Partio::TypeSize(srcAttr.type) * srcAttr.count;
-        dstAttr = p->addAttribute(srcAttr.name.c_str(), srcAttr.type, srcAttr.count);
+        dstAttr = p->addAttribute(getMappedName(srcAttr.name, attrNameMap).c_str(), srcAttr.type, srcAttr.count);
 
         for (Partio::ParticleIndex j = 0; j < numParticles; ++j) {
             const void *src = other.data<void>(srcAttr, j);
