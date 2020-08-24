@@ -586,11 +586,11 @@ void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::st
 
 %feature("autodoc");
 %feature("docstring","Clone a particle set's attribute schema");
-ParticlesDataMutable* cloneSchema(const ParticlesData& other, const std::map<std::string, std::string>* attrNameMap);
+ParticlesDataMutable* cloneSchema(const ParticlesData& other, const std::map<std::string, std::string>* attrNameMap=nullptr);
 
 %feature("autodoc");
 %feature("docstring","Clone a particle set");
-ParticlesDataMutable* clone(const ParticlesData& other, bool particles, const std::map<std::string, std::string>* attrNameMap);
+ParticlesDataMutable* clone(const ParticlesData& other, bool particles, const std::map<std::string, std::string>* attrNameMap=nullptr);
 
 %feature("autodoc");
 %feature("docstring","Return string name of given attribute type");
