@@ -1,0 +1,47 @@
+name: C/C++ CI
+
+on:
+  push:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build-linux-unix:
+    strategy:
+      matrix:
+        os: [ubuntu]
+        config: [Debug, Release]
+    name: ${{matrix.os}}-${{matrix.config}}
+    runs-on: ${{matrix.os}}-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: sudo apt update && sudo apt install -y zlib1g-dev freeglut3-dev libgtest-dev
+    - name: CMake configure
+      run: cmake -G "Unix Makefiles" -DPARTIO_GTEST_ENABLED=ON -DCMAKE_BUILD_TYPE=${{matrix.config}} .
+    - name: Build
+      run: cmake --build .
+
+  build-windows:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        architecture: [x64]
+        config: [Debug, Release]
+    name: windows-${{matrix.architecture}}-${{matrix.config}}
+    
+    steps:
+    - uses: actions/checkout@v2
+    - name: Get ZLIB
+      run: vcpkg install zlib:${{matrix.architecture}}-windows
+    - name: Get GLUT
+      run: vcpkg install freeglut:${{matrix.architecture}}-windows
+    - name: Get OpenGL
+      run: vcpkg install opengl:${{matrix.architecture}}-windows
+    - name: Get gtest
+      run: vcpkg install gtest:${{matrix.architecture}}-windows
+    - name: CMake configure
+      run: cmake "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DBUILD_SHARED_LIBS=OFF -DPARTIO_GTEST_ENABLED=ON -A ${{matrix.architecture}} .
+    - name: Build
+      run: cmake --build . --config ${{matrix.config}}
