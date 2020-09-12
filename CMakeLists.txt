@@ -126,7 +126,7 @@ endif()
 set(PARTIO_LIBRARIES partio ${ZLIB_LIBRARY})
 
 if (${PARTIO_GTEST_ENABLED})
-    set($GEST_LOCATION "/usr" CACHE STRING "gtest installation prefix")
+    set(GTEST_LOCATION "/usr" CACHE STRING "gtest installation prefix")
     set(GTEST_INCLUDE_PATH ${GTEST_LOCATION}/include)
     set(GTEST_LIBDIR ${CMAKE_INSTALL_LIBDIR})
     set(GTEST_LINK_PATH ${GTEST_LOCATION}/${GTEST_LIBDIR} CACHE STRING "gtest library directory")

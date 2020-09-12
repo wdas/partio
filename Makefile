@@ -26,7 +26,7 @@ CMAKE_FLAGS += -DCMAKE_INSTALL_PREFIX=$(prefix)
 # gtest location: RP_gtest=<path>
 ifdef RP_gtest
     CMAKE_FLAGS += -DGTEST_LOCATION=$(RP_gtest)
-    CMAKE_FLAGS += -DGTEST_ENABLED=1
+    CMAKE_FLAGS += -DPARTIO_GTEST_ENABLED=1
 endif
 
 # Extra cmake flags: CMAKE_EXTRA_FLAGS=<flags>
