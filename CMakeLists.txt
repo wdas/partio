@@ -35,7 +35,13 @@ cmake_minimum_required(VERSION 3.15.0)
 project(partio LANGUAGES CXX)
 
 option(BUILD_SHARED_LIBS "Enabled shared libraries" ON)
-option(GTEST_ENABLED "Enable GTest for tests" OFF)
+option(PARTIO_GTEST_ENABLED "Enable GTest for tests" OFF)
+
+if(WIN32)
+    option(PARTIO_USE_GLVND "Use GLVND for OpenGL" OFF)
+else()
+    option(PARTIO_USE_GLVND "Use GLVND for OpenGL" ON)
+endif()
 
 # Enable C++11
 if (DEFINED ENV{CXXFLAGS_STD})
@@ -119,13 +125,13 @@ endif()
 # Make modules able to see partio library
 set(PARTIO_LIBRARIES partio ${ZLIB_LIBRARY})
 
-if (${GTEST_ENABLED})
+if (${PARTIO_GTEST_ENABLED})
     set($GEST_LOCATION "/usr" CACHE STRING "gtest installation prefix")
     set(GTEST_INCLUDE_PATH ${GTEST_LOCATION}/include)
     set(GTEST_LIBDIR ${CMAKE_INSTALL_LIBDIR})
     set(GTEST_LINK_PATH ${GTEST_LOCATION}/${GTEST_LIBDIR} CACHE STRING "gtest library directory")
 endif()
-
+ 
 ## Traverse subdirectories
 add_subdirectory(src/lib)
 add_subdirectory(src/tools)

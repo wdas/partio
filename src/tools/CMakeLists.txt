@@ -41,9 +41,14 @@ if (GLUT_FOUND AND OPENGL_FOUND)
         PRIVATE
         ${PARTIO_LIBRARIES}
         GLUT::GLUT
-        OpenGL::OpenGL
         OpenGL::GLU
     )
+    if(PARTIO_USE_GLVND)
+        target_link_libraries(partview PRIVATE OpenGL::OpenGL)
+    else()
+        target_link_libraries(partview PRIVATE OpenGL::GL)
+    endif()
+    
     install(TARGETS partview DESTINATION ${CMAKE_INSTALL_BINDIR})
 endif()
 
