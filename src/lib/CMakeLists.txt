@@ -34,7 +34,12 @@
 file(GLOB io_cpp "io/*.cpp")
 file(GLOB core_cpp "core/*.cpp")
 
-add_library(partio ${io_cpp} ${core_cpp})
+if(PARTIO_BUILD_SHARED_LIBS)
+    set(PARTIO_LIBRARY_TYPE SHARED)
+else()
+    set(PARTIO_LIBRARY_TYPE STATIC)
+endif()
+add_library(partio ${PARTIO_LIBRARY_TYPE} ${io_cpp} ${core_cpp})
 set_target_properties(partio PROPERTIES OUTPUT_NAME partio POSITION_INDEPENDENT_CODE ON)
 
 target_include_directories(partio

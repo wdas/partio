@@ -42,6 +42,6 @@ jobs:
     - name: Get gtest
       run: vcpkg install gtest:${{matrix.architecture}}-windows
     - name: CMake configure
-      run: cmake "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DBUILD_SHARED_LIBS=OFF -DPARTIO_GTEST_ENABLED=ON -A ${{matrix.architecture}} .
+      run: cmake "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DPARTIO_GTEST_ENABLED=ON -A ${{matrix.architecture}} .
     - name: Build
       run: cmake --build . --config ${{matrix.config}}
