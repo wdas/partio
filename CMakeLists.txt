@@ -34,13 +34,14 @@
 cmake_minimum_required(VERSION 3.15.0)
 project(partio LANGUAGES CXX)
 
-option(BUILD_SHARED_LIBS "Enabled shared libraries" ON)
 option(PARTIO_GTEST_ENABLED "Enable GTest for tests" OFF)
 
 if(WIN32)
     option(PARTIO_USE_GLVND "Use GLVND for OpenGL" OFF)
+    option(PARTIO_BUILD_SHARED_LIBS "Enabled shared libraries" OFF)
 else()
     option(PARTIO_USE_GLVND "Use GLVND for OpenGL" ON)
+    option(PARTIO_BUILD_SHARED_LIBS "Enabled shared libraries" ON)
 endif()
 
 # Enable C++11
