@@ -33,7 +33,6 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-
 #include <iostream>
 #include <cmath>
 #include <string>
@@ -43,6 +42,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <sys/stat.h>
 #if defined(__DARWIN__) || defined(__APPLE__)
 #include <GLUT/glut.h>
+#elif _WIN32 // is safer to use freeglut in windows
+#include <GL/freeglut.h>
 #else
 #include <GL/glut.h>
 #endif
@@ -54,11 +55,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 using namespace Partio;
 using namespace std;
 
-
 // global vars
-ParticlesData* particles;
-ParticlesData* connectivity;
-
+ParticlesData *particles;
+ParticlesData *connectivity;
 
 Camera camera;
 ParticleAttribute positionAttr;
@@ -82,7 +81,7 @@ bool frameForwardPressed;
 bool frameBackwardPressed;
 bool brightnessUpPressed;
 bool brightnessDownPressed;
-bool* keyStates;
+bool *keyStates;
 bool frameMissing;
 bool anyKeyPressed;
 bool colorMissing;
@@ -96,24 +95,15 @@ string lastConnectivityFile;
 
 void restorePerspectiveProjection();
 void setOrthographicProjection();
-void renderBitmapString( float x,float y,float z,void *font,char *string);
+void renderBitmapString(float x, float y, float z, void *font, char *string);
 static void render();
-void  reloadParticleFile(int direction);
-static void mouseFunc(int button,int state,int x,int y);
-static void motionFunc(int x,int y);
+void reloadParticleFile(int direction);
+static void mouseFunc(int button, int state, int x, int y);
+static void motionFunc(int x, int y);
 static void processNormalKeys(unsigned char key, int x, int y);
 static void processNormalUpKeys(unsigned char key, int x, int y);
 static void processSpecialKeys(int key, int x, int y);
 static void processSpecialUpKeys(int key, int x, int y);
 void timer();
 
-int main(int argc,char *argv[]);
-
-
-
-
-
-
-
-
-
+int main(int argc, char *argv[]);
