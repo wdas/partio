@@ -35,20 +35,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 This code is partially based on the Gifts/readpdb directory of Autodesk Maya
 */
 
-#include "../Partio.h"
 #include "../core/ParticleHeaders.h"
 namespace PDB{
 #include "pdb.h"
 }
-#include "PartioEndian.h"
-#include "ZIP.h"
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cassert>
-#include <memory>
-#include <string.h>
+#include "io.h"
+
 namespace Partio
 {
 
@@ -91,8 +83,7 @@ string GetString(istream& input,bool& error)
 
 template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
-
-    unique_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
+    unique_ptr<istream> input(io::unzip(filename));
     if(!*input){
         if(errorStream) *errorStream<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
@@ -175,11 +166,7 @@ template<int bits> ParticlesDataMutable* readPDBHelper(const char* filename,cons
 template<int bits>
 bool writePDBHelper(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream)
 {
-    unique_ptr<ostream> output(
-        compressed ? 
-        Gzip_Out(filename,ios::out|ios::binary)
-        :new ofstream(filename,ios::out|ios::binary));
-
+    unique_ptr<ostream> output(io::write(filename, compressed));
     if(!*output){
         if(errorStream) *errorStream<<"Partio Unable to open file "<<filename<<endl;
         return false;
@@ -265,7 +252,7 @@ bool writePDB64(const char* filename,const ParticlesData& p,const bool compresse
 
 ParticlesDataMutable* readPDB(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
-    unique_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
+    unique_ptr<istream> input(io::unzip(filename));
     if(!*input){
         if(errorStream) *errorStream <<"Partio: Unable to open file "<<filename<<endl;
         return 0;

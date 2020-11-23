@@ -37,16 +37,8 @@ Some code for this format  was helped along  by referring to an implementation b
 Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Pictures  2011
 
 */
-
-#include "../Partio.h"
 #include "../core/ParticleHeaders.h"
-#include "PartioEndian.h"
-#include "ZIP.h"
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <memory>
+#include "io.h"
 
 namespace Partio{
 
@@ -92,8 +84,7 @@ typedef struct{
 
 ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly,std::ostream* errorStream){
 
-    unique_ptr<istream> input(new ifstream(filename,ios::in|ios::binary));
-
+    unique_ptr<istream> input(io::read(filename));
     if(!*input){
         if(errorStream) *errorStream << "Partio: Unable to open file " << filename << endl;
         return 0;
@@ -277,10 +268,7 @@ ParticlesDataMutable* readBIN(const char* filename, const bool headersOnly,std::
 
 bool writeBIN(const char* filename,const ParticlesData& p,const bool /*compressed*/,std::ostream* errorStream)
 {
-
-    unique_ptr<ostream> output(
-    new ofstream(filename,ios::out|ios::binary));
-
+    unique_ptr<ostream> output(io::write(filename));
     if (!*output) {
         if(errorStream) *errorStream<<"Partio Unable to open file "<<filename<<endl;
         return false;

@@ -38,15 +38,9 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 
 */
 
-#include "../Partio.h"
 #include "../core/ParticleHeaders.h"
 #include "PartioEndian.h"
-#include "ZIP.h"
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <memory>
+#include "io.h"
 
 namespace Partio{
 
@@ -76,7 +70,7 @@ string readName(istream& input){
 
 ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly,std::ostream* errorStream){
 
-    unique_ptr<istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
+    unique_ptr<istream> input(io::unzip(filename));
     if(!*input){
         if(errorStream) *errorStream  << "Partio: Unable to open file " << filename << std::endl;
         return 0;
@@ -128,11 +122,7 @@ ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly,std::
 }
 
 bool writePDC(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream){
-    unique_ptr<ostream> output(
-        compressed ?
-        Gzip_Out(filename,ios::out|ios::binary)
-        :new std::ofstream(filename,ios::out|ios::binary));
-
+    unique_ptr<ostream> output(io::write(filename, compressed));
     if(!*output){
         if(errorStream) *errorStream << "Partio Unable to open file " << filename << endl;
         return false;

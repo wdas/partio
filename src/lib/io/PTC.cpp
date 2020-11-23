@@ -35,19 +35,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #ifndef _USE_MATH_DEFINES
     #define _USE_MATH_DEFINES
 #endif
-#include <cmath>
-
-#include "../Partio.h"
 #include "../core/ParticleHeaders.h"
 #include "PartioEndian.h"
-#include "ZIP.h"
+#include "io.h"
 
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <string>
+#include <cmath>
 #include <cfloat>
-#include <memory>
 #include <sstream>
 
 namespace Partio
@@ -84,7 +77,7 @@ bool ParseSpec(const string& spec,string& typeName,string& name)
 
 ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
-    unique_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
+    unique_ptr<istream> input(io::unzip(filename));
     if(!*input){
         if(errorStream) *errorStream <<"Partio: Unable to open file "<<filename<<endl;
         return 0;
@@ -238,13 +231,7 @@ ParticlesDataMutable* readPTC(const char* filename,const bool headersOnly,std::o
 
 bool writePTC(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream)
 {
-    //ofstream output(filename,ios::out|ios::binary);
-
-    unique_ptr<ostream> output(
-        compressed ? 
-        Gzip_Out(filename,ios::out|ios::binary)
-        :new ofstream(filename,ios::out|ios::binary));
-
+    unique_ptr<ostream> output(io::write(filename, compressed));
     if(!*output){
         if(errorStream) *errorStream <<"Partio Unable to open file "<<filename<<endl;
         return false;
