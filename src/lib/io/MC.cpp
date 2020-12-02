@@ -37,16 +37,9 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 
 */
 
-#include "../Partio.h"
 #include "../core/ParticleHeaders.h"
 #include "PartioEndian.h" // read/write big-endian file
-#include "ZIP.h" // for zip file
-
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <cassert>
-#include <memory>
+#include "io.h"
 
 namespace Partio
 {
@@ -131,7 +124,7 @@ static const int HEADER_SIZE = 56;
 
 ParticlesDataMutable* readMC(const char* filename, const bool headersOnly,std::ostream* errorStream){
 
-    std::unique_ptr<std::istream> input(Gzip_In(filename,std::ios::in|std::ios::binary));
+    std::unique_ptr<std::istream> input(io::unzip(filename));
     if(!*input){
         if(errorStream) *errorStream << "Partio: Unable to open file " << filename << std::endl;
         return 0;

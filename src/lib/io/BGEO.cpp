@@ -33,18 +33,9 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 
-#include "../Partio.h"
 #include "PartioEndian.h"
 #include "../core/ParticleHeaders.h"
-#include "ZIP.h"
-
-#include <algorithm>
-#include <iostream>
-#include <fstream>
-#include <string>
-#include <memory>
-
-#include <string.h>
+#include "io.h"
 
 namespace Partio
 {
@@ -195,7 +186,7 @@ bool skipPrimitives(int nPoints, int nPrims, int nPrimAttrib, istream* input,std
 
 ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
-    unique_ptr<istream> input(Gzip_In(filename,ios::in|ios::binary));
+    unique_ptr<istream> input(io::unzip(filename));
     if(!*input){
         if(errorStream) *errorStream<<"Partio: Unable to open file "<<filename<<endl;
         return 0;
@@ -310,11 +301,7 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,std::
 
 bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream)
 {
-    unique_ptr<ostream> output(
-        compressed ? 
-        Gzip_Out(filename,ios::out|ios::binary)
-        :new ofstream(filename,ios::out|ios::binary));
-
+    unique_ptr<ostream> output(io::write(filename, compressed));
     if(!*output){
         if(errorStream) *errorStream <<"Partio Unable to open file "<<filename<<endl;
         return false;
