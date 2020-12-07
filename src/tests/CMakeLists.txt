@@ -51,4 +51,3 @@ else()
 
     install(PROGRAMS testpartjson.py DESTINATION ${CMAKE_INSTALL_PARTIO_TESTDIR} RENAME testpartjson)
 endif()
-install(PROGRAMS testpartjson.py DESTINATION ${CMAKE_INSTALL_PARTIO_TESTDIR} RENAME testpartjson)
