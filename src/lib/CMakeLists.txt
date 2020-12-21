@@ -39,8 +39,12 @@ if(PARTIO_BUILD_SHARED_LIBS)
 else()
     set(PARTIO_LIBRARY_TYPE STATIC)
 endif()
+
 add_library(partio ${PARTIO_LIBRARY_TYPE} ${io_cpp} ${core_cpp})
-set_target_properties(partio PROPERTIES OUTPUT_NAME partio POSITION_INDEPENDENT_CODE ON)
+set_target_properties(partio PROPERTIES
+    OUTPUT_NAME partio
+    POSITION_INDEPENDENT_CODE ON
+    SOVERSION ${PARTIO_VERSION_MAJOR})
 
 target_include_directories(partio
     PUBLIC

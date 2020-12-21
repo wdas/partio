@@ -33,6 +33,7 @@
 
 cmake_minimum_required(VERSION 3.15.0)
 project(partio LANGUAGES CXX)
+set(PARTIO_VERSION_MAJOR "1")
 
 option(PARTIO_GTEST_ENABLED "Enable GTest for tests" OFF)
 
