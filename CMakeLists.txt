@@ -33,6 +33,7 @@
 
 cmake_minimum_required(VERSION 3.15.0)
 project(partio LANGUAGES CXX)
+set(PARTIO_VERSION_MAJOR "1")
 
 option(PARTIO_GTEST_ENABLED "Enable GTest for tests" OFF)
 
@@ -48,24 +49,21 @@ endif()
 if (DEFINED ENV{CXXFLAGS_STD})
     set(CXXFLAGS_STD $ENV{CXXFLAGS_STD})
 else()
-    set(CXXFLAGS_STD "c++11")
+    set(CXXFLAGS_STD "c++14")
 endif()
-if (${CXXFLAGS_STD} STREQUAL "c++17")
-    set(CMAKE_CXX_STANDARD 17)
-elseif (${CXXFLAGS_STD} STREQUAL "c++14")
-    set(CMAKE_CXX_STANDARD 14)
-else()
-    set(CMAKE_CXX_STANDARD 11)
+# Transform "c++17" into "17".  "-1" means "rest of the string".
+if (NOT DEFINED WDAS_CXX_STANDARD)
+    string(SUBSTRING "${CXXFLAGS_STD}" 3 -1 WDAS_CXX_STANDARD)
 endif()
 
+set(CMAKE_CXX_STANDARD "${WDAS_CXX_STANDARD}")
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(THREADS_PREFER_PTHREAD_FLAG OFF)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS ON)
+set(CMAKE_INSTALL_MESSAGE LAZY)
+set(CMAKE_SKIP_RPATH ON)
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
-set(CMAKE_SKIP_RPATH ON)
-set(CMAKE_INSTALL_MESSAGE LAZY)
 
 ## Setup platform specific helper defines build variants
 if (WIN32)
