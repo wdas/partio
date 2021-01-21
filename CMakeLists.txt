@@ -37,7 +37,7 @@ set(PARTIO_VERSION_MAJOR "1")
 
 option(PARTIO_GTEST_ENABLED "Enable GTest for tests" OFF)
 
-if(WIN32)
+if(WIN32 OR APPLE)
     option(PARTIO_USE_GLVND "Use GLVND for OpenGL" OFF)
     option(PARTIO_BUILD_SHARED_LIBS "Enabled shared libraries" OFF)
 else()
@@ -77,6 +77,7 @@ endif()
 
 if (APPLE)
   set(CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
+  add_definitions(-DGL_SILENCE_DEPRECATION)
 endif()
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
