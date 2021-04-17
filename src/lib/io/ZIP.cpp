@@ -363,7 +363,7 @@ public:
         process(true);
         deflateEnd(&strm);
         if(header){
-            std::ios::streampos final_position=ostream.tellp();
+            std::streampos final_position=ostream.tellp();
             header->uncompressed_size=uncompressed_size;
             header->crc=crc;
             ostream.seekp(header->header_offset);
@@ -461,9 +461,9 @@ ZipFileWriter::
 ~ZipFileWriter()
 {
     // Write all file headers
-    std::ios::streampos final_position=ostream.tellp();
+    std::streampos final_position=ostream.tellp();
     for(unsigned int i=0;i<files.size();i++){files[i]->Write(ostream,true);delete files[i];}
-    std::ios::streampos central_end=ostream.tellp();
+    std::streampos central_end=ostream.tellp();
     // Write end of central
     Write_Primitive(ostream,(unsigned int)0x06054b50); // end of central
     Write_Primitive(ostream,(unsigned short)0); // this disk number
@@ -512,10 +512,10 @@ Find_And_Read_Central_Header()
     // Find the header
     // NOTE: this assumes the zip file header is the last thing written to file...
     istream.seekg(0,std::ios_base::end);
-    std::ios::streampos end_position=istream.tellg();
+    std::streampos end_position=istream.tellg();
     unsigned int max_comment_size=0xffff; // max size of header
     unsigned int read_size_before_comment=22;
-    std::ios::streamoff read_start=max_comment_size+read_size_before_comment;
+    std::streamoff read_start=max_comment_size+read_size_before_comment;
     if(read_start>end_position) read_start=end_position;
     istream.seekg(end_position-read_start);
     char *buf=new char[static_cast<unsigned int>(read_start)];
