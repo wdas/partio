@@ -11,7 +11,8 @@ jobs:
       matrix:
         os: [ubuntu]
         config: [Debug, Release]
-    name: ${{matrix.os}}-${{matrix.config}}
+        standard: [c++11, c++14, c++17, c++20]
+    name: ${{matrix.os}}-${{matrix.config}}-${{matrix.standard}}
     runs-on: ${{matrix.os}}-latest
 
     steps:
@@ -20,6 +21,8 @@ jobs:
       run: sudo apt update && sudo apt install -y zlib1g-dev freeglut3-dev libgtest-dev
     - name: CMake configure
       run: cmake -G "Unix Makefiles" -DPARTIO_GTEST_ENABLED=ON -DCMAKE_BUILD_TYPE=${{matrix.config}} .
+      env:
+        CXXFLAGS_STD: ${{matrix.standard}}
     - name: Build
       run: cmake --build .
 
@@ -29,7 +32,8 @@ jobs:
       matrix:
         architecture: [x64]
         config: [Debug, Release]
-    name: windows-${{matrix.architecture}}-${{matrix.config}}
+        standard: [c++11, c++14, c++17, c++20]
+    name: windows-${{matrix.architecture}}-${{matrix.config}}-${{matrix.standard}}
     
     steps:
     - uses: actions/checkout@v2
@@ -43,5 +47,7 @@ jobs:
       run: vcpkg install gtest:${{matrix.architecture}}-windows
     - name: CMake configure
       run: cmake "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DPARTIO_GTEST_ENABLED=ON -A ${{matrix.architecture}} .
+      env:
+        CXXFLAGS_STD: ${{matrix.standard}}
     - name: Build
       run: cmake --build . --config ${{matrix.config}}
