@@ -1053,6 +1053,14 @@ class PartEdit(QMainWindow):
 
 
 #----------------------------------------------------------------------------------------
+def styleAppWidgets():
+    """Apply widget styling when available"""
+    try:
+        from minibar.gui import mbWidgetStyling
+    except ImportError:
+        return
+    mbWidgetStyling.styleTheApplication()
+
 #----------------------------------------------------------------------------------------
 def main():
     """ Main """
@@ -1068,8 +1076,7 @@ def main():
 
     # Start up the QApplication
     app = QApplication([])
-    from minibar.gui import mbWidgetStyling
-    mbWidgetStyling.styleTheApplication()
+    styleAppWidgets()
     window = PartEdit()
 
     # Open file if provided
