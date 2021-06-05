@@ -35,6 +35,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 
 %module partio
+
+/* Enable unicode-to-utf-8 autoconversion for unicode text strings */
+%begin %{
+#define SWIG_PYTHON_2_UNICODE
+%}
+
 %include "std_string.i"
 %include "std_map.i"
 
