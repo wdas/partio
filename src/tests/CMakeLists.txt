@@ -49,5 +49,6 @@ else()
         add_test(NAME ${item} COMMAND ${item})
     endforeach(item)
 
+    add_test(NAME testpartjson COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/testpartjson.py)
     install(PROGRAMS testpartjson.py DESTINATION ${CMAKE_INSTALL_PARTIO_TESTDIR} RENAME testpartjson)
 endif()
