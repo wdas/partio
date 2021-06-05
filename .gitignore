@@ -1,11 +1,9 @@
 /.sconsign.dblite
 /build
 /bin
-/CMakeFiles
 /src/doc/doc
 /Makefile.config
 /Darwin-*
-/kbuild.*
 /*.kdev*
 /Linux-*
 *.o
@@ -21,4 +19,5 @@
 *.out
 *.log
 *~
+__pycache__
 workspace.mel
