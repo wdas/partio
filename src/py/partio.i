@@ -35,6 +35,12 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 
 %module partio
+
+/* Enable unicode-to-utf-8 autoconversion for unicode text strings */
+%begin %{
+#define SWIG_PYTHON_2_UNICODE
+%}
+
 %include "std_string.i"
 %include "std_map.i"
 
@@ -582,7 +588,41 @@ ParticlesDataMutable* computeClustering(ParticlesDataMutable* particles,const in
 %feature("docstring","Merge two particle sets");
 void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier=std::string());
 
-%template(attrNameMap) std::map<std::string, std::string>;
+/*
+ * We do NOT want swig to wrap partio's attrNameMap std::map<std::string, std::string>.
+ * because it causes conflicts inside of Houdini where its swig APIs are
+ * designed to return Python dictionaries for std::map<std::string, std::string>.
+ * We accomplish this by defining our own typemap and using an empty template.
+
+ * From the swig docs: http://www.swig.org/Doc3.0/SWIGDocumentation.html#SWIGPlus_nn30
+ *
+ * Occasionally, you may need to tell SWIG about base classes that are defined
+ * by templates, but which aren't supposed to be wrapped. Since SWIG is not
+ * able to automatically instantiate templates for this purpose, you must do
+ * it manually. To do this, simply use the empty template instantiation, that
+ * is, %template with no name.
+ */
+%template() std::map<std::string, std::string>;
+
+/* typemap to convert Python arguments into an attrNameMap std::map pointer. */
+%typemap(in) const std::map<std::string, std::string> * attrNameMap (std::map<std::string, std::string> temp) {
+    PyObject *key = nullptr;
+    PyObject *value = nullptr;
+    Py_ssize_t pos = 0;
+
+    if (PyDict_Check($input)) {
+
+        while (PyDict_Next($input, &pos, &key, &value)) {
+            std::string key_str = PyString_AsString(key);
+            std::string value_str = PyString_AsString(value);
+            temp[std::move(key_str)] = std::move(value_str);
+        }
+
+        $1 = &temp;
+    } else {
+        $1 = nullptr;
+    }
+}
 
 %feature("autodoc");
 %feature("docstring","Clone a particle set's attribute schema");
