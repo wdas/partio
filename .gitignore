@@ -22,3 +22,5 @@
 *.log
 *~
 workspace.mel
+.vscode/
+build_partio/
