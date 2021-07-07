@@ -53,7 +53,6 @@ doc: $(builddir)/stamp
 
 $(builddir)/stamp:
 	mkdir -p $(builddir)
-	$(info CMAKE_FLAGS is $(CMAKE_FLAGS))
 	cd $(builddir) && cmake $(CMAKE_FLAGS) ../..
 	touch $@
 
