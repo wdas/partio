@@ -1,62 +1,156 @@
 #!/usr/bin/env python
 # -*- coding:utf-8 -*-
 
-from setuptools import setup
-from cmake_build_extension import BuildExtension, CMakeExtension
+from setuptools import setup, Extension
+from setuptools.command.install_lib import install_lib
+from setuptools.command.build_ext import build_ext
+
+# from cmake_build_extension import BuildExtension, CMakeExtension
 import shutil
-import subprocess
+import platform
+
 from pathlib import Path
 import os
+import subprocess
+import shutil
+import sys
+from distutils.sysconfig import get_python_inc, get_config_var
 
 
-# create the output dirs
-os.makedirs("build_partio/src/py", exist_ok=True)
+class CMakeExtension(Extension):
+    def __init__(
+        self,
+        name,
+        source_dir: str = str(Path(".").absolute()),
+        cmake_configure_options=[],
+    ):
+        super().__init__(name=name, sources=[])
+        self.cmake_configure_options = cmake_configure_options
+        self.cmake_build_type = "Release"
+        self.source_dir = source_dir
 
-PARTIO_EXT =  CMakeExtension(
+
+class BuildCMakeExtension(build_ext):
+    def run(self):
+        cmake_extensions = [e for e in self.extensions if isinstance(e, CMakeExtension)]
+        if len(cmake_extensions) == 0:
+            raise ValueError("No CMakeExtension objects found")
+
+        # Check that CMake is installed
+        if shutil.which("cmake") is None:
+            raise RuntimeError("Required command 'cmake' not found")
+
+        for ext in cmake_extensions:
+            self.build_extension(ext)
+
+    def build_extension(self, ext: Extension):
+        # CMake configure arguments
+        configure_args = [
+            f"-DCMAKE_BUILD_TYPE={ext.cmake_build_type}",
+            # "-GNinja",
+            f"-DCMAKE_INSTALL_PREFIX:PATH=build/install",
+        ]
+        build_args = ["--config", ext.cmake_build_type]
+        # Extend the configure arguments with those passed from the extension
+        configure_args += ext.cmake_configure_options
+
+        if platform.system() == "Windows":
+            configure_args += []
+        elif platform.system() in {"Linux", "Darwin"}:
+            configure_args += []
+        else:
+            raise RuntimeError(f"Unsupported '{platform.system()}' platform")
+
+        # Get the absolute path to the build folder
+        build_folder = str(Path(".").absolute() / f"{self.build_temp}_{ext.name}")
+
+        # Make sure that the build folder exists
+        Path(build_folder).mkdir(exist_ok=True, parents=True)
+
+        # 1. Compose CMake configure command
+        configure_command = [
+            "cmake",
+            "-S",
+            ext.source_dir,
+            "-B",
+            build_folder,
+        ] + configure_args
+
+        # 2. Compose CMake build command
+        build_command = ["cmake", "--build", build_folder] + build_args
+
+        # 3. Compose CMake install command
+        install_command = ["cmake", "--install", build_folder]
+
+        print("")
+        print("==> Configuring:")
+        print(f"$ {' '.join(configure_command)}")
+        print("")
+        print("==> Building:")
+        print(f"$ {' '.join(build_command)}")
+        print("")
+        print("==> Installing:")
+        print(f"$ {' '.join(install_command)}")
+        print("")
+
+        # Call CMake
+        subprocess.check_call(configure_command)
+        subprocess.check_call(build_command)
+        subprocess.check_call(install_command)
+
+
+PARTIO_EXT = CMakeExtension(
     name="partio",
-    install_prefix="partio",
-    source_dir=".",
     cmake_configure_options=[
+        f"-DPYTHON_INCLUDE_DIR={get_python_inc()}",
+        f"-DPYTHON_LIBRARY={get_config_var('LIBDIR')} ",
+        f"-DPYTHON_EXECUTABLE={sys.executable} ",
     ],
 )
 
-class BuildPartioExtension(BuildExtension):
-    def __init__(self, *args, **kwars) -> None:
-        super().__init__(*args, **kwars)
 
-    def run(self) -> None:
-        super().run()
-        if shutil.which("patchelf") is None:
-            raise RuntimeError("Required command 'patchelf' not found")
+class InstallLibs(install_lib):
+    def run(self):
+        self.announce("+++ InstallLibs", level=3)
+        self.skip_build = True
 
-    def build_extension(self, ext: CMakeExtension) -> None:
-        self.build_temp = "build"
-        super().build_extension(ext)
-        # Get the absolute path to the build folder
-        build_folder = str(Path(".").absolute() / f"{self.build_temp}_{ext.name}")
-        shared_object_path = os.path.join(build_folder, "src", "py", "_partio.so")
-        # directly set the path of the shared object into the shared object created from swig
-        patch_command = [
-            "patchelf", 
-            "--replace-needed", 
-            "libpartio.so.1", 
-            f"{build_folder}/src/lib/libpartio.so.1", 
-            shared_object_path
+        # Everything under self.build_dir will get moved into site-packages
+        # so move all things we want installed there
+        lib_dir = self.build_dir
+        write_dir = Path(lib_dir) / "partio"
+
+        os.makedirs(write_dir, exist_ok=True)
+
+        # copy equired files
+        python_version = f"python{sys.version_info[0]}.{sys.version_info[1]}"
+        base_path = Path.cwd() / "build" / "install" / "lib64"
+        to_install = [
+            base_path / "libpartio.so.1",
+            base_path / python_version / "site-packages" / "partio.py",
+            base_path / python_version / "site-packages" / "_partio.so",
         ]
-        print("Patching shared obbject to directly include the libpartio file")
-        print(f" => {patch_command}")
-        subprocess.check_call(patch_command)
+        for lib in to_install:
+            filename = Path(lib).name
+            target = str(write_dir / filename)
+            if os.path.isfile(target):
+                os.remove(target)
+            shutil.move(str(lib), str(write_dir))
+
+        # create init file
+        f = open(str(write_dir / "__init__.py"), "w")
+        f.write("from .partio import *")
+        f.close()
+        self.announce("+++ custom done", level=3)
+        super().run()
+
 
 setup(
-    name='partio',
-    description='A Python wrapper for partio',
+    name="partio",
+    description="A Python wrapper for partio",
+    version="1.0.0",
     packages=[],
-    package_dir={'': 'build_partio/src/py'},
     ext_modules=[PARTIO_EXT],
-    cmdclass={
-        'build_ext': BuildPartioExtension
-    },
-    install_requires=["cmake-build-extension"],
-    python_requires='>=3.4',
-
+    cmdclass={"build_ext": BuildCMakeExtension, "install_lib": InstallLibs,},
+    python_requires=">=3.4",
 )
+

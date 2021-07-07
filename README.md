@@ -1,13 +1,11 @@
-[Partio](https://wdas.github.io/partio) - A library for particle IO and manipulation
-=============================================================================================================
+# [Partio](https://wdas.github.io/partio) - A library for particle IO and manipulation
 
 This is the initial source code release of partio a tool we used for particle
-reading/writing.  It started out as an abstraction for the commonalities in
+reading/writing. It started out as an abstraction for the commonalities in
 particle models (i.e. accessing many attributes associated with an index or
 entity).
 
-Super impatient building guide
-==============================
+# Super impatient building guide
 
         # Install Location ~ adjust accordingly
         prefix=$HOME/local
@@ -15,8 +13,7 @@ Super impatient building guide
         cd partio
         make -j prefix=$prefix install
 
-Getting Started
-===============
+# Getting Started
 
 CMake is used to build the project, but we provide a top-level Makefile
 for convenience that takes care of all the steps.
@@ -29,8 +26,7 @@ with a temporary staging directory of `/tmp/stage` is:
 
     make DESTDIR=/tmp/stage prefix=/usr/local install
 
-Source code overview
-====================
+# Source code overview
 
         src/
            lib/      Library code (public API in root)
@@ -44,8 +40,7 @@ Source code overview
                      partinfo <particle file>
                      partview <particle file>
 
-Class Model
------------
+## Class Model
 
 The goal of the library is to abstract the particle interface from the data
 representation. That is why Partio represents particles using three classes that
@@ -71,14 +66,13 @@ The functions used to get particle access are these:
            returns ParticlesDataMutable
            allows read/write access
 
-Behind the scenes you could implement these classes however you like.  Headers
-only representation is called core/ParticleHeader.{h,cpp}.  Simple
+Behind the scenes you could implement these classes however you like. Headers
+only representation is called core/ParticleHeader.{h,cpp}. Simple
 non-interleaved attributes is core/ParticleSimple.{h,cpp}.
 
-Attribute Data Model
---------------------
+## Attribute Data Model
 
-All particles have the same data attributes.  They have the model that they are
+All particles have the same data attributes. They have the model that they are
 of three basic types with a count of how many scalar values they have.
 
         VECTOR[3]
@@ -90,9 +84,7 @@ of three basic types with a count of how many scalar values they have.
 
 This seems to encompass the most common file formats for particles
 
-
-Iterating
----------
+## Iterating
 
 There are multiple ways to access data in the API. Here are
 some tips
@@ -107,23 +99,32 @@ some tips
 - Use iterators to do linear operations over all particles They are much more
   optimized than both data() and the dataAsFloat or
 
-
-Backends
---------
+## Backends
 
 Behind the scenes there are SimpleParticles, ParticleHeaders, and
-SimpleParticlesInterleaved.  In the future I would like to write a disk-based
+SimpleParticlesInterleaved. In the future I would like to write a disk-based
 cached back end that can dynamically only load the data that is necessary.
 create(), read() and readCached could be augmented to create different
 structures in these cases.
 
-Readers/Writers
----------------
+## Readers/Writers
 
 New readers and writers can be added in the io/ directory. You simply need to
 implement the interface ParticlesInfo, ParticlesData and ParticlesDataMutable
 (or as many as you need). Editing the io/readers.h to add prototypes and
 io/ParticleIO.cpp to add file extension bindings should be easy.
 
+## Building the python Package for PyPi
+
+To the partio for python and publish it to we have to build it using docker and upload it to PyPi.
+
+```bash
+# build the docker
+  docker build -t partio .
+  # run the build
+  docker run partio
+  # use twine to upload to pypi
+  twine upload wheelhouse/*
+```
 
 - Andrew Selle, Walt Disney Animation Studios

@@ -24,3 +24,6 @@
 workspace.mel
 .vscode/
 build_partio/
+dist/
+partio.egg-info
+wheelhouse/
