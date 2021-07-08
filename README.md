@@ -122,7 +122,7 @@ To the partio for python and publish it to we have to build it using docker and 
 # build the docker
   docker build -t partio .
   # run the build
-  docker run partio
+  docker run -v $(pwd):/io partio
   # use twine to upload to pypi
   twine upload wheelhouse/*
 ```
