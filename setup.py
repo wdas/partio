@@ -19,14 +19,11 @@ from distutils.sysconfig import get_python_inc, get_config_var
 
 class CMakeExtension(Extension):
     def __init__(
-        self,
-        name,
-        source_dir: str = str(Path(".").absolute()),
-        cmake_configure_options=[],
+        self, name, source_dir=str(Path(".").absolute()), cmake_configure_options=[],
     ):
         super().__init__(name=name, sources=[])
         self.cmake_configure_options = cmake_configure_options
-        self.cmake_build_type = "Release"
+        self.cmake_build_type = "RelWithDebInfo"
         self.source_dir = source_dir
 
 
@@ -43,12 +40,12 @@ class BuildCMakeExtension(build_ext):
         for ext in cmake_extensions:
             self.build_extension(ext)
 
-    def build_extension(self, ext: Extension):
+    def build_extension(self, ext):
         # CMake configure arguments
         configure_args = [
-            f"-DCMAKE_BUILD_TYPE={ext.cmake_build_type}",
-            # "-GNinja",
-            f"-DCMAKE_INSTALL_PREFIX:PATH=build/install",
+            "-DCMAKE_BUILD_TYPE={}".format(ext.cmake_build_type),
+            "-DPARTIO_ORIGIN_RPATH=ON",
+            "-DCMAKE_INSTALL_PREFIX:PATH=build/install",
         ]
         build_args = ["--config", ext.cmake_build_type]
         # Extend the configure arguments with those passed from the extension
@@ -56,13 +53,14 @@ class BuildCMakeExtension(build_ext):
 
         if platform.system() == "Windows":
             configure_args += []
-        elif platform.system() in {"Linux", "Darwin"}:
-            configure_args += []
         else:
-            raise RuntimeError(f"Unsupported '{platform.system()}' platform")
+            configure_args += []
 
         # Get the absolute path to the build folder
-        build_folder = str(Path(".").absolute() / f"{self.build_temp}_{ext.name}")
+        build_folder = str(
+            Path(".").absolute()
+            / "{build_temp}_{name}".format(build_temp=self.build_temp, name=ext.name)
+        )
 
         # Make sure that the build folder exists
         Path(build_folder).mkdir(exist_ok=True, parents=True)
@@ -84,13 +82,13 @@ class BuildCMakeExtension(build_ext):
 
         print("")
         print("==> Configuring:")
-        print(f"$ {' '.join(configure_command)}")
+        print(" ".join(configure_command))
         print("")
         print("==> Building:")
-        print(f"$ {' '.join(build_command)}")
+        print(" ".join(build_command))
         print("")
         print("==> Installing:")
-        print(f"$ {' '.join(install_command)}")
+        print(" ".join(install_command))
         print("")
 
         # Call CMake
@@ -102,9 +100,9 @@ class BuildCMakeExtension(build_ext):
 PARTIO_EXT = CMakeExtension(
     name="partio",
     cmake_configure_options=[
-        f"-DPYTHON_INCLUDE_DIR={get_python_inc()}",
-        f"-DPYTHON_LIBRARY={get_config_var('LIBDIR')} ",
-        f"-DPYTHON_EXECUTABLE={sys.executable} ",
+        "-DPYTHON_INCLUDE_DIR={} ".format(get_python_inc()),
+        "-DPYTHON_LIBRARY={} ".format(get_config_var("LIBDIR")),
+        "-DPYTHON_EXECUTABLE={} ".format(sys.executable),
     ],
 )
 
@@ -122,7 +120,9 @@ class InstallLibs(install_lib):
         os.makedirs(write_dir, exist_ok=True)
 
         # copy equired files
-        python_version = f"python{sys.version_info[0]}.{sys.version_info[1]}"
+        python_version = "python{major}.{minor}".format(
+            major=sys.version_info[0], minor=sys.version_info[1]
+        )
         base_path = Path.cwd() / "build" / "install" / "lib64"
         to_install = [
             base_path / "libpartio.so.1",
@@ -137,9 +137,8 @@ class InstallLibs(install_lib):
             shutil.move(str(lib), str(write_dir))
 
         # create init file
-        f = open(str(write_dir / "__init__.py"), "w")
-        f.write("from .partio import *")
-        f.close()
+        with open(str(write_dir / "__init__.py"), "w") as f:
+            f.write("from .partio import *\n")
         self.announce("+++ custom done", level=3)
         super().run()
 
@@ -151,6 +150,5 @@ setup(
     packages=[],
     ext_modules=[PARTIO_EXT],
     cmdclass={"build_ext": BuildCMakeExtension, "install_lib": InstallLibs,},
-    python_requires=">=3.4",
+    python_requires=">=3.6",
 )
-

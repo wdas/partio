@@ -120,11 +120,11 @@ To the partio for python and publish it to we have to build it using docker and 
 
 ```bash
 # build the docker
-  docker build -t partio .
+  docker build -t partio:latest .
   # run the build
-  docker run -v $(pwd):/io partio
+  docker run --rm -v $(pwd):/io partio:latest
   # use twine to upload to pypi
-  twine upload wheelhouse/*
+  twine upload dist/*
 ```
 
 - Andrew Selle, Walt Disney Animation Studios
