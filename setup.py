@@ -146,9 +146,15 @@ class InstallLibs(install_lib):
 setup(
     name="partio",
     description="A Python wrapper for partio",
-    version="1.14.0",
     packages=[],
     ext_modules=[PARTIO_EXT],
     cmdclass={"build_ext": BuildCMakeExtension, "install_lib": InstallLibs,},
     python_requires=">=3.6",
+    setup_requires=["setuptools_scm"],
+    use_scm_version={
+        "root": ".",
+        "relative_to": __file__,
+        "local_scheme": "no-local-version",
+        "version_scheme": "no-guess-dev",
+    },
 )
