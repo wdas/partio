@@ -44,7 +44,7 @@ def toJson(particleSet):
                                       'value': particleSet.getFixed(attr),
                                      }
 
-        # Convert indexed string attributse
+        # Convert indexed string attributes
         if attr.type == partio.INDEXEDSTR:
             fixedIndexedStrings[attr.name] = particleSet.fixedIndexedStrs(attr)
 
@@ -62,7 +62,7 @@ def toJson(particleSet):
         attrs.append(attr)
         attributes[attr.name] = {'type': attr.type, 'count': attr.count }
 
-        # Convert indexed string attributse
+        # Convert indexed string attributes
         if attr.type == partio.INDEXEDSTR:
             indexedStrings[attr.name] = particleSet.indexedStrs(attr)
 
