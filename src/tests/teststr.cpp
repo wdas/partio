@@ -60,7 +60,7 @@ int main(int argc,char *argv[])
         int alive=p->lookupIndexedStr(stateAttr,"alive");
         int dead=p->lookupIndexedStr(stateAttr,"dead");
         int zombie=p->lookupIndexedStr(stateAttr,"zombie");
-        int states[]={alive,dead,zombie}; // every ith particle should be asigned these in order
+        int states[]={alive,dead,zombie}; // every ith particle should be assigned these in order
         if(alive == -1 || dead == -1 || zombie == -1){ std::cerr<<"don't have tokens I expect!"<<std::endl;}
 
         for(int i=0;i<p->numParticles();i++){
