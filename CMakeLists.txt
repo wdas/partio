@@ -36,6 +36,7 @@ project(partio LANGUAGES CXX)
 set(PARTIO_VERSION_MAJOR "1")
 
 option(PARTIO_GTEST_ENABLED "Enable GTest for tests" OFF)
+option(PARTIO_ORIGIN_RPATH "Enable ORIGIN rpath in the installed libraries" OFF)
 
 if(WIN32 OR APPLE)
     option(PARTIO_USE_GLVND "Use GLVND for OpenGL" OFF)
@@ -61,9 +62,16 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_FIND_PACKAGE_RESOLVE_SYMLINKS ON)
 set(CMAKE_INSTALL_MESSAGE LAZY)
-set(CMAKE_SKIP_RPATH ON)
 set(CMAKE_THREAD_PREFER_PTHREAD ON)
 set(THREADS_PREFER_PTHREAD_FLAG ON)
+if (PARTIO_ORIGIN_RPATH)
+    # this is use for building the python wheel
+    set(CMAKE_SKIP_RPATH OFF)
+    set(CMAKE_BUILD_RPATH "$ORIGIN")
+    set(CMAKE_INSTALL_RPATH "$ORIGIN")
+else ()
+    set(CMAKE_SKIP_RPATH ON)
+endif()
 
 ## Setup platform specific helper defines build variants
 if (WIN32)

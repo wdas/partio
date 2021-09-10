@@ -21,3 +21,5 @@
 *~
 __pycache__
 workspace.mel
+/dist
+/partio.egg-info
