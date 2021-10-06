@@ -122,6 +122,17 @@ TEST_F(PartioTest, mergenoid)
 {
 }
 
+TEST(MergeTest, mergepair)
+{
+    std::string datadir(PARTIO_DATA_DIR);
+    std::string base_geo = datadir + "/baseidsfaceid.bgeo";
+    std::string delta_geo = datadir + "/deltaidsfaceid.bgeo";
+    Partio::ParticlesDataMutable* base = Partio::read(base_geo.c_str());
+    Partio::ParticlesDataMutable* delta = Partio::read(delta_geo.c_str());
+    Partio::merge(*base, *delta, "ids", "faceid_XS");
+    ASSERT_EQ(13, base->numParticles());
+}
+
 int main(int argc, char* argv[])
 {
     testing::InitGoogleTest(&argc, argv);

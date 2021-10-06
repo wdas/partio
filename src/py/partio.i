@@ -586,7 +586,7 @@ ParticlesDataMutable* computeClustering(ParticlesDataMutable* particles,const in
 
 %feature("autodoc");
 %feature("docstring","Merge two particle sets");
-void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier=std::string());
+void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier0=std::string(), const std::string& identifier1=std::string());
 
 /*
  * We do NOT want swig to wrap partio's attrNameMap std::map<std::string, std::string>.

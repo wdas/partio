@@ -344,7 +344,7 @@ ParticlesDataMutable* computeClustering(ParticlesDataMutable* particles, const i
   provided or the particle's attribute value is not found in the base set,
   a new particle is added. If used, the identifier must be a single INT.
 */
-void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier=std::string());
+void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier0=std::string(), const std::string& identifier1=std::string());
 
 }
 #endif

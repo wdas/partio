@@ -445,31 +445,48 @@ struct AttributePair {
     T delta;
 };
 
-void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier)
+// Combines two hashes.
+inline uint32_t hashCombine(uint32_t hashPriorCombine, uint32_t b)
+{
+    // Following http://www.boost.org/doc/libs/1_35_0/doc/html/boost/hash_combine_id241013.html
+    // The constants are somewhat arbitrary, and others may work equally well.
+    // Further explanation here: http://stackoverflow.com/a/4948967
+    return hashPriorCombine ^ (0x9e3779b9U + (hashPriorCombine << 6) + (hashPriorCombine >> 2) + b);
+}
+
+struct IntPairHash {
+    size_t operator()(std::pair<int, int> v) const
+    {
+        return hashCombine(v.first, v.second);
+    }
+};
+
+void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier0, const std::string& identifier1)
 {
     // Build a map from the identifier value to the particle index
     // and locate the identifier attribute in the base.
     // This assumes unique identifiers per particle.
-    std::unordered_map<int,int> idToParticleIndex;
-    ParticleAttribute baseIdAttr;
-    bool baseHasIdentifier = base.attributeInfo(identifier.c_str(), baseIdAttr);
-    if (baseHasIdentifier) {
-        if (baseIdAttr.type == INT) {
-            for (int i=0; i<base.numParticles(); i++) {
-                idToParticleIndex[base.data<int>(baseIdAttr,i)[0]] = i;
-            }
-        } else {
-            baseHasIdentifier = false;
+    std::unordered_map<std::pair<int,int>,int,IntPairHash> idToParticleIndex;
+    ParticleAttribute baseIdAttr0;
+    bool baseHasIdentifier0 = base.attributeInfo(identifier0.c_str(), baseIdAttr0);
+    baseHasIdentifier0 = baseHasIdentifier0 ? baseIdAttr0.type == INT : false;
+    ParticleAttribute baseIdAttr1;
+    bool baseHasIdentifier1 = base.attributeInfo(identifier1.c_str(), baseIdAttr1);
+    baseHasIdentifier1 = baseHasIdentifier1 ? baseIdAttr1.type == INT : false;
+    if (baseHasIdentifier0 || baseHasIdentifier1) {
+        for (int i=0; i<base.numParticles(); i++) {
+            idToParticleIndex[std::make_pair(baseHasIdentifier0 ? base.data<int>(baseIdAttr0,i)[0] : 0,
+                                             baseHasIdentifier1 ? base.data<int>(baseIdAttr1,i)[0] : 0)] = i;
         }
     }
 
     // Locate the identifier attribute in the delta
-    ParticleAttribute deltaIdAttr;
-    bool deltaHasIdentifier = delta.attributeInfo(identifier.c_str(), deltaIdAttr);
-    if (deltaHasIdentifier) {
-        deltaHasIdentifier &= deltaIdAttr.type == INT;
-    }
-    bool hasIdentifier = baseHasIdentifier && deltaHasIdentifier;
+    ParticleAttribute deltaIdAttr0;
+    bool deltaHasIdentifier0 = delta.attributeInfo(identifier0.c_str(), deltaIdAttr0);
+    deltaHasIdentifier0 = deltaHasIdentifier0 ? deltaIdAttr0.type == INT : false;
+    ParticleAttribute deltaIdAttr1;
+    bool deltaHasIdentifier1 = delta.attributeInfo(identifier1.c_str(), deltaIdAttr1);
+    deltaHasIdentifier1 = deltaHasIdentifier1 ? deltaIdAttr1.type == INT : false;
 
     // Identify the attributes to be copied (base present in delta)
     std::vector<AttributePair<ParticleAttribute>> attrs;
@@ -555,12 +572,14 @@ void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::st
 
 
     // Loop through the delta particles and incorporate into the base
+    bool hasIdentifier = (baseHasIdentifier0 && deltaHasIdentifier0) || (baseHasIdentifier1 && deltaHasIdentifier1);
     for (int i=0; i<delta.numParticles(); ++i) {
 
         // Grab index into base particle set - either existing or new
         int index(-1);
         if (hasIdentifier) {
-            int idValue = *(delta.data<int>(deltaIdAttr, i));
+            std::pair<int,int> idValue = std::make_pair(deltaHasIdentifier0 ? delta.data<int>(deltaIdAttr0, i)[0] : 0,
+                                                        deltaHasIdentifier1 ? delta.data<int>(deltaIdAttr1, i)[0] : 0);
             auto it = idToParticleIndex.find(idValue);
             if (it != idToParticleIndex.end()) {
                 index = it->second;
