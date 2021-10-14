@@ -446,12 +446,12 @@ struct AttributePair {
 };
 
 // Combines two hashes.
-inline uint32_t hashCombine(uint32_t hashPriorCombine, uint32_t b)
+inline uint32_t hashCombine(uint32_t seed, uint32_t v)
 {
     // Following http://www.boost.org/doc/libs/1_35_0/doc/html/boost/hash_combine_id241013.html
     // The constants are somewhat arbitrary, and others may work equally well.
     // Further explanation here: http://stackoverflow.com/a/4948967
-    return hashPriorCombine ^ (0x9e3779b9U + (hashPriorCombine << 6) + (hashPriorCombine >> 2) + b);
+    return seed ^ (0x9e3779b9U + (seed << 6) + (seed >> 2) + v);
 }
 
 struct IntPairHash {
@@ -461,6 +461,9 @@ struct IntPairHash {
     }
 };
 
+// merge two particle sets.  if no identifiers are specified, the particle sets will be aggregated together.
+// if one or more identifiers are specified, the particle will be overwritten if the identifier(s) match.
+// if the identifier only exists in one particle set, the particle sets will be aggregated together.
 void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::string& identifier0, const std::string& identifier1)
 {
     // Build a map from the identifier value to the particle index
@@ -572,7 +575,10 @@ void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::st
 
 
     // Loop through the delta particles and incorporate into the base
+    // make sure there is a matching set of attributes
     bool hasIdentifier = (baseHasIdentifier0 && deltaHasIdentifier0) || (baseHasIdentifier1 && deltaHasIdentifier1);
+    // just append if there are mismatched attributes
+    hasIdentifier = hasIdentifier && !((baseHasIdentifier0 ^ deltaHasIdentifier0) || (baseHasIdentifier1 ^ deltaHasIdentifier1));
     for (int i=0; i<delta.numParticles(); ++i) {
 
         // Grab index into base particle set - either existing or new

@@ -68,5 +68,29 @@ def _check_attribute(partfile, name, count):
     assert info.count == count
 
 
+def test_merge_pair():
+    testdir = os.path.dirname(os.path.abspath(__file__))
+    srcdir = os.path.dirname(testdir)
+    base_filename = os.path.join(srcdir, 'data', 'baseidsfaceid.bgeo')
+    base_file = partio.read(base_filename)
+    delta_filename = os.path.join(srcdir, 'data', 'deltaidsfaceid.bgeo')
+    delta_file = partio.read(delta_filename)
+
+    partio.merge(base_file, delta_file, 'ids', 'faceid_XS')
+    assert base_file.numParticles() == 13
+
+
+def test_merge_mismatch():
+    testdir = os.path.dirname(os.path.abspath(__file__))
+    srcdir = os.path.dirname(testdir)
+    base_filename = os.path.join(srcdir, 'data', 'baseidsfaceid.bgeo')
+    base_file = partio.read(base_filename)
+    delta_filename = os.path.join(srcdir, 'data', 'deltaids.bgeo')
+    delta_file = partio.read(delta_filename)
+
+    partio.merge(base_file, delta_file, 'ids', 'faceid_XS')
+    assert base_file.numParticles() == 16
+
+
 if __name__ == '__main__':
     sys.exit(pytest.main([__file__]))

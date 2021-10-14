@@ -122,6 +122,7 @@ TEST_F(PartioTest, mergenoid)
 {
 }
 
+// test merge of particle sets when both have all attributes
 TEST(MergeTest, mergepair)
 {
     std::string datadir(PARTIO_DATA_DIR);
@@ -131,6 +132,18 @@ TEST(MergeTest, mergepair)
     Partio::ParticlesDataMutable* delta = Partio::read(delta_geo.c_str());
     Partio::merge(*base, *delta, "ids", "faceid_XS");
     ASSERT_EQ(13, base->numParticles());
+}
+
+// test merge of particle sets when one is missing an attribute
+TEST(MergeTest, mergemismatch)
+{
+    std::string datadir(PARTIO_DATA_DIR);
+    std::string base_geo = datadir + "/baseidsfaceid.bgeo";
+    std::string delta_geo = datadir + "/deltaids.bgeo";
+    Partio::ParticlesDataMutable* base = Partio::read(base_geo.c_str());
+    Partio::ParticlesDataMutable* delta = Partio::read(delta_geo.c_str());
+    Partio::merge(*base, *delta, "ids", "faceid_XS");
+    ASSERT_EQ(16, base->numParticles());
 }
 
 int main(int argc, char* argv[])
