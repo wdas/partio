@@ -72,7 +72,7 @@ def getAttrs(numAttributesFunc, attributeInfoFunc, sort=False):
     numAttr = numAttributesFunc()
 
     nameToIndex = {attributeInfoFunc(anum).name:anum for anum in range(numAttr)}
-    names = nameToIndex.keys()
+    names = list(nameToIndex.keys())
     if sort:
         names.sort()
 
