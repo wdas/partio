@@ -62,7 +62,6 @@ If you want everything associated with the file
 <pre>
 &gt;&gt;&gt; p=partio.read("circle.bgeo")
 </pre>
-\end{document}
 
 <h2>Finding nearest neighbors</h2>
 
