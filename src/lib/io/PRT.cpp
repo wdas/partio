@@ -173,7 +173,7 @@ ParticlesDataMutable* readPRT(const char* filename,const bool headersOnly,std::o
     read<LITEND>(*input,channels);		// number of channel
     read<LITEND>(*input,channelsize);	// size of channel
 
-    simple->addParticles((const int)header.numParticles);
+    simple->addParticles((int)header.numParticles);
 
     std::vector<Channel> chans;
     std::vector<ParticleAttribute> attrs;
