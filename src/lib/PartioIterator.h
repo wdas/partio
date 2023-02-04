@@ -152,11 +152,23 @@ public:
 		:particles(other.particles),index(other.index),indexEnd(other.indexEnd),accessors(0)
     {}
 
+    //! Assignment operator. NOTE: Invalidates any accessors that have been registered with it
+    ParticleIterator& operator=(const ParticleIterator& other)
+    {
+        if (this == &other)
+            return *this;
+		particles = other.particles;
+        index = other.index;
+        indexEnd = other.indexEnd;
+        accessors = 0;
+        return *this;
+    }
+
     //! Construct an iterator with iteration parameters. This is typically only
     //! called by implementations of Particle (not by users). For users, use
     //! begin() and end() on the particle type
     ParticleIterator(PROVIDER* particles,size_t index,size_t indexEnd)
-        :particles(particles),index(index),indexEnd(indexEnd)
+        :particles(particles),index(index),indexEnd(indexEnd),accessors(0)
     {}
 
     //! Whether the iterator is valid

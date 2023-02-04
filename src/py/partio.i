@@ -611,13 +611,21 @@ void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::st
     Py_ssize_t pos = 0;
 
     if (PyDict_Check($input)) {
-
         while (PyDict_Next($input, &pos, &key, &value)) {
-            std::string key_str = PyString_AsString(key);
-            std::string value_str = PyString_AsString(value);
+            std::string key_str;
+            if (PyBytes_Check(key))
+                key_str = PyBytes_AsString(key);
+            else if (PyUnicode_Check(key))
+                key_str = PyBytes_AsString(PyUnicode_AsUTF8String(key));
+            if (key_str.empty())
+                continue;
+            std::string value_str;
+            if (PyBytes_Check(value))
+                key_str = PyBytes_AsString(value);
+            else if (PyUnicode_Check(value))
+                value_str = PyBytes_AsString(PyUnicode_AsUTF8String(value));
             temp[std::move(key_str)] = std::move(value_str);
         }
-
         $1 = &temp;
     } else {
         $1 = nullptr;
