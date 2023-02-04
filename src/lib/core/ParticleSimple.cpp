@@ -51,7 +51,7 @@ using namespace Partio;
 
 ParticlesSimple::
 ParticlesSimple()
-    :particleCount(0),allocatedCount(0),kdtree(0)
+    :particleCount(0),allocatedCount(0),kdtree(nullptr)
 {
 }
 
