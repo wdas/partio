@@ -97,16 +97,16 @@ class ParticleAttribute
 {
 public:
     //! Type of attribute
-    ParticleAttributeType type;
+    ParticleAttributeType type{NONE};
 
     //! Number of entries, should be 3 if type is VECTOR
-    int count;
+    int count{0};
 
     //! Name of attribute
     std::string name;
 
     //! Internal method of fast access, user should not use or change
-    int attributeIndex;
+    int attributeIndex{-1};
 
     //! Comment used by various data/readers for extra attribute information
     //! for example for a PTC file to read and write this could be "color" or "point"
@@ -124,16 +124,16 @@ class FixedAttribute
 {
 public:
     //! Type of attribute
-    ParticleAttributeType type;
+    ParticleAttributeType type{NONE};
 
     //! Number of entries, should be 3 if type is VECTOR
-    int count;
+    int count{0};
 
     //! Name of attribute
     std::string name;
 
     //! Internal method of fast access, user should not use or change
-    int attributeIndex;
+    int attributeIndex{-1};
 
     //! Comment used by various data/readers for extra attribute information
     //! for example for a PTC file to read and write this could be "color" or "point"

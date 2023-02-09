@@ -50,7 +50,7 @@ using namespace Partio;
 
 ParticlesSimpleInterleave::
 ParticlesSimpleInterleave()
-    :particleCount(0),allocatedCount(0),data(0),fixedData(0),stride(0),kdtree(0)
+    :particleCount(0),allocatedCount(0),data(nullptr),fixedData(nullptr),stride(0),kdtree(nullptr)
 {
 }
 
@@ -200,7 +200,7 @@ findNPoints(const float[3], int, const float, ParticleIndex *,
 ParticleAttribute ParticlesSimpleInterleave::
 addAttribute(const char* attribute,ParticleAttributeType type,const int count)
 {
-	//std::cerr<< "AddAttribute interleave" << std::endl;
+    //std::cerr<< "AddAttribute interleave" << std::endl;
     if(nameToAttribute.find(attribute) != nameToAttribute.end()){
         std::cerr<<"Partio: addAttribute failed because attr '"<<attribute<<"'"<<" already exists"<<std::endl;
         return ParticleAttribute();
@@ -230,7 +230,7 @@ addAttribute(const char* attribute,ParticleAttributeType type,const int count)
     data=newData;
     stride=newStride;
     attributeOffsets.push_back(oldStride);
-	attributeIndexedStrs.push_back(IndexedStrTable());
+    attributeIndexedStrs.push_back(IndexedStrTable());
 
     return attr;
 }
@@ -238,7 +238,7 @@ addAttribute(const char* attribute,ParticleAttributeType type,const int count)
 FixedAttribute ParticlesSimpleInterleave::
 addFixedAttribute(const char* attribute,ParticleAttributeType type,const int count)
 {
-	//std::cerr<< "AddAttribute interleave" << std::endl;
+    //std::cerr<< "AddAttribute interleave" << std::endl;
     if(nameToFixedAttribute.find(attribute) != nameToFixedAttribute.end()){
         std::cerr<<"Partio: addFixedAttribute failed because attr '"<<attribute<<"'"<<" already exists"<<std::endl;
         return FixedAttribute();

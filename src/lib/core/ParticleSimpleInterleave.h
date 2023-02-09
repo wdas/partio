@@ -110,11 +110,11 @@ private:
     char* data;
     char* fixedData;
     int stride;
-	struct IndexedStrTable{
+    struct IndexedStrTable{
         std::map<std::string,int> stringToIndex; // TODO: this should be a hash table unordered_map
         std::vector<std::string> strings;
     };
-	std::vector<IndexedStrTable> attributeIndexedStrs;
+    std::vector<IndexedStrTable> attributeIndexedStrs;
     std::vector<size_t> attributeOffsets; // Inside is data of appropriate type
     std::vector<ParticleAttribute> attributes;
     std::map<std::string,int> nameToAttribute;
