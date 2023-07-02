@@ -133,16 +133,17 @@ endif()
 # Make modules able to see partio library
 set(PARTIO_LIBRARIES partio ${ZLIB_LIBRARY})
 
+## Traverse subdirectories
+add_subdirectory(src/lib)
+add_subdirectory(src/tools)
+add_subdirectory(src/py)
+add_subdirectory(src/doc)
+
 if (${PARTIO_GTEST_ENABLED})
     set(GTEST_LOCATION "/usr" CACHE STRING "gtest installation prefix")
     set(GTEST_INCLUDE_PATH ${GTEST_LOCATION}/include)
     set(GTEST_LIBDIR ${CMAKE_INSTALL_LIBDIR})
     set(GTEST_LINK_PATH ${GTEST_LOCATION}/${GTEST_LIBDIR} CACHE STRING "gtest library directory")
+
+    add_subdirectory(src/tests)
 endif()
- 
-## Traverse subdirectories
-add_subdirectory(src/lib)
-add_subdirectory(src/tools)
-add_subdirectory(src/py)
-add_subdirectory(src/tests)
-add_subdirectory(src/doc)
