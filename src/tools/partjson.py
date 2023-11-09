@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-
 """
 Converts partio files to and from json.
 
@@ -9,18 +8,6 @@ Supported FLAGS:
     -c/--compress: When converting to partio, compress the output
     -v/--verbose : Turn on verbosity for partio
     -h/--help    : Print this help message
-"""
-
-# TODO: Unicode compliance
-
-__copyright__ = """
-CONFIDENTIAL INFORMATION: This software is the confidential and
-proprietary information of Walt Disney Animation Studios ("WDAS").
-This software may not be used, disclosed, reproduced or distributed
-for any purpose without prior written authorization and license
-from WDAS.  Reproduction of any section of this software must
-include this legend and all copyright notices.
-Copyright Disney Enterprises, Inc.  All rights reserved.
 """
 
 import os, sys, json

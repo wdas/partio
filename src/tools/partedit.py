@@ -23,16 +23,6 @@ Supported FLAGS:
 # - delete fixed attribute
 # - rename fixed attribute
 
-__copyright__ = """
-CONFIDENTIAL INFORMATION: This software is the confidential and
-proprietary information of Walt Disney Animation Studios ("WDAS").
-This software may not be used, disclosed, reproduced or distributed
-for any purpose without prior written authorization and license
-from WDAS.  Reproduction of any section of this software must
-include this legend and all copyright notices.
-Copyright Disney Enterprises, Inc.  All rights reserved.
-"""
-
 import os, sys, math
 import partio
 
