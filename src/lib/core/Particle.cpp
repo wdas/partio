@@ -137,7 +137,6 @@ clone(const ParticlesData& other, bool particles, const std::map<std::string, st
     Partio::ParticleAttribute srcAttr, dstAttr;
     const int numAttributes = other.numAttributes();
     const size_t numParticles = other.numParticles();
-    std::vector<Partio::ParticleAttribute> dstAttrs;
 
     p->addParticles(numParticles);
 
@@ -145,6 +144,7 @@ clone(const ParticlesData& other, bool particles, const std::map<std::string, st
     // we copy one particle at a time.  A bulk memcpy would be faster.
     for (int i = 0; i < numAttributes; ++i) {
         other.attributeInfo(i, srcAttr);
+        dstAttr = p->addAttribute(getMappedName(srcAttr.name, attrNameMap).c_str(), srcAttr.type, srcAttr.count);
         // Register indexed strings
         if (srcAttr.type == Partio::INDEXEDSTR) {
             const std::vector<std::string>& values = other.indexedStrs(srcAttr);
@@ -153,7 +153,6 @@ clone(const ParticlesData& other, bool particles, const std::map<std::string, st
             }
         }
         size_t size = Partio::TypeSize(srcAttr.type) * srcAttr.count;
-        dstAttr = p->addAttribute(getMappedName(srcAttr.name, attrNameMap).c_str(), srcAttr.type, srcAttr.count);
 
         for (Partio::ParticleIndex j = 0; j < numParticles; ++j) {
             const void *src = other.data<void>(srcAttr, j);
