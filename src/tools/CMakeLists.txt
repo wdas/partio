@@ -67,5 +67,5 @@ install(PROGRAMS partedit.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partedit
 install(PROGRAMS partjson.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partjson)
 install(PROGRAMS partinspect.py DESTINATION ${CMAKE_INSTALL_BINDIR} RENAME partinspect)
 
-set(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
+set(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages" )
 install(FILES partedit.py partjson.py partinspect.py DESTINATION ${PYTHON_DEST})
