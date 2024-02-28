@@ -52,7 +52,11 @@ target_include_directories(
 )
 target_link_libraries(partio_mod PRIVATE ${PYTHON_LIBRARIES} partio)
 
-set(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages" )
+if(CMAKE_VERSION VERSION_GREATER_EQUAL "3.12")
+    set(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages" )
+else()
+    set(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR}/site-packages" )
+endif()
 
 install(TARGETS partio_mod DESTINATION ${PYTHON_DEST})
 install(FILES partio.i DESTINATION ${CMAKE_INSTALL_DATADIR}/swig)
