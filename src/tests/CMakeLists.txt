@@ -50,7 +50,7 @@ else()
     endforeach(item)
 
     foreach(item testpartjson testpartio)
-        add_test(NAME ${item} COMMAND ${PYTHON_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/${item}.py)
+        add_test(NAME ${item} COMMAND ${Python_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/${item}.py)
         install(PROGRAMS ${item}.py DESTINATION ${CMAKE_INSTALL_PARTIO_TESTDIR} RENAME ${item})
     endforeach(item)
 endif()
