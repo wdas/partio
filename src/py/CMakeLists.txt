@@ -47,10 +47,10 @@ get_property(swig_files TARGET partio_mod PROPERTY SWIG_SUPPORT_FILES)
 target_include_directories(
     partio_mod
     PRIVATE
-        ${PYTHON_INCLUDE_DIRS}
+        ${Python_INCLUDE_DIRS}
         ${CMAKE_SOURCE_DIR}/src/lib
 )
-target_link_libraries(partio_mod PRIVATE ${PYTHON_LIBRARIES} partio)
+target_link_libraries(partio_mod PRIVATE ${Python_LIBRARIES} partio)
 
 set(PYTHON_DEST "${CMAKE_INSTALL_LIBDIR}/python${Python_VERSION_MAJOR}.${Python_VERSION_MINOR}/site-packages" )
 

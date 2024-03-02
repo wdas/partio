@@ -100,9 +100,9 @@ class BuildCMakeExtension(build_ext):
 PARTIO_EXT = CMakeExtension(
     name="partio",
     cmake_configure_options=[
-        "-DPYTHON_INCLUDE_DIR={} ".format(get_python_inc()),
-        "-DPYTHON_LIBRARY={} ".format(get_config_var("LIBDIR")),
-        "-DPYTHON_EXECUTABLE={} ".format(sys.executable),
+        "-DPython_INCLUDE_DIR={} ".format(get_python_inc()),
+        "-DPython_LIBRARY={} ".format(get_config_var("LIBDIR")),
+        "-DPython_EXECUTABLE={} ".format(sys.executable),
     ],
 )
 
