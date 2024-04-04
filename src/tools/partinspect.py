@@ -29,7 +29,7 @@ class PartioTreeModel(QtCore.QAbstractItemModel):
         nameToIndex = {self.parts.attributeInfo(anum).name:anum for anum in range(numAttr)}
         sortedNames = sorted(nameToIndex.keys())
         names = []
-        specials = ('id', 'h_pil_id')
+        specials = ('id', 'ids', 'h_pil_id')
         for special in specials:
             if special in sortedNames:
                 names.append(special)
@@ -163,7 +163,7 @@ class Spreadsheet(QtWidgets.QDialog):
         If attrsOnly is True, display attribute per row and attribute info per column.
     """
 
-    def __init__(self, filename, attrsOnly=False, parent=None):
+    def __init__(self, attrsOnly=False, parent=None):
         QtWidgets.QDialog.__init__(self, parent)
         self.treeView = None
         self.hasParticles = False
@@ -182,8 +182,6 @@ class Spreadsheet(QtWidgets.QDialog):
         # Configure ctrl-w to close window
         QtWidgets.QShortcut( QKeySequence(Qt.CTRL + Qt.Key_W), self, self.accept )
 
-        self.setFile(filename)
-
     def setFile(self, filename):
         """ Redraws the spreadsheet with a new particle file """
 
@@ -191,6 +189,31 @@ class Spreadsheet(QtWidgets.QDialog):
             return
         self.filename = filename
 
+        self.prepForRedraw()
+
+        p = partio.read(filename)
+        if not p:
+            p = partio.create()
+            self.hasParticles = False
+        else:
+            self.hasParticles = True
+
+        self.drawParticles(p)
+
+    def setData(self, particleSet):
+        """ Redraws the spreadsheet with a new particle set """
+
+        self.prepForRedraw()
+
+        if not particleSet:
+            particleSet = partio.create()
+            self.hasParticles = False
+        else:
+            self.hasParticles = True
+
+        self.drawParticles(particleSet)
+
+    def prepForRedraw(self):
         # reusing empty list causes column resizing problem so delete it
         if self.treeView and not self.hasParticles:
             self.layout().removeWidget(self.treeView)
@@ -202,21 +225,15 @@ class Spreadsheet(QtWidgets.QDialog):
             self.treeView.setUniformRowHeights(True)
             self.layout().addWidget(self.treeView)
 
-        p = partio.read(filename)
-        if not p:
-            p = partio.create()
-            self.hasParticles = False
-        else:
-            self.hasParticles = True
-
-        model = PartioTreeModel(self.treeView, p, self.attrsOnly)
+    def drawParticles(self, particleSet):
+        model = PartioTreeModel(self.treeView, particleSet, self.attrsOnly)
         proxyModel = FilterModel(self.lineEdit, self.attrsOnly, self)
         self.lineEdit.textChanged.connect(proxyModel.filter)
         proxyModel.setSourceModel(model)
         self.treeView.setModel(proxyModel)
         for i in range(model.columnCount(self.treeView)):
             self.treeView.resizeColumnToContents(i)
-        self.setWindowTitle(filename)
+        self.setWindowTitle(self.filename)
         self.show()
 
 _particleSpreadsheet = None
@@ -229,7 +246,8 @@ def spreadsheet(filename=None, attrsOnly=False, parent=None):
         if not filename and _attrSpreadsheet:
             return _attrSpreadsheet
         if not _attrSpreadsheet:
-            _attrSpreadsheet = Spreadsheet(filename, attrsOnly, parent)
+            _attrSpreadsheet = Spreadsheet(attrsOnly, parent)
+            _attrSpreadsheet.setFile(filename)
         else:
             _attrSpreadsheet.setFile(filename)
         return _attrSpreadsheet
@@ -238,7 +256,8 @@ def spreadsheet(filename=None, attrsOnly=False, parent=None):
     if not filename and _particleSpreadsheet:
         return _particleSpreadsheet
     if not _particleSpreadsheet:
-        _particleSpreadsheet = Spreadsheet(filename, attrsOnly, parent)
+        _particleSpreadsheet = Spreadsheet(attrsOnly, parent)
+        _particleSpreadsheet.setFile(filename)
     else:
         _particleSpreadsheet.setFile(filename)
 
