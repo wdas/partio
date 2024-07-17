@@ -299,7 +299,8 @@ def main():
 
     # Create the dialog
     app = QtWidgets.QApplication(newArgs)
-    dialog = Spreadsheet(filename, attrsOnly)
+    dialog = Spreadsheet(attrsOnly)
+    dialog.setFile(filename)
 
     # Configure ctrl-q to quit
     QtWidgets.QShortcut( QKeySequence(Qt.CTRL + Qt.Key_Q), dialog, dialog.close )
