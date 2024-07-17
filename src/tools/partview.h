@@ -97,7 +97,7 @@ string lastConnectivityFile;
 void restorePerspectiveProjection();
 void setOrthographicProjection();
 void renderBitmapString( float x,float y,float z,void *font,char *string);
-static void render();
+static void drawParticles();
 void  reloadParticleFile(int direction);
 static void mouseFunc(int button,int state,int x,int y);
 static void motionFunc(int x,int y);
@@ -108,12 +108,3 @@ static void processSpecialUpKeys(int key, int x, int y);
 void timer();
 
 int main(int argc,char *argv[]);
-
-
-
-
-
-
-
-
-

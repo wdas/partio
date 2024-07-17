@@ -91,15 +91,15 @@ void renderBitmapString(
 /////////////////////////////////////////
 /// RENDER  callback
 
-static void render()
+static void drawParticles()
 {
     static bool inited=false;
     if (!inited || sourceChanged)
     {
         //cout << "not inited" << endl;
         inited=true;
-        colorMissing = false;
-        colorMissing = false;
+        colorMissing = true;
+        colorMissing = true;
 
 
         glEnable(GL_DEPTH_TEST);
@@ -117,6 +117,7 @@ static void render()
                 if (!particles->attributeInfo("position",positionAttr))
                 {
                     std::cerr<<"Failed to find position attribute "<<std::endl;
+                    return;
                 }
                 else
                 {
@@ -135,20 +136,23 @@ static void render()
                         camera.fit(fov,bmin,bmax);
                     }
                 }
-                if (!particles->attributeInfo("rgbPP", colorAttr) &
-                        !particles->attributeInfo("rgb", colorAttr) &
-                        !particles->attributeInfo("color", colorAttr) &
-                        !particles->attributeInfo("pointColor", colorAttr))
+                if (particles->attributeInfo("pointColor", colorAttr) ||
+                    particles->attributeInfo("color", colorAttr) ||
+                    particles->attributeInfo("rgb", colorAttr) ||
+                    particles->attributeInfo("rgbPP", colorAttr))
                 {
-                    //std::cerr<<"Failed to find color attribute "<<std::endl;
+                    //std::cerr<<"Found color attribute "<<std::endl;
+                    colorMissing = false;
+                } else {
                     colorMissing = true;
                 }
-                if (!particles->attributeInfo("opacity", alphaAttr) &
-                        !particles->attributeInfo("opacityPP", alphaAttr) &
-                        !particles->attributeInfo("alpha", alphaAttr) &
-                        !particles->attributeInfo("alphaPP", alphaAttr) &
-                        !particles->attributeInfo("pointOpacity", alphaAttr))
+                if (particles->attributeInfo("pointOpacity", alphaAttr) ||
+                    particles->attributeInfo("alphaPP", alphaAttr) ||
+                    particles->attributeInfo("alpha", alphaAttr) ||
+                    particles->attributeInfo("opacityPP", alphaAttr) ||
+                    particles->attributeInfo("opacity", alphaAttr))
                 {
+                    //std::cerr<<"Found alpha attribute "<<std::endl;
                     glEnable(GL_BLEND);
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                     alphaMissing = false;
@@ -158,7 +162,7 @@ static void render()
                 }
             }
         }
-        sourceChanged=false;
+        sourceChanged = false;
     }
 
     glEnableClientState( GL_VERTEX_ARRAY );
@@ -427,7 +431,7 @@ void  reloadParticleFile(int direction)
                             currentConnectivityFrame.replace(currentConnectivityFrame.rfind(numberString),numberString.length(),newFrameString);
 
 			currentFrame.replace(currentFrame.find(origFileName), origFileName.length(), fileName);
-                        
+
 			particleFile = currentFrame;
                         connectivityFile = currentConnectivityFrame;
         }
@@ -462,7 +466,7 @@ void  reloadParticleFile(int direction)
 			{
 				frameMissing = false;
 				sourceChanged = true;
-				render();
+				drawParticles();
 				glutPostRedisplay();
 				cout << particleFile << endl;
 				lastParticleFile = particleFile;
@@ -764,8 +768,8 @@ int main(int argc,char *argv[])
     frameMissing = false;
     loadError = "";
     anyKeyPressed = false;
-    colorMissing = false;
-    alphaMissing = false;
+    colorMissing = true;
+    alphaMissing = true;
 
     glutInit(&argc,argv);
     if (argc!=2 && argc != 3)
@@ -787,7 +791,7 @@ int main(int argc,char *argv[])
         glutInitDisplayMode(GLUT_DEPTH | GLUT_DOUBLE | GLUT_RGBA);
         glutCreateWindow("PartView");
         glutTimerFunc(200,timer,0);
-        glutDisplayFunc(render);
+        glutDisplayFunc(drawParticles);
         glutMotionFunc(motionFunc);
         glutMouseFunc(mouseFunc);
         glutKeyboardFunc(processNormalKeys);
@@ -805,8 +809,3 @@ int main(int argc,char *argv[])
     return 0;
 
 }
-
-
-
-
-
