@@ -65,7 +65,12 @@ void printParticle(int particleIndex, Partio::ParticlesDataMutable* p, size_t wi
                     std::cout << ", ";
                 if (attr.type == Partio::INDEXEDSTR) {
                     int val = p->data<int>(attr, particleIndex)[ii];
-                    std::cout << val << "='" << p->indexedStrs(attr)[val] << "'";
+                    std::cout << val << "=";
+                    if (val < p->indexedStrs(attr).size()) {
+                        std::cout << "'" << p->indexedStrs(attr)[val] << "'";
+                    } else {
+                        std::cout << "<out-of-bounds>";
+                    }
                 } else if (attr.type == Partio::INT)
                     std::cout << p->data<int>(attr, particleIndex)[ii];
                 else
