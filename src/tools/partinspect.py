@@ -300,6 +300,14 @@ def main():
     # Create the dialog
     app = QtWidgets.QApplication(newArgs)
     dialog = Spreadsheet(attrsOnly)
+    dialog.setModal(False)
+    dialog.setWindowFlags(QtCore.Qt.Window |
+        QtCore.Qt.CustomizeWindowHint |
+        QtCore.Qt.WindowTitleHint |
+        QtCore.Qt.WindowCloseButtonHint |
+        QtCore.Qt.WindowMinimizeButtonHint |
+        QtCore.Qt.WindowMaximizeButtonHint)
+    dialog.resize(1400, 900)
     dialog.setFile(filename)
 
     # Configure ctrl-q to quit

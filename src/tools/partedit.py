@@ -1068,6 +1068,7 @@ def main():
     app = QApplication([])
     styleAppWidgets()
     window = PartEdit()
+    window.resize(1400, 900)
 
     # Open file if provided
     if filename:
