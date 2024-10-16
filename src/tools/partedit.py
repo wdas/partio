@@ -430,7 +430,10 @@ class AttrWidget(QFrame): # pylint:disable=R0903
         idx = 0
         self.items = []
         self.textValues = []
-        numRows = int(math.ceil(len(value) / float(numColumns)))
+        if numColumns:
+            numRows = int(math.ceil(len(value) / float(numColumns)))
+        else:
+            numRows = 0
         for _ in range(numRows):
             row = QHBoxLayout()
             layout.addLayout(row)
@@ -881,6 +884,7 @@ class PartEdit(QMainWindow):
 
         particleTable = ParticleTableWidget(self.data, self)
         splitter.addWidget(particleTable)
+        particleTable.resize(1000, particleTable.height())
 
         right = QWidget(self)
         splitter.addWidget(right)
