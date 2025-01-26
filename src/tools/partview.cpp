@@ -138,7 +138,8 @@ static void render()
                 if (!particles->attributeInfo("rgbPP", colorAttr) &
                         !particles->attributeInfo("rgb", colorAttr) &
                         !particles->attributeInfo("color", colorAttr) &
-                        !particles->attributeInfo("pointColor", colorAttr))
+                        !particles->attributeInfo("pointColor", colorAttr) &
+                        !particles->attributeInfo("Cd", colorAttr))
                 {
                     //std::cerr<<"Failed to find color attribute "<<std::endl;
                     colorMissing = true;
