@@ -34,7 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 */
 #ifndef KdTree_h
 #define KdTree_h
-#if defined(__clang__) && defined(_LIBCPP_VERSION)
+#if defined(__clang__) && defined(_LIBCPP_VERSION) || defined(_MSC_VER)
 #include <numeric>
 #elif defined(__GNUC__)
 #include <ext/numeric>
@@ -290,7 +290,7 @@ void KdTree<k>::setPoints(const float* p, int n)
 
     // assign sequential ids
     _ids.resize(n);
-#if defined(__clang__) && defined(_LIBCPP_VERSION)
+#if defined(__clang__) && defined(_LIBCPP_VERSION) || defined(_MSC_VER)
     std::iota(_ids.begin(), _ids.end(), 0);
 #elif defined(__GNUC__)
     __gnu_cxx::iota(_ids.begin(), _ids.end(), 0);
