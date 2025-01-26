@@ -99,7 +99,7 @@ static void render()
         //cout << "not inited" << endl;
         inited=true;
         colorMissing = false;
-        colorMissing = false;
+        alphaMissing = false;
 
 
         glEnable(GL_DEPTH_TEST);
@@ -149,12 +149,12 @@ static void render()
                         !particles->attributeInfo("alphaPP", alphaAttr) &
                         !particles->attributeInfo("pointOpacity", alphaAttr))
                 {
+                    glDisable(GL_BLEND);
+                    alphaMissing = true;
+                } else {
                     glEnable(GL_BLEND);
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                     alphaMissing = false;
-                } else {
-                    glDisable(GL_BLEND);
-                    alphaMissing = true;
                 }
             }
         }
