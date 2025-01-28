@@ -38,6 +38,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #include <iostream>
 #include <cmath>
 #include <stdexcept>
+#include <algorithm>
 #define GRIDN 9
 
 
@@ -86,17 +87,19 @@ int main(int argc,char *argv[])
 
         foo->findNPoints(point, 5, 0.15f, indices, dists);
         TESTASSERT (indices.size() == 5);
-        
+
+        std::sort(indices.begin(), indices.end());
+
         const float *pos = foo->data<float>(posAttr, indices[0]);
         TESTASSERT (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[1]);
-        TESTASSERT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[2]);
         TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
         pos = foo->data<float>(posAttr, indices[3]);
         TESTASSERT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[4]);
-        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
         
         std::cout << "Test passed\n";
     }
@@ -109,17 +112,19 @@ int main(int argc,char *argv[])
         float finalDist;
         int returned=foo->findNPoints(point, 5, 0.15f, indices, dists,&finalDist);
         TESTASSERT(returned == 5);
-        
+
+        std::sort(indices, indices + returned);
+
         const float *pos = foo->data<float>(posAttr, indices[0]);
         TESTASSERT (pos[0] == 0.375f && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[1]);
-        TESTASSERT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[2]);
         TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.625);
         pos = foo->data<float>(posAttr, indices[3]);
         TESTASSERT (pos[0] == 0.5    && pos[1] == 0.625 && pos[2] == 0.5);
         pos = foo->data<float>(posAttr, indices[4]);
-        TESTASSERT (pos[0] == 0.5    && pos[1] == 0.5   && pos[2] == 0.5);
+        TESTASSERT (pos[0] == 0.625  && pos[1] == 0.5   && pos[2] == 0.5);
 
         std::cout << "Test passed\n";
     }

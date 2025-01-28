@@ -43,14 +43,14 @@ int main(int argc,char* argv[])
     p->addParticle();
     float* pos=p->dataWrite<float>(attr,0);
     pos[0]=1;pos[1]=2;pos[2]=3;
-    Partio::write("/tmp/test.bgeo",*p);
+    Partio::write("test.bgeo",*p);
     p->release();
 
-    Partio::ParticlesInfo* p1=Partio::readCached("/tmp/test.bgeo",false);
-    Partio::ParticlesInfo* p2=Partio::readCached("/tmp/test.bgeo",false);
+    Partio::ParticlesInfo* p1=Partio::readCached("test.bgeo",false);
+    Partio::ParticlesInfo* p2=Partio::readCached("test.bgeo",false);
     assert(p1==p2);
     p1->release();p2->release();
-    Partio::ParticlesInfo* p3=Partio::readCached("/tmp/test.bgeo",false);
+    Partio::ParticlesInfo* p3=Partio::readCached("test.bgeo",false);
     p3->release();
     //assert(p2!=p3);
 

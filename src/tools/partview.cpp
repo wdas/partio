@@ -99,7 +99,7 @@ static void drawParticles()
         //cout << "not inited" << endl;
         inited=true;
         colorMissing = true;
-        colorMissing = true;
+        alphaMissing = true;
 
 
         glEnable(GL_DEPTH_TEST);
@@ -139,7 +139,8 @@ static void drawParticles()
                 if (particles->attributeInfo("pointColor", colorAttr) ||
                     particles->attributeInfo("color", colorAttr) ||
                     particles->attributeInfo("rgb", colorAttr) ||
-                    particles->attributeInfo("rgbPP", colorAttr))
+                    particles->attributeInfo("rgbPP", colorAttr) ||
+                    particles->attributeInfo("Cd", colorAttr))
                 {
                     //std::cerr<<"Found color attribute "<<std::endl;
                     colorMissing = false;
@@ -152,7 +153,6 @@ static void drawParticles()
                     particles->attributeInfo("opacityPP", alphaAttr) ||
                     particles->attributeInfo("opacity", alphaAttr))
                 {
-                    //std::cerr<<"Found alpha attribute "<<std::endl;
                     glEnable(GL_BLEND);
                     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
                     alphaMissing = false;
