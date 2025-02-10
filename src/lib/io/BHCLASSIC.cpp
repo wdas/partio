@@ -184,7 +184,7 @@ bool skipPrimitives(int nPoints, int nPrims, int nPrimAttrib, istream* input,std
     return true;
 }
 
-ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,std::ostream* errorStream)
+ParticlesDataMutable* readBHCLASSIC(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
     unique_ptr<istream> input(io::unzip(filename));
     if(!*input){
@@ -299,7 +299,7 @@ ParticlesDataMutable* readBGEO(const char* filename,const bool headersOnly,std::
     return simple;
 }
 
-bool writeBGEO(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream)
+bool writeBHCLASSIC(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream)
 {
     unique_ptr<ostream> output(io::write(filename, compressed));
     if(!*output){

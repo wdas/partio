@@ -99,7 +99,7 @@ string scanString(istream& input)
     return string(buf);
 }
 
-ParticlesDataMutable* readGEO(const char* filename,const bool headersOnly,std::ostream* errorStream)
+ParticlesDataMutable* readHCLASSIC(const char* filename,const bool headersOnly,std::ostream* errorStream)
 {
     unique_ptr<istream> input(io::unzip(filename));
     if(!*input){
@@ -227,7 +227,7 @@ void writeType(ostream& output,const ParticlesData&,const ParticleAttribute& att
     }
 }
 
-bool writeGEO(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream)
+bool writeHCLASSIC(const char* filename,const ParticlesData& p,const bool compressed,std::ostream* errorStream)
 {
     unique_ptr<ostream> output(io::write(filename, compressed));
     *output<<"PGEOMETRY V5"<<endl;
