@@ -31,8 +31,34 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
-file(GLOB io_cpp "io/*.cpp")
-file(GLOB core_cpp "core/*.cpp")
+set(core_cpp
+    core/Particle.cpp
+    core/ParticleCaching.cpp
+    core/ParticleHeaders.cpp
+    core/ParticleSimple.cpp
+    core/ParticleSimpleInterleave.cpp)
+
+set(io_cpp
+    io/BGEO.cpp
+    io/BHCLASSIC.cpp
+    io/BIN.cpp
+    io/GEO.cpp
+    io/HCLASSIC.cpp
+    io/MC.cpp
+    io/ParticleIO.cpp
+    io/PDA.cpp
+    io/PDB.cpp
+    io/PDC.cpp
+    io/PRT.cpp
+    io/PTC.cpp
+    io/PTS.cpp
+    io/RIB.cpp
+    io/ZIP.cpp
+)
+
+if (bgeo_FOUND)
+    list(APPEND io_cpp io/BJSON.cpp )
+endif()
 
 if(PARTIO_BUILD_SHARED_LIBS)
     set(PARTIO_LIBRARY_TYPE SHARED)
@@ -53,6 +79,11 @@ target_include_directories(partio
 
 if (ZLIB_FOUND)
     target_link_libraries(partio PUBLIC ZLIB::ZLIB)
+endif()
+
+if (bgeo_FOUND)
+    target_link_libraries(partio PUBLIC bgeo::bgeo)
+    target_compile_definitions(partio PRIVATE MODERN_BGEO)
 endif()
 
 install(TARGETS partio DESTINATION ${CMAKE_INSTALL_LIBDIR})

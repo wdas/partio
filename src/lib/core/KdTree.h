@@ -325,8 +325,16 @@ void KdTree<k>::sortSubtree(int n, int size, int j)
 
     // partition range [n, n+size) along axis j into two subranges:
     //   [n, n+leftSize+1) and [n+leftSize+1, n+size)
+#ifdef NDEBUG
     std::nth_element(&_ids[n], &_ids[n+left], &_ids[n+size],
 		     ComparePointsById(&_points[0].p[j]));
+#else
+    // In Debug mode element compiler asserting on _ids[n+size] with
+    // Expression: vector subscript out of range
+    // whereas it's not accessed by algorithm
+    std::nth_element(&_ids[n], &_ids[n+left], &_ids[std::min(n+size, this->size()-1)],
+		     ComparePointsById(&_points[0].p[j]));
+#endif
     // move median value (nth element) to front as root node of subtree
     std::swap(_ids[n], _ids[n+left]);
 

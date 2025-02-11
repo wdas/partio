@@ -129,6 +129,13 @@ else()
     set(ZLIB_LIBRARY "")
 endif()
 
+find_package(bgeo)
+if (bgeo_FOUND)
+    message("Building with modern Bgeo support")
+else()
+    message("Building with NO modern Bgeo support")
+endif()
+
 # Make modules able to see partio library
 set(PARTIO_LIBRARIES partio ${ZLIB_LIBRARY})
 

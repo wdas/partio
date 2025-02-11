@@ -55,9 +55,9 @@ readers()
     if(!initialized){
 	initializationMutex.lock();
         data["bgeo"]=readBGEO;
-        data["bhclassic"]=readBGEO;
+        data["bhclassic"]=readBHCLASSIC;
         data["geo"]=readGEO;
-        data["hclassic"]=readGEO;
+        data["hclassic"]=readHCLASSIC;
         data["pdb"]=readPDB;
         data["pdb32"]=readPDB32;
         data["pdb64"]=readPDB64;
@@ -69,8 +69,8 @@ readers()
         data["bin"]=readBIN;
         data["pts"]=readPTS;
         data["ptf"]=readPTC;
-        data["itbl"]=readBGEO;
-        data["atbl"]=readBGEO;
+        data["itbl"]=readBHCLASSIC;
+        data["atbl"]=readBHCLASSIC;
 	initialized=true;
 	initializationMutex.unlock();
     }
@@ -85,9 +85,9 @@ writers()
     if(!initialized){
 	initializationMutex.lock();
         data["bgeo"]=writeBGEO;
-        data["bhclassic"]=writeBGEO;
+        data["bhclassic"]=writeBHCLASSIC;
         data["geo"]=writeGEO;
-        data["hclassic"]=writeGEO;
+        data["hclassic"]=writeHCLASSIC;
         data["pdb"]=writePDB;
         data["pdb32"]=writePDB32;
         data["pdb64"]=writePDB64;
@@ -98,8 +98,8 @@ writers()
         data["prt"]=writePRT;
         data["bin"]=writeBIN;
         data["ptf"]=writePTC;
-        data["itbl"]=writeBGEO;
-        data["atbl"]=writeBGEO;
+        data["itbl"]=writeBHCLASSIC;
+        data["atbl"]=writeBHCLASSIC;
 	initialized=true;
 	initializationMutex.unlock();
     }
@@ -117,7 +117,7 @@ bool extensionIgnoringGz(const string& filename,string& ret,bool &endsWithGz,std
         return false;
     }
     string extension=filename.substr(period+1);
-    if(extension=="gz"){
+    if(extension=="gz" || extension=="sc"){
         endsWithGz=true;
         size_t period2=filename.rfind('.',period-1);
         if(period2==string::npos){

@@ -45,6 +45,6 @@ int main(int argc,char *argv[])
 {
     Partio::ParticlesDataMutable* p=Partio::read(PARTIO_DATA_DIR "/scatter.bgeo");
     Partio::ParticlesDataMutable* c=Partio::computeClustering(p,5,1.5,100,2,5);
-    Partio::write("/tmp/partio-cluster.bgeo",*c);
+    Partio::write("partio-cluster.bgeo",*c);
     return 0;
 }
