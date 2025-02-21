@@ -1083,8 +1083,7 @@ class PartEdit(QMainWindow):
     #--------------------------------------------------------------------------
     def dataDirtiedSlot(self, dirty):
         """ Sets the window title with or without "*" for dirty state """
-
-        title = self.data.filename
+        title = self.data.filename or ''
         if dirty:
             title += '*'
         self.setWindowTitle(title)
