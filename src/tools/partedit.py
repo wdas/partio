@@ -23,8 +23,9 @@ Supported FLAGS:
 # - delete fixed attribute
 # - rename fixed attribute
 
-import os, sys, math
-import partio
+import math
+import os
+import sys
 
 # pylint:disable=E0611,E0401
 from Qt.QtGui import QKeySequence, QIcon, QIntValidator, QDoubleValidator, QFontMetrics
@@ -34,6 +35,9 @@ from Qt.QtWidgets import QShortcut, QApplication, QMainWindow, \
     QComboBox, QCheckBox, QTableWidgetItem, QSplitter, QSizePolicy
 from Qt.QtCore import Qt, QSize, QObject#, pyqtSignal
 from PyQt5.QtCore import pyqtSignal
+
+import partio
+
 
 #------------------------------------------------------------------------------_
 _attrTypes = [partio.NONE, partio.VECTOR, partio.FLOAT, partio.INT, partio.INDEXEDSTR]
