@@ -33,8 +33,7 @@ from Qt.QtWidgets import QShortcut, QApplication, QMainWindow, \
     QPushButton, QTableWidget, QLabel, QWidget, QVBoxLayout, QHeaderView,\
     QHBoxLayout, QLineEdit, QFileDialog, QFrame, QDialog, QFormLayout, \
     QComboBox, QCheckBox, QTableWidgetItem, QSplitter, QSizePolicy
-from Qt.QtCore import Qt, QSize, QObject#, pyqtSignal
-from PyQt5.QtCore import pyqtSignal
+from Qt.QtCore import Qt, QSize, QObject, Signal
 
 import partio
 
@@ -111,11 +110,11 @@ def copyParticles(src, dst):
 class ParticleData(QObject):
     """ UI Controller class for partio data """
 
-    particleAdded = pyqtSignal(int)
-    attributeAdded = pyqtSignal(str)
-    fixedAttributeAdded = pyqtSignal(str)
-    dataReset = pyqtSignal()
-    dirtied = pyqtSignal(bool)
+    particleAdded = Signal(int)
+    attributeAdded = Signal(str)
+    fixedAttributeAdded = Signal(str)
+    dataReset = Signal()
+    dirtied = Signal(bool)
 
     def __init__(self):
         QObject.__init__(self)
