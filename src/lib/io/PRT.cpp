@@ -38,6 +38,7 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 
 
 */
+#include <iostream>
 #ifndef PARTIO_WIN32
 #ifdef PARTIO_USE_ZLIB
 #include "../Partio.h"
@@ -427,7 +428,6 @@ bool writePRT(const char* filename,const ParticlesData& p,const bool /*compresse
 }
 #else
 #include "../Partio.h"
-#include <iostream>
 #include <fstream>
 
 
