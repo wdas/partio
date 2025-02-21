@@ -1069,6 +1069,7 @@ class PartEdit(QMainWindow):
                 value = values[i]
             else:
                 value = values[-1]
+                values.append(value)
             if attrType == partio.INT or attrType == partio.INDEXEDSTR:
                 values[i] = int(value)
             elif attrType == partio.FLOAT or attrType == partio.VECTOR:
