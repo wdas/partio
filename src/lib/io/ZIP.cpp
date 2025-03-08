@@ -399,7 +399,10 @@ protected:
     {if(pptr() && pptr()>pbase()) return process(false);return 0;}
 
     virtual int underflow()
-    {std::runtime_error("Attempt to read write only ostream");return 0;}
+    {
+        std::cerr << "error: Partio::ZipStreambufCompress attempted to read a write-only ostream" << std::endl;
+        return 0;
+    }
 
     virtual int overflow(int c=EOF)
     {if(c!=EOF){*pptr()=static_cast<char>(c);pbump(1);}
