@@ -18,7 +18,7 @@ class test(unittest.TestCase):
         json1 = partjson.toJson(particleSet)
         particleSet2 = partjson.fromJson(json1)
         json2 = partjson.toJson(particleSet2)
-        self.assertEquals(json1, json2)
+        self.assertEqual(json1, json2)
 
 if __name__ == '__main__':
     unittest.main()
