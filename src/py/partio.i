@@ -41,8 +41,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #define SWIG_PYTHON_2_UNICODE
 %}
 
+%include "std_pair.i"
 %include "std_string.i"
 %include "std_map.i"
+
+namespace std {
+  %template(StringMap) map<string, string>;
+  %template() pair<string, string>;
+}
+
 
 %{
 #include <Partio.h>
@@ -602,7 +609,6 @@ void merge(ParticlesDataMutable& base, const ParticlesData& delta, const std::st
  * it manually. To do this, simply use the empty template instantiation, that
  * is, %template with no name.
  */
-%template() std::map<std::string, std::string>;
 
 /* typemap to convert Python arguments into an attrNameMap std::map pointer. */
 %typemap(in) const std::map<std::string, std::string> * attrNameMap (std::map<std::string, std::string> temp) {
