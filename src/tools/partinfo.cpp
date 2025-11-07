@@ -64,7 +64,7 @@ void printParticle(int particleIndex, Partio::ParticlesDataMutable* p, size_t wi
                 if (ii)
                     std::cout << ", ";
                 if (attr.type == Partio::INDEXEDSTR) {
-                    int val = p->data<int>(attr, particleIndex)[ii];
+                    size_t val = p->data<int>(attr, particleIndex)[ii];
                     std::cout << val << "=";
                     if (val < p->indexedStrs(attr).size()) {
                         std::cout << "'" << p->indexedStrs(attr)[val] << "'";
