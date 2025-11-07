@@ -130,6 +130,10 @@ if (ZLIB_FOUND)
     list(APPEND PARTIO_LIBRARIES ZLIB::ZLIB)
 endif()
 
+if (PARTIO_BUILD_PYTHON)
+    find_package(Python REQUIRED COMPONENTS Interpreter Development)
+endif()
+
 ## Traverse subdirectories
 add_subdirectory(src/lib)
 if (PARTIO_BUILD_TOOLS)
@@ -138,7 +142,6 @@ if (PARTIO_BUILD_TOOLS)
     add_subdirectory(src/tools)
 endif()
 if (PARTIO_BUILD_PYTHON)
-    find_package(Python REQUIRED COMPONENTS Interpreter Development)
     add_subdirectory(src/py)
 endif()
 if (PARTIO_BUILD_DOCS)
