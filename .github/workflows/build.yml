@@ -20,7 +20,7 @@ jobs:
     - name: Install dependencies
       run: sudo apt update && sudo apt install -y zlib1g-dev freeglut3-dev libgtest-dev
     - name: CMake configure
-      run: cmake -G "Unix Makefiles" -DPARTIO_GTEST_ENABLED=ON -DCMAKE_BUILD_TYPE=${{matrix.config}} .
+      run: cmake -G "Unix Makefiles" -DCMAKE_BUILD_TYPE=${{matrix.config}} .
       env:
         CXXFLAGS_STD: ${{matrix.standard}}
     - name: Build
@@ -46,7 +46,7 @@ jobs:
     - name: Get gtest
       run: vcpkg install gtest:${{matrix.architecture}}-windows
     - name: CMake configure
-      run: cmake "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -DPARTIO_GTEST_ENABLED=ON -A ${{matrix.architecture}} .
+      run: cmake "-DCMAKE_TOOLCHAIN_FILE=$env:VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" -A ${{matrix.architecture}} .
       env:
         CXXFLAGS_STD: ${{matrix.standard}}
     - name: Build

@@ -32,25 +32,16 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 
 set(CMAKE_INSTALL_PARTIO_TESTDIR ${CMAKE_INSTALL_DATAROOTDIR}/partio/test)
-find_library(GTEST_LIB gtest HINTS ${GTEST_LINK_PATH})
  
-if ("${GTEST_LIB}" STREQUAL "GTEST_LIB-NOTFOUND")
-    message(STATUS "${GTEST_LIB} not found in ${GTEST_LINK_PATH}, tests disabled")
-else()
- 
-    foreach(item testiterator testio testcache testclonecopy testcluster teststr makecircle makeline testkdtree testmerge)
-        add_executable(${item} "${item}.cpp")
-        target_include_directories(${item} PRIVATE ${GTEST_INCLUDE_PATH})
-        target_link_libraries(
-            ${item} ${PARTIO_LIBRARIES} ${GTEST_LIB} Threads::Threads)
-        target_compile_definitions(${item} PRIVATE -DPARTIO_DATA_DIR="${PROJECT_SOURCE_DIR}/src/data")
-        target_link_directories(${item} PRIVATE ${GTEST_LINK_PATH})
-        install(TARGETS ${item} DESTINATION ${CMAKE_INSTALL_PARTIO_TESTDIR})
-        add_test(NAME ${item} COMMAND ${item})
-    endforeach(item)
+foreach(item testiterator testio testcache testclonecopy testcluster teststr makecircle makeline testkdtree testmerge)
+    add_executable(${item} "${item}.cpp")
+    target_link_libraries(${item} ${PARTIO_LIBRARIES} GTest::gtest Threads::Threads)
+    target_compile_definitions(${item} PRIVATE -DPARTIO_DATA_DIR="${PROJECT_SOURCE_DIR}/src/data")
+    install(TARGETS ${item} DESTINATION ${CMAKE_INSTALL_PARTIO_TESTDIR})
+    add_test(NAME ${item} COMMAND ${item})
+endforeach(item)
 
-    foreach(item testpartjson testpartio)
-        add_test(NAME ${item} COMMAND ${Python_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/${item}.py)
-        install(PROGRAMS ${item}.py DESTINATION ${CMAKE_INSTALL_PARTIO_TESTDIR} RENAME ${item})
-    endforeach(item)
-endif()
+foreach(item testpartjson testpartio)
+    add_test(NAME ${item} COMMAND ${Python_EXECUTABLE} -B ${CMAKE_CURRENT_SOURCE_DIR}/${item}.py)
+    install(PROGRAMS ${item}.py DESTINATION ${CMAKE_INSTALL_PARTIO_TESTDIR} RENAME ${item})
+endforeach(item)

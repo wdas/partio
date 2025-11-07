@@ -35,7 +35,7 @@ cmake_minimum_required(VERSION 3.15.0)
 project(partio LANGUAGES CXX)
 set(PARTIO_VERSION_MAJOR "1")
 
-option(PARTIO_GTEST_ENABLED "Enable GTest for tests" OFF)
+option(PARTIO_ENABLE_TESTING "Enable testing" ON)
 option(PARTIO_ORIGIN_RPATH "Enable ORIGIN rpath in the installed libraries" OFF)
 
 if(WIN32 OR APPLE)
@@ -76,16 +76,16 @@ endif()
 ## Setup platform specific helper defines build variants
 if (WIN32)
     if (MSVC)
-        add_definitions(-DPARTIO_WIN32)
+        add_compile_definitions(PARTIO_WIN32)
     endif()
-    add_definitions(-D_USE_MATH_DEFINES)
+    add_compile_definitions(_USE_MATH_DEFINES)
 else()
     add_compile_options(-Wextra -Wno-unused-parameter)
 endif()
 
 if (APPLE)
   set(CMAKE_SHARED_LINKER_FLAGS "-undefined dynamic_lookup")
-  add_definitions(-DGL_SILENCE_DEPRECATION)
+  add_compile_definitions(GL_SILENCE_DEPRECATION)
 endif()
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
@@ -120,17 +120,16 @@ set(OpenGL_GL_PREFERENCE GLVND)
 ## Search for useful libraries
 find_package(Threads REQUIRED)
 find_package(GLUT REQUIRED)
+find_package(GTest)
 find_package(OpenGL REQUIRED)
 find_package(Python REQUIRED COMPONENTS Interpreter Development)
+
+set(PARTIO_LIBRARIES partio)
 find_package(ZLIB)
 if (ZLIB_FOUND)
-    add_definitions(-DPARTIO_USE_ZLIB)
-else()
-    set(ZLIB_LIBRARY "")
+    add_compile_definitions(PARTIO_USE_ZLIB)
+    list(APPEND PARTIO_LIBRARIES ZLIB::ZLIB)
 endif()
-
-# Make modules able to see partio library
-set(PARTIO_LIBRARIES partio ${ZLIB_LIBRARY})
 
 ## Traverse subdirectories
 add_subdirectory(src/lib)
@@ -138,11 +137,6 @@ add_subdirectory(src/tools)
 add_subdirectory(src/py)
 add_subdirectory(src/doc)
 
-if (${PARTIO_GTEST_ENABLED})
-    set(GTEST_LOCATION "/usr" CACHE STRING "gtest installation prefix")
-    set(GTEST_INCLUDE_PATH ${GTEST_LOCATION}/include)
-    set(GTEST_LIBDIR ${CMAKE_INSTALL_LIBDIR})
-    set(GTEST_LINK_PATH ${GTEST_LOCATION}/${GTEST_LIBDIR} CACHE STRING "gtest library directory")
-
+if (GTest_FOUND AND PARTIO_ENABLE_TESTING)
     add_subdirectory(src/tests)
 endif()

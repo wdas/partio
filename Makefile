@@ -12,6 +12,11 @@ prefix ?= $(CURDIR)/$(platformdir)
 #DESTDIR =
 
 CMAKE_FLAGS =
+
+NINJA_OK := $(shell type ninja >/dev/null 2>&1 && echo 1)
+ifeq ($(NINJA_OK),1)
+    CMAKE_FLAGS += -G Ninja
+endif
 # Allow out-of-band customization
 -include Makefile.config
 
@@ -23,41 +28,31 @@ endif
 # Installation location: prefix=<path>
 CMAKE_FLAGS += -DCMAKE_INSTALL_PREFIX=$(prefix)
 
-# gtest location: RP_gtest=<path>
-ifdef RP_gtest
-    CMAKE_FLAGS += -DGTEST_LOCATION=$(RP_gtest)
-    CMAKE_FLAGS += -DPARTIO_GTEST_ENABLED=1
-endif
-
 # Extra cmake flags: CMAKE_EXTRA_FLAGS=<flags>
 ifdef CMAKE_EXTRA_FLAGS
     CMAKE_FLAGS += $(CMAKE_EXTRA_FLAGS)
 endif
 
-ifdef RP_zlib
-    CMAKE_FLAGS += -DZLIB_INCLUDE_DIR=$(RP_zlib)/include
-    CMAKE_FLAGS += -DZLIB_LIBRARY_RELEASE=$(RP_zlib)/$(lib)/libz.so
-endif
+cmake_ready = $(builddir)/cmake.ready
 
 # The default target in this Makefile is...
 all::
 
 install: all
-	$(MAKE) -C $(builddir) DESTDIR=$(DESTDIR) install
+	cmake --build $(builddir) --target install
 
 test: all
-	$(MAKE) -C $(builddir) DESTDIR=$(DESTDIR) test
+	cmake --build $(builddir) --target test
 
-doc: $(builddir)/stamp
-	$(MAKE) -C $(builddir) DESTDIR=$(DESTDIR) doc
+doc: $(cmake_ready)
+	cmake --build $(builddir) --target doc
 
-$(builddir)/stamp:
-	mkdir -p $(builddir)
-	cd $(builddir) && cmake $(CMAKE_FLAGS) ../..
+all:: $(cmake_ready)
+	cmake --build $(builddir) --target all
+
+clean: $(cmake_ready)
+	cmake --build $(builddir) --target clean
+
+$(cmake_ready):
+	cmake -S . -B $(builddir) $(CMAKE_FLAGS)
 	touch $@
-
-all:: $(builddir)/stamp
-	$(MAKE) -C $(builddir) $(MAKEARGS) all
-
-clean: $(builddir)/stamp
-	$(MAKE) -C $(builddir) $(MAKEARGS) clean
