@@ -40,11 +40,12 @@ option(PARTIO_ORIGIN_RPATH "Enable ORIGIN rpath in the installed libraries" OFF)
 
 if(WIN32 OR APPLE)
     option(PARTIO_USE_GLVND "Use GLVND for OpenGL" OFF)
-    option(PARTIO_BUILD_SHARED_LIBS "Enabled shared libraries" OFF)
+    option(PARTIO_BUILD_SHARED_LIBS "Enable shared libraries" OFF)
 else()
     option(PARTIO_USE_GLVND "Use GLVND for OpenGL" ON)
-    option(PARTIO_BUILD_SHARED_LIBS "Enabled shared libraries" ON)
+    option(PARTIO_BUILD_SHARED_LIBS "Enable shared libraries" ON)
 endif()
+option(PARTIO_BUILD_TOOLS "Enable partio's CLI tools" ON)
 
 # Enable C++11
 if (DEFINED ENV{CXXFLAGS_STD})
@@ -133,7 +134,9 @@ endif()
 
 ## Traverse subdirectories
 add_subdirectory(src/lib)
-add_subdirectory(src/tools)
+if (PARTIO_BUILD_TOOLS)
+    add_subdirectory(src/tools)
+endif()
 add_subdirectory(src/py)
 add_subdirectory(src/doc)
 
