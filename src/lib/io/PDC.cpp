@@ -42,6 +42,18 @@ Modifications from: github user: redpawfx (redpawFX@gmail.com)  and Luma Picture
 #include "PartioEndian.h"
 #include "io.h"
 
+namespace {
+std::string readName(std::istream& input){
+    int nameLen = 0;
+    Partio::read<Partio::BIGEND>(input, nameLen);
+    char* name = new char[nameLen];
+    input.read(name, nameLen);
+    std::string result(name, name+nameLen);
+    delete [] name;
+    return result;
+}
+}
+
 namespace Partio{
 
 using namespace std;
@@ -57,16 +69,6 @@ typedef struct{
     int numParticles;
     int numAttrs;
 } PDC_HEADER;
-
-string readName(istream& input){
-    int nameLen = 0;
-    read<BIGEND>(input, nameLen);
-    char* name = new char[nameLen];
-    input.read(name, nameLen);
-    string result(name, name+nameLen);
-    delete [] name;
-    return result;
-}
 
 ParticlesDataMutable* readPDC(const char* filename, const bool headersOnly,std::ostream* errorStream){
 
