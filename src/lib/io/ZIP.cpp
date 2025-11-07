@@ -163,7 +163,6 @@ struct ZipFileHeader
 
     bool Read(std::istream& istream,const bool global)
     {unsigned int sig;
-    unsigned short version,flags;
     // read and check for local/global magic
     if(global){
         Read_Primitive(istream,sig);
