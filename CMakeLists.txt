@@ -50,7 +50,7 @@ endif()
 if (DEFINED ENV{CXXFLAGS_STD})
     set(CXXFLAGS_STD $ENV{CXXFLAGS_STD})
 else()
-    set(CXXFLAGS_STD "c++14")
+    set(CXXFLAGS_STD "c++17")
 endif()
 # Transform "c++17" into "17".  "-1" means "rest of the string".
 if (NOT DEFINED WDAS_CXX_STANDARD)
