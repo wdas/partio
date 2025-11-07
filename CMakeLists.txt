@@ -145,7 +145,7 @@ if (PARTIO_BUILD_DOCS)
     add_subdirectory(src/doc)
 endif()
 
+find_package(GTest)
 if (GTest_FOUND AND PARTIO_ENABLE_TESTING)
-    find_package(GTest)
     add_subdirectory(src/tests)
 endif()
