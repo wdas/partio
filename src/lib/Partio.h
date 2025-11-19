@@ -290,6 +290,7 @@ ParticlesDataMutable* cloneSchema(const ParticlesData&, const std::map<std::stri
 //! To copy only the detail attributes, pass particles=false.
 //! If attrNameMap is provided, it is used to rename attributes during cloning.
 ParticlesDataMutable* clone(const ParticlesData&, bool particles=true, const std::map<std::string, std::string>* attrNameMap = nullptr);
+ParticlesDataMutable* clone(const ParticlesData&, bool particles, const std::map<std::string, std::string>& attrNameMap);
 
 //! Provides read/write access to a particle set stored in a file
 //! freed with p->release()

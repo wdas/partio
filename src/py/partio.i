@@ -638,7 +638,13 @@ ParticlesDataMutable* cloneSchema(const ParticlesData& other, const std::map<std
 
 %feature("autodoc");
 %feature("docstring","Clone a particle set");
-ParticlesDataMutable* clone(const ParticlesData& other, bool particles, const std::map<std::string, std::string>* attrNameMap=nullptr);
+ParticlesDataMutable* clone(const ParticlesData& other, bool particles, const std::map<std::string, std::string>& attrNameMap);
+
+%pythoncode %{
+def clone(self, particles=True, attrNameMap=None):
+    """Clone a particle set"""
+    return _partio.clone(self, particles, attrNameMap or {})
+%}
 
 %feature("autodoc");
 %feature("docstring","Return string name of given attribute type");

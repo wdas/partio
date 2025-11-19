@@ -164,6 +164,11 @@ clone(const ParticlesData& other, bool particles, const std::map<std::string, st
     return p;
 }
 
+ParticlesDataMutable*
+clone(const ParticlesData& other, bool particles, const std::map<std::string, std::string>& attrNameMap)
+{
+    return clone(other, particles, &attrNameMap);
+}
 
 template<ParticleAttributeType ETYPE> void
 printAttr(const ParticlesData* p,const ParticleAttribute& attr,const int particleIndex)
