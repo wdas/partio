@@ -46,6 +46,19 @@ set_target_properties(partio PROPERTIES
     POSITION_INDEPENDENT_CODE ON
     SOVERSION ${PARTIO_VERSION_MAJOR})
 
+set(TBB_INCLUDE_DIRS "$ENV{TBB_ROOT}/include")
+set(CMAKE_MODULE_PATH "$ENV{OpenVDB_ROOT}/lib/cmake/OpenVDB"
+    "${OpenVDB_ROOT}/lib/cmake/OpenVDB"
+    ${CMAKE_MODULE_PATH})
+find_package(OpenVDB COMPONENTS openvdb)
+find_package(Alembic)
+find_package(Boost)
+find_package(TBB)
+
+
+target_link_libraries(partio PRIVATE Alembic::Alembic OpenVDB::openvdb)
+target_include_directories(partio PRIVATE ${TBB_INCLUDE_DIRS})
+
 target_include_directories(partio
     PUBLIC
         $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>

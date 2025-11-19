@@ -36,6 +36,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
 #define _READERS_h_
 
 namespace Partio{
+ParticlesDataMutable* readABC(  const char* filename,const bool headersOnly,std::ostream* errorStream);
+ParticlesDataMutable* readVDB(  const char* filename,const bool headersOnly,std::ostream* errorStream);
 ParticlesDataMutable* readBGEO(	const char* filename,const bool headersOnly,std::ostream* errorStream);
 ParticlesDataMutable* readGEO(	const char* filename,const bool headersOnly,std::ostream* errorStream);
 ParticlesDataMutable* readPDB(	const char* filename,const bool headersOnly,std::ostream* errorStream);

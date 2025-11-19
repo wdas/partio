@@ -54,6 +54,8 @@ readers()
     static bool initialized=false;
     if(!initialized){
 	initializationMutex.lock();
+        data["abc"]=readABC;
+        data["vdb"]=readVDB;
         data["bgeo"]=readBGEO;
         data["bhclassic"]=readBGEO;
         data["geo"]=readGEO;
