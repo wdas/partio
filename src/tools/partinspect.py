@@ -67,7 +67,7 @@ class PartioTreeModel(QtCore.QAbstractItemModel):
         row = index.row()
         if row < 0 or row >= self.numRows:
             return None
-        if role!=QtCore.Qt.EditRole and role !=QtCore.Qt.DisplayRole:
+        if role!=QtCore.Qt.ItemDataRole.EditRole and role !=QtCore.Qt.ItemDataRole.DisplayRole:
             return None
 
         col = index.column()
@@ -91,7 +91,7 @@ class PartioTreeModel(QtCore.QAbstractItemModel):
 
     def headerData(self, section, orientation, role): # pylint:disable=W0613
         """ Return the header label """
-        if role != QtCore.Qt.DisplayRole:
+        if role != QtCore.Qt.ItemDataRole.DisplayRole:
             return None
 
         if self.attrsOnly:
@@ -128,7 +128,7 @@ class FilterModel(QtCore.QSortFilterProxyModel):
         if self.attrsOnly:
             return True
 
-        attrName = self.sourceModel().headerData(source_column, Qt.Vertical, QtCore.Qt.DisplayRole)
+        attrName = self.sourceModel().headerData(source_column, Qt.Orientation.Vertical, QtCore.Qt.ItemDataRole.DisplayRole)
         if attrName == 'Index':
             return True
         filterText = self.lineEdit.text()
@@ -144,7 +144,7 @@ class FilterModel(QtCore.QSortFilterProxyModel):
             return True
 
         index = self.sourceModel().createIndex(source_row, 1)
-        attrName = self.sourceModel().data(index, QtCore.Qt.DisplayRole)
+        attrName = self.sourceModel().data(index, QtCore.Qt.ItemDataRole.DisplayRole)
         filterText = self.lineEdit.text()
         if not filterText:
             return True
@@ -180,7 +180,7 @@ class Spreadsheet(QtWidgets.QDialog):
         hbox.addWidget(self.lineEdit)
 
         # Configure ctrl-w to close window
-        QtWidgets.QShortcut( QKeySequence(Qt.CTRL + Qt.Key_W), self, self.accept )
+        QtWidgets.QShortcut(QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_W), self, self.accept)
 
     def setFile(self, filename):
         """ Redraws the spreadsheet with a new particle file """
@@ -301,18 +301,18 @@ def main():
     app = QtWidgets.QApplication(newArgs)
     dialog = Spreadsheet(attrsOnly)
     dialog.setModal(False)
-    dialog.setWindowFlags(QtCore.Qt.Window |
-        QtCore.Qt.CustomizeWindowHint |
-        QtCore.Qt.WindowTitleHint |
-        QtCore.Qt.WindowCloseButtonHint |
-        QtCore.Qt.WindowMinimizeButtonHint |
-        QtCore.Qt.WindowMaximizeButtonHint)
+    dialog.setWindowFlags(QtCore.Qt.WindowType.Window |
+        QtCore.Qt.WindowType.CustomizeWindowHint |
+        QtCore.Qt.WindowType.WindowTitleHint |
+        QtCore.Qt.WindowType.WindowCloseButtonHint |
+        QtCore.Qt.WindowType.WindowMinimizeButtonHint |
+        QtCore.Qt.WindowType.WindowMaximizeButtonHint)
     dialog.resize(1400, 900)
     dialog.setFile(filename)
 
     # Configure ctrl-q to quit
-    QtWidgets.QShortcut( QKeySequence(Qt.CTRL + Qt.Key_Q), dialog, dialog.close )
-    app.exec_()
+    QtWidgets.QShortcut(QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_Q), dialog, dialog.close)
+    app.exec()
 
 if __name__=="__main__":
     main()

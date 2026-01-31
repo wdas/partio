@@ -400,7 +400,7 @@ class NumericalEdit(QLineEdit): # pylint:disable=R0903
 
     def __init__(self, value, parent=None):
         QLineEdit.__init__(self, str(value), parent)
-        self.setAlignment(Qt.AlignRight)
+        self.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.setMinimumWidth(50)
         self.setCursorPosition(0)
         if isinstance(value, int):
@@ -411,7 +411,7 @@ class NumericalEdit(QLineEdit): # pylint:disable=R0903
     def sizeHint(self):
         hint = super().sizeHint()
         fm = QFontMetrics(self.font())
-        stringWidth = fm.width(self.text() + '00')  # add a couple characters for padding
+        stringWidth = fm.horizontalAdvance(self.text() + '00')  # add a couple characters for padding
         hint.setWidth(stringWidth)
         return hint
 
@@ -428,7 +428,7 @@ class AttrWidget(QFrame): # pylint:disable=R0903
         self.data = data
         self.attr = attr
         self.particleNum = particleNum
-        self.setFrameShape(QFrame.NoFrame)
+        self.setFrameShape(QFrame.Shape.NoFrame)
 
         self.name = 'AttrWidget{}'.format(AttrWidget.widgetNumber)
         self.setObjectName(self.name)
@@ -456,7 +456,7 @@ class AttrWidget(QFrame): # pylint:disable=R0903
                 item = NumericalEdit(value[idx])
                 self.textValues.append(str(value[idx]))
                 item.editingFinished.connect(self.applyEdit)
-                row.addWidget(item, Qt.AlignHCenter|Qt.AlignTop)
+                row.addWidget(item, Qt.AlignmentFlag.AlignHCenter|Qt.AlignmentFlag.AlignTop)
                 self.items.append(item)
                 idx += 1
                 if idx == len(self.value):
@@ -545,7 +545,7 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
         self.attrs = getAttrs(self.data.numAttributes, self.data.attributeInfo, True)
         self.setColumnCount(numAttr)
         self.setRowCount(numParticles)
-        self.horizontalHeader().setSectionResizeMode(QHeaderView.Interactive)
+        self.horizontalHeader().setSectionResizeMode(QHeaderView.ResizeMode.Interactive)
         for col, (_, attr) in enumerate(self.attrs):
             item = QTableWidgetItem(attr.name)
             tooltip = '<p><tt>&nbsp;Name: {}<br>&nbsp;Type: {}<br>Count: {}</tt></p>'.\
@@ -562,8 +562,8 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
         for pnum in range(numParticles):
             self.populateParticle(pnum)
 
-        self.horizontalHeader().resizeSections(QHeaderView.ResizeToContents)
-        self.verticalHeader().resizeSections(QHeaderView.ResizeToContents)
+        self.horizontalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
+        self.verticalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
 
     #--------------------------------------------------------------------------
     def populateParticle(self, pnum, border=False):
@@ -587,7 +587,7 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
     def keyPressEvent(self, event):
         """ Handles certain keys """
 
-        if event.key() in (Qt.Key_Delete, Qt.Key_Backspace):
+        if event.key() in (Qt.Key.Key_Delete, Qt.Key.Key_Backspace):
             self.handleDeleteKey(event)
         else:
             QTableWidget.keyPressEvent(self, event)
@@ -628,7 +628,7 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
         numParticles = self.data.numParticles()
         self.setRowCount(numParticles)
         self.populateParticle(numParticles-1, True)
-        self.verticalHeader().resizeSections(QHeaderView.ResizeToContents)
+        self.verticalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
 
     #--------------------------------------------------------------------------
     def attributeAddedSlot(self, name): # pylint:disable=W0613
@@ -643,7 +643,7 @@ class ParticleTableWidget(QTableWidget): # pylint:disable=R0903
         self.setHorizontalHeaderItem(numAttrs-1, QTableWidgetItem(attr.name))
         for pnum in range(self.data.numParticles()):
             self.populateAttribute(pnum, anum, attr, True)
-        self.verticalHeader().resizeSections(QHeaderView.ResizeToContents)
+        self.verticalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
 
     #--------------------------------------------------------------------------
     def dataResetSlot(self):
@@ -677,8 +677,8 @@ class FixedAttributesWidget(QWidget):
         vbox.addWidget(self.frame)
         self.vbox = QVBoxLayout()
         self.frame.setLayout(self.vbox)
-        self.frame.setFrameShape(QFrame.Panel)
-        self.frame.setFrameShadow(QFrame.Sunken)
+        self.frame.setFrameShape(QFrame.Shape.Panel)
+        self.frame.setFrameShadow(QFrame.Shadow.Sunken)
 
         self.table = QTableWidget()
         self.table.horizontalHeader().hide()
@@ -742,8 +742,8 @@ class FixedAttributesWidget(QWidget):
         self.table.setTabKeyNavigation(True)
         self.table.horizontalHeader().setSectionsMovable(False)
 
-        self.table.horizontalHeader().resizeSections(QHeaderView.ResizeToContents)
-        self.table.verticalHeader().resizeSections(QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
+        self.table.verticalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
 
 
 class IndexedStringsWidget(QWidget):
@@ -765,8 +765,8 @@ class IndexedStringsWidget(QWidget):
         vbox.addWidget(self.frame)
         self.vbox = QVBoxLayout()
         self.frame.setLayout(self.vbox)
-        self.frame.setFrameShape(QFrame.Panel)
-        self.frame.setFrameShadow(QFrame.Sunken)
+        self.frame.setFrameShape(QFrame.Shape.Panel)
+        self.frame.setFrameShadow(QFrame.Shadow.Sunken)
 
         self.table = QTableWidget()
         self.table.horizontalHeader().hide()
@@ -852,9 +852,9 @@ class IndexedStringsWidget(QWidget):
                 table.setItem(i, 0, item)
             table.setFixedHeight(len(strings) * 33)
             table.setWordWrap(False)
-            table.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+            table.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
             table.horizontalHeader().setStretchLastSection(True)
-            table.horizontalHeader().resizeSections(QHeaderView.ResizeToContents)
+            table.horizontalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
             layout.addWidget(table)
             self.table.setCellWidget(row, 0, cell_widget)
 
@@ -862,9 +862,9 @@ class IndexedStringsWidget(QWidget):
         self.table.horizontalHeader().setSectionsMovable(False)
         self.table.setTabKeyNavigation(True)
 
-        self.table.horizontalHeader().resizeSections(QHeaderView.ResizeToContents)
-        self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeToContents)
-        self.table.verticalHeader().resizeSections(QHeaderView.ResizeToContents)
+        self.table.horizontalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
+        self.table.verticalHeader().setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
+        self.table.verticalHeader().resizeSections(QHeaderView.ResizeMode.ResizeToContents)
 
 #------------------------------------------------------------------------------
 #------------------------------------------------------------------------------
@@ -885,7 +885,7 @@ class PartEdit(QMainWindow):
         openButton.setToolTip( "Open File" )
         toolbar.addWidget(openButton)
         openButton.clicked.connect(self.openSlot)
-        QShortcut( QKeySequence(Qt.CTRL + Qt.Key_O), self, self.openSlot )
+        QShortcut(QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_O), self, self.openSlot)
 
         saveButton = QPushButton("")
         saveButton.setFlat(True)
@@ -894,7 +894,7 @@ class PartEdit(QMainWindow):
         saveButton.setToolTip( "Save File" )
         toolbar.addWidget(saveButton)
         saveButton.clicked.connect(self.saveSlot)
-        QShortcut( QKeySequence(Qt.CTRL + Qt.Key_S), self, self.saveSlot )
+        QShortcut(QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_S), self, self.saveSlot)
 
         saveDeltaButton = QPushButton("")
         saveDeltaButton.setFlat(True)
@@ -903,7 +903,7 @@ class PartEdit(QMainWindow):
         saveDeltaButton.setToolTip( "Save File As Delta" )
         toolbar.addWidget(saveDeltaButton)
         saveDeltaButton.clicked.connect(self.saveDeltaSlot)
-        QShortcut( QKeySequence(Qt.CTRL + Qt.SHIFT + Qt.Key_S), self, self.saveDeltaSlot )
+        QShortcut(QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.KeyboardModifier.ShiftModifier | Qt.Key.Key_S), self, self.saveDeltaSlot)
 
         addParticleButton = QPushButton("Particle")
         addParticleButton.setFlat(True)
@@ -946,9 +946,8 @@ class PartEdit(QMainWindow):
 
         self.data.dirtied.connect(self.dataDirtiedSlot)
 
-
         # Configure ctrl-w to close the window
-        QShortcut( QKeySequence(Qt.CTRL + Qt.Key_W), self, self.close )
+        QShortcut(QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_W), self, self.close)
 
 
     #--------------------------------------------------------------------------
@@ -1052,7 +1051,7 @@ class PartEdit(QMainWindow):
         cancel.clicked.connect(dialog.reject)
         buttons.addWidget(cancel)
 
-        if not dialog.exec_():
+        if not dialog.exec():
             return
 
         name = str(nameBox.text())
@@ -1124,10 +1123,10 @@ def main():
     window.show()
 
     # Configure ctrl-q to quit
-    QShortcut( QKeySequence(Qt.CTRL + Qt.Key_Q), window, window.close )
+    QShortcut(QKeySequence(Qt.KeyboardModifier.ControlModifier | Qt.Key.Key_Q), window, window.close)
 
     # Go
-    app.exec_()
+    app.exec()
 
 
 if __name__ == '__main__':
