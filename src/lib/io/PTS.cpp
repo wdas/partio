@@ -184,19 +184,21 @@ ParticlesDataMutable* readPTS(const char* filename,const bool headersOnly,std::o
 
         stringstream ss(line);
 
-        float lineData[8];
+        constexpr int entries = 8;
+        float lineData[entries];
         int i = 0;
 
-        while (ss >> token)
+        while (i < entries && ss >> token)
         {
             stringstream foo(token);
             float x;
             foo >> x;
-			lineData[i] = x;
+            lineData[i] = x;
             i++;
         }
 
-        if (i == valcount)
+        // Unexpected extra float values are ignored.
+        if (i >= valcount)
         {
             simple->addParticle();
             for (unsigned int attrIndex=0;attrIndex<attrs.size();attrIndex++)
